@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProfAssistant - Dashboard Professeur</title>
+    <!-- Styles globaux et locaux -->
+    <link rel="stylesheet" href="./src/style.css">
+    <link rel="stylesheet" href="./src/admin.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="logo">
+            ProfAssistant <span class="badge">Espace Admin</span>
+        </div>
+        <div class="user-controls">
+            <span id="userEmail"></span>
+            <button id="logoutBtn" class="btn-secondary">Déconnexion</button>
+        </div>
+    </header>
+
+    <!-- Vue principale 1 : Le flux des copies à traiter -->
+    <main id="listView" class="admin-container">
+        <div class="header-actions">
+            <h2>Copies en attente de validation</h2>
+            <!-- Boutons de DEV -->
+            <div style="display:flex;gap:8px;">
+                <button id="generateMockBtn" class="btn-secondary mock-btn">🧪 Générer copies</button>
+                <button id="generateCoursesBtn" class="btn-secondary mock-btn">📚 Initialiser Cours</button>
+            </div>
+        </div>
+
+        <!-- Widget : Météo de la classe (Insights) -->
+        <div class="md-card mt-24" style="background-color: var(--md-sys-color-primary-container);">
+            <h3 style="margin-top:0; color: var(--md-sys-color-on-primary-container);">🌥️ Météo de la Classe (Top Difficultés)</h3>
+            <div id="insightsContainer" style="display:flex; gap:12px; flex-wrap:wrap; margin-top:16px;">
+                <span class="badge" style="background-color: rgba(0,0,0,0.1); color: inherit;">Chargement des statistiques...</span>
+            </div>
+        </div>
+        
+        <div class="md-card mt-24 p-0">
+            <table class="md-table">
+                <thead>
+                    <tr>
+                        <th>Nom de l'élève</th>
+                        <th>Titre de l'exercice</th>
+                        <th>Date de Soumission</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="submissionsTableBody">
+                    <tr><td colspan="4" class="text-center py-16">Chargement sécurisé des bases...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Vue secondaire 2 : L'interface de correction en Split Screen (désactivée par défaut) -->
+    <main id="detailView" class="hidden" style="height: calc(100vh - 64px); display: flex;">
+        <!-- Panel Gauche : Code élève -->
+        <section class="read-only-panel" style="width: 55%;">
+            <div class="panel-header">
+                <button id="backToListBtn" class="btn-text">← Revenir au tableau de bord</button>
+                <h3 id="detailStudentName" class="ml-16">Nom de l'élève</h3>
+            </div>
+            <!-- L'éditeur prendra tout l'espace restant ici -->
+            <div id="editor-container" class="admin-editor-wrapper"></div>
+        </section>
+
+        <!-- Panel Droit : Formulaire de l'IA modifiable -->
+        <section class="feedback-panel">
+            <div class="md-card correction-card">
+                <h2>Outil de Correction Assistant-IA</h2>
+                
+                <div class="info-group">
+                    <span class="label">Copie correspondant à :</span>
+                    <strong id="detailExerciseName">...</strong>
+                </div>
+
+                <div class="form-group mt-32">
+                    <label for="feedbackIaInput">Feedback pré-rempli par l'IA (modifiable par vous) :</label>
+                    <textarea id="feedbackIaInput" class="md-textarea" rows="8"></textarea>
+                </div>
+                
+                <div class="form-group mt-24">
+                    <label for="scoreInput">Note générée pour l'élève (Sur 100) :</label>
+                    <input type="number" id="scoreInput" class="md-input" min="0" max="100">
+                </div>
+
+                <!-- Statistiques d'autonomie -->
+                <div class="info-group mt-24" id="autonomieSection">
+                    <span class="label">🧠 Autonomie de l'élève :</span>
+                    <div id="autonomieStats" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                        <span class="badge" style="background:#dcfce7;color:#166534;">💡 N1 : <strong id="statNiv1">0</strong>x</span>
+                        <span class="badge" style="background:#fef9c3;color:#854d0e;">🔍 N2 : <strong id="statNiv2">0</strong>x</span>
+                        <span class="badge" style="background:#fee2e2;color:#991b1b;">🗺️ N3 : <strong id="statNiv3">0</strong>x</span>
+                        <span class="badge" style="background:#e0f2fe;color:#0369a1;">💬 Questions : <strong id="statQuestions">0</strong></span>
+                    </div>
+                </div>
+
+                <!-- Footer flexbox du formulaire -->
+                <div class="action-buttons mt-32">
+                    <button id="rejectBtn" class="btn-secondary danger">❌ Renvoyer à l'élève (Brouillon)</button>
+                    <button id="approveBtn" class="btn-primary" style="padding-left: 32px; padding-right: 32px;">✅ Valider et Publier l'évaluation</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Import de Monaco Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+    <script>
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            document.dispatchEvent(new Event('monacoReady'));
+        });
+    </script>
+    
+    <!-- Contrôleur JS -->
+    <script type="module" src="./src/admin.js"></script>
+</body>
+</html>

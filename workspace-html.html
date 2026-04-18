@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProfAssistant — Atelier HTML/CSS</title>
+    <meta name="description" content="Éditeur en direct HTML & CSS avec aperçu instantané.">
+    <link rel="stylesheet" href="./src/style.css">
+    <link rel="stylesheet" href="./src/workspace-html.css">
+</head>
+<body>
+
+    <!-- =========================================================
+         TOP BAR
+    ========================================================= -->
+    <header class="app-header">
+        <div class="logo">
+            <span>ProfAssistant</span>
+            <span class="header-badge">Atelier HTML/CSS</span>
+        </div>
+        <div class="user-controls">
+            <span id="userEmail"></span>
+            <button id="submitBtn" class="btn-primary" aria-label="Soumettre le code pour correction">
+                📤 Soumettre
+            </button>
+            <button id="logoutBtn" class="btn-secondary" aria-label="Se déconnecter">Déconnexion</button>
+        </div>
+    </header>
+
+    <!-- =========================================================
+         EXERCICE BANNER
+    ========================================================= -->
+    <div class="exercise-banner">
+        <div class="exercise-info">
+            <span class="exercise-label">Exercice</span>
+            <h1 id="exerciseTitle">Crée ta première carte de profil en HTML/CSS</h1>
+        </div>
+        <button class="btn-icon" id="toggleInstructionsBtn" title="Afficher/masquer les instructions" aria-expanded="true">
+            📋
+        </button>
+    </div>
+
+    <!-- =========================================================
+         COLLAPSIBLE INSTRUCTIONS
+    ========================================================= -->
+    <div class="instructions-bar" id="instructionsBar">
+        <div class="instruction-content" id="exerciseInstructions">
+            <strong>Objectif :</strong> Crée une carte de profil avec ton prénom, une couleur de fond et une bordure arrondie.
+            Elle doit être centrée et avoir une ombre portée.
+        </div>
+    </div>
+
+    <!-- =========================================================
+         SPLIT PANE PRINCIPAL
+    ========================================================= -->
+    <main class="split-workspace" id="splitWorkspace">
+
+        <!-- ---- PANNEAU GAUCHE : Éditeurs ---- -->
+        <section class="editor-section" id="editorSection">
+
+            <!-- Barre d'onglets -->
+            <div class="tab-bar" role="tablist">
+                <button class="tab-btn active" role="tab" aria-selected="true"  data-tab="html" id="tab-html">
+                    <span class="tab-icon">🌐</span> HTML
+                </button>
+                <button class="tab-btn" role="tab" aria-selected="false" data-tab="css"  id="tab-css">
+                    <span class="tab-icon">🎨</span> CSS
+                </button>
+                <button class="tab-btn" role="tab" aria-selected="false" data-tab="js"   id="tab-js">
+                    <span class="tab-icon">🧩</span> JavaScript
+                </button>
+                <div class="live-indicator" id="liveIndicator">
+                    <span class="live-dot"></span> Live
+                </div>
+            </div>
+
+            <!-- Conteneur des deux éditeurs Monaco -->
+            <div class="editors-container">
+                <div id="html-editor-container" class="monaco-editor-pane" data-lang="html"></div>
+                <div id="css-editor-container"  class="monaco-editor-pane hidden" data-lang="css"></div>
+                <div id="js-editor-container"   class="monaco-editor-pane hidden" data-lang="javascript"></div>
+            </div>
+
+        </section>
+
+        <!-- Poignée de redimensionnement -->
+        <div class="resize-handle" id="resizeHandle" title="Glisser pour redimensionner" role="separator" aria-label="Redimensionner les panneaux"></div>
+
+        <!-- ---- PANNEAU DROIT : Rendu Live ---- -->
+        <section class="preview-section" id="previewSection">
+            <div class="preview-header">
+                <span>🖥️ Aperçu en direct</span>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button class="btn-run" id="runCodeBtn" title="Exécuter le code (HTML + CSS + JS)">
+                        ▶️ Exécuter mon code
+                    </button>
+                    <button class="btn-icon" id="refreshPreviewBtn" title="Forcer le rechargement">↻</button>
+                </div>
+            </div>
+            <!--
+                SÉCURITÉ CRITIQUE :
+                • sandbox="allow-scripts" : autorise JS dans l'iframe (pour des animations CSS/JS simples de l'élève)
+                • allow-same-origin est INTENTIONNELLEMENT ABSENT pour isoler l'iframe du DOM parent
+                  et empêcher tout accès à Firebase, localStorage, cookies de l'app.
+            -->
+            <iframe
+                id="livePreview"
+                sandbox="allow-scripts"
+                title="Aperçu du code étudiant"
+                aria-label="Zone d'aperçu du rendu HTML/CSS en direct"
+            ></iframe>
+        </section>
+
+    </main>
+
+    <!-- =========================================================
+         LIBRAIRIES
+    ========================================================= -->
+    <!-- Monaco Editor via RequireJS CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+    <script>
+        require.config({
+            paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }
+        });
+
+        require(['vs/editor/editor.main'], function() {
+            // Signal pour notre script métier
+            document.dispatchEvent(new Event('monacoReady'));
+        });
+    </script>
+
+    <!-- Script principal (Module ES6 pour les imports Firebase) -->
+    <script type="module" src="./src/workspace-html.js"></script>
+
+</body>
+</html>

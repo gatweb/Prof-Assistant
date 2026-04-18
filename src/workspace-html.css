@@ -1,0 +1,370 @@
+/* =================================================================
+   workspace-html.css
+   Styles spécifiques à l'atelier HTML/CSS avec Live Preview
+================================================================= */
+
+/* --- Layout Global --- */
+body {
+    overflow: hidden; /* Empêche le scroll de la page, tout se passe dans les panneaux */
+}
+
+/* --- Top Bar Extensions --- */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background-color: var(--md-sys-color-surface);
+    box-shadow: var(--elevation-1);
+    z-index: 100;
+    flex-shrink: 0;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--md-sys-color-primary);
+}
+
+.header-badge {
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    padding: 2px 10px;
+    border-radius: 100px;
+}
+
+.user-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--md-sys-color-primary);
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-secondary:hover {
+    background-color: var(--md-sys-color-surface-variant);
+}
+
+/* --- Bandeau Exercice --- */
+.exercise-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: var(--md-sys-color-primary);
+    color: white;
+    flex-shrink: 0;
+}
+
+.exercise-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.75;
+    display: block;
+}
+
+.exercise-banner h1 {
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+
+/* --- Instructions collapsibles --- */
+.instructions-bar {
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    overflow: hidden;
+    max-height: 80px;
+    transition: max-height 0.3s ease;
+    flex-shrink: 0;
+}
+
+.instructions-bar.collapsed {
+    max-height: 0;
+}
+
+.instruction-content {
+    padding: 10px 20px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* --- Split Workspace --- */
+.split-workspace {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - 120px); /* Compense header + bandeau */
+}
+
+/* --- Panneau Éditeur --- */
+.editor-section {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    min-width: 200px;
+    background: #1e1e1e; /* Fond sombre Monaco */
+    overflow: hidden;
+}
+
+/* --- Barre d'onglets --- */
+.tab-bar {
+    display: flex;
+    align-items: center;
+    background: #2d2d2d;
+    border-bottom: 1px solid #404040;
+    flex-shrink: 0;
+    padding: 0 8px;
+    gap: 2px;
+}
+
+.tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    color: #9e9e9e;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 10px 16px;
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.tab-btn:hover {
+    color: #d4d4d4;
+}
+
+.tab-btn.active {
+    color: #4fc3f7;
+    border-bottom-color: #4fc3f7;
+}
+
+.tab-icon {
+    font-size: 14px;
+}
+
+.live-indicator {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #66bb6a;
+    font-weight: 500;
+    padding: 4px 10px;
+    background: rgba(102, 187, 106, 0.1);
+    border-radius: 100px;
+}
+
+.live-dot {
+    width: 7px;
+    height: 7px;
+    background: #66bb6a;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(0.8); }
+}
+
+.live-indicator.rendering .live-dot {
+    background: #ffb74d;
+    animation: none;
+}
+
+/* --- Conteneur Éditeurs Monaco --- */
+.editors-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.monaco-editor-pane {
+    position: absolute;
+    inset: 0;
+}
+
+.monaco-editor-pane.hidden {
+    display: none;
+}
+
+/* --- Poignée de Redimensionnement --- */
+.resize-handle {
+    width: 6px;
+    background: #3a3a3a;
+    cursor: col-resize;
+    flex-shrink: 0;
+    position: relative;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.resize-handle::after {
+    content: '⋮';
+    color: #666;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.resize-handle:hover,
+.resize-handle.dragging {
+    background: var(--md-sys-color-primary);
+}
+.resize-handle:hover::after,
+.resize-handle.dragging::after {
+    color: white;
+}
+
+/* --- Panneau Preview --- */
+.preview-section {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 200px;
+    background: white;
+    overflow: hidden;
+}
+
+.preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: var(--md-sys-color-surface-variant);
+    border-bottom: 1px solid var(--md-sys-color-outline);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface-variant);
+    flex-shrink: 0;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    color: var(--md-sys-color-primary);
+    transition: background 0.2s;
+    line-height: 1;
+}
+.btn-icon:hover {
+    background: var(--md-sys-color-primary-container);
+}
+
+/* --- L'Iframe --- */
+#livePreview {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background: white;
+}
+
+/* --- Bouton ▶️ Exécuter --- */
+.btn-run {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #2e7d32;
+    color: white;
+    border: none;
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    box-shadow: 0 2px 8px rgba(46,125,50,0.4);
+}
+.btn-run:hover {
+    background: #1b5e20;
+}
+.btn-run:active {
+    transform: scale(0.97);
+}
+.btn-run:disabled {
+    background: #888;
+    box-shadow: none;
+    cursor: default;
+}
+
+/* Bannière d'avertissement JS dans le live indicator */
+.live-indicator.js-mode {
+    color: #ffa726;
+    background: rgba(255,167,38,0.12);
+}
+.live-indicator.js-mode .live-dot {
+    background: #ffa726;
+    animation: none;
+}
+
+/* =================================================================
+   RESPONSIVE — Les panneaux s'empilent sur mobile
+================================================================= */
+@media (max-width: 768px) {
+    body {
+        overflow: auto;
+    }
+
+    .split-workspace {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .editor-section {
+        width: 100%;
+        height: 50vh;
+    }
+
+    .resize-handle {
+        width: 100%;
+        height: 6px;
+        cursor: row-resize;
+    }
+    .resize-handle::after {
+        content: '···';
+    }
+
+    .preview-section {
+        height: 50vh;
+    }
+
+    #livePreview {
+        height: 100%;
+    }
+
+    .exercise-banner h1 {
+        font-size: 13px;
+    }
+}

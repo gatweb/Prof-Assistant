@@ -1,0 +1,349 @@
+/* Layout spécifique à l'espace de travail */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background-color: var(--md-sys-color-surface);
+    box-shadow: var(--elevation-1);
+    z-index: 10;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--md-sys-color-primary);
+}
+
+.user-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 14px;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--md-sys-color-primary);
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: 100px;
+    padding: 8px 16px;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: var(--md-sys-color-surface-variant);
+}
+
+.workspace-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden; /* Important pour garder l'éditeur fixe */
+}
+
+/* Panneaux */
+.instructions-panel {
+    flex: 0 0 500px; /* Largeur fixe demandée par l'utilisateur */
+    min-width: 300px;
+    padding: 24px;
+    overflow-y: auto;
+    border-right: 1px solid var(--md-sys-color-outline);
+    display: flex;
+    flex-direction: column;
+    background: white;
+}
+
+.instruction-content {
+    margin: 16px 0;
+    padding: 20px;
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    border-radius: 12px;
+    line-height: 1.6;
+}
+
+.instruction-content code {
+    background-color: rgba(0,0,0,0.1);
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.actions {
+    margin-top: 24px;
+    text-align: right;
+    margin-bottom: 24px;
+}
+
+.editor-panel {
+    flex: 1; /* Prend 100% de l'espace restant */
+    position: relative;
+    background-color: #1e1e1e;
+}
+
+#editor-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* Intégration du Chat */
+.chat-panel {
+    display: flex;
+    flex-direction: column;
+    background: #f8fafc;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 16px;
+    flex: 1; /* Prend toute la place restante en hauteur */
+    min-height: 400px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.chat-header {
+    background: var(--md-sys-color-primary);
+    color: white;
+    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#refreshCorrectionsBtn {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: white;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#refreshCorrectionsBtn:hover {
+    background: rgba(255,255,255,0.35);
+}
+
+#refreshCorrectionsBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 12px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.chat-bubble {
+    max-width: 90%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    line-height: 1.4;
+    position: relative;
+}
+
+.chat-sender-name {
+    font-size: 10px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+
+.chat-bubble.assistant {
+    background: white;
+    border: 1px solid rgba(0,0,0,0.05);
+    align-self: flex-start;
+    border-top-left-radius: 0;
+}
+
+.chat-bubble.user {
+    background: var(--md-sys-color-primary);
+    color: white;
+    align-self: flex-end;
+    border-top-right-radius: 0;
+}
+
+.chat-input-area {
+    padding: 10px;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+}
+
+.chat-input-row {
+    display: flex;
+    gap: 8px;
+}
+
+.chat-input-row input {
+    flex: 1;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    outline: none;
+}
+
+.chat-send-btn {
+    background: var(--md-sys-color-primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.export-email-btn {
+    margin-top: 8px;
+    width: 100%;
+    font-size: 10px;
+    padding: 4px;
+}
+
+/* ==========================================================
+   Système d'Indices Progressifs
+========================================================== */
+.hints-area {
+    padding: 10px 12px 4px;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.hints-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.hint-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.hint-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 4px;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1.2;
+}
+
+.hint-sub {
+    font-size: 9px;
+    font-weight: 400;
+    opacity: 0.75;
+}
+
+/* Couleurs par niveau */
+.hint-btn.hint-1 { background: #dcfce7; color: #166534; }
+.hint-btn.hint-1:not(:disabled):hover { background: #bbf7d0; transform: translateY(-1px); }
+
+.hint-btn.hint-2 { background: #fef9c3; color: #854d0e; }
+.hint-btn.hint-2:not(:disabled):hover { background: #fef08a; transform: translateY(-1px); }
+
+.hint-btn.hint-3 { background: #fee2e2; color: #991b1b; }
+.hint-btn.hint-3:not(:disabled):hover { background: #fecaca; transform: translateY(-1px); }
+
+/* Boutons verrouillés (avant soumission ou niveau précédent) */
+.hint-btn:disabled {
+    background: #f1f5f9;
+    color: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Toggle Question Libre */
+.free-question-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: transparent;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-family: var(--font-family);
+    font-size: 12px;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 6px;
+}
+.free-question-toggle:hover {
+    background: #f1f5f9;
+    border-color: var(--md-sys-color-primary);
+}
+
+.question-counter {
+    font-size: 10px;
+    font-weight: 700;
+    background: var(--md-sys-color-primary);
+    color: white;
+    padding: 1px 7px;
+    border-radius: 100px;
+}
+
+.question-counter.exhausted {
+    background: #ef4444;
+}
+
+/* Panneau question libre */
+.free-question-panel {
+    margin-bottom: 6px;
+}
+.free-question-panel.hidden {
+    display: none;
+}
+
+/* ==========================================================
+   Cleanup anciens styles
+========================================================== */
+.modal-overlay, .chat-fab {
+    display: none !important;
+}
+
+/* Markdown dans le chat */
+.chat-bubble-content pre {
+    background: #1e1e1e;
+    color: #f8f8f2;
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 12px;
+    margin: 8px 0;
+}
+
+.chat-bubble-content code {
+    background: rgba(0,0,0,0.05);
+    padding: 2px 4px;
+    border-radius: 4px;
+}

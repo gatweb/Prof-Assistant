@@ -1,0 +1,197 @@
+/* Styles spécifiques au tableau de bord enseignant */
+
+.admin-container {
+    padding: 32px;
+    max-width: 1200px;
+    margin: 0 auto; /* centrer */
+    width: 100%;
+}
+
+.badge {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+    vertical-align: super; /* Soulève un peu le badge par rapport à text normal */
+}
+
+.header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Bouton pour les données mock */
+.mock-btn {
+    border-color: #fbbc05;
+    color: #926d03;
+}
+.mock-btn:hover {
+    background-color: #fffaf0;
+}
+
+/* 
+Material 3 Data Table Styling 
+------------------------------
+*/
+.md-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-family);
+    text-align: left;
+}
+
+.md-table th {
+    background-color: var(--md-sys-color-surface-variant);
+    color: var(--md-sys-color-on-surface-variant);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--md-sys-color-outline);
+}
+
+.md-table td {
+    padding: 16px 24px;
+    border-bottom: 1px solid #e0e4eb;
+    color: var(--md-sys-color-on-surface);
+    vertical-align: middle;
+}
+
+.md-table tbody tr {
+    transition: background-color 0.1s ease;
+}
+
+.md-table tbody tr:hover {
+    background-color: var(--md-sys-color-surface-variant); 
+}
+
+/* Classes utilitaires */
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mt-32 { margin-top: 32px; }
+.ml-16 { margin-left: 16px; }
+.p-0 { padding: 0 !important; }
+.text-center { text-align: center; }
+.py-16 { padding-top: 16px; padding-bottom: 16px; }
+.hidden { display: none !important; }
+
+/* 
+Detail View (Split Screen Administration)
+-----------------------------------------
+*/
+/* La partie div detailView utilise un height calculé via style en ligne pour forcer la dimension */
+
+.read-only-panel {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--md-sys-color-outline);
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    background-color: #1e1e1e; /* Match initial Monaco BG pour un bel effet */
+    color: white;
+}
+
+.btn-text {
+    background: transparent;
+    border: none;
+    color: #79c0ff;
+    cursor: pointer;
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+.btn-text:hover { text-decoration: underline; }
+
+.admin-editor-wrapper {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    background-color: #1e1e1e;
+}
+
+.feedback-panel {
+    flex: 1; /* Prends le reste de l'espace */
+    padding: 24px;
+    background-color: var(--md-sys-color-background);
+    overflow-y: auto;
+}
+
+.correction-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+.info-group {
+    margin-top: 24px;
+    font-size: 16px;
+    background-color: var(--md-sys-color-surface-variant);
+    padding: 16px;
+    border-radius: 8px;
+}
+.info-group .label {
+    color: var(--md-sys-color-on-surface-variant);
+    display: block;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+.info-group strong {
+    color: var(--md-sys-color-primary);
+}
+
+/* MUI Style Form Controls */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.form-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+}
+.md-textarea, .md-input {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 15px;
+    transition: all 0.2s;
+    background-color: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+}
+.md-textarea:focus, .md-input:focus {
+    outline: none;
+    border-color: var(--md-sys-color-primary);
+    border-width: 2px;
+    padding: 13px; /* compense le 1px de border top et bottom pour eviter saut layout */
+    box-shadow: var(--elevation-1);
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: auto; /* Pousse les boutons tout en bas de la card */
+    padding-top: 32px; /* Margin si on scrolle */
+}
+
+.btn-secondary.danger {
+    color: #ba1a1a;
+    border-color: #ba1a1a;
+}
+.btn-secondary.danger:hover {
+    background-color: #ffdad6;
+}
