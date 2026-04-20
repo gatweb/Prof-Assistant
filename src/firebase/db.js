@@ -16,15 +16,19 @@ export const getSubmissionsToGrade = async () => {
 };
 
 // CRUD : Mettre à jour le statut, feedback et note
-export const updateSubmissionStatus = async (id, status, feedbackIa, note) => {
+export const updateSubmissionStatus = async (id, status, feedbackIa, note, profMessage = null) => {
     const docRef = doc(db, "submissions", id);
-    await updateDoc(docRef, {
-        status: status,
-        feedback_ia: feedbackIa,
+    const updateData = {
+        status:       status,
+        feedback_ia:  feedbackIa,
         note_suggeree: note,
-        date_correction: serverTimestamp() // Marqueur de temps de la DB
-    });
+        date_correction: serverTimestamp()
+    };
+    // Message personnalisé du prof (affiché côté élève dans le chat drawer)
+    if (profMessage) updateData.prof_message = profMessage;
+    await updateDoc(docRef, updateData);
 };
+
 
 // DEV ONLY : Génère des copies de tests s'il n'y en a pas
 export const generateMockSubmissions = async () => {

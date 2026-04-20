@@ -249,31 +249,51 @@ document.addEventListener('monacoReady', () => {
 // 5. Actions Métier (Boutons Validation)
 // ============================================
 document.getElementById('approveBtn').addEventListener('click', async () => {
-    await processAction("publie");
+    await processAction("valide");
 });
 
 document.getElementById('rejectBtn').addEventListener('click', async () => {
-    await processAction("brouillon");
+    await processAction("en_cours");
 });
 
 async function processAction(newStatus) {
     if (!currentViewingCopyId) return;
 
-    // Récupération des valeurs potentiellement modifiées par le prof
-    const feedback = document.getElementById('feedbackIaInput').value;
-    const note = document.getElementById('scoreInput').value;
+    const feedback    = document.getElementById('feedbackIaInput').value;
+    const note        = document.getElementById('scoreInput').value;
+    const profMessage = document.getElementById('profMessageInput')?.value?.trim() || null;
+
+    // Label lisible pour la confirmation
+    const label = newStatus === 'valide' ? '✅ Valider l\'exercice' : '❌ Demander des corrections';
+    const copy  = currentCopies.find(c => c.id === currentViewingCopyId);
+    const nomEleve = copy?.nom_eleve || 'l\'élève';
+    if (!confirm(`${label} pour ${nomEleve} ?`)) return;
+
+    // Feedback visuel sur les boutons
+    const approveBtn = document.getElementById('approveBtn');
+    const rejectBtn  = document.getElementById('rejectBtn');
+    approveBtn.disabled = rejectBtn.disabled = true;
+    approveBtn.textContent = rejectBtn.textContent = '⏳ Envoi...';
 
     try {
-        await updateSubmissionStatus(currentViewingCopyId, newStatus, feedback, Number(note));
-        
+        // 1. Mettre à jour le statut, le feedback prof et la note dans Firestore
+        await updateSubmissionStatus(currentViewingCopyId, newStatus, feedback, Number(note), profMessage);
+
+        // 2. Retour à la liste
         detailView.classList.add('hidden');
         listView.classList.remove('hidden');
         currentViewingCopyId = null;
-        
-        // Rafraîchir pour faire disparaître l'item validé du dashboard
-        await loadSubmissionsList();
+
+        // Vider le message prof pour la prochaine copie
+        const msgInput = document.getElementById('profMessageInput');
+        if (msgInput) msgInput.value = '';
+
     } catch (e) {
         console.error("Erreur lors de la validation", e);
-        alert("Erreur réseau lors de la mise à jour du statut dans Firestore.");
+        alert("Erreur réseau lors de la mise à jour.");
+    } finally {
+        approveBtn.disabled = rejectBtn.disabled = false;
+        approveBtn.textContent = '✅ Valider l\'exercice';
+        rejectBtn.textContent  = '❌ Demander des corrections';
     }
 }

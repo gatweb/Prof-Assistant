@@ -160,6 +160,62 @@
     margin-top: auto;
 }
 
+/* --- Cartes avec statut de soumission --- */
+
+/* ✅ Validé — carte verte */
+.exercise-card.card-status-valide {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-color: #86efac;
+}
+.exercise-card.card-status-valide:hover {
+    border-color: #4ade80;
+    box-shadow: 0 8px 24px rgba(34,197,94,0.2);
+}
+.exercise-card.card-status-valide .card-arrow {
+    color: #16a34a;
+}
+
+/* ⏳ En attente — carte bleue */
+.exercise-card.card-status-en-attente {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-color: #93c5fd;
+    cursor: default;
+}
+.exercise-card.card-status-en-attente:hover {
+    border-color: #60a5fa;
+    box-shadow: 0 8px 24px rgba(59,130,246,0.15);
+    transform: none;    /* Pas de survol flottant — on attend */
+}
+.exercise-card.card-status-en-attente .card-arrow {
+    color: #2563eb;
+}
+
+/* 🔄 Corrections demandées — carte orange */
+.exercise-card.card-status-revision {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border-color: #fcd34d;
+}
+.exercise-card.card-status-revision:hover {
+    border-color: #f59e0b;
+    box-shadow: 0 8px 24px rgba(245,158,11,0.2);
+}
+.exercise-card.card-status-revision .card-arrow {
+    color: #d97706;
+}
+
+/* --- Badges de statut --- */
+.card-status-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 100px;
+    white-space: nowrap;
+}
+.status-valide  { background: #dcfce7; color: #15803d; }
+.status-attente { background: #dbeafe; color: #1d4ed8; }
+.status-revision { background: #fef3c7; color: #b45309; }
+
+
 /* --- État vide --- */
 .lobby-empty {
     text-align: center;
@@ -552,10 +608,192 @@ body {
 /* --- L'Iframe --- */
 #livePreview {
     flex: 1;
+    min-height: 80px;   /* Laisse de la place à la console */
     width: 100%;
     border: none;
     background: white;
 }
+
+/* =================================================================
+   CONSOLE INTÉGRÉE
+================================================================= */
+
+/* Poignée verticale entre iframe et console */
+.console-resize-handle {
+    height: 5px;
+    background: #1e1e1e;
+    cursor: row-resize;
+    flex-shrink: 0;
+    position: relative;
+    transition: background 0.2s;
+}
+.console-resize-handle::after {
+    content: '···';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: #555;
+    font-size: 14px;
+    letter-spacing: 3px;
+    line-height: 1;
+}
+.console-resize-handle:hover,
+.console-resize-handle.dragging {
+    background: #3a86ff;
+}
+.console-resize-handle:hover::after,
+.console-resize-handle.dragging::after {
+    color: white;
+}
+
+/* Panneau principal */
+.console-panel {
+    display: flex;
+    flex-direction: column;
+    background: #0d1117;    /* GitHub dark */
+    height: 160px;          /* Hauteur par défaut */
+    min-height: 36px;       /* Collapsed = juste le header */
+    max-height: 60%;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+/* En-tête de la console */
+.console-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #161b22;
+    border-top: 1px solid #30363d;
+    border-bottom: 1px solid #30363d;
+    padding: 5px 10px;
+    flex-shrink: 0;
+    height: 32px;
+}
+
+.console-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.console-icon {
+    color: #3fb950;
+    font-size: 10px;
+}
+
+.console-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #8b949e;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-family: 'Consolas', 'Monaco', monospace;
+}
+
+.console-count {
+    background: #3fb950;
+    color: #0d1117;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 100px;
+    font-family: monospace;
+    min-width: 18px;
+    text-align: center;
+}
+.console-count.has-errors {
+    background: #f85149;
+    color: white;
+}
+
+.console-clear-btn {
+    background: transparent;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-family);
+    transition: all 0.15s;
+}
+.console-clear-btn:hover {
+    background: #21262d;
+    color: #f85149;
+    border-color: #f85149;
+}
+
+/* Zone de sortie */
+.console-output {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    padding: 6px 0;
+    font-family: 'Consolas', 'Monaco', 'Fira Code', monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+}
+
+/* Scrollbar terminale */
+.console-output::-webkit-scrollbar { width: 6px; height: 6px; }
+.console-output::-webkit-scrollbar-track { background: #0d1117; }
+.console-output::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+.console-output::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+/* Placeholder */
+.console-placeholder {
+    color: #484f58;
+    font-style: italic;
+    font-size: 12px;
+    padding: 8px 12px;
+}
+.console-placeholder code {
+    color: #7ee787;
+    font-style: normal;
+}
+
+/* Lignes de log */
+.console-line {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 1px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    word-break: break-all;
+    animation: consoleFadeIn 0.15s ease;
+}
+@keyframes consoleFadeIn {
+    from { opacity: 0; transform: translateX(-4px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.console-prefix {
+    color: #3fb950;
+    font-size: 11px;
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.console-text {
+    color: #e6edf3;
+    flex: 1;
+    white-space: pre-wrap;
+}
+
+/* Variantes */
+.console-line.type-error   { background: rgba(248,81,73,0.08); }
+.console-line.type-error   .console-prefix { color: #f85149; }
+.console-line.type-error   .console-text   { color: #f85149; }
+.console-line.type-warn    { background: rgba(210,153,34,0.08); }
+.console-line.type-warn    .console-prefix { color: #d2a510; }
+.console-line.type-warn    .console-text   { color: #d2a510; }
+.console-line.type-info    .console-prefix { color: #58a6ff; }
+.console-line.type-info    .console-text   { color: #58a6ff; }
+.console-line.type-system  { border-bottom: 1px solid #30363d; }
+.console-line.type-system  .console-text   { color: #30363d; font-style: italic; }
+
 
 /* --- Bouton ▶️ Exécuter --- */
 .btn-run {

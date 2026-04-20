@@ -98,10 +98,20 @@
                     </div>
                 </div>
 
+                <!-- Message du professeur (envoyé à l'élève dans le chat) -->
+                <div class="form-group mt-24">
+                    <label for="profMessageInput">Message personnalisé pour l'élève (optionnel) :</label>
+                    <textarea id="profMessageInput" class="md-textarea" rows="3" placeholder="Ex: Bravo ! Attention à l'indentation..."></textarea>
+                </div>
+
                 <!-- Footer flexbox du formulaire -->
                 <div class="action-buttons mt-32">
-                    <button id="rejectBtn" class="btn-secondary danger">❌ Renvoyer à l'élève (Brouillon)</button>
-                    <button id="approveBtn" class="btn-primary" style="padding-left: 32px; padding-right: 32px;">✅ Valider et Publier l'évaluation</button>
+                    <button id="rejectBtn" class="btn-secondary danger">
+                        ❌ Demander des corrections
+                    </button>
+                    <button id="approveBtn" class="btn-primary" style="padding-left: 32px; padding-right: 32px;">
+                        ✅ Valider l'exercice
+                    </button>
                 </div>
             </div>
         </section>

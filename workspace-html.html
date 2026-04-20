@@ -138,6 +138,7 @@
                 <!--
                     SÉCURITÉ : sandbox="allow-scripts" uniquement.
                     allow-same-origin intentionnellement absent → isolation totale de Firebase.
+                    postMessage reste autorisé même en sandbox pour la communication parent↔iframe.
                 -->
                 <iframe
                     id="livePreview"
@@ -145,6 +146,29 @@
                     title="Aperçu du rendu étudiant"
                     aria-label="Zone d'aperçu HTML/CSS/JS en direct"
                 ></iframe>
+
+                <!-- Poignée de redimensionnement verticale (entre iframe et console) -->
+                <div class="console-resize-handle" id="consoleResizeHandle" title="Redimensionner la console" role="separator" aria-label="Redimensionner la console"></div>
+
+                <!-- Console intégrée -->
+                <div class="console-panel" id="consolePanel">
+                    <div class="console-header">
+                        <div class="console-header-left">
+                            <span class="console-icon">▶</span>
+                            <span class="console-title">Console</span>
+                            <span class="console-count" id="consoleCount" hidden>0</span>
+                        </div>
+                        <button class="console-clear-btn" id="clearConsoleBtn" title="Effacer la console">
+                            🗑 Effacer
+                        </button>
+                    </div>
+                    <div class="console-output" id="consoleOutput" aria-live="polite" aria-label="Sortie de la console">
+                        <div class="console-placeholder">
+                            Exécute ton code pour voir les résultats de <code>console.log()</code> ici.
+                        </div>
+                    </div>
+                </div>
+
             </section>
 
         </main>

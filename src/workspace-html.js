@@ -73,6 +73,15 @@ const chatSendBtn           = document.getElementById('chatSendBtn');
 const refreshCorrectionsBtn = document.getElementById('refreshCorrectionsBtn');
 const exportEmailBtn        = document.getElementById('exportEmailBtn');
 
+// Console intégrée
+const consolePanel         = document.getElementById('consolePanel');
+const consoleOutput        = document.getElementById('consoleOutput');
+const consoleCount         = document.getElementById('consoleCount');
+const clearConsoleBtn      = document.getElementById('clearConsoleBtn');
+const consoleResizeHandle  = document.getElementById('consoleResizeHandle');
+let consoleLineCount = 0;
+let consoleHasError  = false;
+
 // ============================================================
 // 2. ÉTAT GLOBAL
 // ============================================================
@@ -120,6 +129,7 @@ if (logoutBtn) logoutBtn.addEventListener('click', async () => await logoutUser(
  */
 async function loadLobby() {
     // Afficher le loader
+    lobbyLoader.querySelector('p').textContent = 'Chargement des exercices...';
     lobbyLoader.classList.remove('hidden');
     lobbyContent.classList.add('hidden');
     lobbyView.classList.remove('hidden');
@@ -128,9 +138,17 @@ async function loadLobby() {
     chatFab.classList.add('hidden');
 
     try {
-        const snapshot = await getDocs(collection(db, 'exercices'));
+        const userEmail = userEmailEl?.textContent || '';
 
-        if (snapshot.empty) {
+        // Requêtes en parallèle : exercices + soumissions de l'élève
+        const [exercicesSnap, submissionsSnap] = await Promise.all([
+            getDocs(collection(db, 'exercices')),
+            userEmail
+                ? getDocs(query(collection(db, 'submissions'), where('email_eleve', '==', userEmail)))
+                : Promise.resolve({ docs: [] })
+        ]);
+
+        if (exercicesSnap.empty) {
             chaptersContainer.innerHTML = `
                 <div class="lobby-empty">
                     <p>😔 Aucun exercice disponible pour le moment.</p>
@@ -141,10 +159,25 @@ async function loadLobby() {
             return;
         }
 
-        // Grouper par chapitre
+        // Construire une map exercice_id -> dernière soumission (la plus récente)
+        const submissionsByExercice = {};
+        submissionsSnap.docs.forEach(docSnap => {
+            const sub = { id: docSnap.id, ...docSnap.data() };
+            const exId = sub.exercice_id;
+            if (!exId) return;
+            // Garder la soumission la plus récente par exercice
+            const existing = submissionsByExercice[exId];
+            if (!existing || new Date(sub.date_soumission) > new Date(existing.date_soumission)) {
+                submissionsByExercice[exId] = sub;
+            }
+        });
+
+        // Grouper par chapitre (en filtrant les exercices cachés)
         const chapitres = {};
-        snapshot.forEach(docSnap => {
+        exercicesSnap.forEach(docSnap => {
             const data = { id: docSnap.id, ...docSnap.data() };
+            // Masquer les exercices avec is_hidden: true
+            if (data.is_hidden === true) return;
             const ch = data.chapitre || 'Général';
             if (!chapitres[ch]) chapitres[ch] = [];
             chapitres[ch].push(data);
@@ -156,7 +189,6 @@ async function loadLobby() {
         for (const [chapitreName, exercices] of Object.entries(chapitres)) {
             const chapterEl = document.createElement('div');
             chapterEl.className = 'chapter-block';
-
             chapterEl.innerHTML = `<h2 class="chapter-title">
                 <span class="chapter-icon">📚</span> ${chapitreName}
             </h2>`;
@@ -165,21 +197,45 @@ async function loadLobby() {
             grid.className = 'exercise-grid';
 
             exercices.forEach(ex => {
-                const card = document.createElement('button');
-                card.className = 'exercise-card';
-                card.setAttribute('data-id', ex.id);
-                card.setAttribute('aria-label', `Ouvrir l'exercice : ${ex.titre}`);
+                const submission = submissionsByExercice[ex.id];
+                const status     = submission?.status || null;
+                const hasHints   = ex.statut_aide !== false;
 
-                const hasHints = ex.statut_aide !== false;
+                // Déterminer l'état visuel de la carte
+                let cardClass = 'exercise-card';
+                let statusBadge = '';
+                let actionLabel = 'Commencer →';
+
+                if (status === 'valide' || status === 'publie') {
+                    cardClass += ' card-status-valide';
+                    statusBadge = '<span class="card-status-badge status-valide">✅ Validé</span>';
+                    actionLabel = 'Revoir →';
+                } else if (status === 'a_valider') {
+                    cardClass += ' card-status-en-attente';
+                    statusBadge = '<span class="card-status-badge status-attente">⏳ Chez ton prof</span>';
+                    actionLabel = 'Voir mon code →';
+                } else if (status === 'en_cours' || status === 'brouillon') {
+                    cardClass += ' card-status-revision';
+                    statusBadge = '<span class="card-status-badge status-revision">🔄 Corrections demandées</span>';
+                    actionLabel = 'Corriger →';
+                }
+
+                const card = document.createElement('button');
+                card.className = cardClass;
+                card.setAttribute('data-id', ex.id);
+                card.setAttribute('aria-label', `Ouvrir : ${ex.titre}`);
 
                 card.innerHTML = `
                     <div class="card-header">
-                        <span class="card-icon">🧩</span>
-                        ${hasHints ? '<span class="card-badge-aide" title="Indices disponibles">💡 Aide</span>' : ''}
+                        <span class="card-icon">${status === 'valide' || status === 'publie' ? '🎉' : '🧩'}</span>
+                        <div style="display:flex;gap:4px;align-items:center;">
+                            ${hasHints ? '<span class="card-badge-aide">💡 Aide</span>' : ''}
+                            ${statusBadge}
+                        </div>
                     </div>
                     <div class="card-title">${ex.titre || 'Exercice sans titre'}</div>
                     <div class="card-consigne">${(ex.consigne || '').substring(0, 80)}${(ex.consigne || '').length > 80 ? '...' : ''}</div>
-                    <div class="card-arrow">Commencer →</div>
+                    <div class="card-arrow">${actionLabel}</div>
                 `;
 
                 card.addEventListener('click', () => openExercise(ex.id));
@@ -190,17 +246,17 @@ async function loadLobby() {
             chaptersContainer.appendChild(chapterEl);
         }
 
-        // Transition fluide : cacher le loader, révéler le contenu
         lobbyLoader.classList.add('hidden');
         lobbyContent.classList.remove('hidden');
 
     } catch (e) {
-        console.error('[Lobby] Erreur chargement exercices :', e);
+        console.error('[Lobby] Erreur :', e);
         chaptersContainer.innerHTML = `<div class="lobby-empty">❌ Impossible de charger les exercices. Vérifie ta connexion.</div>`;
         lobbyLoader.classList.add('hidden');
         lobbyContent.classList.remove('hidden');
     }
 }
+
 
 /**
  * Ouvre un exercice spécifique.
@@ -403,23 +459,44 @@ function renderPreview() {
 
 function executeAllCode() {
     if (!htmlEditor || !cssEditor || !jsEditor) return;
+    // Vider la console avant chaque exécution
+    clearConsole(true);
     livePreview.srcdoc = buildDocument(htmlEditor.getValue(), cssEditor.getValue(), jsEditor.getValue());
     if (runCodeBtn) {
-        runCodeBtn.textContent = "✅ Exécuté !";
+        runCodeBtn.textContent = "\u2705 Exécuté !";
         runCodeBtn.disabled = true;
-        setTimeout(() => { runCodeBtn.textContent = "▶️ Exécuter mon code"; runCodeBtn.disabled = false; }, 1500);
+        setTimeout(() => { runCodeBtn.textContent = "\u25b6\ufe0f Exécuter mon code"; runCodeBtn.disabled = false; }, 1500);
     }
 }
 
 /**
  * Construit le document HTML complet à injecter dans l'iframe.
- * Si jsCode est vide, le script n'est pas injecté (évite une balise vide).
+ * Injecte un intercepteur console avant le code de l'élève pour
+ * rediriger console.log/error/warn/info vers le panneau console parent.
  */
 function buildDocument(html, css, jsCode) {
+    // Intercepteur : surcharge console.* pour envoyer via postMessage vers le parent
+    const consoleInterceptor = `<script>
+(function() {
+  const _relay = (type) => function(...args) {
+    const msg = args.map(a => {
+      if (typeof a === 'object') { try { return JSON.stringify(a, null, 2); } catch(e) { return String(a); } }
+      return String(a);
+    }).join(' ');
+    window.parent.postMessage({ type: 'console', level: type, message: msg }, '*');
+  };
+  console.log   = _relay('log');
+  console.error = _relay('error');
+  console.warn  = _relay('warn');
+  console.info  = _relay('info');
+})();
+<\/script>`;
+
     const scriptBlock = jsCode.trim()
-        ? `<script>try{${jsCode}}catch(err){document.body.innerHTML+='<div style="background:#ffebee;color:#c62828;padding:12px;border-radius:8px;margin-top:16px;font-family:monospace;font-size:13px;">❌ Erreur JS : '+err.message+'</div>';}<\/script>`
+        ? `<script>try{${jsCode}}catch(err){window.parent.postMessage({type:'console',level:'error',message:'Uncaught: '+err.message},'*');document.body.innerHTML+='<div style="background:#ffebee;color:#c62828;padding:12px;border-radius:8px;margin-top:16px;font-family:monospace;font-size:13px;">\u274c Erreur JS : '+err.message+'</div>';}<\/script>`
         : '';
-    return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>*,*::before,*::after{box-sizing:border-box;}${css}</style></head><body>${html}${scriptBlock}</body></html>`;
+
+    return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>*,*::before,*::after{box-sizing:border-box;}${css}</style></head><body>${html}${consoleInterceptor}${scriptBlock}</body></html>`;
 }
 
 if (runCodeBtn)        runCodeBtn.addEventListener('click', executeAllCode);
@@ -742,14 +819,26 @@ function listenForProfFeedback(docId) {
     profFeedbackUnsub = onSnapshot(doc(db, 'submissions', docId), (snapshot) => {
         const data = snapshot.data();
         if (!data) return;
-        if (data.status === 'publie' || data.status === 'brouillon') {
-            const isValidated = data.status === 'publie';
+
+        // Gère les deux nomenclatures : ancienne (publie/brouillon) et nouvelle (valide/en_cours)
+        const isValidated = data.status === 'valide' || data.status === 'publie';
+        const isRevision  = data.status === 'en_cours' || data.status === 'brouillon';
+
+        if (isValidated || isRevision) {
             const icon  = isValidated ? '✅' : '🔄';
             const title = isValidated
-                ? `**Correction validée — Note : ${data.note_suggeree || 0}/100**`
-                : `**Le professeur te renvoie ta copie en révision**`;
+                ? `**Exercice validé — Note : ${data.note_suggeree || 0}/100**`
+                : `**Le professeur te demande des corrections**`;
+
             let msg = `${icon} ${title}\n\n${data.feedback_ia || ''}`;
-            if (!isValidated) msg += '\n\n_Corrige et soumet à nouveau ! 💪_';
+
+            // Message personnalisé du prof (optionnel)
+            if (data.prof_message) {
+                msg += `\n\n> 💬 *${data.prof_message}*`;
+            }
+
+            if (isRevision) msg += '\n\n_Corrige et soumet à nouveau ! 💪_';
+
             appendMessage(msg, 'assistant', 'Professeur');
             openDrawer();
             profFeedbackUnsub();
@@ -772,9 +861,12 @@ if (refreshCorrectionsBtn) {
                 const snap = await getDoc(doc(db, 'submissions', pendingDocId));
                 if (snap.exists()) {
                     const data = snap.data();
-                    if (data.status === 'publie' || data.status === 'brouillon') {
-                        const isVal = data.status === 'publie';
-                        appendMessage(`${isVal ? '✅' : '🔄'} **${isVal ? `Note : ${data.note_suggeree || 0}/100` : 'Copie renvoyée'}**\n\n${data.feedback_ia || ''}`, 'assistant', 'Professeur');
+                    const isVal = data.status === 'valide' || data.status === 'publie';
+                    const isRev = data.status === 'en_cours' || data.status === 'brouillon';
+                    if (isVal || isRev) {
+                        let msg = `${isVal ? '✅' : '🔄'} **${isVal ? `Exercice validé — Note : ${data.note_suggeree || 0}/100` : 'Corrections demandées'}**\n\n${data.feedback_ia || ''}`;
+                        if (data.prof_message) msg += `\n\n> 💬 *${data.prof_message}*`;
+                        appendMessage(msg, 'assistant', 'Professeur');
                         localStorage.removeItem('pendingHtmlDocId');
                     } else {
                         appendMessage('🔄 Toujours en attente de la correction...', 'assistant', 'Tuteur IA');
@@ -812,5 +904,119 @@ if (exportEmailBtn) {
             exportEmailBtn.textContent = '✅ Envoyé';
         } catch(e) { exportEmailBtn.textContent = '❌ Erreur'; }
         setTimeout(() => { exportEmailBtn.textContent = orig; exportEmailBtn.disabled = false; }, 4000);
+    });
+}
+
+// ============================================================
+// 15. CONSOLE INTÉGRÉE
+// ============================================================
+
+/**
+ * Vide la console.
+ * @param {boolean} silent - Si true, ne montre pas le séparateur "Console effacée".
+ */
+function clearConsole(silent = false) {
+    if (!consoleOutput) return;
+    consoleOutput.innerHTML = '';
+    consoleLineCount = 0;
+    consoleHasError  = false;
+    if (consoleCount) {
+        consoleCount.hidden = true;
+        consoleCount.textContent = '0';
+        consoleCount.classList.remove('has-errors');
+    }
+    if (!silent) {
+        appendConsoleLine('Console effacée.', 'system');
+    }
+}
+
+/**
+ * Ajoute une ligne dans le panneau console.
+ * @param {string} message
+ * @param {'log'|'error'|'warn'|'info'|'system'} level
+ */
+function appendConsoleLine(message, level = 'log') {
+    if (!consoleOutput) return;
+
+    // Retirer le placeholder au premier message réel
+    consoleOutput.querySelector('.console-placeholder')?.remove();
+
+    const line = document.createElement('div');
+    line.className = `console-line type-${level}`;
+
+    const prefixMap = { log: '>>', error: '!!', warn: ' !', info: '  i', system: '--' };
+    const prefix = document.createElement('span');
+    prefix.className = 'console-prefix';
+    prefix.textContent = prefixMap[level] ?? '>>';
+
+    const text = document.createElement('span');
+    text.className = 'console-text';
+    text.textContent = message;
+
+    line.appendChild(prefix);
+    line.appendChild(text);
+    consoleOutput.appendChild(line);
+
+    // Auto-scroll vers le bas
+    consoleOutput.scrollTop = consoleOutput.scrollHeight;
+
+    // Mise à jour du compteur
+    if (level !== 'system') {
+        consoleLineCount++;
+        if (consoleCount) {
+            consoleCount.textContent = consoleLineCount;
+            consoleCount.hidden = false;
+        }
+    }
+    if (level === 'error') {
+        consoleHasError = true;
+        consoleCount?.classList.add('has-errors');
+    }
+}
+
+// Réception des messages postMessage envoyés depuis l'iframe sandbox
+window.addEventListener('message', (event) => {
+    // Validation : ignorer les messages qui ne sont pas de notre type
+    if (!event.data || event.data.type !== 'console') return;
+    const { level = 'log', message = '' } = event.data;
+    appendConsoleLine(String(message), level);
+});
+
+// Bouton "Effacer"
+if (clearConsoleBtn) {
+    clearConsoleBtn.addEventListener('click', () => clearConsole(false));
+}
+
+// ============================================================
+// 16. REDIMENSIONNEMENT VERTICAL DE LA CONSOLE
+// ============================================================
+if (consoleResizeHandle && consolePanel) {
+    let isDragging = false;
+    let startY     = 0;
+    let startH     = 0;
+
+    consoleResizeHandle.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startY = e.clientY;
+        startH = consolePanel.offsetHeight;
+        consoleResizeHandle.classList.add('dragging');
+        document.body.style.cursor    = 'row-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const delta     = startY - e.clientY;   // Tirer vers le HAUT agrandit
+        const newHeight = Math.min(Math.max(36, startH + delta), window.innerHeight * 0.65);
+        consolePanel.style.height = newHeight + 'px';
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        consoleResizeHandle.classList.remove('dragging');
+        document.body.style.cursor    = '';
+        document.body.style.userSelect = '';
     });
 }
