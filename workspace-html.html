@@ -16,8 +16,17 @@
     <header class="app-header">
         <div class="logo">
             <span>ProfAssistant</span>
-            <span class="header-badge">Atelier HTML/CSS</span>
+            <span class="header-badge">Atelier HTML/CSS/JS</span>
         </div>
+        <!-- Switcher de mode -->
+        <nav class="mode-switcher" aria-label="Choisir le mode d'éditeur">
+            <a href="workspace.html" class="mode-btn" title="Exercice JavaScript pur + Chat tuteur">
+                🧩 Mode JS
+            </a>
+            <span class="mode-btn active" title="Atelier visuel HTML/CSS/JS">
+                🎨 Mode CodePen
+            </span>
+        </nav>
         <div class="user-controls">
             <span id="userEmail"></span>
             <button id="submitBtn" class="btn-primary" aria-label="Soumettre le code pour correction">
@@ -114,8 +123,67 @@
     </main>
 
     <!-- =========================================================
+         FLOATING ACTION BUTTON — Chat & Corrections
+    ========================================================= -->
+    <button class="chat-fab" id="chatFab" aria-label="Ouvrir le tuteur et les corrections">
+        💬
+        <span class="fab-badge" id="fabBadge" hidden>!</span>
+    </button>
+
+    <!-- =========================================================
+         CHAT DRAWER (slide-in depuis la droite)
+    ========================================================= -->
+    <div class="chat-drawer" id="chatDrawer" aria-hidden="true">
+        <div class="drawer-header">
+            <span>🧑‍🏫 Tuteur &amp; Corrections</span>
+            <button class="drawer-close" id="chatDrawerClose" aria-label="Fermer">✕</button>
+        </div>
+
+        <div class="drawer-messages chat-messages" id="chatMessages">
+            <div class="chat-bubble assistant">
+                Bonjour ! Soumets ton atelier pour recevoir des indices et la correction du professeur.
+            </div>
+        </div>
+
+        <!-- Indices Progressifs -->
+        <div class="hints-area">
+            <div class="hints-label">🆘 Besoin d'aide ?</div>
+            <div class="hint-buttons">
+                <button class="hint-btn hint-1" id="hintBtn1" disabled>
+                    💡 Niveau 1<span class="hint-sub">Théorie</span>
+                </button>
+                <button class="hint-btn hint-2" id="hintBtn2" disabled>
+                    🔍 Niveau 2<span class="hint-sub">Mon code</span>
+                </button>
+                <button class="hint-btn hint-3" id="hintBtn3" disabled>
+                    🗺️ Niveau 3<span class="hint-sub">Structure</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Question Libre -->
+        <div class="drawer-input-area">
+            <button class="free-question-toggle" id="freeQuestionToggle">
+                💬 Question libre <span id="questionCounter" class="question-counter">5 restantes</span>
+            </button>
+            <div class="free-question-panel hidden" id="freeQuestionPanel">
+                <div class="chat-input-row">
+                    <input type="text" id="chatInput" placeholder="Pose une question..." />
+                    <button id="chatSendBtn" class="chat-send-btn" aria-label="Envoyer">➤</button>
+                </div>
+            </div>
+            <button id="refreshCorrectionsBtn" class="btn-secondary" style="width:100%;margin-top:6px;font-size:12px;">🔄 Vérifier les corrections</button>
+            <button id="exportEmailBtn" class="btn-secondary export-email-btn">📩 M'envoyer la conv.</button>
+        </div>
+    </div>
+    <!-- Overlay de fond pour fermer le drawer -->
+    <div class="chat-overlay" id="chatOverlay"></div>
+
+    <!-- =========================================================
          LIBRAIRIES
     ========================================================= -->
+    <!-- Marked.js -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- Monaco Editor via RequireJS CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
     <script>
@@ -124,7 +192,6 @@
         });
 
         require(['vs/editor/editor.main'], function() {
-            // Signal pour notre script métier
             document.dispatchEvent(new Event('monacoReady'));
         });
     </script>
