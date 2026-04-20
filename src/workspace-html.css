@@ -1,12 +1,219 @@
 /* =================================================================
    workspace-html.css
-   Styles spécifiques à l'atelier HTML/CSS avec Live Preview
+   Styles : atelier HTML/CSS avec Live Preview + Lobby exercices
 ================================================================= */
 
-/* --- Layout Global --- */
-body {
-    overflow: hidden; /* Empêche le scroll de la page, tout se passe dans les panneaux */
+/* =================================================================
+   LOBBY — Sélecteur d'exercices
+================================================================= */
+
+#lobbyView {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
 }
+
+/* --- Loader --- */
+.lobby-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 20px;
+}
+
+.lobby-loader.hidden { display: none; }
+
+.loader-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--md-sys-color-surface-variant);
+    border-top-color: var(--md-sys-color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loader-text {
+    font-size: 14px;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+/* --- Contenu du lobby --- */
+.lobby-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+}
+
+.lobby-content.hidden { display: none; }
+
+.lobby-header {
+    margin-bottom: 32px;
+}
+
+.lobby-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--md-sys-color-on-surface);
+    margin-bottom: 6px;
+}
+
+.lobby-subtitle {
+    font-size: 15px;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+/* --- Chapitre --- */
+.chapter-block {
+    margin-bottom: 40px;
+}
+
+.chapter-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--md-sys-color-primary);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--md-sys-color-primary-container);
+}
+
+.chapter-icon { font-size: 20px; }
+
+/* --- Grille de cartes --- */
+.exercise-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+/* --- Carte exercice --- */
+.exercise-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: white;
+    border: 1px solid var(--md-sys-color-surface-variant);
+    border-radius: 16px;
+    padding: 20px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    box-shadow: var(--elevation-1);
+    font-family: var(--font-family);
+    min-height: 140px;
+}
+
+.exercise-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,100,147,0.15);
+    border-color: var(--md-sys-color-primary);
+}
+
+.exercise-card:focus-visible {
+    outline: 2px solid var(--md-sys-color-primary);
+    outline-offset: 2px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.card-icon { font-size: 22px; }
+
+.card-badge-aide {
+    font-size: 10px;
+    font-weight: 600;
+    background: #fef9c3;
+    color: #854d0e;
+    padding: 2px 8px;
+    border-radius: 100px;
+}
+
+.card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+    line-height: 1.3;
+}
+
+.card-consigne {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+    line-height: 1.5;
+    flex: 1;
+}
+
+.card-arrow {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--md-sys-color-primary);
+    margin-top: auto;
+}
+
+/* --- État vide --- */
+.lobby-empty {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 15px;
+    line-height: 2;
+}
+
+/* =================================================================
+   WORKSPACE — Bouton retour au lobby
+================================================================= */
+
+#workspaceView { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+#workspaceView.hidden { display: none !important; }
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.btn-back:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+/* =================================================================
+   GLOBAL UTILITY
+================================================================= */
+.hidden { display: none !important; }
+
+/* =================================================================
+   LAYOUT GLOBAL
+================================================================= */
+body {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+
 
 /* --- Top Bar Extensions --- */
 .app-header {

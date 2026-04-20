@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProfAssistant — Atelier HTML/CSS</title>
-    <meta name="description" content="Éditeur en direct HTML & CSS avec aperçu instantané.">
+    <title>ProfAssistant — Atelier HTML/CSS/JS</title>
+    <meta name="description" content="Éditeur en direct HTML, CSS & JavaScript avec aperçu instantané.">
     <link rel="stylesheet" href="./src/style.css">
     <link rel="stylesheet" href="./src/workspace-html.css">
 </head>
 <body>
 
     <!-- =========================================================
-         TOP BAR
+         TOP BAR (toujours visible)
     ========================================================= -->
     <header class="app-header">
         <div class="logo">
             <span>ProfAssistant</span>
-            <span class="header-badge">Atelier HTML/CSS/JS</span>
+            <span class="header-badge" id="headerBadge">Atelier HTML/CSS/JS</span>
         </div>
-        <!-- Switcher de mode -->
         <nav class="mode-switcher" aria-label="Choisir le mode d'éditeur">
             <a href="workspace.html" class="mode-btn" title="Exercice JavaScript pur + Chat tuteur">
                 🧩 Mode JS
@@ -29,7 +28,8 @@
         </nav>
         <div class="user-controls">
             <span id="userEmail"></span>
-            <button id="submitBtn" class="btn-primary" aria-label="Soumettre le code pour correction">
+            <!-- Bouton Soumettre, masqué dans le lobby -->
+            <button id="submitBtn" class="btn-primary hidden" aria-label="Soumettre le code pour correction">
                 📤 Soumettre
             </button>
             <button id="logoutBtn" class="btn-secondary" aria-label="Se déconnecter">Déconnexion</button>
@@ -37,95 +37,117 @@
     </header>
 
     <!-- =========================================================
-         EXERCICE BANNER
+         VUE 1 : LOBBY — Sélecteur d'exercices
     ========================================================= -->
-    <div class="exercise-banner">
-        <div class="exercise-info">
-            <span class="exercise-label">Exercice</span>
-            <h1 id="exerciseTitle">Crée ta première carte de profil en HTML/CSS</h1>
+    <div id="lobbyView">
+
+        <!-- Loader plein écran -->
+        <div class="lobby-loader" id="lobbyLoader" aria-live="polite" aria-label="Chargement des exercices">
+            <div class="loader-spinner"></div>
+            <p class="loader-text">Chargement des exercices...</p>
         </div>
-        <button class="btn-icon" id="toggleInstructionsBtn" title="Afficher/masquer les instructions" aria-expanded="true">
-            📋
-        </button>
+
+        <!-- Contenu du lobby (affiché après chargement) -->
+        <div class="lobby-content hidden" id="lobbyContent">
+            <div class="lobby-header">
+                <h1>Choisis ton exercice</h1>
+                <p class="lobby-subtitle">Travaille à ton rythme, le tuteur IA est là pour t'aider 🚀</p>
+            </div>
+
+            <!-- Les chapitres et cartes sont injectés ici dynamiquement -->
+            <div class="chapters-container" id="chaptersContainer"></div>
+        </div>
+
     </div>
 
     <!-- =========================================================
-         COLLAPSIBLE INSTRUCTIONS
+         VUE 2 : WORKSPACE — Éditeur de code (masqué au départ)
     ========================================================= -->
-    <div class="instructions-bar" id="instructionsBar">
-        <div class="instruction-content" id="exerciseInstructions">
-            <strong>Objectif :</strong> Crée une carte de profil avec ton prénom, une couleur de fond et une bordure arrondie.
-            Elle doit être centrée et avoir une ombre portée.
+    <div id="workspaceView" class="hidden">
+
+        <!-- Bannière exercice avec bouton retour -->
+        <div class="exercise-banner" id="exerciseBanner">
+            <button class="btn-back" id="backToLobbyBtn" title="Retour au choix des exercices">
+                ← Exercices
+            </button>
+            <div class="exercise-info">
+                <span class="exercise-label" id="exerciseChapter">Chapitre</span>
+                <h2 id="exerciseTitle">Chargement...</h2>
+            </div>
+            <button class="btn-icon" id="toggleInstructionsBtn" title="Afficher/masquer la consigne" aria-expanded="true">
+                📋
+            </button>
         </div>
-    </div>
 
-    <!-- =========================================================
-         SPLIT PANE PRINCIPAL
-    ========================================================= -->
-    <main class="split-workspace" id="splitWorkspace">
-
-        <!-- ---- PANNEAU GAUCHE : Éditeurs ---- -->
-        <section class="editor-section" id="editorSection">
-
-            <!-- Barre d'onglets -->
-            <div class="tab-bar" role="tablist">
-                <button class="tab-btn active" role="tab" aria-selected="true"  data-tab="html" id="tab-html">
-                    <span class="tab-icon">🌐</span> HTML
-                </button>
-                <button class="tab-btn" role="tab" aria-selected="false" data-tab="css"  id="tab-css">
-                    <span class="tab-icon">🎨</span> CSS
-                </button>
-                <button class="tab-btn" role="tab" aria-selected="false" data-tab="js"   id="tab-js">
-                    <span class="tab-icon">🧩</span> JavaScript
-                </button>
-                <div class="live-indicator" id="liveIndicator">
-                    <span class="live-dot"></span> Live
-                </div>
+        <!-- Consigne collapsible -->
+        <div class="instructions-bar" id="instructionsBar">
+            <div class="instruction-content" id="exerciseInstructions">
+                <!-- Injecté dynamiquement depuis Firestore -->
             </div>
+        </div>
 
-            <!-- Conteneur des deux éditeurs Monaco -->
-            <div class="editors-container">
-                <div id="html-editor-container" class="monaco-editor-pane" data-lang="html"></div>
-                <div id="css-editor-container"  class="monaco-editor-pane hidden" data-lang="css"></div>
-                <div id="js-editor-container"   class="monaco-editor-pane hidden" data-lang="javascript"></div>
-            </div>
+        <!-- Split pane -->
+        <main class="split-workspace" id="splitWorkspace">
 
-        </section>
-
-        <!-- Poignée de redimensionnement -->
-        <div class="resize-handle" id="resizeHandle" title="Glisser pour redimensionner" role="separator" aria-label="Redimensionner les panneaux"></div>
-
-        <!-- ---- PANNEAU DROIT : Rendu Live ---- -->
-        <section class="preview-section" id="previewSection">
-            <div class="preview-header">
-                <span>🖥️ Aperçu en direct</span>
-                <div style="display:flex;gap:8px;align-items:center;">
-                    <button class="btn-run" id="runCodeBtn" title="Exécuter le code (HTML + CSS + JS)">
-                        ▶️ Exécuter mon code
+            <!-- PANNEAU GAUCHE : Éditeurs -->
+            <section class="editor-section" id="editorSection">
+                <div class="tab-bar" role="tablist">
+                    <button class="tab-btn active" role="tab" aria-selected="true"  data-tab="html" id="tab-html">
+                        <span class="tab-icon">🌐</span> HTML
                     </button>
-                    <button class="btn-icon" id="refreshPreviewBtn" title="Forcer le rechargement">↻</button>
+                    <button class="tab-btn" role="tab" aria-selected="false" data-tab="css" id="tab-css">
+                        <span class="tab-icon">🎨</span> CSS
+                    </button>
+                    <button class="tab-btn" role="tab" aria-selected="false" data-tab="js" id="tab-js">
+                        <span class="tab-icon">🧩</span> JavaScript
+                    </button>
+                    <div class="live-indicator" id="liveIndicator">
+                        <span class="live-dot"></span> Live
+                    </div>
                 </div>
-            </div>
-            <!--
-                SÉCURITÉ CRITIQUE :
-                • sandbox="allow-scripts" : autorise JS dans l'iframe (pour des animations CSS/JS simples de l'élève)
-                • allow-same-origin est INTENTIONNELLEMENT ABSENT pour isoler l'iframe du DOM parent
-                  et empêcher tout accès à Firebase, localStorage, cookies de l'app.
-            -->
-            <iframe
-                id="livePreview"
-                sandbox="allow-scripts"
-                title="Aperçu du code étudiant"
-                aria-label="Zone d'aperçu du rendu HTML/CSS en direct"
-            ></iframe>
-        </section>
 
-    </main>
+                <div class="editors-container">
+                    <div id="html-editor-container" class="monaco-editor-pane" data-lang="html"></div>
+                    <div id="css-editor-container"  class="monaco-editor-pane hidden" data-lang="css"></div>
+                    <div id="js-editor-container"   class="monaco-editor-pane hidden" data-lang="javascript"></div>
+                </div>
+            </section>
+
+            <!-- Poignée de redimensionnement -->
+            <div class="resize-handle" id="resizeHandle" role="separator" aria-label="Redimensionner les panneaux"></div>
+
+            <!-- PANNEAU DROIT : Rendu Live -->
+            <section class="preview-section" id="previewSection">
+                <div class="preview-header">
+                    <span>🖥️ Aperçu en direct</span>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <button class="btn-run" id="runCodeBtn" title="Exécuter le code (HTML + CSS + JS)">
+                            ▶️ Exécuter mon code
+                        </button>
+                        <button class="btn-icon" id="refreshPreviewBtn" title="Recharger l'aperçu">↻</button>
+                    </div>
+                </div>
+                <!--
+                    SÉCURITÉ : sandbox="allow-scripts" uniquement.
+                    allow-same-origin intentionnellement absent → isolation totale de Firebase.
+                -->
+                <iframe
+                    id="livePreview"
+                    sandbox="allow-scripts"
+                    title="Aperçu du rendu étudiant"
+                    aria-label="Zone d'aperçu HTML/CSS/JS en direct"
+                ></iframe>
+            </section>
+
+        </main>
+
+    </div><!-- fin #workspaceView -->
 
     <!-- =========================================================
          FLOATING ACTION BUTTON — Chat & Corrections
+         (affiché uniquement dans le workspace, pas le lobby)
     ========================================================= -->
-    <button class="chat-fab" id="chatFab" aria-label="Ouvrir le tuteur et les corrections">
+    <button class="chat-fab hidden" id="chatFab" aria-label="Ouvrir le tuteur et les corrections">
         💬
         <span class="fab-badge" id="fabBadge" hidden>!</span>
     </button>
@@ -141,21 +163,21 @@
 
         <div class="drawer-messages chat-messages" id="chatMessages">
             <div class="chat-bubble assistant">
-                Bonjour ! Soumets ton atelier pour recevoir des indices et la correction du professeur.
+                Bonjour ! Choisis un exercice pour commencer. Les indices et la correction du professeur apparaîtront ici.
             </div>
         </div>
 
         <!-- Indices Progressifs -->
-        <div class="hints-area">
+        <div class="hints-area" id="hintsArea">
             <div class="hints-label">🆘 Besoin d'aide ?</div>
             <div class="hint-buttons">
-                <button class="hint-btn hint-1" id="hintBtn1" disabled>
+                <button class="hint-btn hint-1" id="hintBtn1" disabled title="Soumets ton code d'abord">
                     💡 Niveau 1<span class="hint-sub">Théorie</span>
                 </button>
-                <button class="hint-btn hint-2" id="hintBtn2" disabled>
+                <button class="hint-btn hint-2" id="hintBtn2" disabled title="Débloqué après Niveau 1">
                     🔍 Niveau 2<span class="hint-sub">Mon code</span>
                 </button>
-                <button class="hint-btn hint-3" id="hintBtn3" disabled>
+                <button class="hint-btn hint-3" id="hintBtn3" disabled title="Débloqué après Niveau 2">
                     🗺️ Niveau 3<span class="hint-sub">Structure</span>
                 </button>
             </div>
@@ -176,27 +198,21 @@
             <button id="exportEmailBtn" class="btn-secondary export-email-btn">📩 M'envoyer la conv.</button>
         </div>
     </div>
-    <!-- Overlay de fond pour fermer le drawer -->
     <div class="chat-overlay" id="chatOverlay"></div>
 
     <!-- =========================================================
          LIBRAIRIES
     ========================================================= -->
-    <!-- Marked.js -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- Monaco Editor via RequireJS CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
     <script>
         require.config({
             paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }
         });
-
         require(['vs/editor/editor.main'], function() {
             document.dispatchEvent(new Event('monacoReady'));
         });
     </script>
-
-    <!-- Script principal (Module ES6 pour les imports Firebase) -->
     <script type="module" src="./src/workspace-html.js"></script>
 
 </body>
