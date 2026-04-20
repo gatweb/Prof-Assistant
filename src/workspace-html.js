@@ -274,8 +274,12 @@ function injectExerciseData(exData) {
     // Consigne (en respectant les sauts de ligne \n)
     if (exerciseInstructionsEl) {
         // Convertir les \n en <br> pour l'affichage HTML
-        exerciseInstructionsEl.innerHTML = (exData.consigne || 'Aucune consigne fournie.')
-            .replace(/\n/g, '<br>');
+        // Chercher aussi avec la classe consigne-body (nouvelle structure)
+        const target = document.getElementById('exerciseInstructions');
+        if (target) {
+            target.innerHTML = (exData.consigne || 'Aucune consigne fournie.')
+                .replace(/\n/g, '<br>');
+        }
     }
 
     // Injecter le code de départ dans l'éditeur JS (si Monaco est prêt)
@@ -667,51 +671,66 @@ if (submitBtn) {
 
         const userEmail = userEmailEl?.textContent || 'inconnu@test.com';
         const orig = submitBtn.textContent;
-        submitBtn.textContent = "📤 Envoi...";
+        submitBtn.textContent = "⏳ Correction IA...";
         submitBtn.disabled = true;
 
+        // Code combiné pour l'analyse Gemini (HTML + CSS + JS)
+        const codeEleve = `<!-- HTML -->\n${htmlEditor.getValue()}\n\n/* CSS */\n${cssEditor.getValue()}\n\n// JavaScript\n${jsEditor.getValue()}`;
+
         try {
-            const submissionData = {
-                type: 'html_css_js',
-                exercice_id: currentExercice.id,
-                titre_exercice: currentExercice.titre || 'Exercice',
-                chapitre: currentExercice.chapitre || '',
-                code_html: htmlEditor.getValue(),
-                code_css:  cssEditor.getValue(),
-                code_js:   jsEditor.getValue(),
-                code_eleve: `<!-- HTML -->\n${htmlEditor.getValue()}\n\n/* CSS */\n${cssEditor.getValue()}\n\n// JS\n${jsEditor.getValue()}`,
+            // ✅ Appel à la Cloud Function corrigerDevoir
+            // Elle : analyse le code avec Gemini → écrit dans Firestore → retourne docId + évaluation
+            const corrigeFn = httpsCallable(functions, 'corrigerDevoir');
+            const response = await corrigeFn({
+                // Champs requis par corrigerDevoir
+                code_eleve:        codeEleve,
                 consigne_exercice: currentExercice.consigne || '',
-                email_eleve: userEmail,
-                nom_eleve: userEmail.split('@')[0],
-                status: 'a_valider',
-                indices_utilises: { niv1: 0, niv2: 0, niv3: 0 },
-                questions_libres: 0,
-                date_soumission: new Date().toISOString()
-            };
+                nom_eleve:         userEmail.split('@')[0],
+                // Champs supplémentaires (persistés dans le doc Firestore)
+                type:              'html_css_js',
+                exercice_id:       currentExercice.id,
+                titre_exercice:    currentExercice.titre || 'Exercice',
+                chapitre:          currentExercice.chapitre || '',
+                code_html:         htmlEditor.getValue(),
+                code_css:          cssEditor.getValue(),
+                code_js:           jsEditor.getValue(),
+            });
 
-            const docRef = await addDoc(collection(db, 'submissions'), submissionData);
+            const docId    = response.data.docId;
+            const evalIA   = response.data.evaluation;
 
-            // Activer les indices et le tracking
-            hintState.currentDocId  = docRef.id;
-            hintState.currentCode   = submissionData.code_eleve;
+            // Activer les indices et le tracking maintenant qu'on a le docId
+            hintState.currentDocId  = docId;
+            hintState.currentCode   = codeEleve;
             updateHintButtons();
 
-            localStorage.setItem('pendingHtmlDocId', docRef.id);
-            listenForProfFeedback(docRef.id);
+            localStorage.setItem('pendingHtmlDocId', docId);
+            listenForProfFeedback(docId);
 
-            appendMessage("📬 Ton code a bien été soumis ! Le professeur va le corriger. Tu peux désormais utiliser les indices si tu bloques.", 'assistant', 'Tuteur IA');
+            // Afficher le feedback IA immédiat dans le drawer
+            if (evalIA?.feedback_eleve) {
+                appendMessage(
+                    `✨ **Indice de l'IA**\n\n${evalIA.feedback_eleve}\n\n_Le professeur va valider ta copie..._`,
+                    'assistant', 'Tuteur IA'
+                );
+            } else {
+                appendMessage("📬 Ton code a bien été soumis ! Le professeur va le corriger.", 'assistant', 'Tuteur IA');
+            }
+
             openDrawer();
-
             submitBtn.textContent = "✅ Soumis !";
             setTimeout(() => { submitBtn.textContent = orig; submitBtn.disabled = false; }, 3000);
 
         } catch (error) {
-            console.error('[Submit]', error);
+            console.error('[Submit] Erreur Cloud Function :', error);
+            appendMessage("❌ Erreur lors de l'envoi. Vérifie ta connexion et réessaie.", 'assistant', 'Tuteur IA');
+            openDrawer();
             submitBtn.textContent = "❌ Erreur";
             setTimeout(() => { submitBtn.textContent = orig; submitBtn.disabled = false; }, 3000);
         }
     });
 }
+
 
 // ============================================================
 // 13. ÉCOUTE FEEDBACK PROFESSEUR (temps réel)

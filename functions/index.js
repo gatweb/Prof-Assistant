@@ -81,6 +81,15 @@ Structure JSON attendue (uniquement ce JSON, rien d'autre) :
             note_suggeree: jsonEvaluation.note_suggeree || 0,
             erreurs_detectees: jsonEvaluation.erreurs_detectees || [],
             titre_exercice: request.data.titre_exercice || "Exercice",
+            // Champs supplémentaires (atelier HTML/CSS/JS)
+            type: request.data.type || "js",
+            exercice_id: request.data.exercice_id || null,
+            chapitre: request.data.chapitre || "",
+            code_html: request.data.code_html || null,
+            code_css:  request.data.code_css  || null,
+            code_js:   request.data.code_js   || null,
+            indices_utilises: { niv1: 0, niv2: 0, niv3: 0 },
+            questions_libres: 0,
             date_soumission: new Date().toISOString()
         };
         

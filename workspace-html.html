@@ -74,15 +74,23 @@
                 <span class="exercise-label" id="exerciseChapter">Chapitre</span>
                 <h2 id="exerciseTitle">Chargement...</h2>
             </div>
-            <button class="btn-icon" id="toggleInstructionsBtn" title="Afficher/masquer la consigne" aria-expanded="true">
+            <button class="btn-icon btn-show-consigne" id="toggleInstructionsBtn" title="Afficher/masquer la consigne" aria-expanded="true">
                 📋
             </button>
         </div>
 
         <!-- Consigne collapsible -->
         <div class="instructions-bar" id="instructionsBar">
-            <div class="instruction-content" id="exerciseInstructions">
-                <!-- Injecté dynamiquement depuis Firestore -->
+            <div class="consigne-panel">
+                <!-- En-tête de la consigne -->
+                <div class="consigne-header">
+                    <span class="consigne-tag">📋 Consigne</span>
+                    <button class="btn-icon consigne-close-btn" id="toggleInstructionsBtn" title="Masquer la consigne" aria-expanded="true">✕</button>
+                </div>
+                <!-- Corps de la consigne (injecté dynamiquement) -->
+                <div class="consigne-body" id="exerciseInstructions">
+                    Charge un exercice pour voir la consigne ici.
+                </div>
             </div>
         </div>
 

@@ -289,21 +289,21 @@ body {
     display: block;
 }
 
-.exercise-banner h1 {
+.exercise-banner h1,
+.exercise-banner h2 {
     font-size: 15px;
     font-weight: 600;
     color: white;
     margin: 0;
 }
 
-/* --- Instructions collapsibles --- */
+/* --- Panneau Consigne (collapsible) --- */
 .instructions-bar {
-    background: var(--md-sys-color-primary-container);
-    color: var(--md-sys-color-on-primary-container);
-    border-bottom: 1px solid rgba(0,0,0,0.08);
+    background: white;
+    border-bottom: 2px solid var(--md-sys-color-primary-container);
     overflow: hidden;
-    max-height: 80px;
-    transition: max-height 0.3s ease;
+    max-height: 200px;        /* Espace généreux pour lire la consigne */
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     flex-shrink: 0;
 }
 
@@ -311,11 +311,71 @@ body {
     max-height: 0;
 }
 
+/* Bloc interne avec padding */
+.consigne-panel {
+    padding: 0 20px 14px;
+}
+
+/* En-tête : label + bouton fermer */
+.consigne-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0 8px;
+    border-bottom: 1px solid var(--md-sys-color-surface-variant);
+    margin-bottom: 12px;
+}
+
+.consigne-tag {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--md-sys-color-primary);
+}
+
+.consigne-close-btn {
+    font-size: 14px !important;
+    padding: 2px 6px !important;
+    color: var(--md-sys-color-on-surface-variant) !important;
+    opacity: 0.6;
+}
+.consigne-close-btn:hover { opacity: 1; }
+
+/* Corps de la consigne */
+.consigne-body {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--md-sys-color-on-surface);
+    max-height: 130px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+/* Scrollbar discrète dans la consigne */
+.consigne-body::-webkit-scrollbar { width: 4px; }
+.consigne-body::-webkit-scrollbar-track { background: transparent; }
+.consigne-body::-webkit-scrollbar-thumb { background: var(--md-sys-color-outline); border-radius: 2px; }
+
+/* bouton 📋 dans la bannière — devient "Voir la consigne" */
+.btn-show-consigne {
+    font-size: 16px !important;
+    background: rgba(255,255,255,0.15) !important;
+    border-radius: 8px !important;
+    padding: 4px 10px !important;
+    color: white !important;
+}
+.btn-show-consigne:hover {
+    background: rgba(255,255,255,0.25) !important;
+}
+
+/* Compatibilité : ancien .instruction-content */
 .instruction-content {
     padding: 10px 20px;
     font-size: 13px;
-    line-height: 1.5;
+    line-height: 1.6;
 }
+
 
 /* --- Split Workspace --- */
 .split-workspace {
