@@ -56,7 +56,7 @@ Structure JSON attendue (uniquement ce JSON, rien d'autre) :
             }
         });
 
-        const responseText = response.text();
+        const responseText = response.text;
         console.log("[corrigerDevoir] Réponse brute Gemini :", responseText.substring(0, 200));
 
         // Extraction robuste du JSON (gère les backticks éventuels)
@@ -156,7 +156,7 @@ Cours actuel : ${id_cours || 'javascript'}`,
             }
         });
 
-        return { reponse: response.text() };
+        return { reponse: response.text };
 
     } catch (error) {
         console.error("[interrogerTuteur] Erreur :", error);
@@ -227,7 +227,7 @@ Ne complète pas les blancs. L'élève doit trouver ce qui va à chaque endroit.
             config: { temperature: 0.5 }
         });
 
-        const reponse = response.text();
+        const reponse = response.text;
 
         // Tracking Firestore : incrémente le compteur du bon niveau
         if (doc_id) {
