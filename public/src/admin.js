@@ -98,15 +98,19 @@ window.openDetailView = (id) => {
     
     currentViewingCopyId = id;
 
-    // Transition d'UI
-    listView.classList.add('hidden');
-    detailView.classList.remove('hidden');
-
-    // Injection des données
+    // 1. Charger les données dans l'UI
     document.getElementById('detailStudentName').textContent = "Copie de : " + (copy.nom_eleve || "Anonyme");
     document.getElementById('detailExerciseName').textContent = copy.titre_exercice || "Exercice Inconnu";
     document.getElementById('feedbackIaInput').value = copy.feedback_ia || "";
     document.getElementById('scoreInput').value = copy.note_suggeree || 0;
+    
+    // Masquer les onglets pendant la correction pour maximiser l'espace
+    const tabs = document.querySelector('.admin-tabs-container');
+    if (tabs) tabs.classList.add('hidden');
+
+    // 2. Basculer l'affichage
+    listView.classList.add('hidden');
+    detailView.classList.remove('hidden');
     
     // Statistiques d'autonomie (indices utilisés + questions libres)
     const indices = copy.indices_utilises || {};
@@ -124,11 +128,19 @@ window.openDetailView = (id) => {
     }
 };
 
-document.getElementById('backToListBtn').addEventListener('click', () => {
-    detailView.classList.add('hidden');
-    listView.classList.remove('hidden');
-    currentViewingCopyId = null;
-});
+const backBtn = document.getElementById('backToListBtn');
+if(backBtn) {
+    backBtn.addEventListener('click', () => {
+        detailView.classList.add('hidden');
+        listView.classList.remove('hidden');
+        
+        // Réafficher les onglets
+        const tabs = document.querySelector('.admin-tabs-container');
+        if (tabs) tabs.classList.remove('hidden');
+        
+        currentViewingCopyId = null;
+    });
+}
 
 // ============================================
 // 3. Outil de Génération de Tests (DEV ONLY)
@@ -282,6 +294,11 @@ async function processAction(newStatus) {
         // 2. Retour à la liste
         detailView.classList.add('hidden');
         listView.classList.remove('hidden');
+        
+        // S'assurer que les onglets sont visibles (au cas où on était en split screen)
+        const tabs = document.querySelector('.admin-tabs-container');
+        if (tabs) tabs.classList.remove('hidden');
+        
         currentViewingCopyId = null;
 
         // Vider le message prof pour la prochaine copie

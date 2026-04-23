@@ -1,0 +1,261 @@
+/* Styles pour le Suivi de Progression & Matrice */
+
+.admin-tabs-container {
+    background-color: var(--md-sys-color-surface);
+    border-bottom: 1px solid var(--md-sys-color-outline);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.tabs {
+    display: flex;
+    gap: 24px;
+}
+
+.tab-link {
+    background: none;
+    border: none;
+    padding: 16px 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
+    cursor: pointer;
+    position: relative;
+    transition: color 0.3s;
+}
+
+.tab-link:hover {
+    color: var(--md-sys-color-primary);
+}
+
+.tab-link.active {
+    color: var(--md-sys-color-primary);
+}
+
+.tab-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: var(--md-sys-color-primary);
+    border-radius: 3px 3px 0 0;
+}
+
+.subtitle {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+/* Matrice de progression */
+.progression-matrix-wrapper {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--elevation-1);
+    overflow: hidden;
+    border: 1px solid var(--md-sys-color-outline);
+}
+
+.matrix-scroll-container {
+    overflow: auto;
+    max-height: calc(100vh - 250px);
+}
+
+.progression-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+}
+
+/* Sticky Headers & Columns */
+.progression-table th, 
+.progression-table .sticky-col {
+    position: sticky;
+    background: var(--md-sys-color-surface-variant);
+    z-index: 2;
+}
+
+.progression-table thead tr:first-child th {
+    top: 0;
+    z-index: 3;
+}
+
+.progression-table thead tr:last-child th {
+    top: 44px; /* Ajuster selon hauteur du premier header */
+    z-index: 3;
+}
+
+.progression-table .sticky-col {
+    left: 0;
+    z-index: 4;
+    border-right: 2px solid var(--md-sys-color-outline);
+    background: white;
+}
+
+.progression-table thead .sticky-col {
+    z-index: 5;
+}
+
+/* Table styling */
+.progression-table th {
+    padding: 12px 16px;
+    text-align: center;
+    border-right: 1px solid var(--md-sys-color-outline);
+    border-bottom: 1px solid var(--md-sys-color-outline);
+    white-space: nowrap;
+}
+
+.progression-table td {
+    padding: 8px;
+    text-align: center;
+    border-right: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    min-width: 100px;
+}
+
+.progression-table .student-row:hover .sticky-col {
+    background-color: var(--md-sys-color-surface-variant);
+}
+
+.progression-table .student-row:hover td {
+    background-color: #f8fbff;
+}
+
+.chapter-header {
+    background-color: var(--md-sys-color-primary-container) !important;
+    color: var(--md-sys-color-on-primary-container) !important;
+    cursor: pointer;
+    transition: filter 0.2s;
+}
+
+.chapter-header:hover {
+    filter: brightness(0.95);
+}
+
+/* Badges de statut dans la grille */
+.status-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.status-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: white;
+}
+
+.status-dot.valide { background-color: #2e7d32; }
+.status-dot.a_valider { 
+    background-color: #1565c0; 
+    animation: pulse-blue 2s infinite;
+}
+.status-dot.en_cours { background-color: #ef6c00; }
+.status-dot.brouillon { background-color: #9e9e9e; }
+
+.note-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.avg-col {
+    font-weight: bold;
+    color: var(--md-sys-color-primary);
+    background: #f0f7ff !important;
+}
+
+@keyframes pulse-blue {
+    0% { box-shadow: 0 0 0 0 rgba(21, 101, 192, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(21, 101, 192, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(21, 101, 192, 0); }
+}
+
+/* Modale */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 500px;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.modal-header {
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--md-sys-color-outline);
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.stat-card {
+    background: var(--md-sys-color-surface-variant);
+    padding: 16px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: var(--md-sys-color-primary);
+}
+
+.tags-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.loader-placeholder {
+    padding: 64px;
+    text-align: center;
+    color: var(--md-sys-color-on-surface-variant);
+    font-style: italic;
+}

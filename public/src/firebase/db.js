@@ -15,6 +15,28 @@ export const getSubmissionsToGrade = async () => {
     return submissions;
 };
 
+// Récupérer TOUTES les soumissions (pour la matrice de progression)
+export const getAllSubmissions = async () => {
+    const q = collection(db, "submissions");
+    const querySnapshot = await getDocs(q);
+    const submissions = [];
+    querySnapshot.forEach((doc) => {
+        submissions.push({ id: doc.id, ...doc.data() });
+    });
+    return submissions;
+};
+
+// Récupérer TOUS les exercices (pour les colonnes de la matrice)
+export const getAllExercises = async () => {
+    const q = collection(db, "exercices");
+    const querySnapshot = await getDocs(q);
+    const exercices = [];
+    querySnapshot.forEach((doc) => {
+        exercices.push({ id: doc.id, ...doc.data() });
+    });
+    return exercices;
+};
+
 // CRUD : Mettre à jour le statut, feedback et note
 export const updateSubmissionStatus = async (id, status, feedbackIa, note, profMessage = null) => {
     const docRef = doc(db, "submissions", id);

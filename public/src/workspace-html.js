@@ -25,70 +25,70 @@ import { db } from './firebase/db.js';
 // 1. RÉFÉRENCES DOM
 // ============================================================
 // Layout
-const lobbyView             = document.getElementById('lobbyView');
-const lobbyLoader           = document.getElementById('lobbyLoader');
-const lobbyContent          = document.getElementById('lobbyContent');
-const chaptersContainer     = document.getElementById('chaptersContainer');
-const workspaceView         = document.getElementById('workspaceView');
-const backToLobbyBtn        = document.getElementById('backToLobbyBtn');
+const lobbyView = document.getElementById('lobbyView');
+const lobbyLoader = document.getElementById('lobbyLoader');
+const lobbyContent = document.getElementById('lobbyContent');
+const chaptersContainer = document.getElementById('chaptersContainer');
+const workspaceView = document.getElementById('workspaceView');
+const backToLobbyBtn = document.getElementById('backToLobbyBtn');
 
 // Header workspace
-const userEmailEl           = document.getElementById('userEmail');
-const logoutBtn             = document.getElementById('logoutBtn');
-const submitBtn             = document.getElementById('submitBtn');
-const exerciseTitleEl       = document.getElementById('exerciseTitle');
-const exerciseChapterEl     = document.getElementById('exerciseChapter');
+const userEmailEl = document.getElementById('userEmail');
+const logoutBtn = document.getElementById('logoutBtn');
+const submitBtn = document.getElementById('submitBtn');
+const exerciseTitleEl = document.getElementById('exerciseTitle');
+const exerciseChapterEl = document.getElementById('exerciseChapter');
 const exerciseInstructionsEl = document.getElementById('exerciseInstructions');
 const toggleInstructionsBtn = document.getElementById('toggleInstructionsBtn');
-const instructionsBar       = document.getElementById('instructionsBar');
+const instructionsBar = document.getElementById('instructionsBar');
 
 // Éditeur
-const runCodeBtn            = document.getElementById('runCodeBtn');
-const refreshPreviewBtn     = document.getElementById('refreshPreviewBtn');
-const livePreview           = document.getElementById('livePreview');
-const liveIndicator         = document.getElementById('liveIndicator');
-const tabButtons            = document.querySelectorAll('.tab-btn');
-const htmlEditorContainer   = document.getElementById('html-editor-container');
-const cssEditorContainer    = document.getElementById('css-editor-container');
-const jsEditorContainer     = document.getElementById('js-editor-container');
-const resizeHandle          = document.getElementById('resizeHandle');
-const editorSection         = document.getElementById('editorSection');
-const splitWorkspace        = document.getElementById('splitWorkspace');
+const runCodeBtn = document.getElementById('runCodeBtn');
+const refreshPreviewBtn = document.getElementById('refreshPreviewBtn');
+const livePreview = document.getElementById('livePreview');
+const liveIndicator = document.getElementById('liveIndicator');
+const tabButtons = document.querySelectorAll('.tab-btn');
+const htmlEditorContainer = document.getElementById('html-editor-container');
+const cssEditorContainer = document.getElementById('css-editor-container');
+const jsEditorContainer = document.getElementById('js-editor-container');
+const resizeHandle = document.getElementById('resizeHandle');
+const editorSection = document.getElementById('editorSection');
+const splitWorkspace = document.getElementById('splitWorkspace');
 
 // Chat Drawer
-const chatFab               = document.getElementById('chatFab');
-const chatDrawer            = document.getElementById('chatDrawer');
-const chatDrawerClose       = document.getElementById('chatDrawerClose');
-const chatOverlay           = document.getElementById('chatOverlay');
-const chatMessages          = document.getElementById('chatMessages');
-const fabBadge              = document.getElementById('fabBadge');
-const hintBtn1              = document.getElementById('hintBtn1');
-const hintBtn2              = document.getElementById('hintBtn2');
-const hintBtn3              = document.getElementById('hintBtn3');
-const freeQuestionToggle    = document.getElementById('freeQuestionToggle');
-const freeQuestionPanel     = document.getElementById('freeQuestionPanel');
-const questionCounter       = document.getElementById('questionCounter');
-const chatInput             = document.getElementById('chatInput');
-const chatSendBtn           = document.getElementById('chatSendBtn');
+const chatFab = document.getElementById('chatFab');
+const chatDrawer = document.getElementById('chatDrawer');
+const chatDrawerClose = document.getElementById('chatDrawerClose');
+const chatOverlay = document.getElementById('chatOverlay');
+const chatMessages = document.getElementById('chatMessages');
+const fabBadge = document.getElementById('fabBadge');
+const hintBtn1 = document.getElementById('hintBtn1');
+const hintBtn2 = document.getElementById('hintBtn2');
+const hintBtn3 = document.getElementById('hintBtn3');
+const freeQuestionToggle = document.getElementById('freeQuestionToggle');
+const freeQuestionPanel = document.getElementById('freeQuestionPanel');
+const questionCounter = document.getElementById('questionCounter');
+const chatInput = document.getElementById('chatInput');
+const chatSendBtn = document.getElementById('chatSendBtn');
 const refreshCorrectionsBtn = document.getElementById('refreshCorrectionsBtn');
-const exportEmailBtn        = document.getElementById('exportEmailBtn');
+const exportEmailBtn = document.getElementById('exportEmailBtn');
 
 // Console intégrée
-const consolePanel         = document.getElementById('consolePanel');
-const consoleOutput        = document.getElementById('consoleOutput');
-const consoleCount         = document.getElementById('consoleCount');
-const clearConsoleBtn      = document.getElementById('clearConsoleBtn');
-const consoleResizeHandle  = document.getElementById('consoleResizeHandle');
+const consolePanel = document.getElementById('consolePanel');
+const consoleOutput = document.getElementById('consoleOutput');
+const consoleCount = document.getElementById('consoleCount');
+const clearConsoleBtn = document.getElementById('clearConsoleBtn');
+const consoleResizeHandle = document.getElementById('consoleResizeHandle');
 let consoleLineCount = 0;
-let consoleHasError  = false;
+let consoleHasError = false;
 
 // ============================================================
 // 2. ÉTAT GLOBAL
 // ============================================================
 const MAX_QUESTIONS = 5;
-let activeTab        = 'html';
-let chatHistory      = [];
-let currentExercice  = null;  // Données de l'exercice courant (depuis Firestore)
+let activeTab = 'html';
+let chatHistory = [];
+let currentExercice = null;  // Données de l'exercice courant (depuis Firestore)
 let profFeedbackUnsub = null;
 
 let hintState = {
@@ -198,8 +198,8 @@ async function loadLobby() {
 
             exercices.forEach(ex => {
                 const submission = submissionsByExercice[ex.id];
-                const status     = submission?.status || null;
-                const hasHints   = ex.statut_aide !== false;
+                const status = submission?.status || null;
+                const hasHints = ex.statut_aide !== false;
 
                 // Déterminer l'état visuel de la carte
                 let cardClass = 'exercise-card';
@@ -324,7 +324,7 @@ async function openExercise(exerciceId) {
  */
 function injectExerciseData(exData) {
     // Titre et chapitre dans la bannière
-    if (exerciseTitleEl)   exerciseTitleEl.textContent   = exData.titre || 'Exercice sans titre';
+    if (exerciseTitleEl) exerciseTitleEl.textContent = exData.titre || 'Exercice sans titre';
     if (exerciseChapterEl) exerciseChapterEl.textContent = exData.chapitre || 'Exercice';
 
     // Consigne (en respectant les sauts de ligne \n)
@@ -382,9 +382,9 @@ if (backToLobbyBtn) {
 // ============================================================
 // 5. MONACO — 3 éditeurs indépendants
 // ============================================================
-let htmlEditor    = null;
-let cssEditor     = null;
-let jsEditor      = null;
+let htmlEditor = null;
+let cssEditor = null;
+let jsEditor = null;
 let pendingCodeDepart = null; // Code à injecter dès que Monaco est prêt
 
 const DEFAULT_HTML = `<!-- Ton HTML ici -->
@@ -430,7 +430,7 @@ document.addEventListener('monacoReady', () => {
 
     // Live Reload HTML/CSS uniquement — JS = manuel uniquement
     htmlEditor.onDidChangeModelContent(() => scheduleRender());
-    cssEditor.onDidChangeModelContent(()  => scheduleRender());
+    cssEditor.onDidChangeModelContent(() => scheduleRender());
 
     // Si un code de départ attendait Monaco
     if (pendingCodeDepart) {
@@ -499,7 +499,7 @@ function buildDocument(html, css, jsCode) {
     return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>*,*::before,*::after{box-sizing:border-box;}${css}</style></head><body>${html}${consoleInterceptor}${scriptBlock}</body></html>`;
 }
 
-if (runCodeBtn)        runCodeBtn.addEventListener('click', executeAllCode);
+if (runCodeBtn) runCodeBtn.addEventListener('click', executeAllCode);
 if (refreshPreviewBtn) refreshPreviewBtn.addEventListener('click', renderPreview);
 
 // ============================================================
@@ -512,8 +512,8 @@ function switchTab(targetTab) {
         b.setAttribute('aria-selected', b.dataset.tab === targetTab);
     });
     htmlEditorContainer.classList.toggle('hidden', targetTab !== 'html');
-    cssEditorContainer.classList.toggle('hidden',  targetTab !== 'css');
-    jsEditorContainer.classList.toggle('hidden',   targetTab !== 'js');
+    cssEditorContainer.classList.toggle('hidden', targetTab !== 'css');
+    jsEditorContainer.classList.toggle('hidden', targetTab !== 'js');
 
     const indicator = liveIndicator;
     if (indicator) {
@@ -527,8 +527,8 @@ function switchTab(targetTab) {
     }
 
     if (targetTab === 'html' && htmlEditor) htmlEditor.layout();
-    if (targetTab === 'css'  && cssEditor)  cssEditor.layout();
-    if (targetTab === 'js'   && jsEditor)   jsEditor.layout();
+    if (targetTab === 'css' && cssEditor) cssEditor.layout();
+    if (targetTab === 'js' && jsEditor) jsEditor.layout();
 }
 
 tabButtons.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
@@ -559,7 +559,7 @@ document.addEventListener('mousemove', (e) => {
     const rect = splitWorkspace.getBoundingClientRect();
     const w = Math.max(200, Math.min(rect.width - 206, e.clientX - rect.left));
     editorSection.style.width = `${w}px`;
-    editorSection.style.flex  = 'none';
+    editorSection.style.flex = 'none';
     htmlEditor?.layout(); cssEditor?.layout(); jsEditor?.layout();
 });
 
@@ -621,9 +621,9 @@ const closeDrawer = () => {
     chatOverlay.classList.remove('visible');
 };
 
-if (chatFab)         chatFab.addEventListener('click', openDrawer);
+if (chatFab) chatFab.addEventListener('click', openDrawer);
 if (chatDrawerClose) chatDrawerClose.addEventListener('click', closeDrawer);
-if (chatOverlay)     chatOverlay.addEventListener('click', closeDrawer);
+if (chatOverlay) chatOverlay.addEventListener('click', closeDrawer);
 
 // ============================================================
 // 10. INDICES PROGRESSIFS — Depuis Firestore (pas de Cloud Function)
@@ -633,19 +633,19 @@ function updateHintButtons() {
 
     // Les indices viennent du document Firestore de l'exercice
     const hasStatutAide = currentExercice?.statut_aide !== false;
-    const hasIndices    = !!hintState.indices;
+    const hasIndices = !!hintState.indices;
 
     // N1 : disponible si exercice chargé et aide activée
     hintBtn1.disabled = !currentExercice || !hasStatutAide || !hintState.indices?.niv1;
-    hintBtn1.title    = !currentExercice ? "Choisis un exercice d'abord." : (!hasStatutAide ? "L'aide est désactivée." : "Indice théorique");
+    hintBtn1.title = !currentExercice ? "Choisis un exercice d'abord." : (!hasStatutAide ? "L'aide est désactivée." : "Indice théorique");
 
     // N2 : débloqué après N1
     hintBtn2.disabled = !hintState.niv1Used || !hintState.indices?.niv2;
-    hintBtn2.title    = hintState.niv1Used ? "Analyser mon code" : "🔒 Consulte le Niveau 1 d'abord";
+    hintBtn2.title = hintState.niv1Used ? "Analyser mon code" : "🔒 Consulte le Niveau 1 d'abord";
 
     // N3 : débloqué après N2
     hintBtn3.disabled = !hintState.niv2Used || !hintState.indices?.niv3;
-    hintBtn3.title    = hintState.niv2Used ? "Obtenir la structure" : "🔒 Consulte le Niveau 2 d'abord";
+    hintBtn3.title = hintState.niv2Used ? "Obtenir la structure" : "🔒 Consulte le Niveau 2 d'abord";
 }
 
 /**
@@ -667,7 +667,7 @@ function showStaticHint(niveau) {
     if (hintState.currentDocId) {
         updateDoc(doc(db, "submissions", hintState.currentDocId), {
             [`indices_utilises.niv${niveau}`]: (hintState[`niv${niveau}Count`] = (hintState[`niv${niveau}Count`] || 0) + 1)
-        }).catch(() => {});
+        }).catch(() => { });
     }
 
     updateHintButtons();
@@ -711,7 +711,7 @@ const sendFreeQuestion = async () => {
     if (hintState.currentDocId) {
         updateDoc(doc(db, "submissions", hintState.currentDocId), {
             questions_libres: MAX_QUESTIONS - hintState.questionsLeft
-        }).catch(() => {});
+        }).catch(() => { });
     }
     if (hintState.questionsLeft <= 0 && freeQuestionPanel) freeQuestionPanel.classList.add('hidden');
 
@@ -736,7 +736,7 @@ const sendFreeQuestion = async () => {
 };
 
 if (chatSendBtn) chatSendBtn.addEventListener('click', sendFreeQuestion);
-if (chatInput)   chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendFreeQuestion(); });
+if (chatInput) chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendFreeQuestion(); });
 
 // ============================================================
 // 12. SOUMISSION FIRESTORE
@@ -748,11 +748,11 @@ if (submitBtn) {
 
         const userEmail = userEmailEl?.textContent || 'inconnu@test.com';
         const orig = submitBtn.textContent;
-        submitBtn.textContent = "⏳ Correction IA...";
+        submitBtn.textContent = "⏳ Envoi pour correction...";
         submitBtn.disabled = true;
 
         // Code combiné pour l'analyse Gemini (HTML + CSS + JS)
-        const codeEleve = `<!-- HTML -->\n${htmlEditor.getValue()}\n\n/* CSS */\n${cssEditor.getValue()}\n\n// JavaScript\n${jsEditor.getValue()}`;
+        const codeEleve = `<!-- HTML -->cn${htmlEditor.getValue()}\n\n/* CSS */\n${cssEditor.getValue()}\n\n// JavaScript\n${jsEditor.getValue()}`;
 
         try {
             // ✅ Appel à la Cloud Function corrigerDevoir
@@ -760,25 +760,25 @@ if (submitBtn) {
             const corrigeFn = httpsCallable(functions, 'corrigerDevoir');
             const response = await corrigeFn({
                 // Champs requis par corrigerDevoir
-                code_eleve:        codeEleve,
+                code_eleve: codeEleve,
                 consigne_exercice: currentExercice.consigne || '',
-                nom_eleve:         userEmail.split('@')[0],
+                nom_eleve: userEmail.split('@')[0],
                 // Champs supplémentaires (persistés dans le doc Firestore)
-                type:              'html_css_js',
-                exercice_id:       currentExercice.id,
-                titre_exercice:    currentExercice.titre || 'Exercice',
-                chapitre:          currentExercice.chapitre || '',
-                code_html:         htmlEditor.getValue(),
-                code_css:          cssEditor.getValue(),
-                code_js:           jsEditor.getValue(),
+                type: 'html_css_js',
+                exercice_id: currentExercice.id,
+                titre_exercice: currentExercice.titre || 'Exercice',
+                chapitre: currentExercice.chapitre || '',
+                code_html: htmlEditor.getValue(),
+                code_css: cssEditor.getValue(),
+                code_js: jsEditor.getValue(),
             });
 
-            const docId    = response.data.docId;
-            const evalIA   = response.data.evaluation;
+            const docId = response.data.docId;
+            const evalIA = response.data.evaluation;
 
             // Activer les indices et le tracking maintenant qu'on a le docId
-            hintState.currentDocId  = docId;
-            hintState.currentCode   = codeEleve;
+            hintState.currentDocId = docId;
+            hintState.currentCode = codeEleve;
             updateHintButtons();
 
             localStorage.setItem('pendingHtmlDocId', docId);
@@ -822,10 +822,10 @@ function listenForProfFeedback(docId) {
 
         // Gère les deux nomenclatures : ancienne (publie/brouillon) et nouvelle (valide/en_cours)
         const isValidated = data.status === 'valide' || data.status === 'publie';
-        const isRevision  = data.status === 'en_cours' || data.status === 'brouillon';
+        const isRevision = data.status === 'en_cours' || data.status === 'brouillon';
 
         if (isValidated || isRevision) {
-            const icon  = isValidated ? '✅' : '🔄';
+            const icon = isValidated ? '✅' : '🔄';
             const title = isValidated
                 ? `**Exercice validé — Note : ${data.note_suggeree || 0}/100**`
                 : `**Le professeur te demande des corrections**`;
@@ -873,7 +873,7 @@ if (refreshCorrectionsBtn) {
                         listenForProfFeedback(pendingDocId);
                     }
                 }
-            } catch(e) { console.error('[Refresh]', e); }
+            } catch (e) { console.error('[Refresh]', e); }
         } else {
             appendMessage('📭 Aucune correction en attente.', 'assistant', 'Tuteur IA');
         }
@@ -893,7 +893,7 @@ if (exportEmailBtn) {
         try {
             let html = '<h2>Aide de révision</h2>';
             chatMessages.querySelectorAll('.chat-bubble').forEach(msg => {
-                const sender  = msg.querySelector('.chat-sender-name')?.textContent || 'Moi';
+                const sender = msg.querySelector('.chat-sender-name')?.textContent || 'Moi';
                 const content = msg.querySelector('.chat-bubble-content')?.textContent || msg.textContent;
                 html += `<p><strong>${sender} :</strong> ${content}</p>`;
             });
@@ -902,7 +902,7 @@ if (exportEmailBtn) {
                 message: { subject: 'Révision Atelier HTML/CSS/JS', html }
             });
             exportEmailBtn.textContent = '✅ Envoyé';
-        } catch(e) { exportEmailBtn.textContent = '❌ Erreur'; }
+        } catch (e) { exportEmailBtn.textContent = '❌ Erreur'; }
         setTimeout(() => { exportEmailBtn.textContent = orig; exportEmailBtn.disabled = false; }, 4000);
     });
 }
@@ -919,7 +919,7 @@ function clearConsole(silent = false) {
     if (!consoleOutput) return;
     consoleOutput.innerHTML = '';
     consoleLineCount = 0;
-    consoleHasError  = false;
+    consoleHasError = false;
     if (consoleCount) {
         consoleCount.hidden = true;
         consoleCount.textContent = '0';
@@ -992,22 +992,22 @@ if (clearConsoleBtn) {
 // ============================================================
 if (consoleResizeHandle && consolePanel) {
     let isDragging = false;
-    let startY     = 0;
-    let startH     = 0;
+    let startY = 0;
+    let startH = 0;
 
     consoleResizeHandle.addEventListener('mousedown', (e) => {
         isDragging = true;
         startY = e.clientY;
         startH = consolePanel.offsetHeight;
         consoleResizeHandle.classList.add('dragging');
-        document.body.style.cursor    = 'row-resize';
+        document.body.style.cursor = 'row-resize';
         document.body.style.userSelect = 'none';
         e.preventDefault();
     });
 
     document.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
-        const delta     = startY - e.clientY;   // Tirer vers le HAUT agrandit
+        const delta = startY - e.clientY;   // Tirer vers le HAUT agrandit
         const newHeight = Math.min(Math.max(36, startH + delta), window.innerHeight * 0.65);
         consolePanel.style.height = newHeight + 'px';
     });
@@ -1016,7 +1016,7 @@ if (consoleResizeHandle && consolePanel) {
         if (!isDragging) return;
         isDragging = false;
         consoleResizeHandle.classList.remove('dragging');
-        document.body.style.cursor    = '';
+        document.body.style.cursor = '';
         document.body.style.userSelect = '';
     });
 }

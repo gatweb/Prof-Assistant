@@ -7,6 +7,7 @@
     <!-- Styles globaux et locaux -->
     <link rel="stylesheet" href="./src/style.css">
     <link rel="stylesheet" href="./src/admin.css">
+    <link rel="stylesheet" href="./src/progression.css">
 </head>
 <body>
     <header class="app-header">
@@ -18,6 +19,16 @@
             <button id="logoutBtn" class="btn-secondary">Déconnexion</button>
         </div>
     </header>
+
+    <!-- Navigation par onglets -->
+    <nav class="admin-tabs-container">
+        <div class="admin-container" style="padding-top:0; padding-bottom:0;">
+            <div class="tabs">
+                <button class="tab-link active" data-target="listView">📥 Flux de corrections</button>
+                <button class="tab-link" data-target="progressionView">📊 Suivi de progression</button>
+            </div>
+        </div>
+    </nav>
 
     <!-- Vue principale 1 : Le flux des copies à traiter -->
     <main id="listView" class="admin-container">
@@ -54,6 +65,52 @@
             </table>
         </div>
     </main>
+
+    <!-- Vue principale 2 : La grille de progression -->
+    <main id="progressionView" class="admin-container hidden">
+        <div class="header-actions">
+            <div>
+                <h2>Suivi Global de la Classe</h2>
+                <p class="subtitle">Vue matricielle des exercices par élève</p>
+            </div>
+            <div class="filter-actions">
+                <button id="filterToGradeBtn" class="btn-secondary">🔍 Copies à corriger</button>
+                <button id="refreshProgressionBtn" class="btn-icon" title="Rafraîchir">🔄</button>
+            </div>
+        </div>
+
+        <!-- Matrix Container -->
+        <div class="progression-matrix-wrapper mt-24">
+            <div id="progressionMatrix" class="matrix-scroll-container">
+                <!-- La grille sera générée ici -->
+                <div class="loader-placeholder">Initialisation de la matrice...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal : Détails du Chapitre -->
+    <div id="chapterModal" class="modal-overlay hidden">
+        <div class="modal-content md-card">
+            <div class="modal-header">
+                <h3 id="modalChapterTitle">Détails du Chapitre</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <span class="stat-label">Taux de réussite</span>
+                        <span id="chapterSuccessRate" class="stat-value">--%</span>
+                    </div>
+                </div>
+                <div class="mt-24">
+                    <h4>💡 Erreurs fréquentes (AI Insights)</h4>
+                    <div id="chapterTopErrors" class="tags-cloud mt-16">
+                        <!-- Tags générés ici -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Vue secondaire 2 : L'interface de correction en Split Screen (désactivée par défaut) -->
     <main id="detailView" class="hidden" style="height: calc(100vh - 64px); display: flex;">
@@ -128,5 +185,6 @@
     
     <!-- Contrôleur JS -->
     <script type="module" src="./src/admin.js"></script>
+    <script type="module" src="./src/progression.js"></script>
 </body>
 </html>
