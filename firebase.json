@@ -13,6 +13,7 @@
     }
   ],
   "hosting": {
+    "site": "profassistant-61fde",
     "public": "public",
     "ignore": [
       "firebase.json",
