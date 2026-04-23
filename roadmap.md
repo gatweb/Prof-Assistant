@@ -21,14 +21,13 @@
   3. `publie` : Professeur a validé, visible par l'élève en temps réel.
 * **Collection `cours` :** Documents de référence pour le RAG (Chatbot).
 
-## 📍 4. Phase Actuelle : Single Learning Hub (IA + Prof) [TERMINE ✅]
-**Objectif atteint :** Tout le flux (Indices IA, Corrections Prof, Questions Élève) est désormais centralisé dans une boîte de dialogue unique sous l'exercice.
-*   **UI Unified :** Plus de modales ni de bulles flottantes.
-*   **Real-time Collaboration :** Le chat se met à jour en direct lors de la validation prof.
-*   **Historique Consolidé :** L'élève peut exporter toute la discussion par email.
+## 📍 4. Phase Actuelle : Déploiement Global [TERMINE ✅]
+**Objectif atteint :** Les fonctions backend (IA Gemini) et l'interface utilisateur (Hosting) sont entièrement déployées et accessibles en ligne.
+*   **Firebase Hosting :** Les fichiers web sont structurés proprement dans `public/`.
+*   **Cloud Functions :** Compatibilité établie avec Cloud Build via `functions-framework`.
 
 ## 🔮 5. Prochaines Étapes (Backlog)
-- [ ] **Déploiement Global :** Déployer les fonctions ET le hosting pour valider en ligne.
+- [x] **Déploiement Global :** Déployer les fonctions ET le hosting pour valider en ligne.
 - [ ] **Chat Tuteur (RAG) :** Intégration d'un bouton d'aide utilisant le cours du professeur comme contexte.
 - [ ] **Export Email :** Permettre à l'élève de s'envoyer l'historique du chat/feedback par email pour réviser (via Firebase Trigger Email).
 - [ ] **Analytics Professeur :** Widget de "Météo de la classe" analysant les concepts les plus problématiques.
