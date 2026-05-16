@@ -21,15 +21,15 @@
   3. `publie` : Professeur a validé, visible par l'élève en temps réel.
 * **Collection `cours` :** Documents de référence pour le RAG (Chatbot).
 
-## 📍 4. Phase Actuelle : Déploiement Global [TERMINE ✅]
-**Objectif atteint :** Les fonctions backend (IA Gemini) et l'interface utilisateur (Hosting) sont entièrement déployées et accessibles en ligne.
-*   **Firebase Hosting :** Les fichiers web sont structurés proprement dans `public/`.
-*   **Cloud Functions :** Compatibilité établie avec Cloud Build via `functions-framework`.
+## 📍 4. Phase Actuelle : Intégration RAG & Notebook [EN COURS 🏗️]
+*   **Backend RAG :** `interrogerTuteur` est désormais capable d'injecter le contenu d'un cours Firestore dans le contexte de Gemini.
+*   **Interface Notebook :** Panneau de ressources (Sidebar) ajouté au workspace avec support Markdown.
+*   **Déploiement Global :** [OK] Les fonctions et le hosting sont synchronisés.
 
 ## 🔮 5. Prochaines Étapes (Backlog)
 - [x] **Déploiement Global :** Déployer les fonctions ET le hosting pour valider en ligne.
-- [ ] **Chat Tuteur (RAG) :** Intégration d'un bouton d'aide utilisant le cours du professeur comme contexte.
-- [ ] **Export Email :** Permettre à l'élève de s'envoyer l'historique du chat/feedback par email pour réviser (via Firebase Trigger Email).
+- [/] **Chat Tuteur (RAG) :** Intégration d'un panneau de ressources (Style NotebookLM) utilisant le cours du professeur comme contexte.
+- [ ] **Export Email :** Finaliser le déclencheur (Trigger) pour l'envoi réel des emails.
 - [ ] **Analytics Professeur :** Widget de "Météo de la classe" analysant les concepts les plus problématiques.
 
 ---

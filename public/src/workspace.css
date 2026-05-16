@@ -44,6 +44,101 @@
     overflow: hidden; /* Important pour garder l'éditeur fixe */
 }
 
+/* Sidebar de Ressources (NotebookLM Style) */
+.resources-sidebar {
+    width: 320px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border-right: 1px solid var(--md-sys-color-outline-variant);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 5;
+    overflow: hidden;
+}
+
+.resources-sidebar.collapsed {
+    width: 48px;
+}
+
+.sidebar-header {
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.sidebar-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.resources-sidebar.collapsed .sidebar-header h3 {
+    display: none;
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.icon-btn:hover {
+    background: rgba(0,0,0,0.05);
+}
+
+.course-content-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    line-height: 1.5;
+    font-size: 14px;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.resources-sidebar.collapsed .course-content-area {
+    display: none;
+}
+
+.course-placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* Stylisation du contenu Markdown dans les ressources */
+.course-content-area h1, .course-content-area h2 {
+    color: var(--md-sys-color-primary);
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+.course-content-area p {
+    margin-bottom: 1em;
+}
+
+.course-content-area ul {
+    padding-left: 20px;
+    margin-bottom: 1em;
+}
+
+.course-content-area code {
+    background: rgba(var(--md-sys-color-primary-rgb), 0.1);
+    color: var(--md-sys-color-primary);
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
 /* Panneaux */
 .instructions-panel {
     flex: 0 0 500px; /* Largeur fixe demandée par l'utilisateur */

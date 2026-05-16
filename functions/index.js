@@ -130,6 +130,18 @@ exports.interrogerTuteur = onCall({
     try {
         const ai = new GoogleGenAI({ apiKey: geminiApiKey.value() });
 
+        // --- RAG : Récupération du contenu du cours ---
+        let contenuCours = "";
+        if (id_cours) {
+            const courseDoc = await admin.firestore().collection("courses").doc(id_cours).get();
+            if (courseDoc.exists) {
+                contenuCours = courseDoc.data().content || "";
+                console.log(`[interrogerTuteur] Contexte chargé pour le cours : ${id_cours}`);
+            } else {
+                console.warn(`[interrogerTuteur] Cours introuvable : ${id_cours}. Utilisation du savoir général.`);
+            }
+        }
+
         // Construction du prompt avec historique
         const contentsArray = [];
         
@@ -144,14 +156,22 @@ exports.interrogerTuteur = onCall({
         
         contentsArray.push({ role: "user", parts: [{ text: question }] });
 
+        const systemInstruction = `Tu es un tuteur d'informatique Socratique bienveillant.
+Ton but est d'aider l'élève à trouver la réponse par lui-même, sans jamais la donner.
+Pose des questions de guidage, encourage, et donne des indices progressifs.
+
+${contenuCours ? `CONTEXTE DE RÉFÉRENCE (Utilise UNIQUEMENT ces informations pour répondre si possible) :\n${contenuCours}` : "Utilise tes connaissances générales de programmation pour guider l'élève."}
+
+Règles de réponse :
+1. Si l'information est dans le contexte, priorise-la.
+2. Ne donne JAMAIS de code complet.
+3. Si la question est hors sujet par rapport au cours, ramène doucement l'élève vers le sujet.`;
+
         const response = await ai.models.generateContent({
             model: "gemini-3-flash-preview",
             contents: contentsArray,
             config: {
-                systemInstruction: `Tu es un tuteur d'informatique Socratique bienveillant.
-Ton but est d'aider l'élève à trouver la réponse par lui-même, sans jamais la donner.
-Pose des questions de guidage, encourage, et donne des indices progressifs.
-Cours actuel : ${id_cours || 'javascript'}`,
+                systemInstruction: systemInstruction,
                 temperature: 0.7
             }
         });

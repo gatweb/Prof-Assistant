@@ -21,6 +21,9 @@ const hintBtn3              = document.getElementById('hintBtn3');
 const freeQuestionToggle    = document.getElementById('freeQuestionToggle');
 const freeQuestionPanel     = document.getElementById('freeQuestionPanel');
 const questionCounter       = document.getElementById('questionCounter');
+const resourcesSidebar      = document.getElementById('resourcesSidebar');
+const toggleSidebarBtn      = document.getElementById('toggleSidebar');
+const courseContentEl       = document.getElementById('courseContent');
 
 // ============================================================
 // 2. ÉTAT DE LA SESSION
@@ -29,6 +32,41 @@ let chatHistory        = [];
 const CONSIGNE         = "Crée une boucle for en JavaScript qui affiche les nombres de 1 à 10 dans la console.";
 const COURSE_ID        = "javascript";
 const MAX_QUESTIONS    = 5;
+
+// ============================================================
+// 2bis. GESTION DES RESSOURCES (NotebookLM Style)
+// ============================================================
+const toggleSidebar = () => {
+    if (!resourcesSidebar || !toggleSidebarBtn) return;
+    resourcesSidebar.classList.toggle('collapsed');
+    toggleSidebarBtn.textContent = resourcesSidebar.classList.contains('collapsed') ? '▶' : '◀';
+};
+
+if (toggleSidebarBtn) toggleSidebarBtn.addEventListener('click', toggleSidebar);
+
+/**
+ * Charge le contenu du cours depuis Firestore
+ */
+const loadCourseContent = async (id) => {
+    if (!courseContentEl) return;
+    try {
+        const docRef = doc(db, "courses", id);
+        const snap = await getDoc(docRef);
+        if (snap.exists()) {
+            const data = snap.data();
+            if (typeof window.marked !== 'undefined') {
+                courseContentEl.innerHTML = window.marked.parse(data.content || "# Aucun contenu");
+            } else {
+                courseContentEl.textContent = data.content || "Aucun contenu";
+            }
+        } else {
+            courseContentEl.innerHTML = `<div class="course-placeholder">Pas de ressources pour ce chapitre.</div>`;
+        }
+    } catch (e) {
+        console.error("[Course] Erreur de chargement :", e);
+        courseContentEl.innerHTML = `<div class="course-placeholder">Erreur lors du chargement du cours.</div>`;
+    }
+};
 
 // État des indices (persisté en session)
 let hintState = {
@@ -237,6 +275,7 @@ listenToAuthStatus((user) => {
     
     updateHintButtons();
     updateQuestionCounter();
+    loadCourseContent(COURSE_ID);
 });
 
 if (logoutBtn) logoutBtn.addEventListener('click', async () => await logoutUser());

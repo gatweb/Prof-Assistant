@@ -29,7 +29,18 @@
     </header>
 
     <main class="workspace-container">
-        <!-- Section Gauche : Énoncé de l'exercice -->
+        <!-- Section Gauche : Ressources (Style NotebookLM) -->
+        <aside class="resources-sidebar" id="resourcesSidebar">
+            <div class="sidebar-header">
+                <h3>📚 Ressources</h3>
+                <button id="toggleSidebar" class="icon-btn" aria-label="Réduire">◀</button>
+            </div>
+            <div class="course-content-area" id="courseContent">
+                <div class="course-placeholder">Chargement du cours...</div>
+            </div>
+        </aside>
+
+        <!-- Section Centrale : Énoncé de l'exercice -->
         <section class="instructions-panel">
             <div class="md-card">
                 <h2>Exercice du jour</h2>
