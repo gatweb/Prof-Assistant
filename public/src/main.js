@@ -25,6 +25,6 @@ if (loginBtn) {
 // S'il y a un utilisateur valide de connecté, on le redirige vers l'espace de travail.
 listenToAuthStatus((user) => {
     if (user) {
-        window.location.href = "workspace.html";
+        window.location.href = "workspace-html.html";
     }
 });

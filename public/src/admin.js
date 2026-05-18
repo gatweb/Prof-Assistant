@@ -19,7 +19,7 @@ listenToAuthStatus((user) => {
     // FILTRE DE SÉCURITÉ PRÉSENTATION
     if (user.email !== ADMIN_EMAIL) {
         alert("Accès refusé. \nVotre adresse (" + user.email + ") n'est pas autorisée sur ce tableau de bord professeur.");
-        window.location.href = "workspace.html";
+        window.location.href = "workspace-html.html";
         return;
     }
 

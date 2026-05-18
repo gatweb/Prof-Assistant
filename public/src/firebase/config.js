@@ -1,7 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+import { getAuth, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+import { getFirestore, connectFirestoreEmulator } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getFunctions, connectFunctionsEmulator } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-functions.js";
 
-// Configuration Firebase fournie par l'utilisateur
 const firebaseConfig = {
   apiKey: "AIzaSyCccJvi75RxyaiW4meP9yVz_--k4UUFaps",
   authDomain: "profassistant-61fde.firebaseapp.com",
@@ -11,13 +12,13 @@ const firebaseConfig = {
   appId: "1:429919803539:web:6719e34300ce0ffadc5566"
 };
 
-// Initialisation de Firebase et export global
 export const app = initializeApp(firebaseConfig);
-
-import { getFunctions } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-functions.js";
-
-// Initialisation de l'authentification et export pour utilisation ailleurs
 export const auth = getAuth(app);
-
-// Initialisation des Cloud Functions
+export const db = getFirestore(app);
 export const functions = getFunctions(app, "europe-west1");
+
+// FORCE EMULATOR CONNECTION (DEV MODE)
+console.warn("⚠️ [DEV] Connexion forcée aux émulateurs Firebase (127.0.0.1)");
+connectAuthEmulator(auth, "http://127.0.0.1:9099");
+connectFirestoreEmulator(db, "127.0.0.1", 8080);
+connectFunctionsEmulator(functions, "127.0.0.1", 5001);

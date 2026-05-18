@@ -1,8 +1,6 @@
-import { getFirestore, collection, getDocs, query, where, doc, updateDoc, addDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
-import { app } from "./config.js";
-
-// Initialisation de Firestore
-export const db = getFirestore(app);
+import { collection, getDocs, query, where, doc, updateDoc, addDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { app, db } from "./config.js";
+export { db };
 
 // CRUD : Récupérer toutes les copies avec statut "a_valider"
 export const getSubmissionsToGrade = async () => {

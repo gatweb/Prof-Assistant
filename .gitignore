@@ -1,0 +1,15 @@
+node_modules/
+.npm/
+.yarn/
+*.log
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebase/
+.firebaserc-debug
+.DS_Store
+dist/
+build/
+.env
+.env.local
+.env.*.local

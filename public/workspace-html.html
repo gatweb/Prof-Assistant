@@ -14,25 +14,30 @@
          TOP BAR (toujours visible)
     ========================================================= -->
     <header class="app-header">
-        <div class="logo">
-            <span>ProfAssistant</span>
-            <span class="header-badge" id="headerBadge">Atelier HTML/CSS/JS</span>
+        <div class="header-left">
+            <button id="backToLobbyBtnHeader" class="btn-back-header" title="Retour à la liste des exercices">
+                🏠 Exercices
+            </button>
+            <div class="logo-mini">
+                <span>ProfAssistant</span>
+            </div>
         </div>
-        <nav class="mode-switcher" aria-label="Choisir le mode d'éditeur">
-            <a href="workspace.html" class="mode-btn" title="Exercice JavaScript pur + Chat tuteur">
-                🧩 Mode JS
-            </a>
-            <span class="mode-btn active" title="Atelier visuel HTML/CSS/JS">
-                🎨 Mode CodePen
-            </span>
-        </nav>
-        <div class="user-controls">
-            <span id="userEmail"></span>
-            <!-- Bouton Soumettre, masqué dans le lobby -->
-            <button id="submitBtn" class="btn-primary hidden" aria-label="Soumettre le code pour correction">
+
+        <div class="header-center">
+            <h1 id="currentExerciseTitle" class="exercise-title-header">Chargement...</h1>
+        </div>
+
+        <div class="header-right">
+            <button id="exportCodeBtn" class="btn-icon-header" title="Exporter mon code (HTML/CSS/JS)">
+                💾 Exporter
+            </button>
+            <button id="submitBtnHeader" class="btn-primary" aria-label="Soumettre le code pour correction">
                 📤 Soumettre
             </button>
-            <button id="logoutBtn" class="btn-secondary" aria-label="Se déconnecter">Déconnexion</button>
+            <div class="user-profile">
+                <span id="userEmail" class="user-email-header"></span>
+                <button id="logoutBtn" class="btn-secondary-header" title="Déconnexion">✕</button>
+            </div>
         </div>
     </header>
 
@@ -65,34 +70,25 @@
     ========================================================= -->
     <div id="workspaceView" class="hidden">
 
-        <!-- Bannière exercice avec bouton retour -->
-        <div class="exercise-banner" id="exerciseBanner">
-            <button class="btn-back" id="backToLobbyBtn" title="Retour au choix des exercices">
-                ← Exercices
-            </button>
-            <div class="exercise-info">
-                <span class="exercise-label" id="exerciseChapter">Chapitre</span>
-                <h2 id="exerciseTitle">Chargement...</h2>
+        <!-- Sidebar de Ressources (Style NotebookLM) -->
+        <aside class="resources-sidebar" id="resourcesSidebar">
+            <div class="sidebar-header">
+                <h3>📚 Ressources</h3>
+                <a id="courseLink" href="#" target="_blank" class="btn-course-link hidden" title="Ouvrir le cours complet">📖 Cours Complet</a>
+                <button id="toggleSidebar" class="icon-btn" aria-label="Réduire">◀</button>
             </div>
-            <button class="btn-icon btn-show-consigne" id="toggleInstructionsBtn" title="Afficher/masquer la consigne" aria-expanded="true">
-                📋
-            </button>
-        </div>
+            <div class="course-content-area" id="courseContent">
+                <div class="course-placeholder">Chargement...</div>
+            </div>
+            <div class="sidebar-footer">
+                <button id="resetExerciseBtn" class="btn-danger-outline" title="Effacer mon brouillon et recommencer">
+                    🔄 Réinitialiser l'exercice
+                </button>
+            </div>
+        </aside>
 
-        <!-- Consigne collapsible -->
-        <div class="instructions-bar" id="instructionsBar">
-            <div class="consigne-panel">
-                <!-- En-tête de la consigne -->
-                <div class="consigne-header">
-                    <span class="consigne-tag">📋 Consigne</span>
-                    <button class="btn-icon consigne-close-btn" id="toggleInstructionsBtn" title="Masquer la consigne" aria-expanded="true">✕</button>
-                </div>
-                <!-- Corps de la consigne (injecté dynamiquement) -->
-                <div class="consigne-body" id="exerciseInstructions">
-                    Charge un exercice pour voir la consigne ici.
-                </div>
-            </div>
-        </div>
+        <main class="workspace-main-content">
+
 
         <!-- Split pane -->
         <main class="split-workspace" id="splitWorkspace">
@@ -110,7 +106,7 @@
                         <span class="tab-icon">🧩</span> JavaScript
                     </button>
                     <div class="live-indicator" id="liveIndicator">
-                        <span class="live-dot"></span> Live
+                        <span class="live-dot"></span> <span class="live-text">Live</span>
                     </div>
                 </div>
 
@@ -245,7 +241,7 @@
             document.dispatchEvent(new Event('monacoReady'));
         });
     </script>
-    <script type="module" src="./src/workspace-html.js"></script>
+    <script type="module" src="./src/atelier.js?v=1779002272"></script>
 
 </body>
 </html>
