@@ -17,7 +17,7 @@ exports.corrigerDevoir = onCall({
 }, async (request) => {
     if (!request.auth) throw new HttpsError("unauthenticated", "Connexion requise.");
 
-    const { code_eleve, id_exercice } = request.data;
+    const { code_eleve, id_exercice, nom_eleve } = request.data;
     if (!code_eleve || !id_exercice) throw new HttpsError("invalid-argument", "Données manquantes.");
 
     try {
@@ -55,8 +55,10 @@ Structure JSON :
         const submissionData = {
             code_eleve: code_eleve,
             id_exercice: id_exercice,
+            exercice_id: id_exercice,
             titre_exercice: exData.titre,
             email_eleve: request.auth.token.email,
+            nom_eleve: nom_eleve || request.auth.token.name || request.auth.token.email.split('@')[0] || "Anonyme",
             status: "a_valider",
             feedback_ia: jsonEvaluation.feedback_eleve,
             note_suggeree: jsonEvaluation.note_suggeree,

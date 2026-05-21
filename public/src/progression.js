@@ -117,7 +117,7 @@ class ProgressionManager {
             }
             
             // On garde la soumission la plus récente pour cet exercice (ou on priorise les statuts validés?)
-            const exId = sub.exercice_id;
+            const exId = sub.exercice_id || sub.id_exercice;
             if (exId) {
                 const existing = studentMap[email].submissions[exId];
                 if (!existing || new Date(sub.date_soumission) > new Date(existing.date_soumission)) {

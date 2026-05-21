@@ -175,7 +175,7 @@ async function loadLobby() {
         const submissionsByExercice = {};
         submissionsSnap.docs.forEach(docSnap => {
             const sub = { id: docSnap.id, ...docSnap.data() };
-            const exId = sub.exercice_id;
+            const exId = sub.exercice_id || sub.id_exercice;
             if (!exId) return;
             // Garder la soumission la plus récente par exercice
             const existing = submissionsByExercice[exId];
