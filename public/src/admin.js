@@ -234,7 +234,7 @@ if (insightsContainer) {
 let monacoEditorInstance;
 let pendingCodeToSet = null;
 
-document.addEventListener('monacoReady', () => {
+const initMonaco = () => {
     const container = document.getElementById('editor-container');
     if (container) {
         monacoEditorInstance = window.monaco.editor.create(container, {
@@ -255,7 +255,13 @@ document.addEventListener('monacoReady', () => {
             pendingCodeToSet = null;
         }
     }
-});
+};
+
+if (window.monaco && window.monaco.editor) {
+    initMonaco();
+} else {
+    document.addEventListener('monacoReady', initMonaco);
+}
 
 // ============================================
 // 5. Actions Métier (Boutons Validation)

@@ -468,7 +468,7 @@ body {
   text-align: center;
 }`;
 
-document.addEventListener('monacoReady', () => {
+const initMonaco = () => {
     htmlEditor = window.monaco.editor.create(htmlEditorContainer, {
         value: DEFAULT_HTML, language: 'html', theme: 'vs-dark',
         automaticLayout: true, minimap: { enabled: false }, fontSize: 14,
@@ -499,7 +499,13 @@ document.addEventListener('monacoReady', () => {
         jsEditor.setValue(pendingCodeDepart);
         pendingCodeDepart = null;
     }
-});
+};
+
+if (window.monaco && window.monaco.editor) {
+    initMonaco();
+} else {
+    document.addEventListener('monacoReady', initMonaco);
+}
 
 // --- LOGIQUE AUTO-SAVE ---
 let autoSaveTimeout = null;
