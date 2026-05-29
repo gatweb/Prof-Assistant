@@ -63,7 +63,8 @@ Structure JSON :
             feedback_ia: jsonEvaluation.feedback_eleve,
             note_suggeree: jsonEvaluation.note_suggeree,
             erreurs_detectees: jsonEvaluation.erreurs_detectees,
-            date_soumission: new Date().toISOString()
+            date_soumission: new Date().toISOString(),
+            autonomie: request.data.autonomie || {}
         };
         
         const docRef = await admin.firestore().collection("submissions").add(submissionData);

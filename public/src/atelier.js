@@ -98,7 +98,12 @@ let hintState = {
     niv3Used: false,
     questionsLeft: MAX_QUESTIONS,
     currentDocId: null,
-    currentCode: null
+    currentCode: null,
+    pasteOps: 0,
+    pasteChars: 0,
+    pageExits: 0,
+    timeOutside: 0,
+    lastBlurTime: null
 };
 
 // ============================================================
@@ -302,7 +307,12 @@ async function openExercise(exerciceId) {
             niv3Used: false,
             questionsLeft: MAX_QUESTIONS,
             currentDocId: null,
-            currentCode: null
+            currentCode: null,
+            pasteOps: 0,
+            pasteChars: 0,
+            pageExits: 0,
+            timeOutside: 0,
+            lastBlurTime: null
         };
         updateHintButtons();
         updateQuestionCounter();
@@ -486,11 +496,28 @@ const initMonaco = () => {
         wordWrap: 'on', padding: { top: 16 }, scrollBeyondLastLine: false
     });
 
-    // Live Reload + AUTO-SAVE
+    // Live Reload + AUTO-SAVE + Paste tracking
     [htmlEditor, cssEditor, jsEditor].forEach(editor => {
         editor.onDidChangeModelContent(() => {
             scheduleRender();
             scheduleAutoSave();
+        });
+
+        editor.onDidPaste((e) => {
+            const model = editor.getModel();
+            if (model) {
+                const pastedTextLength = model.getValueInRange(e.range).length;
+                hintState.pasteOps = (hintState.pasteOps || 0) + 1;
+                hintState.pasteChars = (hintState.pasteChars || 0) + pastedTextLength;
+                
+                // Mettre à jour en temps réel si on a déjà un document soumis
+                if (hintState.currentDocId) {
+                    updateDoc(doc(db, "submissions", hintState.currentDocId), {
+                        "autonomie.copie_colle_ops": hintState.pasteOps,
+                        "autonomie.copie_colle_caracteres": hintState.pasteChars
+                    }).catch(() => {});
+                }
+            }
         });
     });
 
@@ -926,6 +953,16 @@ if (submitBtn) {
                 code_html: htmlEditor.getValue(),
                 code_css: cssEditor.getValue(),
                 code_js: jsEditor.getValue(),
+                autonomie: {
+                    indices_niv1: hintState.niv1Used ? 1 : 0,
+                    indices_niv2: hintState.niv2Used ? 1 : 0,
+                    indices_niv3: hintState.niv3Used ? 1 : 0,
+                    questions_ia: MAX_QUESTIONS - hintState.questionsLeft,
+                    copie_colle_ops: hintState.pasteOps || 0,
+                    copie_colle_caracteres: hintState.pasteChars || 0,
+                    sorties_page: hintState.pageExits || 0,
+                    temps_hors_focus_sec: hintState.timeOutside || 0
+                }
             });
 
             const docId = response.data.docId;
@@ -1245,3 +1282,29 @@ function exportCode() {
 }
 
 if (exportCodeBtn) exportCodeBtn.addEventListener('click', exportCode);
+
+// Tab Switching & Blur Focus tracking
+window.addEventListener('blur', () => {
+    if (!currentExercice) return; // Only track when an exercise is active
+    hintState.pageExits = (hintState.pageExits || 0) + 1;
+    hintState.lastBlurTime = Date.now();
+    
+    if (hintState.currentDocId) {
+        updateDoc(doc(db, "submissions", hintState.currentDocId), {
+            "autonomie.sorties_page": hintState.pageExits
+        }).catch(() => {});
+    }
+});
+
+window.addEventListener('focus', () => {
+    if (!currentExercice || !hintState.lastBlurTime) return;
+    const elapsedOutside = Math.round((Date.now() - hintState.lastBlurTime) / 1000);
+    hintState.timeOutside = (hintState.timeOutside || 0) + elapsedOutside;
+    hintState.lastBlurTime = null;
+    
+    if (hintState.currentDocId) {
+        updateDoc(doc(db, "submissions", hintState.currentDocId), {
+            "autonomie.temps_hors_focus_sec": hintState.timeOutside
+        }).catch(() => {});
+    }
+});

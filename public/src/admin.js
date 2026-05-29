@@ -112,12 +112,25 @@ window.openDetailView = (id) => {
     listView.classList.add('hidden');
     detailView.classList.remove('hidden');
     
-    // Statistiques d'autonomie (indices utilisés + questions libres)
-    const indices = copy.indices_utilises || {};
-    document.getElementById('statNiv1').textContent     = indices.niv1 || 0;
-    document.getElementById('statNiv2').textContent     = indices.niv2 || 0;
-    document.getElementById('statNiv3').textContent     = indices.niv3 || 0;
-    document.getElementById('statQuestions').textContent = copy.questions_libres || 0;
+    // Statistiques d'autonomie (indices utilisés + questions libres + copier/coller + focus)
+    const auto = copy.autonomie || {};
+    
+    // Rétrocompatibilité avec les anciens champs
+    const niv1 = auto.indices_niv1 !== undefined ? auto.indices_niv1 : (copy.indices_utilises?.niv1 || 0);
+    const niv2 = auto.indices_niv2 !== undefined ? auto.indices_niv2 : (copy.indices_utilises?.niv2 || 0);
+    const niv3 = auto.indices_niv3 !== undefined ? auto.indices_niv3 : (copy.indices_utilises?.niv3 || 0);
+    const questions = auto.questions_ia !== undefined ? auto.questions_ia : (copy.questions_libres || 0);
+    
+    document.getElementById('statNiv1').textContent     = niv1;
+    document.getElementById('statNiv2').textContent     = niv2;
+    document.getElementById('statNiv3').textContent     = niv3;
+    document.getElementById('statQuestions').textContent = questions;
+
+    // Nouveaux indicateurs de copier-coller et de focus
+    document.getElementById('statPasteOps').textContent  = auto.copie_colle_ops || 0;
+    document.getElementById('statPasteChars').textContent = auto.copie_colle_caracteres || 0;
+    document.getElementById('statPageExits').textContent = auto.sorties_page || 0;
+    document.getElementById('statTimeOutside').textContent = auto.temps_hors_focus_sec !== undefined ? `${auto.temps_hors_focus_sec}s` : '0s';
     
     // Injection du code dans Monaco
     const codeData = copy.code_eleve || "// Aucun code n'a été fourni";
