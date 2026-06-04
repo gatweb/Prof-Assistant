@@ -1,7 +1,7 @@
 import { listenToAuthStatus, logoutUser } from './firebase/auth.js';
 import { getSubmissionsToGrade, updateSubmissionStatus, generateMockSubmissions, generateMockCourses, db } from './firebase/db.js';
 import { formatDate } from './utils.js';
-import { doc, onSnapshot, collection, addDoc, query, where } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { doc, onSnapshot, collection, addDoc, query, where, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 // ============================================
 // 1. Contrôle d'accès strict
@@ -333,3 +333,137 @@ async function processAction(newStatus) {
         rejectBtn.textContent  = '❌ Demander des corrections';
     }
 }
+
+// ============================================
+// 6. LOGIQUE DE CONFIGURATION (Chapitres / Examen)
+// ============================================
+const toggleExamActive = document.getElementById('toggleExamActive');
+const examStatusLabel = document.getElementById('examStatusLabel');
+const adminChaptersList = document.getElementById('adminChaptersList');
+
+let dbSettings = {
+    exam_active: true,
+    disabled_chapters: []
+};
+
+// Démarrer l'écoute des réglages
+async function initConfigTab() {
+    if (!toggleExamActive || !adminChaptersList) return;
+
+    // 1. Écouter le statut de l'examen et des chapitres
+    onSnapshot(doc(db, "config", "settings"), async (snapshot) => {
+        if (snapshot.exists()) {
+            dbSettings = snapshot.data();
+            if (dbSettings.exam_active === undefined) dbSettings.exam_active = true;
+            if (dbSettings.disabled_chapters === undefined) dbSettings.disabled_chapters = [];
+        } else {
+            // Créer les réglages par défaut s'ils n'existent pas
+            dbSettings = { exam_active: true, disabled_chapters: [] };
+            await setDoc(doc(db, "config", "settings"), dbSettings);
+        }
+
+        // Mettre à jour le toggle de l'examen
+        toggleExamActive.checked = dbSettings.exam_active;
+        if (examStatusLabel) {
+            examStatusLabel.textContent = dbSettings.exam_active ? "Examen Actif" : "Examen Désactivé";
+            examStatusLabel.style.color = dbSettings.exam_active ? "green" : "red";
+        }
+
+        // Re-rendre les chapitres pour refléter les coches
+        renderChaptersConfig();
+    });
+
+    // 2. Écouter les clics sur le toggle Examen
+    toggleExamActive.addEventListener('change', async () => {
+        dbSettings.exam_active = toggleExamActive.checked;
+        await setDoc(doc(db, "config", "settings"), dbSettings);
+    });
+}
+
+async function renderChaptersConfig() {
+    try {
+        // Récupérer tous les exercices pour extraire la liste unique des chapitres
+        const exsSnap = await getDocs(collection(db, "exercices"));
+        const chaptersSet = new Set();
+        
+        // Liste ordonnée de référence pour les chapitres standard
+        const orderedChapters = [
+            "HTML & CSS",
+            "CH1 — Introduction à JavaScript",
+            "CH2 — Variables, types et opérateurs",
+            "CH3 — Entrées / Sorties interactives",
+            "CH4 — Chaînes de caractères",
+            "CH5 — Conditions",
+            "CH6 — Boucles",
+            "CH7 — Structures combinées",
+            "CH8 — Fonctions prédéfinies",
+            "CH9 — Algorithmes",
+            "CH10 — Projets"
+        ];
+
+        exsSnap.forEach(docSnap => {
+            const data = docSnap.data();
+            if (data.chapitre) {
+                chaptersSet.add(data.chapitre);
+            }
+        });
+
+        // Convertir en tableau et trier selon orderedChapters ou alphabétiquement
+        const sortedChapters = Array.from(chaptersSet).sort((a, b) => {
+            const idxA = orderedChapters.indexOf(a);
+            const idxB = orderedChapters.indexOf(b);
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+            if (idxA !== -1) return -1;
+            if (idxB !== -1) return 1;
+            return a.localeCompare(b);
+        });
+
+        if (sortedChapters.length === 0) {
+            adminChaptersList.innerHTML = '<p class="config-desc">Aucun chapitre trouvé dans les exercices.</p>';
+            return;
+        }
+
+        adminChaptersList.innerHTML = sortedChapters.map(ch => {
+            const isDisabled = dbSettings.disabled_chapters.includes(ch);
+            // Si le chapitre n'est pas désactivé, il est "actif" donc coché
+            const isChecked = !isDisabled;
+
+            return `
+                <div class="chapter-config-item">
+                    <label class="checkbox-container">
+                        <input type="checkbox" data-chapter="${ch}" ${isChecked ? 'checked' : ''}>
+                        <span class="checkmark"></span>
+                        <span class="chapter-name-label">${ch}</span>
+                    </label>
+                </div>
+            `;
+        }).join('');
+
+        // Attacher les écouteurs sur les cases à cocher
+        adminChaptersList.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', async () => {
+                const chapterName = checkbox.getAttribute('data-chapter');
+                const isChecked = checkbox.checked;
+
+                if (isChecked) {
+                    // Retirer de la liste des désactivés
+                    dbSettings.disabled_chapters = dbSettings.disabled_chapters.filter(ch => ch !== chapterName);
+                } else {
+                    // Ajouter à la liste des désactivés
+                    if (!dbSettings.disabled_chapters.includes(chapterName)) {
+                        dbSettings.disabled_chapters.push(chapterName);
+                    }
+                }
+
+                await setDoc(doc(db, "config", "settings"), dbSettings);
+            });
+        });
+
+    } catch (e) {
+        console.error("Erreur de rendu config chapitres :", e);
+        adminChaptersList.innerHTML = '<p class="config-desc" style="color:red">Erreur lors de la récupération des chapitres.</p>';
+    }
+}
+
+// Initialiser
+initConfigTab();

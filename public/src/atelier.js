@@ -20,6 +20,7 @@ import {
     onSnapshot, query, where, orderBy, limit
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 import { db } from './firebase/db.js';
+import { ExamManager } from './exam.js';
 
 // ============================================================
 // 1. RÉFÉRENCES DOM
@@ -89,6 +90,10 @@ let consoleHasError = false;
 const MAX_QUESTIONS = 5;
 let activeTab = 'html';
 let chatHistory = [];
+let disabledChapters = [];
+let examActive = true;
+let configUnsub = null;
+const examManager = new ExamManager();
 let currentExercice = null;  // Données de l'exercice courant (depuis Firestore)
 let profFeedbackUnsub = null;
 
@@ -112,6 +117,41 @@ let hintState = {
 listenToAuthStatus((user) => {
     if (!user) { window.location.href = "index.html"; return; }
     if (userEmailEl) userEmailEl.textContent = user.email;
+
+    // Initialiser le gestionnaire d'examen
+    examManager.init(() => {
+        switchToLobby();
+    });
+
+    // Écouter les réglages prof en temps réel (chapitres désactivés + examen actif)
+    if (!configUnsub) {
+        configUnsub = onSnapshot(doc(db, "config", "settings"), (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.data();
+                disabledChapters = data.disabled_chapters || [];
+                examActive = data.exam_active !== false;
+            } else {
+                disabledChapters = [];
+                examActive = true;
+            }
+
+            // Afficher/Masquer la bannière d'examen dans le lobby
+            const examBanner = document.getElementById('lobbyExamBanner');
+            if (examBanner) {
+                if (examActive) {
+                    examBanner.classList.remove('hidden');
+                } else {
+                    examBanner.classList.add('hidden');
+                }
+            }
+
+            // Si on est dans la vue Lobby, on recharge pour masquer/afficher les chapitres
+            const examView = document.getElementById('examView');
+            if (workspaceView.classList.contains('hidden') && (!examView || examView.classList.contains('hidden'))) {
+                loadLobby();
+            }
+        });
+    }
 
     // Au chargement : vérifier si un exercice est demandé dans l'URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -189,13 +229,15 @@ async function loadLobby() {
             }
         });
 
-        // Grouper par chapitre (en filtrant les exercices cachés)
+        // Grouper par chapitre (en filtrant les exercices cachés et désactivés)
         const chapitres = {};
         exercicesSnap.forEach(docSnap => {
             const data = { id: docSnap.id, ...docSnap.data() };
             // Masquer les exercices avec is_hidden: true
             if (data.is_hidden === true) return;
             const ch = data.chapitre || 'Général';
+            // Masquer les chapitres désactivés par le prof
+            if (disabledChapters.includes(ch)) return;
             if (!chapitres[ch]) chapitres[ch] = [];
             chapitres[ch].push(data);
         });
@@ -388,7 +430,10 @@ function injectExerciseData(exData) {
     }
 
     // Afficher/Masquer les boutons du header selon le mode
-    if (backToLobbyBtn) backToLobbyBtn.style.display = 'inline-flex';
+    if (backToLobbyBtn) {
+        backToLobbyBtn.style.display = 'inline-flex';
+        backToLobbyBtn.textContent = '🏠 Exercices';
+    }
     if (exportCodeBtn) exportCodeBtn.style.display = 'inline-flex';
     if (submitBtn) submitBtn.classList.remove('hidden');
 
@@ -437,13 +482,73 @@ if (toggleSidebarBtn && resourcesSidebar) {
     });
 }
 
+// Fonction pour revenir proprement au lobby depuis le workspace ou l'examen
+function switchToLobby() {
+    // Reset Header UI
+    if (exerciseTitleEl) exerciseTitleEl.textContent = 'Choisis un exercice';
+    if (backToLobbyBtn) {
+        backToLobbyBtn.style.display = 'none';
+        backToLobbyBtn.textContent = '🏠 Exercices';
+    }
+    if (exportCodeBtn) exportCodeBtn.style.display = 'none';
+    if (submitBtn) submitBtn.classList.add('hidden');
+    if (chatFab) chatFab.classList.add('hidden');
+
+    lobbyView.classList.remove('hidden');
+    workspaceView.classList.add('hidden');
+    
+    const examView = document.getElementById('examView');
+    if (examView) examView.classList.add('hidden');
+
+    // Stopper l'écoute prof en cours
+    if (profFeedbackUnsub) { profFeedbackUnsub(); profFeedbackUnsub = null; }
+    currentExercice = null;
+
+    loadLobby();
+}
+
 // Bouton retour lobby
 if (backToLobbyBtn) {
     backToLobbyBtn.addEventListener('click', () => {
+        const examView = document.getElementById('examView');
+        if (examView && !examView.classList.contains('hidden')) {
+            if (examManager.isExamActive()) {
+                if (!confirm("Attention, si tu quittes l'examen maintenant, ton score actuel ne sera pas sauvegardé. Es-tu sûr de vouloir abandonner ?")) {
+                    return;
+                }
+            }
+            switchToLobby();
+            return;
+        }
+
         // Stopper l'écoute prof en cours
         if (profFeedbackUnsub) { profFeedbackUnsub(); profFeedbackUnsub = null; }
         currentExercice = null;
         loadLobby();
+    });
+}
+
+// Bouton Lancer l'examen (depuis la bannière du lobby)
+const startExamBtn = document.getElementById('startExamBtn');
+if (startExamBtn) {
+    startExamBtn.addEventListener('click', () => {
+        // 1. Masquer le lobby, afficher l'examView
+        lobbyView.classList.add('hidden');
+        const examView = document.getElementById('examView');
+        if (examView) examView.classList.remove('hidden');
+
+        // 2. Adapter le header pour le mode Examen
+        if (exerciseTitleEl) exerciseTitleEl.textContent = '📝 Examen Final JavaScript';
+        if (backToLobbyBtn) {
+            backToLobbyBtn.style.display = 'inline-flex';
+            backToLobbyBtn.textContent = '🏠 Quitter l\'examen';
+        }
+        if (exportCodeBtn) exportCodeBtn.style.display = 'none';
+        if (submitBtn) submitBtn.classList.add('hidden');
+        if (chatFab) chatFab.classList.add('hidden'); // Désactivé pendant l'examen
+
+        // 3. Démarrer l'examen en passant les chapitres désactivés
+        examManager.start(disabledChapters);
     });
 }
 

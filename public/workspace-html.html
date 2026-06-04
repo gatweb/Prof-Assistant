@@ -59,10 +59,27 @@
                 <p class="lobby-subtitle">Travaille à ton rythme, le tuteur IA est là pour t'aider 🚀</p>
             </div>
 
+            <!-- Bannière Examen de Révision -->
+            <div id="lobbyExamBanner" class="exam-banner-card hidden">
+                <div class="exam-banner-badge">🏆 ÉVALUATION</div>
+                <div class="exam-banner-content">
+                    <h2>Examen Final JavaScript</h2>
+                    <p>Teste tes connaissances sur l'ensemble des chapitres actifs. 20 questions de révision pour évaluer ton autonomie !</p>
+                </div>
+                <button id="startExamBtn" class="btn-exam-start">Lancer l'examen ⚡</button>
+            </div>
+
             <!-- Les chapitres et cartes sont injectés ici dynamiquement -->
             <div class="chapters-container" id="chaptersContainer"></div>
         </div>
 
+    </div>
+
+    <!-- =========================================================
+         VUE 1.5 : EXAMEN — Quiz Interactif (masqué au départ)
+    ========================================================= -->
+    <div id="examView" class="hidden">
+        <!-- Rendu dynamique par public/src/exam.js -->
     </div>
 
     <!-- =========================================================

@@ -26,6 +26,7 @@
             <div class="tabs">
                 <button class="tab-link active" data-target="listView">📥 Flux de corrections</button>
                 <button class="tab-link" data-target="progressionView">📊 Suivi de progression</button>
+                <button class="tab-link" data-target="configView">⚙️ Configuration</button>
             </div>
         </div>
     </nav>
@@ -84,6 +85,42 @@
             <div id="progressionMatrix" class="matrix-scroll-container">
                 <!-- La grille sera générée ici -->
                 <div class="loader-placeholder">Initialisation de la matrice...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Vue principale 3 : Configuration des Chapitres et Examens -->
+    <main id="configView" class="admin-container hidden">
+        <div class="header-actions">
+            <div>
+                <h2>Configuration de la classe</h2>
+                <p class="subtitle">Activez ou désactivez l'examen final et les chapitres pour les élèves</p>
+            </div>
+        </div>
+
+        <div class="grid-config mt-24">
+            <!-- Card Examen -->
+            <div class="md-card config-card">
+                <h3>📝 Examen Final JavaScript</h3>
+                <p class="config-desc">Si désactivé, les élèves ne verront plus la bannière de l'examen de révision dans leur lobby.</p>
+                <div class="toggle-container mt-16">
+                    <label class="switch">
+                        <input type="checkbox" id="toggleExamActive" checked>
+                        <span class="slider round"></span>
+                    </label>
+                    <span id="examStatusLabel" class="toggle-status-label">Examen Actif</span>
+                </div>
+            </div>
+
+            <!-- Card Chapitres -->
+            <div class="md-card config-card mt-24">
+                <h3>📚 Gestion active des chapitres</h3>
+                <p class="config-desc">Décochez les chapitres que vous souhaitez désactiver pour les élèves. Un chapitre désactivé masque tous ses exercices dans le lobby et exclut ses questions de l'examen final.</p>
+                
+                <div class="chapters-grid mt-24" id="adminChaptersList">
+                    <!-- Généré dynamiquement en JS (checkboxes) -->
+                    <div class="loader-placeholder">Chargement des chapitres...</div>
+                </div>
             </div>
         </div>
     </main>

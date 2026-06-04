@@ -65,6 +65,9 @@ class ProgressionManager {
                 // Toggle visibility of mains
                 document.getElementById('listView').classList.add('hidden');
                 document.getElementById('progressionView').classList.add('hidden');
+                const configView = document.getElementById('configView');
+                if (configView) configView.classList.add('hidden');
+                
                 document.getElementById(targetId).classList.remove('hidden');
 
                 if (targetId === 'progressionView') {
