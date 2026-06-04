@@ -1,4 +1,5 @@
 import { getAllExercises, getAllSubmissions, db } from './firebase/db.js';
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 /**
  * MODULE : Suivi de Progression Matrix
@@ -9,6 +10,7 @@ class ProgressionManager {
     constructor() {
         this.exercices = [];
         this.submissions = [];
+        this.examResults = {}; // { email: examResultData }
         this.students = []; // { email, nom, submissions: { exId: sub } }
         this.chapters = {}; // { name: [exIds] }
         this.isFilterActive = false;
@@ -19,6 +21,7 @@ class ProgressionManager {
     initUI() {
         this.matrixContainer = document.getElementById('progressionMatrix');
         this.filterBtn = document.getElementById('filterToGradeBtn');
+        this.exportBtn = document.getElementById('exportCsvBtn');
         this.refreshBtn = document.getElementById('refreshProgressionBtn');
         this.modal = document.getElementById('chapterModal');
         this.closeModalBtn = this.modal?.querySelector('.close-modal');
@@ -34,6 +37,10 @@ class ProgressionManager {
                 this.filterBtn.style.backgroundColor = this.isFilterActive ? 'var(--md-sys-color-primary-container)' : '';
                 this.renderMatrix();
             });
+        }
+
+        if (this.exportBtn) {
+            this.exportBtn.addEventListener('click', () => this.exportToCSV());
         }
 
         if (this.refreshBtn) {
@@ -81,13 +88,15 @@ class ProgressionManager {
         this.matrixContainer.innerHTML = '<div class="loader-placeholder">Chargement des données en cours...</div>';
         
         try {
-            const [exs, subs] = await Promise.all([
+            const [exs, subs, examResultsSnap] = await Promise.all([
                 getAllExercises(),
-                getAllSubmissions()
+                getAllSubmissions(),
+                getDocs(collection(db, "exam_results"))
             ]);
 
             this.exercices = exs;
             this.submissions = subs;
+            this.examResultsSnap = examResultsSnap;
 
             this.processData();
             this.renderMatrix();
@@ -105,6 +114,20 @@ class ProgressionManager {
             if (!this.chapters[ch]) this.chapters[ch] = [];
             this.chapters[ch].push(ex);
         });
+
+        // 1.5 Extraire les résultats d'examen par email
+        this.examResults = {};
+        if (this.examResultsSnap) {
+            this.examResultsSnap.forEach(docSnap => {
+                const res = docSnap.data();
+                const email = res.email_eleve || "anonyme@test.com";
+                // Conserver le résultat le plus récent
+                const existing = this.examResults[email];
+                if (!existing || new Date(res.date) > new Date(existing.date)) {
+                    this.examResults[email] = res;
+                }
+            });
+        }
 
         // 2. Extraire la liste unique des élèves et mapper leurs soumissions
         const studentMap = {};
@@ -127,6 +150,19 @@ class ProgressionManager {
                     studentMap[email].submissions[exId] = sub;
                 }
                 if (sub.status === 'a_valider') studentMap[email].hasAwaiting = true;
+            }
+        });
+
+        // Inclure également les élèves ayant uniquement passé l'examen
+        Object.keys(this.examResults).forEach(email => {
+            if (!studentMap[email]) {
+                const res = this.examResults[email];
+                studentMap[email] = {
+                    email: email,
+                    nom: res.nom_eleve || email.split('@')[0],
+                    submissions: {},
+                    hasAwaiting: false
+                };
             }
         });
 
@@ -178,6 +214,13 @@ class ProgressionManager {
         avgHead.className = 'avg-col';
         avgHead.textContent = "Moyenne";
         rowChapters.appendChild(avgHead);
+
+        // Header Examen
+        const examHead = document.createElement('th');
+        examHead.rowSpan = 2;
+        examHead.className = 'exam-col-header';
+        examHead.textContent = "Examen (Quiz)";
+        rowChapters.appendChild(examHead);
 
         for (const [chapterName, exercises] of Object.entries(this.chapters)) {
             const th = document.createElement('th');
@@ -263,7 +306,26 @@ class ProgressionManager {
             }
             tr.appendChild(tdAvg);
 
-            // Ajouter les cellules d'exercices après la moyenne
+            // Cellule Examen
+            const tdExam = document.createElement('td');
+            tdExam.className = 'exam-col';
+            const examRes = this.examResults[student.email];
+            if (examRes) {
+                tdExam.innerHTML = `
+                    <div class="exam-status-cell">
+                        <span class="note-badge exam-badge-result" style="font-weight:600;">${examRes.score}/${examRes.total}</span>
+                        <span class="exam-pct-badge" style="font-size:10px;color:#64748b;display:block;">${examRes.pct}%</span>
+                    </div>
+                `;
+                // Coloration
+                if (examRes.pct >= 80) tdExam.style.color = '#2e7d32';
+                else if (examRes.pct < 50) tdExam.style.color = '#c62828';
+            } else {
+                tdExam.innerHTML = '<span style="color:#ccc">--</span>';
+            }
+            tr.appendChild(tdExam);
+
+            // Ajouter les cellules d'exercices après la moyenne et l'examen
             scoreCells.forEach(c => tr.appendChild(c));
             
             body.appendChild(tr);
@@ -333,6 +395,82 @@ class ProgressionManager {
         }
 
         this.modal.classList.remove('hidden');
+    }
+
+    exportToCSV() {
+        if (this.students.length === 0) {
+            alert("Aucune donnée à exporter.");
+            return;
+        }
+
+        // En-têtes CSV
+        const headers = ["Nom", "Email", "Moyenne Exercices (%)", "Note Examen (Points)", "Score Examen (%)"];
+        
+        // Liste ordonnée d'exercices pour le CSV
+        const exercisesList = [];
+        for (const exercises of Object.values(this.chapters)) {
+            exercises.forEach(ex => {
+                headers.push(ex.titre);
+                exercisesList.push(ex.id);
+            });
+        }
+
+        // Lignes du CSV
+        const rows = [headers];
+
+        this.students.forEach(student => {
+            // Calculer la moyenne
+            let totalScore = 0;
+            let countScores = 0;
+            const exScores = [];
+
+            exercisesList.forEach(exId => {
+                const sub = student.submissions[exId];
+                if (sub) {
+                    const score = this.calculateScore(sub);
+                    const status = sub.status || "brouillon";
+                    if (status === 'valide' || status === 'publie') {
+                        exScores.push(`${score}/100`);
+                        totalScore += score;
+                        countScores++;
+                    } else {
+                        exScores.push(`${status} (${score}/100)`);
+                    }
+                } else {
+                    exScores.push("--");
+                }
+            });
+
+            const avg = countScores > 0 ? Math.round(totalScore / countScores) : "";
+            
+            // Note Examen
+            const examRes = this.examResults[student.email];
+            const examScoreStr = examRes ? `${examRes.score}/${examRes.total}` : "";
+            const examPctStr = examRes ? `${examRes.pct}%` : "";
+
+            const row = [
+                student.nom,
+                student.email,
+                avg ? `${avg}%` : "--",
+                examScoreStr || "--",
+                examPctStr || "--",
+                ...exScores
+            ];
+            rows.push(row);
+        });
+
+        // Formater en CSV (délimiteur ';' pour Excel en français)
+        const csvContent = "\uFEFF" + rows.map(r => r.map(val => `"${String(val).replace(/"/g, '""')}"`).join(";")).join("\n");
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `notes_classe_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     }
 }
 

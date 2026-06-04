@@ -259,3 +259,23 @@
     color: var(--md-sys-color-on-surface-variant);
     font-style: italic;
 }
+
+/* Styles pour la colonne Examen de la matrice */
+.exam-col {
+    font-weight: bold;
+    background: #f6f0ff !important; /* Teinte violette douce */
+    border-right: 2px solid var(--md-sys-color-outline) !important; /* Démarcation */
+}
+
+.exam-col-header {
+    background-color: #e9d5ff !important; /* Teinte violette plus soutenue */
+    color: #581c87 !important;
+    border-right: 2px solid var(--md-sys-color-outline) !important;
+}
+
+.exam-status-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}

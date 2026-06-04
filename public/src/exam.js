@@ -471,14 +471,14 @@ export class ExamManager {
         ${wrongsHtml}
 
         <!-- Actions -->
-        <button id="examRestartBtn" class="btn-primary" style="width: 100%; margin-top: 16px;">
-          🔄 Recommencer l'examen
+        <button id="examExitBtn" class="btn-primary" style="width: 100%; margin-top: 16px;">
+          🏠 Retourner aux exercices
         </button>
       </div>
     `;
 
-    document.getElementById('examRestartBtn').addEventListener('click', () => {
-      this.start();
+    document.getElementById('examExitBtn').addEventListener('click', () => {
+      if (this.onBackToLobbyCallback) this.onBackToLobbyCallback();
     });
 
     // Enregistrer les résultats de l'élève dans Firestore

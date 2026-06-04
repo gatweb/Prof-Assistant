@@ -197,11 +197,14 @@ async function loadLobby() {
     try {
         const userEmail = userEmailEl?.textContent || '';
 
-        // Requêtes en parallèle : exercices + soumissions de l'élève
-        const [exercicesSnap, submissionsSnap] = await Promise.all([
+        // Requêtes en parallèle : exercices + soumissions de l'élève + résultats d'examen
+        const [exercicesSnap, submissionsSnap, examResultsSnap] = await Promise.all([
             getDocs(collection(db, 'exercices')),
             userEmail
                 ? getDocs(query(collection(db, 'submissions'), where('email_eleve', '==', userEmail)))
+                : Promise.resolve({ docs: [] }),
+            userEmail
+                ? getDocs(query(collection(db, 'exam_results'), where('email_eleve', '==', userEmail)))
                 : Promise.resolve({ docs: [] })
         ]);
 
@@ -214,6 +217,39 @@ async function loadLobby() {
             lobbyLoader.classList.add('hidden');
             lobbyContent.classList.remove('hidden');
             return;
+        }
+
+        // Mettre à jour la bannière d'examen dans le lobby
+        const examBanner = document.getElementById('lobbyExamBanner');
+        const startExamBtn = document.getElementById('startExamBtn');
+        if (examBanner && startExamBtn) {
+            if (examActive) {
+                examBanner.classList.remove('hidden');
+                
+                // Vérifier si l'élève a déjà passé l'examen
+                const examResults = examResultsSnap ? examResultsSnap.docs.map(d => d.data()) : [];
+                if (examResults.length > 0) {
+                    // Trier par date pour avoir le plus récent
+                    examResults.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    const latestExam = examResults[0];
+
+                    examBanner.querySelector('p').innerHTML = `Félicitations, tu as terminé ton examen final !<br><strong>Note obtenue : ${latestExam.score}/${latestExam.total} (${latestExam.pct}%)</strong> le ${new Date(latestExam.date).toLocaleDateString('fr-FR')}.`;
+                    startExamBtn.textContent = "🏆 Examen Terminé";
+                    startExamBtn.disabled = true;
+                    startExamBtn.style.background = "linear-gradient(135deg, #10b981 0%, #059669 100%)";
+                    startExamBtn.style.boxShadow = "none";
+                    startExamBtn.style.cursor = "default";
+                } else {
+                    examBanner.querySelector('p').textContent = "Teste tes connaissances sur l'ensemble des chapitres actifs. 20 questions de révision pour évaluer ton autonomie !";
+                    startExamBtn.textContent = "Lancer l'examen ⚡";
+                    startExamBtn.disabled = false;
+                    startExamBtn.style.background = "";
+                    startExamBtn.style.boxShadow = "";
+                    startExamBtn.style.cursor = "";
+                }
+            } else {
+                examBanner.classList.add('hidden');
+            }
         }
 
         // Construire une map exercice_id -> dernière soumission (la plus récente)
