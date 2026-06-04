@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Synthèse UAA5 — Référence JavaScript</title>
+  <meta name="color-scheme" content="light dark">
+  <link rel="stylesheet" href="style.css">
+  <!-- Inline theme initializer to prevent Flash of Unstyled Content (FOUC) -->
+  <script>
+    {
+      const colorScheme = localStorage.getItem("color-scheme");
+      if (colorScheme) {
+        document.documentElement.setAttribute('data-theme', colorScheme);
+      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    }
+  </script>
+</head>
+<body>
+
+  <!-- Mobile Top Header Bar -->
+  <header class="mobile-header">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+      </svg>
+      <span>UAA5 JavaScript</span>
+    </div>
+    <button class="mobile-menu-btn" id="mobile-menu-toggle" aria-label="Menu">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </header>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+          </svg>
+          <span>UAA5 JavaScript</span>
+        </div>
+        
+        <div class="progress-container">
+          <div class="progress-header">
+            <span>Progression lecture</span>
+            <span id="progress-percent">0%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="theme-toggle-container">
+        <button class="theme-btn" id="theme-toggle">
+          <span class="theme-icon"></span>
+          <span class="theme-text">Mode Sombre</span>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-label">Cours & Synthese</span>
+        <a href="#ch2_vars" class="nav-link" data-chapter="ch2_vars">
+          <span>Variables & Types</span>
+          <span class="chapter-badge">CH2</span>
+        </a>
+        <a href="#ch_ops" class="nav-link" data-chapter="ch_ops">
+          <span>Opérateurs</span>
+          <span class="chapter-badge">CH2</span>
+        </a>
+        <a href="#ch4_strings" class="nav-link" data-chapter="ch4_strings">
+          <span>Chaînes</span>
+          <span class="chapter-badge">CH4</span>
+        </a>
+        <a href="#ch3_dom" class="nav-link" data-chapter="ch3_dom">
+          <span>DOM & E/S</span>
+          <span class="chapter-badge">CH3+</span>
+        </a>
+        <a href="#ch5_cond" class="nav-link" data-chapter="ch5_cond">
+          <span>Conditions</span>
+          <span class="chapter-badge">CH5</span>
+        </a>
+        <a href="#ch6_loops" class="nav-link" data-chapter="ch6_loops">
+          <span>Boucles</span>
+          <span class="chapter-badge">CH6+</span>
+        </a>
+        <a href="#ch8_math" class="nav-link" data-chapter="ch8_math">
+          <span>Math & Date</span>
+          <span class="chapter-badge">CH8</span>
+        </a>
+        <a href="#ch7_algo" class="nav-link" data-chapter="ch7_algo">
+          <span>Algo Patterns</span>
+          <span class="chapter-badge">CH7</span>
+        </a>
+        <a href="#ch_val" class="nav-link" data-chapter="ch_val">
+          <span>Validation</span>
+          <span class="chapter-badge">CH3+5</span>
+        </a>
+        <a href="#ch_pieges" class="nav-link" data-chapter="ch_pieges">
+          <span>Les 10 Pièges</span>
+          <span class="chapter-badge">Tous</span>
+        </a>
+        <a href="#ch_dashboard" class="nav-link" data-chapter="ch_dashboard">
+          <span>Tableau de Bord</span>
+          <span class="chapter-badge">UAA5</span>
+        </a>
+
+        <span class="nav-label">Outils Pratiques</span>
+        <a href="#playground-card" class="nav-link">
+          <span>🧪 Laboratoire d'Op.</span>
+        </a>
+        <a href="#dom-card" class="nav-link">
+          <span>🖥️ Simulateur DOM</span>
+        </a>
+        <a href="#validation-card" class="nav-link">
+          <span>🛡️ Flux de Validation</span>
+        </a>
+        <a href="#algo-card" class="nav-link" data-chapter="ch7_algo_tracer">
+          <span>🔄 Tracé d'Algorithmes</span>
+        </a>
+        <a href="#quiz-card" class="nav-link">
+          <span>🎮 Quiz d'évaluation</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header>
+        <h1>Synthèse UAA5 — Référence JavaScript</h1>
+        <div class="intro-quote">
+          Programmation impérative · 10 chapitres · Conforme aux compétences UAA5 du programme informatique SEGEC
+        </div>
+      </header>
+
+      <!-- ==========================================
+           VARIABLES & TYPES (CH2)
+           ========================================== -->
+      <section id="ch2_vars" class="cat-vars">
+        <h2>Variables &amp; Types <span class="chap-anchor">CH2</span></h2>
+        
+        <p>Les variables permettent de stocker temporairement des données en mémoire. En JavaScript moderne, nous utilisons principalement deux mots-clés pour déclarer des variables :</p>
+        
+        <div class="code-container">
+          <pre><div class="code-header"><span class="code-title">javascript</span><div class="code-actions"><button class="code-btn btn-copy">Copier</button></div></div><code><span class="hl-keyword">const</span> nom = <span class="hl-string">"Alex"</span>;   <span class="hl-comment">// valeur fixe — à utiliser par défaut</span>
+<span class="hl-keyword">let</span> score = <span class="hl-number">0</span>;        <span class="hl-comment">// valeur modifiable — si réassignation</span>
+<span class="hl-comment">// var → legacy (ancienne syntaxe), à éviter absolument</span></code></pre>
+        </div>
+
+        <p>Voici la liste des types de données primitifs abordés dans le cadre de l'UAA5 :</p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Exemple</th>
+                <th>Résultat de <code>typeof</code></th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong><code>number</code></strong></td>
+                <td><code>42</code>, <code>3.14</code>, <code>-5</code></td>
+                <td><span class="badge-info">"number"</span></td>
+                <td>Valeurs numériques (entières ou décimales).</td>
+              </tr>
+              <tr>
+                <td><strong><code>string</code></strong></td>
+                <td><code>"Bonjour"</code>, <code>'JS'</code></td>
+                <td><span class="badge-info">"string"</span></td>
+                <td>Chaînes de caractères (du texte).</td>
+              </tr>
+              <tr>
+                <td><strong><code>boolean</code></strong></td>
+                <td><code>true</code>, <code>false</code></td>
+                <td><span class="badge-info">"boolean"</span></td>
+                <td>Valeurs logiques (vrai ou faux).</td>
+              </tr>
+              <tr>
+                <td><strong><code>undefined</code></strong></td>
+                <td><code>let x;</code></td>
+                <td><span class="badge-info">"undefined"</span></td>
+                <td>Variable créée mais à laquelle aucune valeur n'a été assignée.</td>
+              </tr>
+              <tr>
+                <td><strong><code>null</code></strong></td>
+                <td><code>const v = null;</code></td>
+                <td><span class="badge-info">"object"</span> <span class="hl-comment">← bug historique !</span></td>
+                <td>Représente l'absence intentionnelle de valeur.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body">
+            <div class="callout-title">Règle de bonne pratique</div>
+            <div class="callout-text">Déclarez par défaut toutes vos variables avec <code>const</code>. Utilisez <code>let</code> uniquement si vous devez explicitement réassigner une nouvelle valeur à cette variable plus tard.</div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body">
+            <div class="callout-title">Le piège de <code>typeof null</code></div>
+            <div class="callout-text">L'instruction <code>typeof null</code> renvoie <code>"object"</code>. C'est un bug historique du langage JavaScript qui n'a jamais été corrigé pour des raisons de rétrocompatibilité. Pour vérifier si une variable vaut null, faites directement un test d'égalité stricte : <code>variable === null</code>.</div>
+          </div>
+        </div>
+      </section>
+
+      <hr>
+
+      <!-- ==========================================
+           OPÉRATEURS (CH2)
+           ========================================== -->
+      <section id="ch_ops" class="cat-ops">
+        <h2>Opérateurs <span class="chap-anchor">CH2</span></h2>
+
+        <h3>Arithmétiques</h3>
+        <p>Utilisés pour réaliser des calculs mathématiques standard :</p>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Op.</th>
+                <th>Opération</th>
+                <th>Exemple</th>
+                <th>Résultat</th>
+                <th>Essayer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>+</code></td>
+                <td>Addition</td>
+                <td><code>10 + 3</code></td>
+                <td><code>13</code></td>
+                <td><button class="code-btn btn-test" data-test-type="ops" data-test-a="10" data-test-b="3" data-test-op="+">Tester</button></td>
+              </tr>
+              <tr>
+                <td><code>-</code></td>
+                <td>Soustraction</td>
+                <td><code>10 - 3</code></td>
+                <td><code>7</code></td>
+                <td><button class="code-btn btn-test" data-test-type="ops" data-test-a="10" data-test-b="3" data-test-op="-">Tester</button></td>
+              </tr>
+              <tr>
+                <td><code>*</code></td>
+                <td>Multiplication</td>
+                <td><code>10 * 3</code></td>
+                <td><code>30</code></td>
+                <td><button class="code-btn btn-test" data-test-type="ops" data-test-a="10" data-test-b="3" data-test-op="*">Tester</button></td>
+              </tr>
+              <tr>
+                <td><code>/</code></td>
+                <td>Division</td>
+                <td><code>10 / 3</code></td>
+                <td><code>3.33…</code></td>
+                <td><button class="code-btn btn-test" data-test-type="ops" data-test-a="10" data-test-b="3" data-test-op="/">Tester</button></td>
+              </tr>
+              <tr>
+                <td><code>%</code></td>
+                <td>Modulo (reste)</td>
+                <td><code>10 % 3</code></td>
+                <td><code>1</code></td>
+                <td><button class="code-btn btn-test" data-test-type="ops" data-test-a="10" data-test-b="3" data-test-op="%">Tester</button></td>
+              </tr>
+              <tr>
+                <td><code>**</code></td>
+                <td>Exponentiation (puissance)</td>
+                <td><code>2 ** 8</code></td>
+                <td><code>256</code></td>
+                <td><button class="code-btn btn-test" data-test-type="ops" data-test-a="2" data-test-b="8" data-test-op="**">Tester</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Comparaison</h3>
+        <p>Permettent de tester des relations logiques entre des valeurs :</p>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Op.</th>
+                <th>Signification</th>
+                <th>Exemple</th>
+                <th>Résultat</th>
+                <th>Essayer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>===</code></td>
+                <td>Strictement égal (valeur et type)</td>
+                <td><code>5 === "5"</code></td>
+                <td><code>false</code></td>
+                <td><button class="code-btn btn-test" data-test-type="ops" data-test-a="5" data-test-b="&quot;5&quot;" data-test-op="===">Tester</button></td>
+              </tr>
+              <tr>
+                <td><code>==</code></td>
+                <td>Égal (faible, fait des conversions)</td>
+                <td><code>5 == "5"</code></td>
+                <td><code>true</code></td>
+                <td><button class="code-btn btn-test" data-test-type="ops" data-test-a="5" data-test-b="&quot;5&quot;" data-test-op="==">Tester</button></td>
+              </tr>
+              <tr>
+                <td><code>!==</code></td>
+                <td>Strictement différent</td>
+                <td><code>5 !== "5"</code></td>
+                <td><code>true</code></td>
+                <td><button class="code-btn btn-test" data-test-type="ops" data-test-a="5" data-test-b="&quot;5&quot;" data-test-op="!==">Tester</button></td>
+              </tr>
+              <tr>
+                <td><code>&lt;</code> / <code>&gt;</code></td>
+                <td>Strictement inférieur / supérieur</td>
+                <td><code>3 &lt; 5</code></td>
+                <td><code>true</code></td>
+                <td><button class="code-btn btn-test" data-test-type="ops" data-test-a="3" data-test-b="5" data-test-op="&lt;">Tester</button></td>
+              </tr>
+              <tr>
+                <td><code>&lt;=</code> / <code>&gt;=</code></td>
+                <td>Inférieur ou égal / supérieur ou égal</td>
+                <td><code>5 &lt;= 5</code></td>
+                <td><code>true</code></td>
+                <td><button class="code-btn btn-test" data-test-type="ops" data-test-a="5" data-test-b="5" data-test-op="&lt;=">Tester</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Logiques</h3>
+        <p>Pour combiner plusieurs conditions :</p>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Op.</th>
+                <th>Signification</th>
+                <th>Exemple</th>
+                <th>Résultat</th>
+                <th>Essayer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>&&</code></td>
+                <td>ET — les deux conditions doivent être vraies</td>
+                <td><code>true && false</code></td>
+                <td><code>false</code></td>
+                <td><button class="code-btn btn-test" data-test-type="ops" data-test-a="true" data-test-b="false" data-test-op="&&">Tester</button></td>
+              </tr>
+              <tr>
+                <td><code>||</code></td>
+                <td>OU — au moins une condition doit être vraie</td>
+                <td><code>false || true</code></td>
+                <td><code>true</code></td>
+                <td><button class="code-btn btn-test" data-test-type="ops" data-test-a="false" data-test-b="true" data-test-op="||">Tester</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Raccourcis d'affectation</h3>
+        <div class="code-container">
+          <pre><div class="code-header"><span class="code-title">javascript</span><div class="code-actions"><button class="code-btn btn-copy">Copier</button></div></div><code>score += <span class="hl-number">10</span>;   <span class="hl-comment">// Équivaut à : score = score + 10</span>
+score -= <span class="hl-number">5</span>;    <span class="hl-comment">// Équivaut à : score = score - 5</span>
+score *= <span class="hl-number">2</span>;    <span class="hl-comment">// Équivaut à : score = score * 2</span>
+score++;       <span class="hl-comment">// Équivaut à : score = score + 1 (Incrémentation)</span>
+score--;       <span class="hl-comment">// Équivaut à : score = score - 1 (Décrémentation)</span></code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body">
+            <div class="callout-title">Règle de comparaison recommandée</div>
+            <div class="callout-text">Utilisez toujours l'égalité stricte <code>===</code> et l'inégalité stricte <code>!==</code>. N'utilisez jamais <code>==</code> ni <code>!=</code> car ils effectuent des coercions de type implicites confuses qui créent des bugs insidieux.</div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body">
+            <div class="callout-title">Le piège de la coercion avec l'addition</div>
+            <div class="callout-text">L'opérateur <code>+</code> fait de la concaténation si l'un des deux éléments est du texte : <code>"5" + 3</code> donne <code>"53"</code>. Les autres opérateurs arithmétiques forcent la conversion numérique : <code>"5" - 3</code> donne le nombre <code>2</code>.</div>
+          </div>
+        </div>
+
+        <!-- LABO INTERACTIF DES OPÉRATEURS -->
+        <div class="interactive-card card-ops" id="playground-card">
+          <span class="card-label">Apprentissage Actif</span>
+          <h3 class="card-headline">🧪 Le Laboratoire d'Opérateurs (Playground)</h3>
+          <p>Saisissez des valeurs et choisissez un opérateur pour analyser en temps réel comment JavaScript effectue les calculs et gère les types !</p>
+          
+          <div class="interactive-inputs">
+            <div class="form-group">
+              <label class="form-label" for="op-input-a">Entrée A</label>
+              <div class="input-wrapper">
+                <input type="text" class="form-input" id="op-input-a" value="5" placeholder="ex: 5, &quot;5&quot;, true">
+                <span class="type-indicator" id="type-indicator-a">number</span>
+              </div>
+            </div>
+
+            <div class="form-group group-operator">
+              <label class="form-label" for="op-select">Opérateur</label>
+              <select class="form-select" id="op-select">
+                <optgroup label="Comparaison">
+                  <option value="===" selected>===</option>
+                  <option value="==">==</option>
+                  <option value="!==">!==</option>
+                  <option value="&lt;">&lt;</option>
+                  <option value="&lt;=">&lt;=</option>
+                </optgroup>
+                <optgroup label="Arithmétique">
+                  <option value="+">+</option>
+                  <option value="-">-</option>
+                  <option value="*">*</option>
+                  <option value="/">/</option>
+                  <option value="%">%</option>
+                  <option value="**">**</option>
+                </optgroup>
+                <optgroup label="Logique">
+                  <option value="&&">&amp;&amp;</option>
+                  <option value="||">||</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="op-input-b">Entrée B</label>
+              <div class="input-wrapper">
+                <input type="text" class="form-input" id="op-input-b" value="&quot;5&quot;" placeholder="ex: 5, &quot;5&quot;, false">
+                <span class="type-indicator" id="type-indicator-b">string</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="result-box" id="op-result-box">
+            <span class="result-title">Résultat :</span>
+            <span class="result-value" id="op-result-val">false</span>
+            
+            <span class="result-title">Type du retour :</span>
+            <span class="result-value" style="font-size:1rem" id="op-result-type">boolean</span>
+            
+            <div class="result-explanation" id="op-result-desc">
+              L'égalité stricte <code>===</code> compare la valeur ET le type. Le premier est de type <code>number</code> (5) et le second de type <code>string</code> ("5"). Le résultat est <code>false</code> car les types diffèrent.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr>
+
+      <!-- ==========================================
+           CHAÎNES DE CARACTÈRES (CH4)
+           ========================================== -->
+      <section id="ch4_strings" class="cat-vars">
+        <h2>Chaînes de caractères <span class="chap-anchor">CH4</span></h2>
+
+        <p>Les chaînes de caractères permettent de manipuler du texte. On peut les déclarer de trois façons différentes :</p>
+        
+        <div class="code-container">
+          <pre><div class="code-header"><span class="code-title">javascript</span><div class="code-actions"><button class="code-btn btn-copy">Copier</button></div></div><code><span class="hl-keyword">const</span> a = <span class="hl-string">"guillemets doubles"</span>;
+<span class="hl-keyword">const</span> b = <span class="hl-string">'guillemets simples'</span>;
+<span class="hl-keyword">const</span> c = <span class="hl-string">`template literal — <span class="hl-operator">${</span>a<span class="hl-operator">}</span>`</span>;       <span class="hl-comment">// expression dans ${ }</span>
+<span class="hl-keyword">const</span> d = <span class="hl-string">`Niveau <span class="hl-operator">${</span>score * 2<span class="hl-operator">}</span>`</span>;           <span class="hl-comment">// accepte n'importe quel calcul JS</span></code></pre>
+        </div>
+
+        <p>Les chaînes possèdent des propriétés (comme <code>.length</code>) et de nombreuses méthodes prédéfinies :</p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Méthode / Propriété</th>
+                <th>Description</th>
+                <th>Exemple → Résultat</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>.length</code></td>
+                <td>Renvoie la longueur du texte (nombre de caractères).</td>
+                <td><code>"Bonjour".length</code> → <span class="hl-number">7</span></td>
+              </tr>
+              <tr>
+                <td><code>[i]</code> / <code>.charAt(i)</code></td>
+                <td>Lit le caractère à l'indice <code>i</code> (commence à 0).</td>
+                <td><code>"abc"[0]</code> → <span class="hl-string">"a"</span></td>
+              </tr>
+              <tr>
+                <td><code>.toUpperCase()</code></td>
+                <td>Convertit le texte tout en majuscules.</td>
+                <td><code>"js".toUpperCase()</code> → <span class="hl-string">"JS"</span></td>
+              </tr>
+              <tr>
+                <td><code>.toLowerCase()</code></td>
+                <td>Convertit le texte tout en minuscules.</td>
+                <td><code>"JS".toLowerCase()</code> → <span class="hl-string">"js"</span></td>
+              </tr>
+              <tr>
+                <td><code>.trim()</code></td>
+                <td>Supprime les espaces inutiles au début et à la fin.</td>
+                <td><code>"  hi  ".trim()</code> → <span class="hl-string">"hi"</span></td>
+              </tr>
+              <tr>
+                <td><code>.includes(sub)</code></td>
+                <td>Vérifie si le texte contient la sous-chaîne <code>sub</code>.</td>
+                <td><code>"hello".includes("ell")</code> → <span class="hl-keyword">true</span></td>
+              </tr>
+              <tr>
+                <td><code>.startsWith(sub)</code></td>
+                <td>Vérifie si le texte commence par <code>sub</code>.</td>
+                <td><code>"hello".startsWith("he")</code> → <span class="hl-keyword">true</span></td>
+              </tr>
+              <tr>
+                <td><code>.endsWith(sub)</code></td>
+                <td>Vérifie si le texte se termine par <code>sub</code>.</td>
+                <td><code>"hello".endsWith("lo")</code> → <span class="hl-keyword">true</span></td>
+              </tr>
+              <tr>
+                <td><code>.indexOf(sub)</code></td>
+                <td>Renvoie la position de la sous-chaîne, ou <code>-1</code> si absente.</td>
+                <td><code>"hello".indexOf("l")</code> → <span class="hl-number">2</span></td>
+              </tr>
+              <tr>
+                <td><code>.slice(d, f)</code></td>
+                <td>Extrait une partie du texte depuis l'indice <code>d</code> jusqu'à <code>f</code> exclu.</td>
+                <td><code>"hello".slice(1, 3)</code> → <span class="hl-string">"el"</span></td>
+              </tr>
+              <tr>
+                <td><code>.replace(x, y)</code></td>
+                <td>Remplace la première occurrence de <code>x</code> par <code>y</code>.</td>
+                <td><code>"aa".replace("a", "b")</code> → <span class="hl-string">"ba"</span></td>
+              </tr>
+              <tr>
+                <td><code>.replaceAll(x, y)</code></td>
+                <td>Remplace toutes les occurrences de <code>x</code> par <code>y</code>.</td>
+                <td><code>"aa".replaceAll("a", "b")</code> → <span class="hl-string">"bb"</span></td>
+              </tr>
+              <tr>
+                <td><code>.split(sep)</code></td>
+                <td>Découpe la chaîne selon le séparateur pour en faire un tableau.</td>
+                <td><code>"a,b".split(",")</code> → <span class="hl-string">["a", "b"]</span></td>
+              </tr>
+              <tr>
+                <td><code>.repeat(n)</code></td>
+                <td>Répète la chaîne <code>n</code> fois.</td>
+                <td><code>"ab".repeat(3)</code> → <span class="hl-string">"ababab"</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body">
+            <div class="callout-title">Les chaînes sont immuables</div>
+            <div class="callout-text">En JavaScript, les chaînes de caractères ne peuvent pas être modifiées directement en mémoire. Les méthodes comme <code>.toUpperCase()</code> ou <code>.trim()</code> ne modifient pas la variable de départ, elles renvoient une <strong>nouvelle</strong> chaîne. Vous devez donc réassigner ou stocker le résultat : <br><code>const monTexteMaj = monTexte.toUpperCase();</code></div>
+          </div>
+        </div>
+      </section>
+
+      <hr>
+
+      <!-- ==========================================
+           DOM & IO (CH3+)
+           ========================================== -->
+      <section id="ch3_dom" class="cat-dom">
+        <h2>Entrées / Sorties &amp; DOM <span class="chap-anchor">CH3+</span></h2>
+
+        <p>JavaScript permet de communiquer avec l'utilisateur (Entrées/Sorties) soit via des boîtes de dialogue système, soit en manipulant directement les éléments du document HTML (le DOM).</p>
+
+        <div class="code-container">
+          <pre><div class="code-header"><span class="code-title">javascript</span><div class="code-actions"><button class="code-btn btn-copy">Copier</button><button class="code-btn btn-test" data-test-type="dom" data-dom-msg="Message depuis la synthèse !" data-dom-bg="#a78bfa" data-dom-border="#7c3aed" data-dom-size="18">Tester l'effet</button></div></div><code><span class="hl-comment">// --- 1. ENTRÉE UTILISATEUR VIA PROMPT ---</span>
+<span class="hl-keyword">const</span> saisie = prompt(<span class="hl-string">"Ton prénom ?"</span>);
+<span class="hl-comment">// → Renvoie une string ou null si l'utilisateur clique sur "Annuler"</span>
+<span class="hl-keyword">const</span> n = Number(saisie); <span class="hl-comment">// Toujours convertir avant d'effectuer un calcul numérique !</span>
+
+<span class="hl-comment">// --- 2. LIRE UN CHAMP DE SAISIE DANS LA PAGE HTML ---</span>
+<span class="hl-keyword">const</span> val = document.getElementById(<span class="hl-string">"monInput"</span>).value;  <span class="hl-comment">// Toujours du texte (string) !</span>
+<span class="hl-keyword">const</span> nb  = Number(document.getElementById(<span class="hl-string">"monInput"</span>).value);
+
+<span class="hl-comment">// --- 3. MODIFIER LA PAGE HTML ---</span>
+element.textContent = <span class="hl-string">"texte brut"</span>;         <span class="hl-comment">// Remplace le texte brut (sécurisé)</span>
+element.innerHTML   = <span class="hl-string">"&lt;b&gt;texte gras&lt;/b&gt;"</span>;  <span class="hl-comment">// Interprète les balises HTML</span>
+element.className   = <span class="hl-string">"card card-ok"</span>;       <span class="hl-comment">// Écrase et remplace les classes CSS</span>
+element.disabled    = <span class="hl-keyword">true</span>;                 <span class="hl-comment">// Active ou désactive un bouton</span>
+output.innerHTML    = <span class="hl-string">""</span>;                   <span class="hl-comment">// Vide entièrement le contenu d'une boîte</span>
+
+<span class="hl-comment">// --- 4. CRÉER ET INSÉRER UN NOUVEL ÉLÉMENT ---</span>
+<span class="hl-keyword">const</span> div = document.createElement(<span class="hl-string">"div"</span>);
+div.className   = <span class="hl-string">"card"</span>;
+div.textContent = <span class="hl-string">"Contenu dynamique"</span>;
+document.getElementById(<span class="hl-string">"output"</span>).appendChild(div);
+
+<span class="hl-comment">// --- 5. ÉCOUTER UN ÉVÉNEMENT (CLIC...) ---</span>
+document.getElementById(<span class="hl-string">"btn"</span>).addEventListener(<span class="hl-string">"click"</span>, <span class="hl-keyword">function</span>() {
+    <span class="hl-keyword">const</span> valeurSaisie = document.getElementById(<span class="hl-string">"input"</span>).value;
+    <span class="hl-comment">// Traitement exécuté au moment du clic...</span>
+});
+
+<span class="hl-comment">// --- 6. ÉTAT PERSISTANT ENTRE LES CLICS ---</span>
+<span class="hl-keyword">let</span> compteur = <span class="hl-number">0</span>;   <span class="hl-comment">// Déclarée en dehors du listener : sa valeur survit aux clics</span>
+document.getElementById(<span class="hl-string">"btn"</span>).addEventListener(<span class="hl-string">"click"</span>, <span class="hl-keyword">function</span>() {
+    compteur++;      <span class="hl-comment">// Incrémente la variable globale à chaque clic</span>
+});</code></pre>
+        </div>
+
+        <!-- SIMULATEUR DU DOM EN TEMPS RÉEL -->
+        <div class="interactive-card card-dom" id="dom-card">
+          <span class="card-label">Apprentissage Actif</span>
+          <h3 class="card-headline">🖥️ Le Simulateur du DOM en temps réel</h3>
+          <p>Modifiez les paramètres du formulaire ci-dessous. Le script met à jour instantanément la zone de prévisualisation HTML à l'aide de commandes JavaScript que vous pouvez lire ci-dessous !</p>
+          
+          <div class="dom-grid">
+            <!-- Inputs -->
+            <div style="display:flex; flex-direction:column; gap:16px;">
+              <div class="form-group">
+                <label class="form-label" for="dom-input-message">Texte à afficher (textContent)</label>
+                <input type="text" class="form-input" id="dom-input-message" value="Bonjour la classe d'informatique !">
+              </div>
+              
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div class="form-group">
+                  <label class="form-label" for="dom-input-bg">Couleur de fond (style.backgroundColor)</label>
+                  <select class="form-select" id="dom-input-bg">
+                    <option value="#3b82f6" selected>Bleu royal</option>
+                    <option value="#10b981">Vert émeraude</option>
+                    <option value="#8b5cf6">Violet améthyste</option>
+                    <option value="#f59e0b">Or / Ambre</option>
+                    <option value="#f43f5e">Rose corail</option>
+                    <option value="#1e293b">Sombre</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label" for="dom-input-border">Bordure (style.borderColor)</label>
+                  <select class="form-select" id="dom-input-border">
+                    <option value="#1d4ed8" selected>Bleu foncé</option>
+                    <option value="#047857">Vert foncé</option>
+                    <option value="#6d28d9">Violet foncé</option>
+                    <option value="#b45309">Orange foncé</option>
+                    <option value="#be123c">Rose foncé</option>
+                    <option value="#0f172a">Très sombre</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="dom-input-size">Taille de police : <span id="font-size-val">16</span>px (style.fontSize)</label>
+                <input type="range" class="form-input" id="dom-input-size" min="12" max="32" value="16" style="padding:4px 0">
+              </div>
+
+              <button class="btn-apply" id="dom-btn-apply">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Appliquer via JS
+              </button>
+            </div>
+            
+            <!-- Output Rendering & Code Display -->
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div class="dom-preview-zone">
+                <div class="dom-preview-badge">Rendu HTML (id="preview-card")</div>
+                <div class="preview-card" id="dom-preview-card">Bonjour la classe !</div>
+              </div>
+              
+              <div class="code-witness" id="dom-code-witness">
+                <!-- Rempli par app.js -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr>
+
+      <!-- ==========================================
+           CONDITIONS (CH5)
+           ========================================== -->
+      <section id="ch5_cond" class="cat-log">
+        <h2>Conditions <span class="chap-anchor">CH5</span></h2>
+
+        <p>Les structures conditionnelles permettent de dériver le comportement d'un programme en fonction de critères logiques.</p>
+
+        <h3>Structure IF / ELSE IF / ELSE</h3>
+        <div class="code-container">
+          <pre><div class="code-header"><span class="code-title">javascript</span><div class="code-actions"><button class="code-btn btn-copy">Copier</button></div></div><code><span class="hl-keyword">if</span> (score &gt;= <span class="hl-number">85</span>) {
+    <span class="hl-comment">// Exécuté si la condition est vraie. Les blocs suivants sont alors ignorés.</span>
+} <span class="hl-keyword">else</span> <span class="hl-keyword">if</span> (score &gt;= <span class="hl-number">70</span>) {
+    <span class="hl-comment">// Testé uniquement si la première condition était fausse (false).</span>
+} <span class="hl-keyword">else</span> {
+    <span class="hl-comment">// Exécuté si aucun des tests précédents n'était vrai (fallback).</span>
+}</code></pre>
+        </div>
+
+        <h3>Structure SWITCH (Valeurs discrètes précises)</h3>
+        <div class="code-container">
+          <pre><div class="code-header"><span class="code-title">javascript</span><div class="code-actions"><button class="code-btn btn-copy">Copier</button></div></div><code><span class="hl-keyword">switch</span> (choix) {
+    <span class="hl-keyword">case</span> <span class="hl-string">"1"</span>:
+        <span class="hl-comment">// Traitement pour le choix "1"</span>
+        <span class="hl-keyword">break</span>;    <span class="hl-comment">// OBLIGATOIRE — empêche de continuer vers les cases suivants !</span>
+    <span class="hl-keyword">case</span> <span class="hl-string">"2"</span>:
+        <span class="hl-comment">// Traitement pour le choix "2"</span>
+        <span class="hl-keyword">break</span>;
+    <span class="hl-keyword">default</span>:
+        <span class="hl-comment">// Exécuté si aucune valeur case ne correspond</span>
+}</code></pre>
+        </div>
+
+        <h3>L'opérateur Ternaire</h3>
+        <div class="code-container">
+          <pre><div class="code-header"><span class="code-title">javascript</span><div class="code-actions"><button class="code-btn btn-copy">Copier</button></div></div><code><span class="hl-keyword">const</span> statut = hp &gt; <span class="hl-number">0</span> ? <span class="hl-string">"Vivant"</span> : <span class="hl-string">"KO"</span>;
+<span class="hl-comment">//            [condition] ? [si vrai] : [si faux]</span></code></pre>
+        </div>
+
+        <p><strong>Valeurs considérées comme Falsy</strong> (évaluées à <code>false</code> dans un test logique) : <br>
+          <code>false</code>, <code>0</code>, <code>""</code> (chaîne vide), <code>null</code>, <code>undefined</code>, <code>NaN</code>.
+        </p>
+
+        <div class="callout callout-tip">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body">
+            <div class="callout-title">Ordre logique des Else If</div>
+            <div class="callout-text">Placez toujours vos conditions de la plus restrictive à la plus générale. Si vous écrivez <code>if (score &gt; 50)</code> en premier puis <code>else if (score &gt; 90)</code>, le second bloc ne s'exécutera jamais car un score de 95 validera le premier test et arrêtera l'évaluation.</div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body">
+            <div class="callout-title">Comparaison stricte du Switch</div>
+            <div class="callout-text">Le bloc <code>switch</code> réalise une comparaison en égalité stricte (<code>===</code>). Puisque l'instruction <code>prompt()</code> renvoie par défaut du texte, vous devez tester des chaînes de caractères : écrire <code>case "1":</code> (avec guillemets) et non <code>case 1:</code>.</div>
+          </div>
+        </div>
+      </section>
+
+      <hr>
+
+      <!-- ==========================================
+           BOUCLES (CH6-7)
+           ========================================== -->
+      <section id="ch6_loops" class="cat-loops">
+        <h2>Boucles <span class="chap-anchor">CH6-7</span></h2>
+
+        <p>Les boucles (ou structures répétitives) permettent de répéter un bloc d'instructions un certain nombre de fois.</p>
+
+        <div class="code-container">
+          <pre><div class="code-header"><span class="code-title">javascript</span><div class="code-actions"><button class="code-btn btn-copy">Copier</button></div></div><code><span class="hl-comment">// --- 1. BOUCLE WHILE (Nombre d'itérations inconnu à l'avance) ---</span>
+<span class="hl-keyword">let</span> energie = <span class="hl-number">100</span>;
+<span class="hl-keyword">while</span> (energie &gt; <span class="hl-number">0</span>) {
+    energie -= <span class="hl-number">25</span>;   <span class="hl-comment">// IMPORTANT : faire évoluer la variable pour éviter une boucle infinie !</span>
+}
+
+<span class="hl-comment">// --- 2. BOUCLE FOR (Nombre d'itérations connu à l'avance) ---</span>
+<span class="hl-keyword">for</span> (<span class="hl-keyword">let</span> i = <span class="hl-number">0</span>; i &lt; <span class="hl-number">10</span>; i++) {
+    <span class="hl-comment">// S'exécute pour i allant de 0 à 9 (10 itérations au total)</span>
+}
+
+<span class="hl-comment">// --- 3. PARCOURIR LES CARACTÈRES D'UNE CHAÎNE (String) ---</span>
+<span class="hl-keyword">for</span> (<span class="hl-keyword">let</span> i = <span class="hl-number">0</span>; i &lt; str.length; i++) {
+    <span class="hl-keyword">const</span> caractere = str[i]; <span class="hl-comment">// ou str.charAt(i)</span>
+}
+
+<span class="hl-comment">// --- 4. BOUCLE DO...WHILE (S'exécute toujours au moins une fois) ---</span>
+<span class="hl-keyword">do</span> {
+    <span class="hl-comment">// Code exécuté une fois avant d'évaluer la condition du while en bas</span>
+} <span class="hl-keyword">while</span> (condition);
+
+<span class="hl-comment">// --- 5. INSTRUCTIONS DE CONTRÔLE D'ÉCHAPPEMENT ---</span>
+<span class="hl-keyword">for</span> (<span class="hl-keyword">let</span> i = <span class="hl-number">0</span>; i &lt; <span class="hl-number">100</span>; i++) {
+    <span class="hl-keyword">if</span> (i === <span class="hl-number">5</span>) <span class="hl-keyword">break</span>;         <span class="hl-comment">// Sort immédiatement de la boucle</span>
+    <span class="hl-keyword">if</span> (i % <span class="hl-number">2</span> === <span class="hl-number">0</span>) <span class="hl-keyword">continue</span>;  <span class="hl-comment">// Saute le reste du code et passe à l'itération suivante (impairs uniquement)</span>
+}</code></pre>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Boucle</th>
+                <th>À utiliser quand...</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong><code>for</code></strong></td>
+                <td>Le nombre d'itérations est connu à l'avance (ex: 10 itérations, longueur d'un texte, etc.).</td>
+              </tr>
+              <tr>
+                <td><strong><code>while</code></strong></td>
+                <td>Le nombre d'itérations est imprévisible et dépend d'une condition (ex: jusqu'à ce que l'utilisateur tape une bonne réponse).</td>
+              </tr>
+              <tr>
+                <td><strong><code>do...while</code></strong></td>
+                <td>Identique à la boucle <code>while</code>, mais le code doit s'exécuter au moins une fois avant de tester la condition.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <hr>
+
+      <!-- ==========================================
+           MATH & DATE (CH8)
+           ========================================== -->
+      <section id="ch8_math" class="cat-dom">
+        <h2>Fonctions prédéfinies — Math &amp; Date <span class="chap-anchor">CH8</span></h2>
+
+        <p>JavaScript fournit des bibliothèques globales d'objets pour réaliser des fonctions complexes sur les mathématiques et la gestion du temps.</p>
+
+        <h3>Fonctions Mathématiques Utiles</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Méthode</th>
+                <th>Description</th>
+                <th>Exemple → Résultat</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Math.round(n)</code></td>
+                <td>Calcule l'arrondi standard à l'entier le plus proche.</td>
+                <td><code>Math.round(4.5)</code> → <span class="hl-number">5</span></td>
+              </tr>
+              <tr>
+                <td><code>Math.floor(n)</code></td>
+                <td>Calcule l'arrondi vers le bas (troncation entière).</td>
+                <td><code>Math.floor(4.9)</code> → <span class="hl-number">4</span></td>
+              </tr>
+              <tr>
+                <td><code>Math.ceil(n)</code></td>
+                <td>Calcule l'arrondi vers le haut.</td>
+                <td><code>Math.ceil(4.1)</code> → <span class="hl-number">5</span></td>
+              </tr>
+              <tr>
+                <td><code>Math.abs(n)</code></td>
+                <td>Renvoie la valeur absolue d'un nombre (sans signe négatif).</td>
+                <td><code>Math.abs(-5)</code> → <span class="hl-number">5</span></td>
+              </tr>
+              <tr>
+                <td><code>Math.min(a, b, …)</code></td>
+                <td>Trouve le plus petit nombre parmi la liste fournie.</td>
+                <td><code>Math.min(3, 1, 4)</code> → <span class="hl-number">1</span></td>
+              </tr>
+              <tr>
+                <td><code>Math.max(a, b, …)</code></td>
+                <td>Trouve le plus grand nombre parmi la liste fournie.</td>
+                <td><code>Math.max(3, 1, 4)</code> → <span class="hl-number">4</span></td>
+              </tr>
+              <tr>
+                <td><code>Math.sqrt(n)</code></td>
+                <td>Calcule la racine carrée.</td>
+                <td><code>Math.sqrt(144)</code> → <span class="hl-number">12</span></td>
+              </tr>
+              <tr>
+                <td><code>Math.pow(b, e)</code></td>
+                <td>Calcule la puissance (base <code>b</code> élevée à l'exposant <code>e</code>).</td>
+                <td><code>Math.pow(2, 10)</code> → <span class="hl-number">1024</span></td>
+              </tr>
+              <tr>
+                <td><code>Math.random()</code></td>
+                <td>Génère un nombre décimal aléatoire compris dans l'intervalle <code>[0, 1[</code> (exclu).</td>
+                <td><code>Math.random()</code> → <span class="hl-number">0.7341…</span></td>
+              </tr>
+              <tr>
+                <td><code>Math.PI</code></td>
+                <td>Propriété contenant la constante mathématique π.</td>
+                <td><code>Math.PI</code> → <span class="hl-number">3.14159…</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Pattern pour générer un entier aléatoire</h3>
+        <p>Pour générer un nombre entier aléatoire compris entre <code>min</code> et <code>max</code> (<strong>inclus</strong>) :</p>
+        <div class="code-container">
+          <pre><div class="code-header"><span class="code-title">javascript</span><div class="code-actions"><button class="code-btn btn-copy">Copier</button></div></div><code>Math.floor(Math.random() * (max - min + <span class="hl-number">1</span>)) + min
+
+<span class="hl-comment">// --- Exemples concrets ---</span>
+Math.floor(Math.random() * <span class="hl-number">6</span>)  + <span class="hl-number">1</span>;   <span class="hl-comment">// Dé de 6 faces → renvoie un nombre entier entre 1 et 6</span>
+Math.floor(Math.random() * <span class="hl-number">100</span>) + <span class="hl-number">1</span>;  <span class="hl-comment">// Nombre mystère → renvoie un nombre entier entre 1 et 100</span></code></pre>
+        </div>
+
+        <h3>Méthodes de gestion de Dates</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Méthode Date</th>
+                <th>Ce qu'elle retourne</th>
+                <th>Piège pédagogique</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>new Date()</code></td>
+                <td>Crée un objet représentant l'instant présent.</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td><code>.getFullYear()</code></td>
+                <td>Renvoie l'année sur 4 chiffres (ex: 2026).</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td><code>.getMonth()</code></td>
+                <td>Renvoie le mois (nombre de 0 à 11).</td>
+                <td>⚠️ <strong>0 = Janvier !</strong> Décembre = 11.</td>
+              </tr>
+              <tr>
+                <td><code>.getDate()</code></td>
+                <td>Renvoie le jour du mois (nombre de 1 à 31).</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td><code>.getDay()</code></td>
+                <td>Renvoie le jour de la semaine (nombre de 0 à 6).</td>
+                <td>⚠️ <strong>0 = Dimanche !</strong> Lundi = 1.</td>
+              </tr>
+              <tr>
+                <td><code>.getHours()</code></td>
+                <td>Renvoie les heures (0 à 23).</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td><code>.getMinutes()</code></td>
+                <td>Renvoie les minutes (0 à 59).</td>
+                <td>—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><strong>Formater une heure avec des zéros (ex: 09:05 au lieu de 9:5) :</strong></p>
+        <div class="code-container">
+          <pre><div class="code-header"><span class="code-title">javascript</span><div class="code-actions"><button class="code-btn btn-copy">Copier</button></div></div><code><span class="hl-keyword">const</span> maintenant = <span class="hl-keyword">new</span> Date();
+<span class="hl-keyword">const</span> h = String(maintenant.getHours()).padStart(<span class="hl-number">2</span>, <span class="hl-string">"0"</span>);
+<span class="hl-keyword">const</span> m = String(maintenant.getMinutes()).padStart(<span class="hl-number">2</span>, <span class="hl-string">"0"</span>);
+<span class="hl-keyword">const</span> heureFormatee = h + <span class="hl-string">":"</span> + m; <span class="hl-comment">// Affiche par exemple "09:05"</span></code></pre>
+        </div>
+      </section>
+
+      <hr>
+
+      <!-- ==========================================
+           PATTERNS ALGORITHMIQUES (CH7)
+           ========================================== -->
+      <section id="ch7_algo" class="cat-loops">
+        <h2>Patterns algorithmiques <span class="chap-anchor">CH7</span></h2>
+
+        <p>Les patterns algorithmiques de référence sont des structures types à connaître par cœur pour résoudre les problèmes d'examens (SEGEC) :</p>
+        
+        <div class="code-container">
+          <pre><div class="code-header"><span class="code-title">javascript</span><div class="code-actions"><button class="code-btn btn-copy">Copier</button></div></div><code><span class="hl-comment">// --- 1. FILTRAGE (Traiter seulement certains éléments) ---</span>
+<span class="hl-keyword">for</span> (<span class="hl-keyword">let</span> i = <span class="hl-number">0</span>; i &lt; n; i++) {
+    <span class="hl-keyword">if</span> (condition) { 
+        <span class="hl-comment">/* Code de traitement de l'élément i */</span> 
+    }
+}
+
+<span class="hl-comment">// --- 2. ACCUMULATION CONDITIONNELLE (Somme ou décompte) ---</span>
+<span class="hl-keyword">let</span> somme = <span class="hl-number">0</span>;
+<span class="hl-keyword">let</span> nombreElements = <span class="hl-number">0</span>;
+<span class="hl-keyword">for</span> (<span class="hl-keyword">let</span> i = <span class="hl-number">0</span>; i &lt; n; i++) {
+    <span class="hl-keyword">if</span> (condition) { 
+        somme += valeur; 
+        nombreElements++; 
+    }
+}
+
+<span class="hl-comment">// --- 3. RECHERCHE DE MAXIMUM / MINIMUM (Initialiser à null !) ---</span>
+<span class="hl-keyword">let</span> min = <span class="hl-keyword">null</span>;
+<span class="hl-keyword">let</span> max = <span class="hl-keyword">null</span>;
+<span class="hl-keyword">for</span> (<span class="hl-keyword">let</span> i = <span class="hl-number">0</span>; i &lt; n; i++) {
+    <span class="hl-keyword">if</span> (min === <span class="hl-keyword">null</span> || valeur &lt; min) {
+        min = valeur;
+    }
+    <span class="hl-keyword">if</span> (max === <span class="hl-keyword">null</span> || valeur &gt; max) {
+        max = valeur;
+    }
+}
+
+<span class="hl-comment">// --- 4. RECHERCHE AVEC ARRÊT ANTICIPÉ (Drapeau 'found') ---</span>
+<span class="hl-keyword">let</span> found = <span class="hl-keyword">false</span>;
+<span class="hl-keyword">let</span> indexTrouve = -<span class="hl-number">1</span>;
+<span class="hl-keyword">for</span> (<span class="hl-keyword">let</span> i = <span class="hl-number">0</span>; i &lt; n; i++) {
+    <span class="hl-keyword">if</span> (condition) { 
+        found = <span class="hl-keyword">true</span>; 
+        indexTrouve = i; 
+        <span class="hl-keyword">break</span>; <span class="hl-comment">// Interrompt immédiatement l'exécution de la boucle !</span>
+    }
+}</code></pre>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body">
+            <div class="callout-title">L'initialisation critique du Min / Max</div>
+            <div class="callout-text">N'initialisez jamais vos variables <code>min</code> ou <code>max</code> à <code>0</code> par défaut. Si votre liste contient uniquement des notes positives (ex: 12, 15, 8) et que vous avez initialisé <code>min = 0</code>, votre programme affichera à la fin que le minimum est 0 (ce qui est faux car 0 n'était pas dans la liste). Initialisez toujours à <code>null</code>.</div>
+          </div>
+        </div>
+
+        <!-- SIMULATEUR DE TRACÉ D'ALGORITHMES -->
+        <div class="interactive-card card-loops" id="algo-card" style="margin-top: 32px;">
+          <span class="card-label">Apprentissage Actif</span>
+          <h3 class="card-headline">🔄 Le Simulateur d'Algorithmes &amp; Tracé de Boucle</h3>
+          <p>Choisissez un algorithme de référence, saisissez une liste de notes, puis suivez l'exécution pas-à-pas pour comprendre comment l'index <code>i</code> progresse, comment les conditions sont évaluées et comment les variables de stockage évoluent en mémoire !</p>
+          
+          <div class="interactive-inputs">
+            <div class="form-group" style="flex: 1.2; min-width: 250px;">
+              <label class="form-label" for="algo-select">Pattern algorithmique à tracer</label>
+              <select class="form-select" id="algo-select">
+                <option value="somme" selected>1. ACCUMULATION : Calculer la somme des notes</option>
+                <option value="min">2. MINIMUM : Trouver la note la plus basse</option>
+                <option value="filtrage">3. FILTRAGE : Compter les notes de réussite (>= 10)</option>
+                <option value="recherche">4. RECHERCHE ANTICIPÉE : Chercher s'il y a un 20/20 (avec break)</option>
+              </select>
+            </div>
+            
+            <div class="form-group" style="flex: 0.8; min-width: 200px;">
+              <label class="form-label" for="algo-input-array">Liste des notes (séparées par des virgules)</label>
+              <input type="text" class="form-input" id="algo-input-array" value="12, 8, 15, 6, 20" placeholder="ex: 12, 8, 15, 6, 20">
+            </div>
+          </div>
+
+          <!-- Zone de rendu visuel du tableau -->
+          <div class="algo-visualizer">
+            <div class="algo-array-wrapper">
+              <div class="algo-array-container" id="algo-array-container">
+                <!-- Rempli par app.js (cellules de tableau) -->
+              </div>
+              <div class="algo-index-container">
+                <div class="algo-index-pointer" id="algo-index-pointer">
+                  <span class="pointer-arrow">▲</span>
+                  <span class="pointer-label">i = <span id="algo-index-val">0</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contrôles multimédias -->
+          <div class="algo-controls">
+            <button class="btn-control" id="algo-btn-init">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              Initialiser
+            </button>
+            
+            <button class="btn-control btn-control-primary" id="algo-btn-step">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+              Pas Suivant
+            </button>
+            
+            <button class="btn-control" id="algo-btn-play">
+              <span id="algo-play-icon" style="display: flex; align-items: center; gap: 6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Lecture Auto
+              </span>
+            </button>
+            
+            <div class="algo-speed-selector">
+              <label for="algo-speed">Vitesse :</label>
+              <select class="form-select-sm" id="algo-speed">
+                <option value="1800">Lent (1.8s)</option>
+                <option value="1000" selected>Normal (1.0s)</option>
+                <option value="500">Rapide (0.5s)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Grille d'état & code surligné -->
+          <div class="algo-grid">
+            <!-- État mémoire des variables -->
+            <div class="algo-state-panel">
+              <div class="state-title">État des variables (Mémoire) :</div>
+              <div class="state-variables-grid">
+                <div class="state-var-row">
+                  <span class="var-name">i</span>
+                  <span class="var-val" id="var-i">undefined</span>
+                </div>
+                <div class="state-var-row">
+                  <span class="var-name">notes[i] <span class="var-alias">(note courante)</span></span>
+                  <span class="var-val" id="var-val">undefined</span>
+                </div>
+                <!-- Variables dynamiques selon l'algorithme -->
+                <div class="state-var-row dynamic-var" id="row-somme">
+                  <span class="var-name">somme</span>
+                  <span class="var-val" id="var-somme">0</span>
+                </div>
+                <div class="state-var-row dynamic-var" id="row-min" style="display: none;">
+                  <span class="var-name">min</span>
+                  <span class="var-val" id="var-min">null</span>
+                </div>
+                <div class="state-var-row dynamic-var" id="row-count" style="display: none;">
+                  <span class="var-name">nombreElements</span>
+                  <span class="var-val" id="var-count">0</span>
+                </div>
+                <div class="state-var-row dynamic-var" id="row-found" style="display: none;">
+                  <span class="var-name">found</span>
+                  <span class="var-val" id="var-found">false</span>
+                </div>
+                <div class="state-var-row dynamic-var" id="row-indexTrouve" style="display: none;">
+                  <span class="var-name">indexTrouve</span>
+                  <span class="var-val" id="var-indexTrouve">-1</span>
+                </div>
+              </div>
+              
+              <div class="algo-explanation-box" id="algo-step-explanation">
+                Chargez des données et cliquez sur "Pas Suivant" ou "Lecture Auto" pour démarrer le tracé.
+              </div>
+            </div>
+            
+            <!-- Code surligné -->
+            <div class="algo-code-panel">
+              <div class="state-title">Code en cours d'exécution :</div>
+              <div class="code-witness" id="algo-code-witness">
+                <!-- Rempli dynamiquement par app.js -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr>
+
+      <!-- ==========================================
+           VALIDATION DE SAISIE (CH3,5)
+           ========================================== -->
+      <section id="ch_val" class="cat-ops">
+        <h2>Validation — Le pattern de référence <span class="chap-anchor">CH3,5</span></h2>
+
+        <p>Pour écrire du code robuste, vous devez valider systématiquement toute entrée fournie par l'utilisateur (via un <code>prompt()</code> ou un formulaire HTML) avant d'effectuer le moindre traitement logique ou calcul.</p>
+        
+        <div class="code-container">
+          <pre><div class="code-header"><span class="code-title">javascript</span><div class="code-actions"><button class="code-btn btn-copy">Copier</button><button class="code-btn btn-test" data-test-type="val" data-val-saisie="42">Tester 42</button><button class="code-btn btn-test" data-test-type="val" data-val-saisie="null">Tester Annuler</button><button class="code-btn btn-test" data-test-type="val" data-val-saisie="abc">Tester "abc"</button><button class="code-btn btn-test" data-test-type="val" data-val-saisie="150">Tester 150</button></div></div><code><span class="hl-comment">// --- 1. PATTERN DE VALIDATION D'UNE SAISIE TEXTE ---</span>
+<span class="hl-keyword">const</span> saisie = prompt(<span class="hl-string">"Ton prénom ?"</span>);
+<span class="hl-keyword">if</span> (saisie === <span class="hl-keyword">null</span>) { 
+    afficherErreur(<span class="hl-string">"Saisie annulée par l'utilisateur."</span>); 
+    <span class="hl-keyword">return</span>; <span class="hl-comment">// Arrêt immédiat</span>
+}
+<span class="hl-keyword">if</span> (saisie.trim() === <span class="hl-string">""</span>) { 
+    afficherErreur(<span class="hl-string">"Le champ ne peut pas être vide."</span>); 
+    <span class="hl-keyword">return</span>; <span class="hl-comment">// Arrêt immédiat</span>
+}
+<span class="hl-keyword">const</span> prenom = saisie.trim(); <span class="hl-comment">// Saisie nettoyée et garantie valide !</span>
+
+<span class="hl-comment">// --- 2. PATTERN COMPLET DE VALIDATION D'UNE SAISIE NUMÉRIQUE ---</span>
+<span class="hl-keyword">const</span> saisieNb = prompt(<span class="hl-string">"Entrez un nombre (0-100) :"</span>);
+<span class="hl-keyword">if</span> (saisieNb === <span class="hl-keyword">null</span>) { 
+    afficherErreur(<span class="hl-string">"Saisie annulée."</span>); 
+    <span class="hl-keyword">return</span>; 
+}
+<span class="hl-keyword">const</span> n = Number(saisieNb);
+<span class="hl-keyword">if</span> (isNaN(n)) { 
+    afficherErreur(<span class="hl-string">"Erreur : ce n'est pas un nombre valide."</span>); 
+    <span class="hl-keyword">return</span>; 
+}
+<span class="hl-keyword">if</span> (n &lt; <span class="hl-number">0</span> || n &gt; <span class="hl-number">100</span>) { 
+    afficherErreur(<span class="hl-string">"Erreur : le nombre doit être compris entre 0 et 100."</span>); 
+    <span class="hl-keyword">return</span>; 
+}
+<span class="hl-comment">// Ici, la variable 'n' est garantie être un nombre valide entre 0 et 100</span></code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body">
+            <div class="callout-title">Ordre obligatoire des vérifications</div>
+            <div class="callout-text">Vous devez obligatoirement suivre cet ordre de test : <br>
+              1. Tester la valeur <code>null</code> (bouton Annuler).<br>
+              2. Tester si la chaîne est vide (<code>trim() === ""</code>).<br>
+              3. Tester la validité du format (<code>isNaN</code> après conversion).<br>
+              4. Tester les limites logiques (plage de valeurs).<br>
+              Si vous tentez d'appeler <code>saisie.trim()</code> sans tester <code>saisie === null</code> d'abord, votre programme va crasher avec l'erreur <code>TypeError: Cannot read properties of null (reading 'trim')</code>.
+            </div>
+          </div>
+        </div>
+
+        <!-- VISUALISEUR DE FLUX DE VALIDATION -->
+        <div class="interactive-card card-ops" id="validation-card">
+          <span class="card-label">Apprentissage Actif</span>
+          <h3 class="card-headline">🛡️ Le Visualiseur de Validation de Saisie</h3>
+          <p>Saisissez une valeur ci-dessous. Observez en temps réel le cheminement logique du code de validation. Chaque bloc simule un test avec un retour hâtif (early return) en cas d'échec.</p>
+          
+          <div style="margin-bottom: 20px;">
+            <div class="form-group" style="max-width:350px;">
+              <label class="form-label" for="val-input">Simuler une entrée utilisateur (Nombre 0-100)</label>
+              <input type="text" class="form-input" id="val-input" value="42" placeholder="Tapez ex: 42, null, vide, abc, 120">
+            </div>
+          </div>
+
+          <div class="flow-step-container">
+            <!-- Step 1 -->
+            <div class="flow-step" id="val-cancel-check">
+              <div class="step-number">1</div>
+              <div class="step-details">
+                <span class="step-code">saisie === null</span>
+                <span class="step-desc">Vérifie si l'utilisateur a cliqué sur "Annuler" dans le prompt.</span>
+              </div>
+              <span class="step-status-icon">•</span>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flow-step" id="val-empty-check">
+              <div class="step-number">2</div>
+              <div class="step-details">
+                <span class="step-code">saisie.trim() === ""</span>
+                <span class="step-desc">Vérifie si l'entrée est vide ou ne contient que des espaces.</span>
+              </div>
+              <span class="step-status-icon">•</span>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flow-step" id="val-nan-check">
+              <div class="step-number">3</div>
+              <div class="step-details">
+                <span class="step-code">isNaN(Number(saisie))</span>
+                <span class="step-desc">Vérifie si la conversion en nombre échoue (Not a Number).</span>
+              </div>
+              <span class="step-status-icon">•</span>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="flow-step" id="val-range-check">
+              <div class="step-number">4</div>
+              <div class="step-details">
+                <span class="step-code">n &lt; 0 || n &gt; 100</span>
+                <span class="step-desc">Vérifie si le nombre est en dehors des limites logiques (0 à 100).</span>
+              </div>
+              <span class="step-status-icon">•</span>
+            </div>
+          </div>
+
+          <div class="result-box" style="margin-top:20px; display:block;">
+            <span class="chapter-badge" id="val-success-badge" style="background-color:#10b981; color:white; border:none; display:none; margin-bottom:8px;">Succès</span>
+            <div id="val-status-result" style="font-size:0.95rem;"></div>
+          </div>
+        </div>
+      </section>
+
+      <hr>
+
+      <!-- ==========================================
+           LES 10 PIÈGES LES PLUS FRÉQUENTS
+           ========================================== -->
+      <section id="ch_pieges" class="cat-pieges">
+        <h2>Les 10 pièges les plus fréquents <span class="chap-anchor">Tous</span></h2>
+
+        <p>Voici un récapitulatif synthétique des erreurs de codage les plus courantes à éviter lors des épreuves pratiques :</p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Piège classique</th>
+                <th>Conséquence dans le script</th>
+                <th>Correction à appliquer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Utiliser <code>==</code></strong></td>
+                <td><code>"5" == 5</code> donne <code>true</code> (coercion implicite dangereuse).</td>
+                <td>Utiliser systématiquement <code>===</code> (égalité stricte).</td>
+              </tr>
+              <tr>
+                <td><strong>Saisie brute <code>prompt()</code></strong></td>
+                <td>Effectue des calculs de texte au lieu de nombres.</td>
+                <td>Convertir avec <code>Number(saisie)</code> avant tout calcul.</td>
+              </tr>
+              <tr>
+                <td><strong>L'addition <code>"5" + 3</code></strong></td>
+                <td>Affiche <code>"53"</code> (concaténation de texte).</td>
+                <td>Convertir d'abord ou utiliser la soustraction (qui force le calcul).</td>
+              </tr>
+              <tr>
+                <td><strong>Initialiser <code>min = 0</code></strong></td>
+                <td>Si toutes vos notes sont positives, <code>min</code> restera faussement bloqué à <code>0</code>.</td>
+                <td>Initialiser la recherche à <code>null</code>.</td>
+              </tr>
+              <tr>
+                <td><strong>Switch : <code>case 1:</code></strong></td>
+                <td>Le case n'est jamais activé car <code>prompt()</code> renvoie du texte (type string).</td>
+                <td>Écrire les valeurs entre guillemets : <code>case "1":</code>.</td>
+              </tr>
+              <tr>
+                <td><strong>Oubli de <code>break</code></strong></td>
+                <td><em>Fall-through</em> : le script exécute les blocs case suivants par erreur.</td>
+                <td>Placer un <code>break;</code> à la fin de chaque bloc case.</td>
+              </tr>
+              <tr>
+                <td><strong>Tester <code>typeof null</code></strong></td>
+                <td>Renvoie <code>"object"</code> au lieu de <code>"null"</code> (bug du langage).</td>
+                <td>Faire directement un test d'égalité stricte : <code>=== null</code>.</td>
+              </tr>
+              <tr>
+                <td><strong><code>getMonth()</code> de Date</strong></td>
+                <td>Janvier renvoie <code>0</code>, Décembre renvoie <code>11</code>.</td>
+                <td>Créer un tableau de textes <code>["Janvier", ...]</code> et lire à l'index.</td>
+              </tr>
+              <tr>
+                <td><strong><code>getDay()</code> de Date</strong></td>
+                <td>Dimanche renvoie <code>0</code>, Lundi renvoie <code>1</code>.</td>
+                <td>Créer un tableau de textes <code>["Dimanche", ...]</code> et lire à l'index.</td>
+              </tr>
+              <tr>
+                <td><strong>Modifier string sans assigner</strong></td>
+                <td>Le résultat de <code>texte.toUpperCase()</code> est perdu en mémoire.</td>
+                <td>Réassigner la valeur : <code>const maj = texte.toUpperCase();</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Résumé de la coercion automatique</h3>
+        <div class="code-container">
+          <pre><div class="code-header"><span class="code-title">javascript</span><div class="code-actions"><button class="code-btn btn-copy">Copier</button></div></div><code>"5" + <span class="hl-number">3</span>;       <span class="hl-comment">// → "53"  (Le signe + avec du texte force la concaténation)</span>
+"5" - <span class="hl-number">3</span>;       <span class="hl-comment">// → 2     (La soustraction force la conversion numérique)</span>
+"abc" * <span class="hl-number">2</span>;     <span class="hl-comment">// → NaN   (Conversion impossible car le texte n'est pas numérique)</span>
+<span class="hl-keyword">true</span> + <span class="hl-number">1</span>;      <span class="hl-comment">// → 2     (Le booléen true est converti en nombre 1)</span>
+<span class="hl-keyword">false</span> + <span class="hl-number">5</span>;     <span class="hl-comment">// → 5     (Le booléen false est converti en nombre 0)</span>
+<span class="hl-keyword">null</span> + <span class="hl-number">5</span>;      <span class="hl-comment">// → 5     (null est converti en nombre 0)</span>
+<span class="hl-keyword">undefined</span> + <span class="hl-number">5</span>; <span class="hl-comment">// → NaN   (undefined ne peut pas être converti en nombre valide)</span></code></pre>
+        </div>
+      </section>
+
+      <hr>
+
+      <!-- ==========================================
+           TABLEAU DE BORD UAA5 (COMPÉTENCES)
+           ========================================== -->
+      <section id="ch_dashboard" class="cat-vars">
+        <h2>Tableau de bord UAA5 — Compétences <span class="chap-anchor">UAA5</span></h2>
+
+        <p>Ce tableau répertorie les compétences exigées par le référentiel de l'enseignement SEGEC en Belgique pour l'UAA5 :</p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Chapitre</th>
+                <th>Contenu de formation</th>
+                <th>Dimension d'apprentissage SEGEC</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>CH1</strong></td>
+                <td>Environnement de dev, syntaxe de base, commentaires.</td>
+                <td>Connaître</td>
+              </tr>
+              <tr>
+                <td><strong>CH2</strong></td>
+                <td>Variables, types primitifs, opérateurs arithmétiques.</td>
+                <td>Connaître / Appliquer</td>
+              </tr>
+              <tr>
+                <td><strong>CH3</strong></td>
+                <td>Entrées / Sorties simples (dialogues &amp; champs HTML).</td>
+                <td>Connaître / Appliquer</td>
+              </tr>
+              <tr>
+                <td><strong>CH4</strong></td>
+                <td>Manipulation de chaînes de caractères (String).</td>
+                <td>Connaître / Appliquer</td>
+              </tr>
+              <tr>
+                <td><strong>CH5</strong></td>
+                <td>Structures alternatives conditionnelles (if/else, switch).</td>
+                <td>Appliquer</td>
+              </tr>
+              <tr>
+                <td><strong>CH6</strong></td>
+                <td>Structures répétitives (boucles while et for) &amp; DOM.</td>
+                <td>Appliquer</td>
+              </tr>
+              <tr>
+                <td><strong>CH7</strong></td>
+                <td>Structures algorithmiques complexes combinées.</td>
+                <td>Appliquer</td>
+              </tr>
+              <tr>
+                <td><strong>CH8</strong></td>
+                <td>Bibliothèques intégrées (Math, Date).</td>
+                <td>Connaître / Appliquer</td>
+              </tr>
+              <tr>
+                <td><strong>CH9</strong></td>
+                <td>Algorithmes — Lire, écrire, comprendre et traduire.</td>
+                <td>Appliquer / Transférer</td>
+              </tr>
+              <tr>
+                <td><strong>CH10</strong></td>
+                <td>Projets pratiques (ex: Pierre-Feuille-Ciseaux, Moyennes pondérées).</td>
+                <td>Transférer</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <hr>
+
+      <!-- ==========================================
+           QUIZ D'AUTO-ÉVALUATION (MODULE FINAL)
+           ========================================== -->
+      <section>
+        <div class="interactive-card card-quiz" id="quiz-card">
+          <span class="card-label">Apprentissage Actif</span>
+          <h3 class="card-headline">🎮 Quiz d'auto-évaluation</h3>
+          <p>Validez votre compréhension de la synthèse en répondant à ce mini-QCM interactif de 5 questions sur les pièges réguliers de programmation.</p>
+          
+          <div class="quiz-container">
+            <!-- Progress bar of quiz -->
+            <div class="quiz-progress">
+              <span>Question <span id="quiz-current-idx">1</span> sur <span id="quiz-total-questions">5</span></span>
+              <div class="quiz-dots" id="quiz-dots">
+                <!-- Dynamically filled by app.js -->
+              </div>
+            </div>
+
+            <!-- Quiz Screens -->
+            <div id="quiz-game-content">
+              <div id="quiz-question-container">
+                <!-- Question card injected by app.js -->
+              </div>
+            </div>
+
+            <!-- Quiz Results Screen -->
+            <div class="quiz-results-screen" id="quiz-results-screen">
+              <div class="score-circle">
+                <span id="quiz-score-val">0/5</span>
+                <span class="score-label">Score</span>
+              </div>
+              <div class="score-message" id="quiz-score-msg">Excellent !</div>
+              <button class="btn-reset-quiz" id="quiz-btn-reset">Recommencer le Quiz ⟳</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

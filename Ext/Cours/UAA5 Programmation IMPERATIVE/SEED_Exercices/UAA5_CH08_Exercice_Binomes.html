@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UAA5 — Dev' & Présente ! | Chapitre 8</title>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --card-header: #1f2937;
+      --border: #1f2937;
+      --border-hover: #374151;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --success: #10b981;
+      --amber: #f59e0b;
+      --cyan: #06b6d4;
+      --violet: #8b5cf6;
+      --rose: #f43f5e;
+      --font-ui: 'Inter', system-ui, sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-ui);
+      margin: 0;
+      padding: 0;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* Layout & Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 5rem 1.5rem;
+    }
+
+    /* Premium Header / Hero Section */
+    .hero {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      background: radial-gradient(circle at top, rgba(99, 102, 241, 0.15) 0%, transparent 60%);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 3rem;
+      border-radius: 24px;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin: 0 0 1rem 0;
+      background: linear-gradient(to right, #ffffff, #9ca3af, var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto 2rem auto;
+      font-weight: 400;
+    }
+
+    .hero-meta {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      background: rgba(31, 41, 55, 0.4);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .meta-item strong {
+      color: var(--text);
+    }
+
+    /* Segmented Navigation */
+    .tabs-nav {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+      background: rgba(17, 24, 39, 0.6);
+      padding: 0.5rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .tab-nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+
+    .tab-nav-btn:hover {
+      color: var(--text);
+    }
+
+    .tab-nav-btn.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    /* Section Styles */
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-title span {
+      background: rgba(99, 102, 241, 0.1);
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      color: var(--primary);
+      font-size: 1.2rem;
+    }
+
+    /* Subjects Grid */
+    .subjects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 4rem;
+    }
+
+    .subject-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .subject-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(99, 102, 241, 0.15);
+    }
+
+    .subject-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: var(--primary);
+      opacity: 0.7;
+    }
+
+    .subject-card.sc-1::before { background: var(--success); }
+    .subject-card.sc-2::before { background: var(--cyan); }
+    .subject-card.sc-3::before { background: var(--amber); }
+    .subject-card.sc-4::before { background: var(--violet); }
+    .subject-card.sc-5::before { background: var(--rose); }
+    .subject-card.sc-6::before { background: var(--primary); }
+
+    .card-header-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .subject-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sc-1 .subject-badge { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+    .sc-2 .subject-badge { background: rgba(6, 182, 212, 0.1); color: var(--cyan); }
+    .sc-3 .subject-badge { background: rgba(245, 158, 11, 0.1); color: var(--amber); }
+    .sc-4 .subject-badge { background: rgba(139, 92, 246, 0.1); color: var(--violet); }
+    .sc-5 .subject-badge { background: rgba(244, 63, 94, 0.1); color: var(--rose); }
+    .sc-6 .subject-badge { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+
+    .card-num {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .subject-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0 0 0.75rem 0;
+      color: var(--text);
+    }
+
+    .subject-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      flex-grow: 1;
+    }
+
+    .subject-targets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .target-tag {
+      background: rgba(31, 41, 55, 0.5);
+      border: 1px solid var(--border);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      color: var(--text);
+    }
+
+    .card-footer-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: rgba(31, 41, 55, 0.8);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.6rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      width: 100%;
+      transition: all 0.2s;
+    }
+
+    .subject-card:hover .card-footer-btn {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .sc-1:hover .card-footer-btn { background-color: var(--success); border-color: var(--success); }
+    .sc-2:hover .card-footer-btn { background-color: var(--cyan); border-color: var(--cyan); }
+    .sc-3:hover .card-footer-btn { background-color: var(--amber); border-color: var(--amber); }
+    .sc-4:hover .card-footer-btn { background-color: var(--violet); border-color: var(--violet); }
+    .sc-5:hover .card-footer-btn { background-color: var(--rose); border-color: var(--rose); }
+
+    /* Modal Subject Details Overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(9, 13, 22, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      padding: 1.5rem;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-container {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 800px;
+      max-height: 85vh;
+      overflow-y: auto;
+      transform: scale(0.95);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-overlay.active .modal-container {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background-color: var(--card-bg);
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .modal-close {
+      background: rgba(31, 41, 55, 0.6);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+      background-color: var(--rose);
+      color: white;
+      border-color: var(--rose);
+    }
+
+    .modal-body {
+      padding: 2rem;
+    }
+
+    /* Modal Typography */
+    .modal-section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 1.5rem 0 0.75rem 0;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .modal-section-title:first-of-type {
+      margin-top: 0;
+    }
+
+    .modal-section-title svg {
+      color: var(--primary);
+    }
+
+    .modal-text {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin: 0 0 1rem 0;
+    }
+
+    .modal-text strong {
+      color: var(--text);
+    }
+
+    .modal-list {
+      margin: 0 0 1.5rem 0;
+      padding-left: 1.25rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .modal-list li {
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-list strong {
+      color: var(--text);
+    }
+
+    /* Live Interactive Sandbox / Widget within Modal */
+    .sandbox {
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .sandbox-header {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sandbox-header .badge-live {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+    }
+
+    .sandbox-controls {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .sandbox-input {
+      flex: 1;
+      min-width: 140px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+      color: white;
+      font-family: var(--font-ui);
+      font-size: 0.9rem;
+    }
+
+    .sandbox-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .sandbox-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .sandbox-output {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 0.9rem;
+      min-height: 50px;
+    }
+
+    .sandbox-output-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .sandbox-output-row:last-child {
+      border-bottom: none;
+    }
+
+    .sandbox-output-row span:last-child {
+      font-family: var(--font-code);
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    /* Template Code block container */
+    .template-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .code-witness-wrapper {
+      position: relative;
+      margin-top: 1.5rem;
+    }
+
+    .btn-copy-code {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: rgba(31, 41, 55, 0.8);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+      z-index: 10;
+    }
+
+    .btn-copy-code:hover {
+      color: white;
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .code-block {
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      overflow-x: auto;
+      max-height: 480px;
+      margin: 0;
+    }
+
+    .code-block code {
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      line-height: 1.6;
+    }
+
+    /* Interactive Score Calculator */
+    .rubric-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+    }
+
+    .rubric-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .rubric-row {
+      background: rgba(31, 41, 55, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .rubric-row {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .rubric-info {
+      max-width: 500px;
+    }
+
+    .rubric-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+
+    .rubric-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .score-selector {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .score-node {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .score-node:hover {
+      border-color: var(--primary);
+      color: var(--text);
+    }
+
+    .score-node.selected {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+    }
+
+    /* Calculator Score Panel Box */
+    .score-result-box {
+      background: radial-gradient(circle at right, rgba(99, 102, 241, 0.1) 0%, transparent 80%);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .total-score-panel {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .score-circle {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-weight: 800;
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .score-circle .score-num {
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+
+    .score-circle .score-max {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      margin-top: 0.1rem;
+    }
+
+    .score-verdict-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+    }
+
+    .score-verdict-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .btn-reset-score {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+    }
+
+    .btn-reset-score:hover {
+      color: white;
+      border-color: var(--rose);
+      background-color: rgba(244, 63, 94, 0.05);
+    }
+
+    /* Footer styling */
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 1.5rem;
+      margin-top: 5rem;
+    }
+
+    /* Interactive syntax highlighting helper classes */
+    .hl-keyword { color: #f43f5e; font-weight: 600; }
+    .hl-string { color: #10b981; }
+    .hl-number { color: #f59e0b; }
+    .hl-comment { color: #6b7280; font-style: italic; }
+    .hl-var { color: #38bdf8; }
+    .hl-fun { color: #818cf8; }
+
+    /* Alert / Alert box style callout */
+    .modal-callout {
+      background: rgba(245, 158, 11, 0.06);
+      border-left: 4px solid var(--amber);
+      padding: 1rem;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .modal-callout strong {
+      color: var(--amber);
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .modal-callout p {
+      margin: 0;
+      color: var(--text-muted);
+    }
+
+    /* Active sections display */
+    .section-tab-content {
+      display: none;
+    }
+
+    .section-tab-content.active {
+      display: block;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Hero / Header Section -->
+    <header class="hero">
+      <span class="hero-badge">UAA5 — Programmation impérative</span>
+      <h1 class="hero-title">Dev' & Présente !</h1>
+      <p class="hero-subtitle">
+        Devenez les experts du <strong>Chapitre 8</strong>. En binôme, relevez le défi : expliquez les concepts théoriques clés à vos camarades et concevez une démonstration interactive percutante en HTML/CSS/JS !
+      </p>
+      <div class="hero-meta">
+        <div class="meta-item">🎯 Objectif : <strong>5 à 7 min au tableau</strong></div>
+        <div class="meta-item">👥 Groupes : <strong>6 Sujets de Binômes</strong></div>
+        <div class="meta-item">🖥️ Rendu : <strong>Mini-Démo Web interactive</strong></div>
+      </div>
+    </header>
+
+    <!-- Segmented Control Navigation -->
+    <nav class="tabs-nav">
+      <button class="tab-nav-btn active" onclick="switchSection('subjects')">1. Les 6 Sujets</button>
+      <button class="tab-nav-btn" onclick="switchSection('template')">2. Modèle de Départ</button>
+      <button class="tab-nav-btn" onclick="switchSection('evaluation')">3. Barème & Calculateur</button>
+    </nav>
+
+    <!-- ── SECTION 1: LES SUJETS ── -->
+    <main id="subjects-section" class="section-tab-content active">
+      <h2 class="section-title">
+        <span>🔄</span>
+        Sujets d'Expertise Disponibles
+      </h2>
+      <p style="color: var(--text-muted); margin-bottom: 2rem; margin-top: -1rem;">
+        Cliquez sur une carte ci-dessous pour ouvrir les détails de votre sujet, votre objectif de démonstration et votre guide de fonctions de référence interactif !
+      </p>
+      
+      <div class="subjects-grid">
+        <!-- Subject 1 -->
+        <div class="subject-card sc-1" onclick="openSubjectModal(1)">
+          <div class="card-header-meta">
+            <span class="subject-badge">Sujet 1</span>
+            <span class="card-num">Groupe 1</span>
+          </div>
+          <h3 class="subject-name">L'Arrondi et la Précision</h3>
+          <p class="subject-desc">
+            Comprenez et illustrez la différence entre l'arrondi standard, vers le bas (plancher), vers le haut (plafond) et la valeur absolue.
+          </p>
+          <div class="subject-targets">
+            <span class="target-tag">Math.round()</span>
+            <span class="target-tag">Math.floor()</span>
+            <span class="target-tag">Math.ceil()</span>
+            <span class="target-tag">Math.trunc()</span>
+            <span class="target-tag">Math.abs()</span>
+          </div>
+          <button class="card-footer-btn">
+            Voir le sujet &amp; Tester
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        <!-- Subject 2 -->
+        <div class="subject-card sc-2" onclick="openSubjectModal(2)">
+          <div class="card-header-meta">
+            <span class="subject-badge">Sujet 2</span>
+            <span class="card-num">Groupe 2</span>
+          </div>
+          <h3 class="subject-name">Les Géomètres Math</h3>
+          <p class="subject-desc">
+            Maîtrisez les calculs géométriques : aire et périmètre d'un cercle, calcul de l'hypoténuse (Pythagore) et extraction automatique de min/max.
+          </p>
+          <div class="subject-targets">
+            <span class="target-tag">Math.PI</span>
+            <span class="target-tag">Math.min()</span>
+            <span class="target-tag">Math.max()</span>
+            <span class="target-tag">Math.pow()</span>
+            <span class="target-tag">Math.sqrt()</span>
+          </div>
+          <button class="card-footer-btn">
+            Voir le sujet &amp; Tester
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        <!-- Subject 3 -->
+        <div class="subject-card sc-3" onclick="openSubjectModal(3)">
+          <div class="card-header-meta">
+            <span class="subject-badge">Sujet 3</span>
+            <span class="card-num">Groupe 3</span>
+          </div>
+          <h3 class="subject-name">Les Maîtres du Hasard</h3>
+          <p class="subject-desc">
+            Décortiquez Math.random() et maîtrisez la formule universelle permettant d'obtenir un entier aléatoire dans un intervalle [min, max] donné.
+          </p>
+          <div class="subject-targets">
+            <span class="target-tag">Math.random()</span>
+            <span class="target-tag">Math.floor()</span>
+            <span class="target-tag">Formule [min, max]</span>
+          </div>
+          <button class="card-footer-btn">
+            Voir le sujet &amp; Tester
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        <!-- Subject 4 -->
+        <div class="subject-card sc-4" onclick="openSubjectModal(4)">
+          <div class="card-header-meta">
+            <span class="subject-badge">Sujet 4</span>
+            <span class="card-num">Groupe 4</span>
+          </div>
+          <h3 class="subject-name">Les Voyageurs du Temps</h3>
+          <p class="subject-desc">
+            Capturez l'instant présent et construisez une horloge numérique en extrayant les composantes et en formatant avec padStart().
+          </p>
+          <div class="subject-targets">
+            <span class="target-tag">new Date()</span>
+            <span class="target-tag">getHours()</span>
+            <span class="target-tag">getMinutes()</span>
+            <span class="target-tag">padStart()</span>
+          </div>
+          <button class="card-footer-btn">
+            Voir le sujet &amp; Tester
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        <!-- Subject 5 -->
+        <div class="subject-card sc-5" onclick="openSubjectModal(5)">
+          <div class="card-header-meta">
+            <span class="subject-badge">Sujet 5</span>
+            <span class="card-num">Groupe 5</span>
+          </div>
+          <h3 class="subject-name">Les Historiens de l'Année</h3>
+          <p class="subject-desc">
+            Déjouez les pièges des index de mois/jours en JavaScript et utilisez des tableaux de chaînes de caractères pour générer une date textuelle.
+          </p>
+          <div class="subject-targets">
+            <span class="target-tag">getMonth()</span>
+            <span class="target-tag">getDay()</span>
+            <span class="target-tag">Tableau JOURS</span>
+            <span class="target-tag">Tableau MOIS</span>
+          </div>
+          <button class="card-footer-btn">
+            Voir le sujet &amp; Tester
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        <!-- Subject 6 -->
+        <div class="subject-card sc-6" onclick="openSubjectModal(6)">
+          <div class="card-header-meta">
+            <span class="subject-badge">Sujet 6</span>
+            <span class="card-num">Groupe 6</span>
+          </div>
+          <h3 class="subject-name">Les Gardiens du Score</h3>
+          <p class="subject-desc">
+            Comprenez la portée globale/locale et apprenez à conserver des variables vivantes en mémoire entre plusieurs clics (compteurs et états).
+          </p>
+          <div class="subject-targets">
+            <span class="target-tag">Portée globale</span>
+            <span class="target-tag">Portée locale</span>
+            <span class="target-tag">addEventListener</span>
+            <span class="target-tag">État persistant</span>
+          </div>
+          <button class="card-footer-btn">
+            Voir le sujet &amp; Tester
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ── SECTION 2: LE MODÈLE DE DÉPART ── -->
+    <section id="template-section" class="section-tab-content">
+      <div class="template-card">
+        <h2 class="section-title">
+          <span>🗂️</span>
+          Modèle HTML/CSS/JS de départ (Boilerplate)
+        </h2>
+        <p style="color: var(--text-muted); margin-top: -1rem; margin-bottom: 1.5rem;">
+          Copiez-collez ce modèle prêt à l'emploi. Il intègre une mise en page soignée, responsive et en thème sombre. Cela vous permet de vous concentrer à 100% sur le code JavaScript !
+        </p>
+
+        <div class="code-witness-wrapper">
+          <button class="btn-copy-code" onclick="copyTemplateCode()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span id="copy-text">Copier le modèle</span>
+          </button>
+          
+          <pre class="code-block"><code id="code-template">&lt;!DOCTYPE html&gt;
+&lt;html lang="fr"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Démo interactive - Chapitre 8&lt;/title&gt;
+  &lt;style&gt;
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --text: #f8fafc;
+      --border: #334155;
+    }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 1rem;
+    }
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+    }
+    .card-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      font-weight: bold;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    h2 {
+      margin-top: 0;
+      color: white;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.5rem;
+      font-size: 1.4rem;
+    }
+    .input-group {
+      margin-bottom: 1.2rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    input, button {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background-color: #0f172a;
+      color: white;
+      font-size: 1rem;
+      box-sizing: border-box;
+      outline: none;
+    }
+    input:focus {
+      border-color: var(--accent);
+    }
+    button {
+      background-color: var(--accent);
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: var(--accent-hover);
+    }
+    .output-container {
+      margin-top: 1.5rem;
+      background-color: #0f172a;
+      padding: 1rem;
+      border-radius: 8px;
+      border-left: 4px solid var(--accent);
+      min-height: 50px;
+      font-size: 0.95rem;
+    }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+  &lt;div class="card"&gt;
+    &lt;span class="card-label"&gt;UAA5 - Démo interactive&lt;/span&gt;
+    &lt;h2&gt;🎮 Démo Groupe : [Sujet...]&lt;/h2&gt;
+    
+    &lt;!-- 🟢 Modifiez cette zone pour insérer vos champs (input, select, etc.) --&gt;
+    &lt;div class="input-group"&gt;
+      &lt;label for="monInput"&gt;Saisie utilisateur :&lt;/label&gt;
+      &lt;input type="number" id="monInput" placeholder="Ex: 15.5"&gt;
+    &lt;/div&gt;
+    
+    &lt;button id="monBouton"&gt;Exécuter l'action&lt;/button&gt;
+    
+    &lt;!-- 🔴 Zone de rendu de vos résultats --&gt;
+    &lt;div class="output-container" id="monOutput"&gt;
+      Les résultats s'afficheront ici...
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;script&gt;
+    // ══════ ÉCRIVEZ VOTRE CODE JAVASCRIPT ICI ══════
+    document.getElementById("monBouton").addEventListener("click", function() {
+      // 1. Récupération de la saisie utilisateur
+      const valeurSaisie = Number(document.getElementById("monInput").value);
+      
+      // 2. Effectuer des calculs avec les fonctions prédéfinies
+      // (Exemple factice à remplacer)
+      const resultat = valeurSaisie * 2;
+      
+      // 3. Modifier le DOM pour afficher le rendu
+      document.getElementById("monOutput").innerHTML = "Le double est : " + resultat;
+    });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION 3: BARÈME & CALCULATEUR ── -->
+    <section id="evaluation-section" class="section-tab-content">
+      <div class="rubric-card">
+        <h2 class="section-title">
+          <span>📊</span>
+          Calculateur de Points interactif
+        </h2>
+        <p style="color: var(--text-muted); margin-top: -1rem; margin-bottom: 2rem;">
+          Professeur ? Cliquez directement sur les notes attribuées pour chaque critère. Le score final s'actualise instantanément avec un verdict pédagogique correspondant !
+        </p>
+
+        <div class="rubric-grid">
+          <!-- Criterion 1 -->
+          <div class="rubric-row">
+            <div class="rubric-info">
+              <div class="rubric-name">1. Exactitude Technique (Concepts théoriques)</div>
+              <div class="rubric-desc">Les fonctions JavaScript affectées sont maîtrisées, utilisées de manière pertinente et expliquées sans aucune erreur technique.</div>
+            </div>
+            <div class="score-selector" data-crit="1" data-max="6">
+              <span class="score-node" onclick="setScore(this, 0)">0</span>
+              <span class="score-node" onclick="setScore(this, 1)">1</span>
+              <span class="score-node" onclick="setScore(this, 2)">2</span>
+              <span class="score-node" onclick="setScore(this, 3)">3</span>
+              <span class="score-node" onclick="setScore(this, 4)">4</span>
+              <span class="score-node" onclick="setScore(this, 5)">5</span>
+              <span class="score-node" onclick="setScore(this, 6)">6</span>
+            </div>
+          </div>
+
+          <!-- Criterion 2 -->
+          <div class="rubric-row">
+            <div class="rubric-info">
+              <div class="rubric-name">2. Fonctionnalité (La Mini-Démo)</div>
+              <div class="rubric-desc">La démo web s'exécute correctement lors de la présentation. Les entrées sont validées (pas de crash en cas d'entrée vide ou textuelle).</div>
+            </div>
+            <div class="score-selector" data-crit="2" data-max="5">
+              <span class="score-node" onclick="setScore(this, 0)">0</span>
+              <span class="score-node" onclick="setScore(this, 1)">1</span>
+              <span class="score-node" onclick="setScore(this, 2)">2</span>
+              <span class="score-node" onclick="setScore(this, 3)">3</span>
+              <span class="score-node" onclick="setScore(this, 4)">4</span>
+              <span class="score-node" onclick="setScore(this, 5)">5</span>
+            </div>
+          </div>
+
+          <!-- Criterion 3 -->
+          <div class="rubric-row">
+            <div class="rubric-info">
+              <div class="rubric-name">3. Clarté de l'explication du Code</div>
+              <div class="rubric-desc">Le code JavaScript est propre et bien indenté. Le binôme est capable d'expliquer le fonctionnement de chaque ligne aux questions.</div>
+            </div>
+            <div class="score-selector" data-crit="3" data-max="4">
+              <span class="score-node" onclick="setScore(this, 0)">0</span>
+              <span class="score-node" onclick="setScore(this, 1)">1</span>
+              <span class="score-node" onclick="setScore(this, 2)">2</span>
+              <span class="score-node" onclick="setScore(this, 3)">3</span>
+              <span class="score-node" onclick="setScore(this, 4)">4</span>
+            </div>
+          </div>
+
+          <!-- Criterion 4 -->
+          <div class="rubric-row">
+            <div class="rubric-info">
+              <div class="rubric-name">4. Qualité de la Présentation Orale</div>
+              <div class="rubric-desc">Diction, expression vivante et répartition équitable du temps de parole et du travail au sein du binôme. Respect du temps (5-7 min).</div>
+            </div>
+            <div class="score-selector" data-crit="4" data-max="3">
+              <span class="score-node" onclick="setScore(this, 0)">0</span>
+              <span class="score-node" onclick="setScore(this, 1)">1</span>
+              <span class="score-node" onclick="setScore(this, 2)">2</span>
+              <span class="score-node" onclick="setScore(this, 3)">3</span>
+            </div>
+          </div>
+
+          <!-- Criterion 5 -->
+          <div class="rubric-row">
+            <div class="rubric-info">
+              <div class="rubric-name">5. Esthétique &amp; Ergonomie (CSS)</div>
+              <div class="rubric-desc">Des efforts visibles ont été faits sur le fichier CSS du template de base pour s'adapter à la charte et à la thématique de la démo.</div>
+            </div>
+            <div class="score-selector" data-crit="5" data-max="2">
+              <span class="score-node" onclick="setScore(this, 0)">0</span>
+              <span class="score-node" onclick="setScore(this, 1)">1</span>
+              <span class="score-node" onclick="setScore(this, 2)">2</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calculated Live Result Panel -->
+        <div class="score-result-box">
+          <div class="total-score-panel">
+            <div class="score-circle">
+              <span class="score-num" id="live-total-score">0</span>
+              <span class="score-max">/20</span>
+            </div>
+            <div>
+              <div class="score-verdict-title" id="score-verdict-title">Veuillez évaluer...</div>
+              <div class="score-verdict-desc" id="score-verdict-desc">Sélectionnez une valeur pour chaque ligne de critère pour voir le total.</div>
+            </div>
+          </div>
+          <button class="btn-reset-score" onclick="resetRubric()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            Réinitialiser
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      UAA5 — Programmation impérative en JavaScript | 4e secondaire transition | Institut de la Providence
+    </footer>
+  </div>
+
+  <!-- ── MODAL SYSTEM FOR SUBJECT DETAILS ── -->
+  <div class="modal-overlay" id="subject-modal" onclick="closeSubjectModal(event)">
+    <div class="modal-container" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-badge" id="modal-lbl-subject">Sujet X</span>
+          <h3 class="modal-title" id="modal-lbl-title">Nom du sujet...</h3>
+        </div>
+        <button class="modal-close" onclick="closeSubjectModal(null)">&times;</button>
+      </div>
+      
+      <div class="modal-body" id="modal-body-content">
+        <!-- Rempli dynamiquement en JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SYSTEM SCRIPTS (JS) ── -->
+  <script>
+    // 6 Subjects Detailed Data
+    const SUBJECT_DATA = {
+      1: {
+        badge: "Sujet 1 — Groupe 1",
+        title: "L'Arrondi et la Précision",
+        desc: "Comprendre et modéliser le comportement de JavaScript lorsqu'il s'agit d'arrondir un nombre décimal ou d'en calculer la valeur absolue.",
+        theory: [
+          "<strong>Math.round(x)</strong> : renvoie l'arrondi standard à l'entier le plus proche (si la décimale est &ge; 0.5, arrondit au supérieur).",
+          "<strong>Math.floor(x)</strong> : arrondit toujours vers le bas (à l'entier inférieur).",
+          "<strong>Math.ceil(x)</strong> : arrondit toujours vers le haut (à l'entier supérieur).",
+          "<strong>Math.trunc(x)</strong> : supprime purement et simplement les décimales sans arrondir.",
+          "<strong>Math.abs(x)</strong> : extrait la valeur absolue (transforme un nombre négatif en positif)."
+        ],
+        trap: "<strong>Attention au piège des négatifs !</strong><br>Pour <code>-3.7</code>, <code>Math.floor(-3.7)</code> renvoie <code>-4</code> (l'entier inférieur), alors que <code>Math.trunc(-3.7)</code> renvoie <code>-3</code> car il coupe simplement après la virgule. C'est une différence fondamentale à bien expliquer au tableau !",
+        demo: "Concevoir une page avec un champ de saisie où l'élève peut taper un nombre décimal (ex: <code>3.45</code>, <code>-7.89</code>, etc.) et qui affiche au clic 5 lignes structurées illustrant le résultat et le nom de chaque méthode. Ajoutez une animation lors de la validation !",
+        sandboxType: "arrondi",
+        sandboxPlaceholder: "Ex: -3.75"
+      },
+      2: {
+        badge: "Sujet 2 — Groupe 2",
+        title: "Les Géomètres Math",
+        desc: "Maîtriser les constantes et les calculs géométriques usuels, ainsi que l'extraction statistique rapide de valeurs extrêmes.",
+        theory: [
+          "<strong>Math.PI</strong> : constante stockant la valeur de Pi (&approx; 3.14159...). Utile pour les géométries de disques.",
+          "<strong>Math.min(a, b, c...)</strong> : renvoie instantanément la plus petite valeur parmi tous les nombres fournis.",
+          "<strong>Math.max(a, b, c...)</strong> : renvoie instantanément la plus grande valeur parmi tous les nombres fournis.",
+          "<strong>Math.pow(base, exposant)</strong> : calcule la puissance d'un nombre (ex: 2<sup>10</sup> = 1024). Équivaut à l'opérateur <code>**</code>.",
+          "<strong>Math.sqrt(x)</strong> : calcule la racine carrée d'un nombre (ex: racine de 16 = 4)."
+        ],
+        trap: "<strong>Math.min/max ne prennent pas de tableaux directement !</strong><br>Si vous écrivez <code>Math.min([5, 3, 8])</code>, cela renverra <code>NaN</code>. Il faut leur passer les nombres séparés par des virgules : <code>Math.min(5, 3, 8)</code>.",
+        demo: "Créez une boîte à outils géométrique à trois fonctionnalités :<br>1. Saisie du rayon d'un cercle pour en calculer et afficher l'Aire et le Périmètre.<br>2. Saisie des deux côtés d'un triangle rectangle pour en calculer l'hypoténuse (Théorème de Pythagore : racine carrée de la somme des carrés).<br>3. Saisie de trois nombres pour mettre en évidence dynamiquement le maximum et le minimum en deux couleurs distinctes.",
+        sandboxType: "geometrie",
+        sandboxPlaceholder: "Côté A, Côté B (ex: 3, 4)"
+      },
+      3: {
+        badge: "Sujet 3 — Groupe 3",
+        title: "Les Maîtres du Hasard",
+        desc: "Domptez le générateur de nombres aléatoires pour créer un outil configurable indispensable aux jeux et aux simulations.",
+        theory: [
+          "<strong>Math.random()</strong> : génère un nombre décimal pseudo-aléatoire compris strictement entre <code>0</code> (inclus) et <code>1</code> (exclus).",
+          "<strong>Le Pattern universel</strong> : Pour générer un entier compris entre une borne <code>min</code> et une borne <code>max</code> incluses, la formule est :<br><code>Math.floor(Math.random() * (max - min + 1)) + min</code>",
+          "<strong>Explication :</strong> Multiplier par la taille de la plage étire le nombre. Le <code>Math.floor()</code> arrondit à l'entier inférieur pour avoir des tranches entières, et le <code>+ min</code> décale la borne inférieure."
+        ],
+        trap: "<strong>Pourquoi 'floor' et pas 'round' ?</strong><br>Si vous utilisez <code>Math.round(Math.random() * max)</code>, les bornes extrêmes (0 et max) ont deux fois moins de probabilités d'apparaître que les nombres intermédiaires ! Pour garantir un hasard parfaitement équitable, utilisez toujours <strong>Math.floor()</strong> avec un ajustement <code>+ 1</code>.",
+        demo: "Créer un simulateur de lancers de dés de jeux de rôle (RPG). L'utilisateur saisit sa valeur minimale (ex: 1) et maximale (ex: 6 pour un dé standard, 20 pour un dé RPG) et clique pour générer le lancer. Affichez le résultat avec des styles colorés : vert brillant en cas de score maximum ('coup critique') ou rouge sombre en cas de score minimal ('échec critique') !",
+        sandboxType: "hasard",
+        sandboxPlaceholder: "Min, Max (ex: 1, 6)"
+      },
+      4: {
+        badge: "Sujet 4 — Groupe 4",
+        title: "Les Voyageurs du Temps (Horloge)",
+        desc: "Capturer l'instant présent et maîtriser le formatage temporel rigoureux requis pour les dashboards de données.",
+        theory: [
+          "<strong>new Date()</strong> : instancie un nouvel objet contenant la date et l'heure système exactes capturées à cet instant précis.",
+          "<strong>.getHours(), .getMinutes(), .getSeconds()</strong> : méthodes permettant d'extraire respectivement les heures (0-23), les minutes (0-59) et les secondes (0-59).",
+          "<strong>String(n).padStart(longueur, '0')</strong> : méthode de chaîne permettant de combler avec un zéro de tête si le nombre n'a qu'un seul chiffre (ex: transformer la minute <code>5</code> en <code>'05'</code>)."
+        ],
+        trap: "<strong>Les nombres simples n'ont pas la méthode padStart() !</strong><br>La méthode <code>.padStart()</code> n'existe que sur le type <code>String</code>. Si vous écrivez <code>maintenant.getMinutes().padStart(2, '0')</code>, le script plantera ! Vous devez d'abord convertir la valeur numérique en texte : <code>String(maintenant.getMinutes()).padStart(2, '0')</code>.",
+        demo: "Créez une horloge digitale animée qui s'actualise en temps réel sur la page. Affichez l'heure sous le format standardisé <code>HH:MM:SS</code>. Ajoutez un bouton 'Figer' qui stocke et liste les heures capturées en mémoire sous forme de tableau historique de sauvegardes.",
+        sandboxType: "date-basic",
+        sandboxPlaceholder: "Aucun input requis (cliquez)"
+      },
+      5: {
+        badge: "Sujet 5 — Groupe 5",
+        title: "Les Historiens de l'Année (Mots en Français)",
+        desc: "Maîtriser la conversion d'index temporels numériques complexes en chaînes de caractères localisées et lisibles.",
+        theory: [
+          "<strong>Date.getMonth()</strong> : renvoie l'index du mois (<strong>0 pour Janvier</strong>, 11 pour Décembre). C'est le piège numéro 1 !",
+          "<strong>Date.getDay()</strong> : renvoie l'index du jour de la semaine (<strong>0 pour Dimanche</strong>, 1 pour Lundi, ..., 6 pour Samedi). C'est le piège numéro 2 !",
+          "<strong>Tableaux de traduction</strong> : Déclarer des constantes comme <code>const JOURS = ['Dimanche', 'Lundi'...]</code> pour convertir l'index numérique en texte lisible : <code>JOURS[maintenant.getDay()]</code>."
+        ],
+        trap: "<strong>Ne confondez pas .getDate() et .getDay() !</strong><br><code>.getDate()</code> renvoie le numéro du jour du mois (ex: 22), alors que <code>.getDay()</code> renvoie le jour de la semaine (0 à 6).",
+        demo: "Créez un module interactif 'Quel jour es-tu né ?'. L'utilisateur saisit son année, son mois de naissance (via une liste déroulante de 1 à 12) et son jour de naissance. Le programme instancie la date précise correspondante, et affiche une phrase magnifique : <em>'Tu es né le Vendredi 22 mai 2026 ! Profite bien de ton week-end !'</em> (avec un badge vert pour le week-end, bleu pour la semaine).",
+        sandboxType: "date-french",
+        sandboxPlaceholder: "AAAA-MM-JJ (ex: 1998-05-15)"
+      },
+      6: {
+        badge: "Sujet 6 — Groupe 6",
+        title: "Les Gardiens du Score (Portée & État)",
+        desc: "Comprendre comment maintenir et modifier l'état persistant de variables en mémoire tout au long de la vie de l'application.",
+        theory: [
+          "<strong>Portée Locale (dans une fonction)</strong> : les variables déclarées avec <code>let</code> ou <code>const</code> à l'intérieur d'un <code>addEventListener</code> naissent au clic et meurent à la fin du bloc. Elles se réinitialisent donc à chaque clic.",
+          "<strong>Portée Globale (dans le script)</strong> : déclarer les variables à l'extérieur des écouteurs permet de conserver leurs valeurs en mémoire entre les clics. La fonction de clic peut alors les modifier sans les réinitialiser."
+        ],
+        trap: "<strong>Évitez de déclarer des variables sans let/const !</strong><br>Si vous oubliez d'écrire <code>let</code> devant une variable interne, JavaScript la transformera automatiquement en variable globale par défaut (ce qui peut créer des bugs très difficiles à détecter). Restez rigoureux.",
+        demo: "Créez un mini-jeu interactif du 'Juste Prix' (ou 'Nombre Secret'). Au chargement, le programme génère secrètement un entier aléatoire entre 1 et 100 <strong>une seule fois</strong>. L'utilisateur tente sa chance. Le programme indique si le secret est plus grand ou plus petit. Il incrémente un compteur global de tentatives à chaque essai et stoppe le jeu (désactive le bouton) dès la victoire avec un historique des tentatives !",
+        sandboxType: "score-portee",
+        sandboxPlaceholder: "Entrez votre essai (1-100)"
+      }
+    };
+
+    // Switch major Sections
+    function switchSection(sectionId) {
+      document.querySelectorAll('.section-tab-content').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.tab-nav-btn').forEach(btn => btn.classList.remove('active'));
+      
+      document.getElementById(sectionId + '-section').classList.add('active');
+      
+      // Highlight nav button
+      const buttons = document.querySelectorAll('.tab-nav-btn');
+      if (sectionId === 'subjects') buttons[0].classList.add('active');
+      if (sectionId === 'template') buttons[1].classList.add('active');
+      if (sectionId === 'evaluation') buttons[2].classList.add('active');
+    }
+
+    // Modal Manager
+    function openSubjectModal(subjectId) {
+      const data = SUBJECT_DATA[subjectId];
+      if (!data) return;
+
+      document.getElementById('modal-lbl-subject').textContent = data.badge;
+      document.getElementById('modal-lbl-title').textContent = data.title;
+
+      // Build theory list HTML
+      let theoryHtml = '<ul class="modal-list">';
+      data.theory.forEach(t => {
+        theoryHtml += `<li>${t}</li>`;
+      });
+      theoryHtml += '</ul>';
+
+      // Build sandbox widget HTML
+      let sandboxHtml = '';
+      if (data.sandboxType) {
+        sandboxHtml = `
+          <div class="sandbox">
+            <div class="sandbox-header">
+              <span>🕹️ Console de test rapide</span>
+              <span class="badge-live">Live JS</span>
+            </div>
+            <p class="modal-text" style="font-size: 0.85rem; margin-top:-0.5rem; margin-bottom:0.75rem;">
+              Testez la théorie en direct avant de la coder ! Saisissez vos paramètres et observez le comportement immédiat :
+            </p>
+            <div class="sandbox-controls">
+              <input type="text" class="sandbox-input" id="sb-input" placeholder="${data.sandboxPlaceholder}">
+              <button class="sandbox-btn" onclick="runSandbox(${subjectId})">Tester en live</button>
+            </div>
+            <div class="sandbox-output" id="sb-output">
+              En attente d'évaluation...
+            </div>
+          </div>
+        `;
+      }
+
+      const bodyHtml = `
+        <div class="modal-callout">
+          <strong>Description du Sujet :</strong>
+          <p>${data.desc}</p>
+        </div>
+
+        <h4 class="modal-section-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V5A2.5 2.5 0 0 1 6.5 2.5H20v14H6.5a2.5 2.5 0 0 0-2.5 2.5z"/></svg>
+          Les fonctions et concepts à expliquer
+        </h4>
+        ${theoryHtml}
+
+        <div class="modal-callout" style="background: rgba(244, 63, 94, 0.04); border-left-color: var(--rose);">
+          <strong style="color: var(--rose);">⚠️ Le piège classique du chapitre :</strong>
+          <p>${data.trap}</p>
+        </div>
+
+        <h4 class="modal-section-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Objectif de votre Mini-Démonstration
+        </h4>
+        <p class="modal-text">${data.demo}</p>
+
+        ${sandboxHtml}
+      `;
+
+      document.getElementById('modal-body-content').innerHTML = bodyHtml;
+      document.getElementById('subject-modal').classList.add('active');
+    }
+
+    function closeSubjectModal(event) {
+      if (event === null || event.target === document.getElementById('subject-modal')) {
+        document.getElementById('subject-modal').classList.remove('active');
+      }
+    }
+
+    // Run live JS tests in modal console
+    function runSandbox(subjectId) {
+      const inputVal = document.getElementById('sb-input').value.trim();
+      const output = document.getElementById('sb-output');
+      output.innerHTML = '';
+
+      if (subjectId === 1) {
+        // Arrondis
+        const num = parseFloat(inputVal);
+        if (isNaN(num)) {
+          output.innerHTML = '⚠️ Veuillez entrer un nombre valide (ex: -3.75).';
+          return;
+        }
+        output.innerHTML = `
+          <div class="sandbox-output-row"><span>Saisie d'origine (décimal) :</span> <span>${num}</span></div>
+          <div class="sandbox-output-row"><span>Math.round(x) (le plus proche) :</span> <span>${Math.round(num)}</span></div>
+          <div class="sandbox-output-row"><span>Math.floor(x) (plancher) :</span> <span>${Math.floor(num)}</span></div>
+          <div class="sandbox-output-row"><span>Math.ceil(x) (plafond) :</span> <span>${Math.ceil(num)}</span></div>
+          <div class="sandbox-output-row"><span>Math.trunc(x) (tronquer) :</span> <span>${Math.trunc(num)}</span></div>
+          <div class="sandbox-output-row"><span>Math.abs(x) (absolu) :</span> <span>${Math.abs(num)}</span></div>
+        `;
+      } else if (subjectId === 2) {
+        // Geometrie / Min Max / Pythagore
+        const parts = inputVal.split(',').map(p => parseFloat(p.trim()));
+        if (parts.length < 2 || parts.some(isNaN)) {
+          output.innerHTML = '⚠️ Entrez deux nombres valides séparés par une virgule (ex: 3, 4).';
+          return;
+        }
+        const a = parts[0];
+        const b = parts[1];
+        const hyp = Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
+        output.innerHTML = `
+          <div class="sandbox-output-row"><span>Côté A :</span> <span>${a}</span></div>
+          <div class="sandbox-output-row"><span>Côté B :</span> <span>${b}</span></div>
+          <div class="sandbox-output-row"><span>Math.pow(A, 2) + Math.pow(B, 2) :</span> <span>${Math.pow(a,2) + Math.pow(b,2)}</span></div>
+          <div class="sandbox-output-row"><span>Hypoténuse (Math.sqrt()) :</span> <span>${hyp.toFixed(3)}</span></div>
+          <div class="sandbox-output-row"><span>Plus petit des deux (Math.min()) :</span> <span>${Math.min(a, b)}</span></div>
+          <div class="sandbox-output-row"><span>Plus grand des deux (Math.max()) :</span> <span>${Math.max(a, b)}</span></div>
+        `;
+      } else if (subjectId === 3) {
+        // Aléatoire
+        const parts = inputVal.split(',').map(p => parseInt(p.trim()));
+        if (parts.length < 2 || parts.some(isNaN)) {
+          output.innerHTML = '⚠️ Entrez deux bornes entières séparées par une virgule (ex: 1, 6).';
+          return;
+        }
+        const min = parts[0];
+        const max = parts[1];
+        if (min >= max) {
+          output.innerHTML = '⚠️ La borne Min doit être strictement inférieure à Max !';
+          return;
+        }
+        
+        let lancers = [];
+        for (let k = 0; k < 5; k++) {
+          lancers.push(Math.floor(Math.random() * (max - min + 1)) + min);
+        }
+        output.innerHTML = `
+          <div class="sandbox-output-row"><span>Borne Min demandée :</span> <span>${min}</span></div>
+          <div class="sandbox-output-row"><span>Borne Max demandée :</span> <span>${max}</span></div>
+          <div class="sandbox-output-row"><span>Taille de la plage (max - min + 1) :</span> <span>${max - min + 1}</span></div>
+          <div class="sandbox-output-row"><span>Simulation de 5 tirages consécutifs :</span> <span style="color:var(--success)">[ ${lancers.join(', ')} ]</span></div>
+        `;
+      } else if (subjectId === 4) {
+        // Date basique
+        const main = new Date();
+        const h = String(main.getHours()).padStart(2, '0');
+        const m = String(main.getMinutes()).padStart(2, '0');
+        const s = String(main.getSeconds()).padStart(2, '0');
+        output.innerHTML = `
+          <div class="sandbox-output-row"><span>new Date() brute :</span> <span>${main.toString()}</span></div>
+          <div class="sandbox-output-row"><span>maintenant.getHours() :</span> <span>${main.getHours()}</span></div>
+          <div class="sandbox-output-row"><span>maintenant.getMinutes() :</span> <span>${main.getMinutes()}</span></div>
+          <div class="sandbox-output-row"><span>Formaté avec padStart() :</span> <span style="color: var(--amber); font-weight:700;">${h}:${m}:${s}</span></div>
+        `;
+      } else if (subjectId === 5) {
+        // Date historique / Index français
+        let testDate = new Date();
+        if (inputVal !== "") {
+          const parts = inputVal.split('-');
+          if (parts.length === 3) {
+            testDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+          }
+        }
+        const DAYS = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+        const MONTHS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+        
+        const rawDay = testDate.getDay();
+        const rawMonth = testDate.getMonth();
+        output.innerHTML = `
+          <div class="sandbox-output-row"><span>Date analysée :</span> <span>${testDate.toLocaleDateString('fr-FR')}</span></div>
+          <div class="sandbox-output-row"><span>Index jour (.getDay()) :</span> <span>${rawDay} (${DAYS[rawDay]})</span></div>
+          <div class="sandbox-output-row"><span>Index mois (.getMonth()) :</span> <span>${rawMonth} (${MONTHS[rawMonth]})</span></div>
+          <div class="sandbox-output-row"><span>Type de jour :</span> <span>${(rawDay === 0 || rawDay === 6) ? '🎉 Week-end' : '💼 Semaine'}</span></div>
+        `;
+      } else if (subjectId === 6) {
+        // Portée & persistance
+        let prevCount = parseInt(output.getAttribute('data-persisted-count')) || 0;
+        prevCount++;
+        output.setAttribute('data-persisted-count', prevCount);
+        
+        const secretConst = 42; // fictif
+        output.innerHTML = `
+          <div class="sandbox-output-row"><span>Nombre de clics enregistrés :</span> <span style="color: var(--success); font-size:1.1rem;">${prevCount} clics</span></div>
+          <div class="sandbox-output-row"><span>Portée de la variable clic :</span> <span>Persistante (globale)</span></div>
+          <p class="modal-text" style="font-size:0.8rem; margin: 0.5rem 0 0 0; color:var(--text-muted);">
+            Remarquez que le compteur s'incrémente à chaque fois que vous recliquez sans jamais revenir à zéro !
+          </p>
+        `;
+      }
+    }
+
+    // Boilerplate Code Copying
+    function copyTemplateCode() {
+      const codeElement = document.getElementById('code-template');
+      const text = codeElement.textContent;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        const btnText = document.getElementById('copy-text');
+        btnText.textContent = 'Copié !';
+        setTimeout(() => {
+          btnText.textContent = 'Copier le modèle';
+        }, 2000);
+      }).catch(err => {
+        alert("Erreur lors de la copie.");
+      });
+    }
+
+    // Evaluation Rubric / Interactive score Calculator
+    let selectedScores = { 1: null, 2: null, 3: null, 4: null, 5: null };
+
+    function setScore(element, scoreVal) {
+      const selector = element.parentElement;
+      const critId = parseInt(selector.getAttribute('data-crit'));
+      
+      // Remove selection from siblings
+      selector.querySelectorAll('.score-node').forEach(node => node.classList.remove('selected'));
+      
+      // Select clicked
+      element.classList.add('selected');
+      selectedScores[critId] = scoreVal;
+      
+      calculateTotalScore();
+    }
+
+    function calculateTotalScore() {
+      let total = 0;
+      let allEvaluated = true;
+      
+      for (let k = 1; k <= 5; k++) {
+        if (selectedScores[k] === null) {
+          allEvaluated = false;
+        } else {
+          total += selectedScores[k];
+        }
+      }
+      
+      const totalBox = document.getElementById('live-total-score');
+      totalBox.textContent = total;
+      
+      const title = document.getElementById('score-verdict-title');
+      const desc = document.getElementById('score-verdict-desc');
+      
+      if (!allEvaluated) {
+        title.textContent = "Évaluation en cours...";
+        desc.textContent = "Veuillez sélectionner un score pour chaque critère.";
+        return;
+      }
+      
+      if (total >= 18) {
+        title.textContent = "🏆 Excellentissime !";
+        title.style.color = "var(--success)";
+        desc.textContent = "Le binôme a fourni une prestation remarquable, tant technique qu'orale ! Excellent design.";
+      } else if (total >= 14) {
+        title.textContent = "🟢 Très bon travail !";
+        title.style.color = "var(--success)";
+        desc.textContent = "La démo fonctionne bien, la théorie est comprise et le code est bien structuré.";
+      } else if (total >= 10) {
+        title.textContent = "🟡 Travail satisfaisant.";
+        title.style.color = "var(--amber)";
+        desc.textContent = "Les concepts clés sont là, mais certains aspects techniques ou l'oralité restent perfectibles.";
+      } else {
+        title.textContent = "🔴 À retravailler.";
+        title.style.color = "var(--rose)";
+        desc.textContent = "Des lacunes théoriques significatives ou une démo non fonctionnelle. Il faut consolider ces bases.";
+      }
+    }
+
+    function resetRubric() {
+      selectedScores = { 1: null, 2: null, 3: null, 4: null, 5: null };
+      document.querySelectorAll('.score-node').forEach(node => node.classList.remove('selected'));
+      document.getElementById('live-total-score').textContent = '0';
+      document.getElementById('score-verdict-title').textContent = "Veuillez évaluer...";
+      document.getElementById('score-verdict-title').style.color = "white";
+      document.getElementById('score-verdict-desc').textContent = "Sélectionnez une valeur pour chaque ligne de critère pour voir le total.";
+    }
+  </script>
+</body>
+</html>

@@ -373,17 +373,30 @@
 }
 
 .btn-back-header {
-    background: var(--md-sys-color-secondary-container);
-    color: var(--md-sys-color-on-secondary-container);
-    border: none;
+    background: transparent;
+    color: var(--md-sys-color-on-surface-variant);
+    border: 1px solid var(--md-sys-color-surface-variant);
     padding: 6px 14px;
     border-radius: 100px;
     font-weight: 600;
     font-size: 12px;
     cursor: pointer;
     transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
-.btn-back-header:hover { transform: scale(1.05); background: var(--md-sys-color-primary-container); }
+
+.btn-back-header.active {
+    background: var(--md-sys-color-primary-container) !important;
+    color: var(--md-sys-color-on-primary-container) !important;
+    border-color: transparent !important;
+}
+
+.btn-back-header:hover {
+    transform: scale(1.05);
+    background: var(--md-sys-color-surface-variant);
+}
 
 .logo-mini { font-weight: 800; font-size: 14px; color: var(--md-sys-color-primary); opacity: 0.5; }
 
@@ -2109,4 +2122,275 @@ input:checked + .slider:before {
 
 .slider.round:before {
     border-radius: 50%;
+}
+
+/* =========================================================
+   ESPACE COURS & MODAL DE LECTURE (DYNAMIC .MD FILES)
+   ========================================================= */
+
+/* --- Cartes des cours (📚 Onglet Cours) --- */
+.course-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: white;
+    border: 1px solid var(--md-sys-color-surface-variant);
+    border-radius: 16px;
+    padding: 24px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--elevation-1);
+    font-family: var(--font-family);
+    min-height: 180px;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none !important; /* pas de soulignement */
+}
+
+.course-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--md-sys-color-primary), #3b82f6);
+}
+
+.course-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 100, 147, 0.15);
+    border-color: var(--md-sys-color-primary);
+}
+
+.course-card .card-icon {
+    font-size: 28px;
+    color: var(--md-sys-color-primary);
+}
+
+.course-card .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+    line-height: 1.4;
+}
+
+.course-card .card-description {
+    font-size: 12.5px;
+    color: var(--md-sys-color-on-surface-variant);
+    line-height: 1.6;
+    flex: 1;
+}
+
+.course-card .card-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--md-sys-color-primary);
+    margin-top: auto;
+    transition: transform 0.2s;
+}
+
+.course-card:hover .card-action {
+    transform: translateX(4px);
+}
+
+/* --- Modal Lecteur de Cours --- */
+#courseReaderModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(8px);
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#courseReaderModal.hidden-reader-modal {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+#courseReaderModal.visible-reader-modal {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.reader-modal-content {
+    background: white;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 860px;
+    height: 90%;
+    max-height: 800px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--md-sys-color-surface-variant);
+    overflow: hidden;
+    animation: readerSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes readerSlideUp {
+    from {
+        transform: translateY(40px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.reader-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--md-sys-color-surface-variant);
+    background: #f8fafc;
+}
+
+.reader-modal-header h2 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--md-sys-color-primary);
+    margin: 0;
+}
+
+.btn-close-reader {
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-close-reader:hover {
+    background: var(--md-sys-color-primary);
+    color: white;
+    transform: scale(1.05);
+}
+
+.reader-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 40px;
+    line-height: 1.7;
+    color: #334155;
+    font-size: 14.5px;
+}
+
+/* Styles pour le Markdown généré dans le Reader */
+.reader-modal-body h1,
+.reader-modal-body h2,
+.reader-modal-body h3 {
+    color: var(--md-sys-color-primary);
+    margin-top: 1.8rem;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+}
+
+.reader-modal-body h1 {
+    font-size: 24px;
+    border-bottom: 2px solid var(--md-sys-color-primary-container);
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+.reader-modal-body h2 {
+    font-size: 19px;
+    border-bottom: 1px solid var(--md-sys-color-surface-variant);
+    padding-bottom: 6px;
+}
+
+.reader-modal-body h3 {
+    font-size: 15px;
+}
+
+.reader-modal-body p {
+    margin-bottom: 1.2rem;
+}
+
+.reader-modal-body code {
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 3px 6px;
+    border-radius: 6px;
+    font-family: 'Fira Code', Consolas, Monaco, monospace;
+    font-size: 0.88em;
+}
+
+.reader-modal-body pre {
+    background: #0f172a;
+    color: #f8fafc;
+    padding: 16px 20px;
+    border-radius: 12px;
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.reader-modal-body pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    font-size: 13px;
+}
+
+.reader-modal-body ul,
+.reader-modal-body ol {
+    margin-bottom: 1.2rem;
+    padding-left: 24px;
+}
+
+.reader-modal-body li {
+    margin-bottom: 0.5rem;
+}
+
+.reader-modal-body blockquote {
+    background: #eff6ff;
+    border-left: 4px solid var(--md-sys-color-primary);
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    color: #1e3a8a;
+    font-style: italic;
+}
+
+.reader-modal-body blockquote p {
+    margin: 0;
+}
+
+.reader-modal-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+}
+
+.reader-modal-body th,
+.reader-modal-body td {
+    border: 1px solid var(--md-sys-color-surface-variant);
+    padding: 10px 14px;
+    text-align: left;
+}
+
+.reader-modal-body th {
+    background: #f1f5f9;
+    font-weight: 600;
 }

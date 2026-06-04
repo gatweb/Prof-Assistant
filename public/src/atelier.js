@@ -44,6 +44,15 @@ const toggleSidebarBtn = document.getElementById('toggleSidebar');
 const courseLink = document.getElementById('courseLink');
 const resetExerciseBtn = document.getElementById('resetExerciseBtn');
 
+// Éléments du Reader de Cours
+const navCoursesBtn = document.getElementById('navCoursesBtn');
+const coursesView = document.getElementById('coursesView');
+const coursesContainer = document.getElementById('coursesContainer');
+const courseReaderModal = document.getElementById('courseReaderModal');
+const readerTitle = document.getElementById('readerTitle');
+const readerBody = document.getElementById('readerBody');
+const closeReaderBtn = document.getElementById('closeReaderBtn');
+
 // Éditeur
 const runCodeBtn = document.getElementById('runCodeBtn');
 const refreshPreviewBtn = document.getElementById('refreshPreviewBtn');
@@ -145,10 +154,14 @@ listenToAuthStatus((user) => {
                 }
             }
 
-            // Si on est dans la vue Lobby, on recharge pour masquer/afficher les chapitres
+            // Si on est dans la vue Lobby ou Cours, on recharge pour masquer/afficher les chapitres
             const examView = document.getElementById('examView');
             if (workspaceView.classList.contains('hidden') && (!examView || examView.classList.contains('hidden'))) {
-                loadLobby();
+                if (coursesView && !coursesView.classList.contains('hidden')) {
+                    loadCourses();
+                } else {
+                    loadLobby();
+                }
             }
         });
     }
@@ -183,7 +196,15 @@ if (logoutBtn) logoutBtn.addEventListener('click', async () => await logoutUser(
 async function loadLobby() {
     // Reset Header UI
     if (exerciseTitleEl) exerciseTitleEl.textContent = 'Choisis un exercice';
-    if (backToLobbyBtn) backToLobbyBtn.style.display = 'none';
+    if (backToLobbyBtn) {
+        backToLobbyBtn.style.display = 'inline-flex';
+        backToLobbyBtn.classList.add('active');
+        backToLobbyBtn.textContent = '🏠 Exercices';
+    }
+    if (navCoursesBtn) {
+        navCoursesBtn.style.display = 'inline-flex';
+        navCoursesBtn.classList.remove('active');
+    }
     if (exportCodeBtn) exportCodeBtn.style.display = 'none';
     if (submitBtn) submitBtn.classList.add('hidden');
 
@@ -192,6 +213,7 @@ async function loadLobby() {
     lobbyLoader.classList.remove('hidden');
     lobbyContent.classList.add('hidden');
     lobbyView.classList.remove('hidden');
+    if (coursesView) coursesView.classList.add('hidden');
     workspaceView.classList.add('hidden');
 
     try {
@@ -437,15 +459,9 @@ async function openExercise(exerciceId) {
 function injectExerciseData(exData) {
     if (exerciseTitleEl) exerciseTitleEl.textContent = exData.titre || 'Exercice sans titre';
 
-    // Gestion du lien vers le cours complet
+    // Gestion du lien vers le cours complet (Masqué — maintenant dans la page dédiée Cours)
     if (courseLink) {
-        const url = exData.lien_cours || exData.lien_cours_complet || '';
-        if (url) {
-            courseLink.href = url;
-            courseLink.classList.remove('hidden');
-        } else {
-            courseLink.classList.add('hidden');
-        }
+        courseLink.classList.add('hidden');
     }
 
     // Rendu des Blocs de Ressources (Énoncé & Théorie séparés)
@@ -468,7 +484,11 @@ function injectExerciseData(exData) {
     // Afficher/Masquer les boutons du header selon le mode
     if (backToLobbyBtn) {
         backToLobbyBtn.style.display = 'inline-flex';
+        backToLobbyBtn.classList.remove('active');
         backToLobbyBtn.textContent = '🏠 Exercices';
+    }
+    if (navCoursesBtn) {
+        navCoursesBtn.style.display = 'none';
     }
     if (exportCodeBtn) exportCodeBtn.style.display = 'inline-flex';
     if (submitBtn) submitBtn.classList.remove('hidden');
@@ -518,13 +538,18 @@ if (toggleSidebarBtn && resourcesSidebar) {
     });
 }
 
-// Fonction pour revenir proprement au lobby depuis le workspace ou l'examen
+// Fonction pour revenir proprement au lobby depuis le workspace, le cours ou l'examen
 function switchToLobby() {
     // Reset Header UI
     if (exerciseTitleEl) exerciseTitleEl.textContent = 'Choisis un exercice';
     if (backToLobbyBtn) {
-        backToLobbyBtn.style.display = 'none';
+        backToLobbyBtn.style.display = 'inline-flex';
+        backToLobbyBtn.classList.add('active');
         backToLobbyBtn.textContent = '🏠 Exercices';
+    }
+    if (navCoursesBtn) {
+        navCoursesBtn.style.display = 'inline-flex';
+        navCoursesBtn.classList.remove('active');
     }
     if (exportCodeBtn) exportCodeBtn.style.display = 'none';
     if (submitBtn) submitBtn.classList.add('hidden');
@@ -532,6 +557,7 @@ function switchToLobby() {
 
     lobbyView.classList.remove('hidden');
     workspaceView.classList.add('hidden');
+    if (coursesView) coursesView.classList.add('hidden');
     
     const examView = document.getElementById('examView');
     if (examView) examView.classList.add('hidden');
@@ -557,10 +583,15 @@ if (backToLobbyBtn) {
             return;
         }
 
-        // Stopper l'écoute prof en cours
-        if (profFeedbackUnsub) { profFeedbackUnsub(); profFeedbackUnsub = null; }
-        currentExercice = null;
-        loadLobby();
+        // Retourner au lobby principal (Exercices)
+        switchToLobby();
+    });
+}
+
+// Clic sur l'onglet Cours
+if (navCoursesBtn) {
+    navCoursesBtn.addEventListener('click', () => {
+        loadCourses();
     });
 }
 
@@ -570,6 +601,7 @@ if (startExamBtn) {
     startExamBtn.addEventListener('click', () => {
         // 1. Masquer le lobby, afficher l'examView
         lobbyView.classList.add('hidden');
+        if (coursesView) coursesView.classList.add('hidden');
         const examView = document.getElementById('examView');
         if (examView) examView.classList.remove('hidden');
 
@@ -577,7 +609,11 @@ if (startExamBtn) {
         if (exerciseTitleEl) exerciseTitleEl.textContent = '📝 Examen Final JavaScript';
         if (backToLobbyBtn) {
             backToLobbyBtn.style.display = 'inline-flex';
+            backToLobbyBtn.classList.remove('active');
             backToLobbyBtn.textContent = '🏠 Quitter l\'examen';
+        }
+        if (navCoursesBtn) {
+            navCoursesBtn.style.display = 'none';
         }
         if (exportCodeBtn) exportCodeBtn.style.display = 'none';
         if (submitBtn) submitBtn.classList.add('hidden');
@@ -1449,3 +1485,191 @@ window.addEventListener('focus', () => {
         }).catch(() => {});
     }
 });
+
+// ============================================================
+// 13. ESPACE COURS ET LECTEUR INTEGRÉ (.MD)
+// ============================================================
+
+const COURSE_FILES = [
+    { id: "ch1", file: "UAA5_CH01_Introduction_JS.md", title: "Bienvenue dans JavaScript", chapter: "CH1 — Introduction à JavaScript" },
+    { id: "ch2", file: "UAA5_CH02_Variables_Types_Operateurs.md", title: "Variables, types et opérateurs", chapter: "CH2 — Variables, types et opérateurs" },
+    { id: "ch3", file: "UAA5_CH03_Entrees_Sorties.md", title: "Entrées / Sorties interactives", chapter: "CH3 — Entrées / Sorties interactives" },
+    { id: "ch4", file: "UAA5_CH04_Chaines_Caracteres.md", title: "Chaînes de caractères", chapter: "CH4 — Chaînes de caractères" },
+    { id: "ch5", file: "UAA5_CH05_Conditions.md", title: "Conditions", chapter: "CH5 — Conditions" },
+    { id: "ch6", file: "UAA5_CH06_Boucles.md", title: "Boucles", chapter: "CH6 — Boucles" },
+    { id: "ch7", file: "UAA5_CH07_Structures_Combinees.md", title: "Structures combinées", chapter: "CH7 — Structures combinées" },
+    { id: "ch8_theory", file: "UAA5_CH08_Fonctions_Predefinies.md", title: "Les Fonctions Prédéfinies", chapter: "CH8 — Fonctions" },
+    { id: "ch8_binomes", file: "UAA5_CH08_Exercice_Binomes.md", title: "Exercice Pratique en Binôme", chapter: "CH8 — Fonctions" },
+    { id: "ch9", file: "UAA5_CH09_Algorithmes.md", title: "Algorithmes", chapter: "CH9 — Algorithmes" },
+    { id: "ch10", file: "UAA5_CH10_Projets.md", title: "Projets", chapter: "CH10 — Projets" }
+];
+
+async function loadCourses() {
+    // Reset Header UI
+    if (exerciseTitleEl) exerciseTitleEl.textContent = 'Cours théoriques';
+    if (backToLobbyBtn) {
+        backToLobbyBtn.style.display = 'inline-flex';
+        backToLobbyBtn.classList.remove('active');
+        backToLobbyBtn.textContent = '🏠 Exercices';
+    }
+    if (navCoursesBtn) {
+        navCoursesBtn.style.display = 'inline-flex';
+        navCoursesBtn.classList.add('active');
+    }
+    if (exportCodeBtn) exportCodeBtn.style.display = 'none';
+    if (submitBtn) submitBtn.classList.add('hidden');
+    if (chatFab) chatFab.classList.add('hidden');
+
+    // Changer la visibilité des vues
+    lobbyView.classList.add('hidden');
+    workspaceView.classList.add('hidden');
+    if (coursesView) coursesView.classList.remove('hidden');
+    
+    const examView = document.getElementById('examView');
+    if (examView) examView.classList.add('hidden');
+
+    // Stopper l'écoute prof en cours
+    if (profFeedbackUnsub) { profFeedbackUnsub(); profFeedbackUnsub = null; }
+    currentExercice = null;
+
+    // Rendre les cours
+    renderCourses();
+}
+
+function renderCourses() {
+    if (!coursesContainer) return;
+    coursesContainer.innerHTML = '';
+
+    // Filtrer les cours dont les chapitres sont actifs
+    const activeCourses = COURSE_FILES.filter(c => !disabledChapters.includes(c.chapter));
+
+    if (activeCourses.length === 0) {
+        coursesContainer.innerHTML = `
+            <div class="lobby-empty">
+                <p>📚 Aucun cours théorique n'est disponible pour le moment.</p>
+            </div>`;
+        return;
+    }
+
+    // Regrouper par chapitre
+    const grouped = {};
+    activeCourses.forEach(c => {
+        if (!grouped[c.chapter]) grouped[c.chapter] = [];
+        grouped[c.chapter].push(c);
+    });
+
+    // Trier les chapitres selon l'ordre officiel
+    const orderedChapters = [
+        "CH1 — Introduction à JavaScript",
+        "CH2 — Variables, types et opérateurs",
+        "CH3 — Entrées / Sorties interactives",
+        "CH4 — Chaînes de caractères",
+        "CH5 — Conditions",
+        "CH6 — Boucles",
+        "CH7 — Structures combinées",
+        "CH8 — Fonctions",
+        "CH9 — Algorithmes",
+        "CH10 — Projets"
+    ];
+
+    const sortedChapters = Object.keys(grouped).sort((a, b) => {
+        const idxA = orderedChapters.indexOf(a);
+        const idxB = orderedChapters.indexOf(b);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return a.localeCompare(b);
+    });
+
+    sortedChapters.forEach(chapterName => {
+        const courses = grouped[chapterName];
+        
+        const chapterEl = document.createElement('div');
+        chapterEl.className = 'chapter-block';
+        chapterEl.innerHTML = `
+            <h2 class="chapter-title">
+                <span class="chapter-icon">📚</span> ${chapterName}
+            </h2>`;
+
+        const grid = document.createElement('div');
+        grid.className = 'exercise-grid';
+
+        courses.forEach(c => {
+            const card = document.createElement('button');
+            card.className = 'course-card';
+            card.setAttribute('aria-label', `Ouvrir : ${c.title}`);
+
+            card.innerHTML = `
+                <div class="card-header">
+                    <span class="card-icon">📄</span>
+                    <span class="card-badge-aide" style="background:#e0f2fe;color:#0369a1;">Cours .MD</span>
+                </div>
+                <div class="card-title">${c.title}</div>
+                <div class="card-description">Support théorique complet et exemples détaillés pour ce chapitre.</div>
+                <div class="card-action">Lire le cours ↗</div>
+            `;
+
+            card.addEventListener('click', () => openCourseReader(c));
+            grid.appendChild(card);
+        });
+
+        chapterEl.appendChild(grid);
+        coursesContainer.appendChild(chapterEl);
+    });
+}
+
+async function openCourseReader(course) {
+    if (!courseReaderModal || !readerTitle || !readerBody) return;
+
+    readerTitle.textContent = course.title;
+    readerBody.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 0;">
+            <div class="loader-spinner"></div>
+            <p style="margin-top:16px;color:#64748b;">Chargement du cours...</p>
+        </div>
+    `;
+
+    courseReaderModal.classList.remove('hidden-reader-modal');
+    courseReaderModal.classList.add('visible-reader-modal');
+
+    try {
+        const response = await fetch(`./src/cours/${course.file}`);
+        if (!response.ok) throw new Error("Erreur de chargement du fichier Markdown");
+        const mdText = await response.text();
+
+        if (typeof window.marked !== 'undefined') {
+            readerBody.innerHTML = window.marked.parse(mdText);
+        } else {
+            readerBody.innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit;">${mdText}</pre>`;
+        }
+    } catch (e) {
+        console.error("Erreur de chargement du cours :", e);
+        readerBody.innerHTML = `
+            <div style="text-align:center;padding:40px;color:var(--md-sys-color-error, #ef4444);">
+                <p style="font-size:32px;">⚠️</p>
+                <p style="font-weight:600;margin-top:16px;">Impossible de charger le cours.</p>
+                <p style="font-size:13px;color:#64748b;margin-top:8px;">Vérifie ton accès au réseau ou réessaye plus tard.</p>
+            </div>
+        `;
+    }
+}
+
+// Gérer la fermeture du Reader de Cours
+if (closeReaderBtn) {
+    closeReaderBtn.addEventListener('click', () => {
+        if (courseReaderModal) {
+            courseReaderModal.classList.remove('visible-reader-modal');
+            courseReaderModal.classList.add('hidden-reader-modal');
+        }
+    });
+}
+
+// Fermer également en cliquant en dehors du modal
+if (courseReaderModal) {
+    courseReaderModal.addEventListener('click', (e) => {
+        if (e.target === courseReaderModal) {
+            courseReaderModal.classList.remove('visible-reader-modal');
+            courseReaderModal.classList.add('hidden-reader-modal');
+        }
+    });
+}

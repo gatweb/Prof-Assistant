@@ -18,6 +18,9 @@
             <button id="backToLobbyBtnHeader" class="btn-back-header" title="Retour à la liste des exercices">
                 🏠 Exercices
             </button>
+            <button id="navCoursesBtn" class="btn-back-header" title="Voir les cours théoriques">
+                📚 Cours
+            </button>
             <div class="logo-mini">
                 <span>ProfAssistant</span>
             </div>
@@ -73,6 +76,20 @@
             <div class="chapters-container" id="chaptersContainer"></div>
         </div>
 
+    </div>
+
+    <!-- =========================================================
+         VUE 1.7 : COURS — Page des cours théoriques (masquée au départ)
+    ========================================================= -->
+    <div id="coursesView" class="hidden">
+        <div class="lobby-content">
+            <div class="lobby-header">
+                <h1>Cours théoriques</h1>
+                <p class="lobby-subtitle">Consulte les supports de cours en Markdown pour réviser et approfondir tes connaissances 📚</p>
+            </div>
+            <!-- Les chapitres et cartes de cours sont injectés ici dynamiquement -->
+            <div class="chapters-container" id="coursesContainer"></div>
+        </div>
     </div>
 
     <!-- =========================================================
@@ -258,6 +275,21 @@
             document.dispatchEvent(new Event('monacoReady'));
         });
     </script>
+    <!-- =========================================================
+         LOBBY / COURS READER MODAL
+    ========================================================= -->
+    <div id="courseReaderModal" class="hidden-reader-modal">
+        <div class="reader-modal-content">
+            <div class="reader-modal-header">
+                <h2 id="readerTitle">Chargement...</h2>
+                <button id="closeReaderBtn" class="btn-close-reader">✕ Fermer</button>
+            </div>
+            <div class="reader-modal-body markdown-body" id="readerBody">
+                <!-- Rendu Markdown ici -->
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="./src/atelier.js?v=1779002272"></script>
 
 </body>
