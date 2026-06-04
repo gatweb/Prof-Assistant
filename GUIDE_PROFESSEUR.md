@@ -34,7 +34,7 @@ Utilise le fichier \`scratch/seed_html_exercise.js\` comme modèle :
    NODE_PATH=./functions/node_modules node mon_nouveau_cours.js
    \`\`\`
 
-## 💡 Conseils pour Gemini
+## 💡 Conseils pour L'IA
 Pour que le tuteur soit efficace, assure-toi que le champ \`theorie_md\` contient les concepts clés. L'IA s'en servira comme "source de vérité" pour répondre à l'élève.
 
 ---
