@@ -1,0 +1,70 @@
+[
+  {
+    "id": "js-uaa5-classic",
+    "title": "UAA5 : Algorithmique et Programmation",
+    "pitch": "Découvrez les bases de l'algorithmique et de la programmation en JavaScript : variables, structures de contrôle, boucles et fonctions.",
+    "systemPrompt": "Tu es un tuteur d'informatique Socratique bienveillant pour le cours d'Algorithmique et Programmation UAA5. Ton but est d'aider l'élève à trouver la réponse par lui-même. Ne donne JAMAIS le code corrigé. Base tes explications sur la théorie fournie et pose des questions de guidage constructives.",
+    "theme": {
+      "primaryColor": "#eab308",
+      "icon": "💛"
+    },
+    "chapters": [
+      {
+        "id": "ch1",
+        "title": "Introduction à JavaScript",
+        "file": "UAA5_CH01_Introduction_JS.md"
+      },
+      {
+        "id": "ch2",
+        "title": "Variables, types et opérateurs",
+        "file": "UAA5_CH02_Variables_Types_Operateurs.md"
+      },
+      {
+        "id": "ch3",
+        "title": "Entrées / Sorties interactives",
+        "file": "UAA5_CH03_Entrees_Sorties.md"
+      },
+      {
+        "id": "ch4",
+        "title": "Chaînes de caractères",
+        "file": "UAA5_CH04_Chaines_Caracteres.md"
+      },
+      {
+        "id": "ch5",
+        "title": "Conditions",
+        "file": "UAA5_CH05_Conditions.md"
+      },
+      {
+        "id": "ch6",
+        "title": "Boucles",
+        "file": "UAA5_CH06_Boucles.md"
+      },
+      {
+        "id": "ch7",
+        "title": "Structures combinées",
+        "file": "UAA5_CH07_Structures_Combinees.md"
+      },
+      {
+        "id": "ch8_theory",
+        "title": "Les Fonctions Prédéfinies",
+        "file": "UAA5_CH08_Fonctions_Predefinies.md"
+      },
+      {
+        "id": "ch8_binomes",
+        "title": "Exercice Pratique en Binôme",
+        "file": "UAA5_CH08_Exercice_Binomes.md"
+      },
+      {
+        "id": "ch9",
+        "title": "Algorithmes",
+        "file": "UAA5_CH09_Algorithmes.md"
+      },
+      {
+        "id": "ch10",
+        "title": "Projets",
+        "file": "UAA5_CH10_Projets.md"
+      }
+    ],
+    "folder": "js-uaa5-classic"
+  }
+]

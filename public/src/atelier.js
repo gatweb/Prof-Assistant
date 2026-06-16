@@ -21,6 +21,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 import { db } from './firebase/db.js';
 import { ExamManager } from './exam.js';
+import { courseManager } from './services/courseManager.js';
 
 // ============================================================
 // 1. RÉFÉRENCES DOM
@@ -127,9 +128,15 @@ listenToAuthStatus((user) => {
     if (!user) { window.location.href = "index.html"; return; }
     if (userEmailEl) userEmailEl.textContent = user.email;
 
-    // Initialiser le gestionnaire d'examen
-    examManager.init(() => {
-        switchToLobby();
+    // Charger les cours dynamiquement
+    courseManager.loadCourses().then(() => {
+        setupCourseSelector();
+        // Initialiser le gestionnaire d'examen
+        examManager.init(() => {
+            switchToLobby();
+        });
+    }).catch(err => {
+        console.error("Erreur de chargement des cours :", err);
     });
 
     // Écouter les réglages prof en temps réel (chapitres désactivés + examen actif)
@@ -188,6 +195,32 @@ if (logoutBtn) logoutBtn.addEventListener('click', async () => await logoutUser(
 // ============================================================
 // 4. LOBBY — Chargement et rendu des exercices
 // ============================================================
+
+function setupCourseSelector() {
+    const courseSelector = document.getElementById('courseSelector');
+    if (!courseSelector) return;
+    
+    courseSelector.innerHTML = '';
+    const courses = courseManager.getCourses();
+    courses.forEach(c => {
+        const option = document.createElement('option');
+        option.value = c.id;
+        option.textContent = `${c.theme?.icon || '📚'} ${c.title}`;
+        if (courseManager.getSelectedCourse()?.id === c.id) {
+            option.selected = true;
+        }
+        courseSelector.appendChild(option);
+    });
+    
+    courseSelector.addEventListener('change', (e) => {
+        courseManager.selectCourse(e.target.value);
+        if (coursesView && !coursesView.classList.contains('hidden')) {
+            loadCourses();
+        } else {
+            loadLobby();
+        }
+    });
+}
 
 /**
  * Charge tous les documents de la collection `exercices` depuis Firestore
@@ -293,6 +326,12 @@ async function loadLobby() {
             const data = { id: docSnap.id, ...docSnap.data() };
             // Masquer les exercices avec is_hidden: true
             if (data.is_hidden === true) return;
+            
+            // Filtrer par le cours sélectionné
+            const selectedCourse = courseManager.getSelectedCourse();
+            const exerciseCourseId = data.course_id || 'js-uaa5-classic';
+            if (selectedCourse && exerciseCourseId !== selectedCourse.id) return;
+
             const ch = data.chapitre || 'Général';
             // Masquer les chapitres désactivés par le prof
             if (disabledChapters.includes(ch)) return;
@@ -1087,7 +1126,8 @@ const sendFreeQuestion = async () => {
         const res = await tuteurFn({ 
             question: text, 
             historique: chatHistory, 
-            id_exercice: currentExercice?.id // Ajouté ici
+            id_exercice: currentExercice?.id,
+            system_prompt_custom: courseManager.getSelectedCourse()?.systemPrompt
         });
         document.getElementById(loaderId)?.remove();
         appendMessage(res.data.reponse, 'assistant', 'Tuteur IA');
@@ -1490,20 +1530,6 @@ window.addEventListener('focus', () => {
 // 13. ESPACE COURS ET LECTEUR INTEGRÉ (.MD)
 // ============================================================
 
-const COURSE_FILES = [
-    { id: "ch1", file: "UAA5_CH01_Introduction_JS.md", title: "Bienvenue dans JavaScript", chapter: "CH1 — Introduction à JavaScript" },
-    { id: "ch2", file: "UAA5_CH02_Variables_Types_Operateurs.md", title: "Variables, types et opérateurs", chapter: "CH2 — Variables, types et opérateurs" },
-    { id: "ch3", file: "UAA5_CH03_Entrees_Sorties.md", title: "Entrées / Sorties interactives", chapter: "CH3 — Entrées / Sorties interactives" },
-    { id: "ch4", file: "UAA5_CH04_Chaines_Caracteres.md", title: "Chaînes de caractères", chapter: "CH4 — Chaînes de caractères" },
-    { id: "ch5", file: "UAA5_CH05_Conditions.md", title: "Conditions", chapter: "CH5 — Conditions" },
-    { id: "ch6", file: "UAA5_CH06_Boucles.md", title: "Boucles", chapter: "CH6 — Boucles" },
-    { id: "ch7", file: "UAA5_CH07_Structures_Combinees.md", title: "Structures combinées", chapter: "CH7 — Structures combinées" },
-    { id: "ch8_theory", file: "UAA5_CH08_Fonctions_Predefinies.md", title: "Les Fonctions Prédéfinies", chapter: "CH8 — Fonctions" },
-    { id: "ch8_binomes", file: "UAA5_CH08_Exercice_Binomes.md", title: "Exercice Pratique en Binôme", chapter: "CH8 — Fonctions" },
-    { id: "ch9", file: "UAA5_CH09_Algorithmes.md", title: "Algorithmes", chapter: "CH9 — Algorithmes" },
-    { id: "ch10", file: "UAA5_CH10_Projets.md", title: "Projets", chapter: "CH10 — Projets" }
-];
-
 async function loadCourses() {
     // Reset Header UI
     if (exerciseTitleEl) exerciseTitleEl.textContent = 'Cours théoriques';
@@ -1540,82 +1566,49 @@ function renderCourses() {
     if (!coursesContainer) return;
     coursesContainer.innerHTML = '';
 
-    // Filtrer les cours dont les chapitres sont actifs
-    const activeCourses = COURSE_FILES.filter(c => !disabledChapters.includes(c.chapter));
-
-    if (activeCourses.length === 0) {
+    const selectedCourse = courseManager.getSelectedCourse();
+    if (!selectedCourse) {
         coursesContainer.innerHTML = `
             <div class="lobby-empty">
-                <p>📚 Aucun cours théorique n'est disponible pour le moment.</p>
+                <p>📚 Aucun cours sélectionné.</p>
             </div>`;
         return;
     }
 
-    // Regrouper par chapitre
-    const grouped = {};
-    activeCourses.forEach(c => {
-        if (!grouped[c.chapter]) grouped[c.chapter] = [];
-        grouped[c.chapter].push(c);
+    // Filtrer les chapitres dont le titre n'est pas désactivé
+    const activeChapters = selectedCourse.chapters.filter(ch => !disabledChapters.includes(ch.title));
+
+    if (activeChapters.length === 0) {
+        coursesContainer.innerHTML = `
+            <div class="lobby-empty">
+                <p>📚 Aucun chapitre n'est disponible pour le moment.</p>
+            </div>`;
+        return;
+    }
+
+    const grid = document.createElement('div');
+    grid.className = 'exercise-grid';
+
+    activeChapters.forEach(c => {
+        const card = document.createElement('button');
+        card.className = 'course-card';
+        card.setAttribute('aria-label', `Ouvrir : ${c.title}`);
+
+        card.innerHTML = `
+            <div class="card-header">
+                <span class="card-icon">📄</span>
+                <span class="card-badge-aide" style="background:#e0f2fe;color:#0369a1;">Cours .MD</span>
+            </div>
+            <div class="card-title">${c.title}</div>
+            <div class="card-description">Support théorique complet et exemples détaillés pour ce chapitre.</div>
+            <div class="card-action">Lire le cours ↗</div>
+        `;
+
+        card.addEventListener('click', () => openCourseReader(c));
+        grid.appendChild(card);
     });
 
-    // Trier les chapitres selon l'ordre officiel
-    const orderedChapters = [
-        "CH1 — Introduction à JavaScript",
-        "CH2 — Variables, types et opérateurs",
-        "CH3 — Entrées / Sorties interactives",
-        "CH4 — Chaînes de caractères",
-        "CH5 — Conditions",
-        "CH6 — Boucles",
-        "CH7 — Structures combinées",
-        "CH8 — Fonctions",
-        "CH9 — Algorithmes",
-        "CH10 — Projets"
-    ];
-
-    const sortedChapters = Object.keys(grouped).sort((a, b) => {
-        const idxA = orderedChapters.indexOf(a);
-        const idxB = orderedChapters.indexOf(b);
-        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-        if (idxA !== -1) return -1;
-        if (idxB !== -1) return 1;
-        return a.localeCompare(b);
-    });
-
-    sortedChapters.forEach(chapterName => {
-        const courses = grouped[chapterName];
-        
-        const chapterEl = document.createElement('div');
-        chapterEl.className = 'chapter-block';
-        chapterEl.innerHTML = `
-            <h2 class="chapter-title">
-                <span class="chapter-icon">📚</span> ${chapterName}
-            </h2>`;
-
-        const grid = document.createElement('div');
-        grid.className = 'exercise-grid';
-
-        courses.forEach(c => {
-            const card = document.createElement('button');
-            card.className = 'course-card';
-            card.setAttribute('aria-label', `Ouvrir : ${c.title}`);
-
-            card.innerHTML = `
-                <div class="card-header">
-                    <span class="card-icon">📄</span>
-                    <span class="card-badge-aide" style="background:#e0f2fe;color:#0369a1;">Cours .MD</span>
-                </div>
-                <div class="card-title">${c.title}</div>
-                <div class="card-description">Support théorique complet et exemples détaillés pour ce chapitre.</div>
-                <div class="card-action">Lire le cours ↗</div>
-            `;
-
-            card.addEventListener('click', () => openCourseReader(c));
-            grid.appendChild(card);
-        });
-
-        chapterEl.appendChild(grid);
-        coursesContainer.appendChild(chapterEl);
-    });
+    coursesContainer.appendChild(grid);
 }
 
 async function openCourseReader(course) {
@@ -1633,7 +1626,9 @@ async function openCourseReader(course) {
     courseReaderModal.classList.add('visible-reader-modal');
 
     try {
-        const response = await fetch(`./src/cours/${course.file}`);
+        const selectedCourse = courseManager.getSelectedCourse();
+        const fileUrl = courseManager.getCourseFileUrl(selectedCourse, course.file);
+        const response = await fetch(fileUrl);
         if (!response.ok) throw new Error("Erreur de chargement du fichier Markdown");
         const mdText = await response.text();
 

@@ -86,7 +86,7 @@ exports.interrogerTuteur = onCall({
 }, async (request) => {
     if (!request.auth) throw new HttpsError("unauthenticated", "Connexion requise.");
 
-    const { question, historique, id_exercice } = request.data;
+    const { question, historique, id_exercice, system_prompt_custom } = request.data;
     if (!question || !id_exercice) throw new HttpsError("invalid-argument", "Données manquantes.");
 
     try {
@@ -101,8 +101,11 @@ exports.interrogerTuteur = onCall({
         }));
         contentsArray.push({ role: "user", parts: [{ text: question }] });
 
-        const systemInstruction = `Tu es un tuteur d'informatique Socratique bienveillant.
-Ton but est d'aider l'élève à trouver la réponse par lui-même.
+        // Utilise le prompt système du cours s'il est fourni, sinon le prompt par défaut.
+        const baseSystemPrompt = system_prompt_custom || `Tu es un tuteur d'informatique Socratique bienveillant.
+Ton but est d'aider l'élève à trouver la réponse par lui-même.`;
+
+        const systemInstruction = `${baseSystemPrompt}
 ${exData ? `CONCOURS THÉORIQUE DE L'EXERCICE :\n${exData.theorie_md}` : ""}
 
 Règles :
