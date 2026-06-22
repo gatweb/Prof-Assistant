@@ -86,5 +86,44 @@ Les exercices sont stockés dans la base de données Cloud Firestore, dans la co
 
 Pour lier un exercice à un cours spécifique :
 
-Créez un document d'exercice dans la collection exercices sur la console Firebase.
-Ajoutez un champ course_id (de type string) contenant l'identifiant du cours défini dans le config.json (ex: bureautique-excel).
+- Créez un document d'exercice dans la collection exercices sur la console Firebase.
+- Ajoutez un champ course_id (de type string) contenant l'identifiant du cours défini dans le config.json (ex: bureautique-excel).
+
+### Types d'Exercices disponibles :
+Chaque document d'exercice dans la collection `exercices` peut être configuré sous deux formats :
+
+1. **Format Code (par défaut)** :
+   - L'élève doit écrire du code (HTML/CSS/JS) dans l'éditeur Monaco.
+   - Laissez le champ `type` vide ou égal à `"code"`.
+   
+2. **Format Quizz interactif (sans code)** :
+   - L'élève répond à un quizz à choix multiples (le code Monaco et l'aperçu en direct sont masqués).
+   - Ajoutez le champ **`type`** (String) avec la valeur `"quizz"`.
+   - Ajoutez le champ **`questions`** (Array of Objects) structuré ainsi :
+     ```json
+     [
+       {
+         "question": "Quelle est la touche pour annuler une action ?",
+         "options": ["Ctrl + C", "Ctrl + V", "Ctrl + Z", "Ctrl + A"],
+         "correctAnswer": 2,
+         "successMessage": "✅ Parfait ! Le raccourci Ctrl + Z annule le dernier changement."
+       }
+     ]
+     ```
+     *(Note : `correctAnswer` est un index numérique qui commence à 0).*
+
+---
+
+## 🔗 Association Théorie et Pratique (LMS)
+
+Le système associe automatiquement la théorie (supports Markdown) et la pratique (exercices/quizz Firestore) au sein de chaque chapitre :
+
+1. **Mapping par Chapitre** :
+   Dans Firestore, le champ **`chapitre`** de l'exercice doit contenir le titre de votre chapitre défini dans le `config.json` (ex: pour le titre de chapitre `"Introduction à JavaScript"`, vous pouvez nommer le chapitre Firestore `"CH1 — Introduction à JavaScript"` ou simplement `"Introduction à JavaScript"`). La correspondance est insensible à la casse et fonctionne par inclusion partielle.
+
+2. **Rendu dans le Lobby** :
+   - La leçon théorique s'affiche automatiquement en première position sous le chapitre.
+   - Les exercices et quizz correspondants s'affichent ensuite (les quizz s'affichant en premier).
+
+3. **Split-Screen automatique** :
+   - Lorsqu'un élève ouvre un exercice ou quizz, le système charge automatiquement le support de cours complet de son chapitre dans l'onglet **"Leçon complète"** de sa sidebar de gauche.
