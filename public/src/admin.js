@@ -92,11 +92,29 @@ async function loadSubmissionsList() {
 }
 
 // Fonction globale injectée pour le onclick HTML
+// Variable globale pour suivre d'où on vient avant d'ouvrir le détail
+window.lastViewBeforeDetail = 'listView';
+
+// Fonction globale injectée pour le onclick HTML
 window.openDetailView = (id) => {
     const copy = currentCopies.find(c => c.id === id);
     if (!copy) return;
     
-    currentViewingCopyId = id;
+    window.lastViewBeforeDetail = 'listView';
+    window.openDetailViewFromCopy(copy);
+};
+
+// Nouvelle fonction globale pour ouvrir n'importe quelle copie depuis la matrice de progression
+window.openDetailViewFromMatrix = (copy) => {
+    if (!copy) return;
+    
+    window.lastViewBeforeDetail = 'progressionView';
+    window.openDetailViewFromCopy(copy);
+};
+
+// Fonction générique interne pour charger les détails d'une copie
+window.openDetailViewFromCopy = (copy) => {
+    currentViewingCopyId = copy.id;
 
     // 1. Charger les données dans l'UI
     document.getElementById('detailStudentName').textContent = "Copie de : " + (copy.nom_eleve || "Anonyme");
@@ -108,8 +126,10 @@ window.openDetailView = (id) => {
     const tabs = document.querySelector('.admin-tabs-container');
     if (tabs) tabs.classList.add('hidden');
 
-    // 2. Basculer l'affichage
+    // 2. Basculer l'affichage (masquer toutes les listes)
     listView.classList.add('hidden');
+    const progressionView = document.getElementById('progressionView');
+    if (progressionView) progressionView.classList.add('hidden');
     detailView.classList.remove('hidden');
     
     // Statistiques d'autonomie (indices utilisés + questions libres + copier/coller + focus)
@@ -145,7 +165,10 @@ const backBtn = document.getElementById('backToListBtn');
 if(backBtn) {
     backBtn.addEventListener('click', () => {
         detailView.classList.add('hidden');
-        listView.classList.remove('hidden');
+        
+        // Retourner à la vue de provenance
+        const prevView = document.getElementById(window.lastViewBeforeDetail || 'listView');
+        if (prevView) prevView.classList.remove('hidden');
         
         // Réafficher les onglets
         const tabs = document.querySelector('.admin-tabs-container');
@@ -467,3 +490,117 @@ async function renderChaptersConfig() {
 
 // Initialiser
 initConfigTab();
+
+// ============================================
+// 7. IMPORTATION DES EXERCICES DEPUIS JSON
+// ============================================
+const triggerImportBtn = document.getElementById('triggerImportBtn');
+const importExercisesInput = document.getElementById('importExercisesInput');
+const importStatus = document.getElementById('importStatus');
+
+if (triggerImportBtn && importExercisesInput) {
+    triggerImportBtn.addEventListener('click', () => {
+        importExercisesInput.click();
+    });
+
+    importExercisesInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        importStatus.textContent = "Lecture du fichier...";
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            try {
+                const data = JSON.parse(event.target.result);
+                const exercises = Array.isArray(data) ? data : [data];
+                
+                importStatus.textContent = `Importation de ${exercises.length} exercice(s)...`;
+                
+                for (const ex of exercises) {
+                    if (!ex.title || !ex.course_id) {
+                        throw new Error("Chaque exercice doit posséder un 'title' et un 'course_id'.");
+                    }
+
+                    const newDoc = {
+                        titre: ex.title,
+                        course_id: ex.course_id,
+                        chapitre_id: ex.chapter_id || "",
+                        chapitre: ex.chapter_name || "Général",
+                        type: ex.type || "code",
+                        enonce_md: ex.enonce_md || "Réponds aux questions ci-dessous.",
+                        theorie_md: ex.theorie_md || "",
+                        is_hidden: false,
+                        statut_aide: true
+                    };
+                    
+                    if (ex.questions) newDoc.questions = ex.questions;
+                    if (ex.indices) newDoc.indices = ex.indices;
+
+                    await addDoc(collection(db, "exercices"), newDoc);
+                }
+
+                importStatus.textContent = "✅ Importation réussie !";
+                importStatus.style.color = "green";
+                alert("✅ Les exercices ont été importés dans la base de données Firestore !");
+                
+                if (typeof renderChaptersConfig === 'function') {
+                    renderChaptersConfig();
+                }
+            } catch (err) {
+                console.error("Erreur d'import :", err);
+                importStatus.textContent = "❌ Erreur d'importation.";
+                importStatus.style.color = "red";
+                alert(`❌ Erreur : ${err.message}`);
+            }
+        };
+        reader.readAsText(file);
+    });
+}
+
+// ============================================
+// 8. CRÉATION DE COURS DEPUIS LE DASHBOARD
+// ============================================
+const createCourseForm = document.getElementById('createCourseForm');
+const createCourseStatus = document.getElementById('createCourseStatus');
+
+if (createCourseForm) {
+    createCourseForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const courseId = document.getElementById('newCourseId').value.trim();
+        const courseTitle = document.getElementById('newCourseTitle').value.trim();
+        const enrolledText = document.getElementById('newCourseEnrolled').value.trim();
+        
+        if (!courseId || !courseTitle) return;
+        
+        const enrolled_students = enrolledText 
+            ? enrolledText.split(',').map(email => email.trim()).filter(email => email.length > 0)
+            : [];
+            
+        createCourseStatus.textContent = "Création du cours...";
+        createCourseStatus.style.color = "orange";
+        
+        try {
+            const userEmail = currentAdminUser?.email || "gatweb@gmail.com";
+            
+            await setDoc(doc(db, "courses", courseId), {
+                id: courseId,
+                title: courseTitle,
+                teacher_id: userEmail,
+                enrolled_students: enrolled_students
+            });
+            
+            createCourseStatus.textContent = "✅ Cours créé avec succès !";
+            createCourseStatus.style.color = "green";
+            alert(`✅ Le cours "${courseTitle}" a été créé et enregistré dans Firestore !`);
+            
+            createCourseForm.reset();
+        } catch (err) {
+            console.error("Erreur de création du cours :", err);
+            createCourseStatus.textContent = "❌ Erreur de création.";
+            createCourseStatus.style.color = "red";
+            alert(`❌ Erreur : ${err.message}`);
+        }
+    });
+}
+

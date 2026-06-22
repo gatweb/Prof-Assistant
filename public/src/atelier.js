@@ -22,6 +22,7 @@ import {
 import { db } from './firebase/db.js';
 import { ExamManager } from './exam.js';
 import { courseManager } from './services/courseManager.js';
+import { progressManager } from './services/progressManager.js';
 
 // ============================================================
 // 1. RÉFÉRENCES DOM
@@ -53,6 +54,12 @@ const courseReaderModal = document.getElementById('courseReaderModal');
 const readerTitle = document.getElementById('readerTitle');
 const readerBody = document.getElementById('readerBody');
 const closeReaderBtn = document.getElementById('closeReaderBtn');
+
+// Workspace Sidebar Tabs elements
+const sidebarTabConsignesBtn = document.getElementById('sidebarTabConsignesBtn');
+const sidebarTabLeconBtn = document.getElementById('sidebarTabLeconBtn');
+const tabContentConsignes = document.getElementById('tabContentConsignes');
+const tabContentLecon = document.getElementById('tabContentLecon');
 
 // Éditeur
 const runCodeBtn = document.getElementById('runCodeBtn');
@@ -105,6 +112,7 @@ let examActive = true;
 let configUnsub = null;
 const examManager = new ExamManager();
 let currentExercice = null;  // Données de l'exercice courant (depuis Firestore)
+let currentUser = null;      // Utilisateur authentifié courant
 let profFeedbackUnsub = null;
 
 let hintState = {
@@ -126,10 +134,11 @@ let hintState = {
 // ============================================================
 listenToAuthStatus((user) => {
     if (!user) { window.location.href = "index.html"; return; }
+    currentUser = user;
     if (userEmailEl) userEmailEl.textContent = user.email;
 
-    // Charger les cours dynamiquement
-    courseManager.loadCourses().then(() => {
+    // Charger les cours dynamiquement et filtrer selon les droits de l'élève
+    courseManager.loadCourses(user.email).then(() => {
         setupCourseSelector();
         // Initialiser le gestionnaire d'examen
         examManager.init(() => {
@@ -235,8 +244,7 @@ async function loadLobby() {
         backToLobbyBtn.textContent = '🏠 Exercices';
     }
     if (navCoursesBtn) {
-        navCoursesBtn.style.display = 'inline-flex';
-        navCoursesBtn.classList.remove('active');
+        navCoursesBtn.style.display = 'none'; // Désactivé (Cours unifiés)
     }
     if (exportCodeBtn) exportCodeBtn.style.display = 'none';
     if (submitBtn) submitBtn.classList.add('hidden');
@@ -251,17 +259,27 @@ async function loadLobby() {
 
     try {
         const userEmail = userEmailEl?.textContent || '';
+        const selectedCourse = courseManager.getSelectedCourse();
+        const courseId = selectedCourse ? selectedCourse.id : 'js-uaa5-classic';
+        const progressDocId = userEmail ? `${userEmail.replace(/\//g, '_')}_${courseId}` : '';
 
-        // Requêtes en parallèle : exercices + soumissions de l'élève + résultats d'examen
-        const [exercicesSnap, submissionsSnap, examResultsSnap] = await Promise.all([
+        // Requêtes en parallèle : exercices + soumissions de l'élève + résultats d'examen + progression
+        const [exercicesSnap, submissionsSnap, examResultsSnap, progressSnap] = await Promise.all([
             getDocs(collection(db, 'exercices')),
             userEmail
                 ? getDocs(query(collection(db, 'submissions'), where('email_eleve', '==', userEmail)))
                 : Promise.resolve({ docs: [] }),
             userEmail
                 ? getDocs(query(collection(db, 'exam_results'), where('email_eleve', '==', userEmail)))
-                : Promise.resolve({ docs: [] })
+                : Promise.resolve({ docs: [] }),
+            progressDocId
+                ? getDoc(doc(db, 'users_progress', progressDocId))
+                : Promise.resolve(null)
         ]);
+
+        const completedChapters = progressSnap && progressSnap.exists()
+            ? (progressSnap.data().completedChapters || [])
+            : [];
 
         if (exercicesSnap.empty) {
             chaptersContainer.innerHTML = `
@@ -320,44 +338,92 @@ async function loadLobby() {
             }
         });
 
-        // Grouper par chapitre (en filtrant les exercices cachés et désactivés)
-        const chapitres = {};
+        // Grouper les exercices par ID de chapitre du manifest (ou 'unmatched')
+        const exercisesByChapter = {};
         exercicesSnap.forEach(docSnap => {
             const data = { id: docSnap.id, ...docSnap.data() };
-            // Masquer les exercices avec is_hidden: true
             if (data.is_hidden === true) return;
             
             // Filtrer par le cours sélectionné
-            const selectedCourse = courseManager.getSelectedCourse();
             const exerciseCourseId = data.course_id || 'js-uaa5-classic';
             if (selectedCourse && exerciseCourseId !== selectedCourse.id) return;
 
-            const ch = data.chapitre || 'Général';
-            // Masquer les chapitres désactivés par le prof
-            if (disabledChapters.includes(ch)) return;
-            if (!chapitres[ch]) chapitres[ch] = [];
-            chapitres[ch].push(data);
+            const matchedCh = selectedCourse ? courseManager.findChapterByDbLabel(selectedCourse, data.chapitre) : null;
+            const chId = matchedCh ? matchedCh.id : 'unmatched';
+            
+            // Masquer si le chapitre est désactivé
+            const chName = matchedCh ? matchedCh.title : (data.chapitre || 'Général');
+            if (disabledChapters.includes(chName) || (matchedCh && disabledChapters.includes(matchedCh.title))) return;
+
+            if (!exercisesByChapter[chId]) exercisesByChapter[chId] = [];
+            exercisesByChapter[chId].push(data);
         });
 
         // Vider et reconstruire le DOM
         chaptersContainer.innerHTML = '';
+        const courseChapters = selectedCourse ? selectedCourse.chapters : [];
 
-        for (const [chapitreName, exercices] of Object.entries(chapitres)) {
+        // 1. Rendre les chapitres du manifeste dans l'ordre
+        courseChapters.forEach(ch => {
+            if (disabledChapters.includes(ch.title)) return;
+
             const chapterEl = document.createElement('div');
             chapterEl.className = 'chapter-block';
             chapterEl.innerHTML = `<h2 class="chapter-title">
-                <span class="chapter-icon">📚</span> ${chapitreName}
+                <span class="chapter-icon">📚</span> ${ch.title}
             </h2>`;
 
             const grid = document.createElement('div');
             grid.className = 'exercise-grid';
 
-            exercices.forEach(ex => {
+            // --- CARTE 1 : Le cours théorique (Markdown) ---
+            const isRead = completedChapters.includes(ch.id);
+            const lessonCard = document.createElement('button');
+            lessonCard.className = 'exercise-card course-lesson-card';
+            if (isRead) {
+                lessonCard.classList.add('card-status-valide');
+            }
+            lessonCard.setAttribute('aria-label', `Lire : ${ch.title}`);
+            
+            const themeColor = selectedCourse?.theme?.primaryColor || '#eab308';
+            const icon = selectedCourse?.theme?.icon || '📖';
+
+            lessonCard.innerHTML = `
+                <div class="card-header">
+                    <span class="card-icon">${icon}</span>
+                    <div style="display:flex;gap:4px;align-items:center;">
+                        ${isRead 
+                            ? '<span class="card-status-badge status-valide">✅ Lu</span>' 
+                            : '<span class="card-status-badge status-attente" style="background:#fef08a;color:#854d0e;">📖 À lire</span>'}
+                    </div>
+                </div>
+                <div class="card-title">${ch.title} (Théorie)</div>
+                <div class="card-consigne">Consulter le cours théorique complet et les exemples associés.</div>
+                <div class="card-arrow">Lire le cours ↗</div>
+            `;
+            
+            lessonCard.addEventListener('click', () => {
+                openCourseReader(ch);
+            });
+            grid.appendChild(lessonCard);
+
+            // --- EXERCICES ET QUIZZ DU CHAPITRE ---
+            const exercises = exercisesByChapter[ch.id] || [];
+            
+            // Trier les exercices : d'abord quizz, puis code
+            exercises.sort((a, b) => {
+                const typeA = a.type || 'code';
+                const typeB = b.type || 'code';
+                if (typeA === 'quizz' && typeB !== 'quizz') return -1;
+                if (typeA !== 'quizz' && typeB === 'quizz') return 1;
+                return (a.titre || '').localeCompare(b.titre || '');
+            });
+
+            exercises.forEach(ex => {
                 const submission = submissionsByExercice[ex.id];
                 const status = submission?.status || null;
                 const hasHints = ex.statut_aide !== false;
 
-                // Déterminer l'état visuel de la carte
                 let cardClass = 'exercise-card';
                 let statusBadge = '';
                 let actionLabel = 'Commencer →';
@@ -383,9 +449,72 @@ async function loadLobby() {
 
                 card.innerHTML = `
                     <div class="card-header">
-                        <span class="card-icon">${status === 'valide' || status === 'publie' ? '🎉' : '🧩'}</span>
+                        <span class="card-icon">${ex.type === 'quizz' ? '⚡' : (status === 'valide' || status === 'publie' ? '🎉' : '🧩')}</span>
                         <div style="display:flex;gap:4px;align-items:center;">
-                            ${hasHints ? '<span class="card-badge-aide">💡 Aide</span>' : ''}
+                            ${ex.type === 'quizz' ? '<span class="card-badge-aide" style="background:#e0e7ff;color:#4338ca;">⚡ Quizz</span>' : ''}
+                            ${hasHints && ex.type !== 'quizz' ? '<span class="card-badge-aide">💡 Aide</span>' : ''}
+                            ${statusBadge}
+                        </div>
+                    </div>
+                    <div class="card-title">${ex.titre || 'Exercice sans titre'}</div>
+                    <div class="card-consigne">${(ex.enonce_md || ex.consigne || '').substring(0, 80)}...</div>
+                    <div class="card-arrow">${actionLabel}</div>
+                `;
+
+                card.addEventListener('click', () => openExercise(ex.id));
+                grid.appendChild(card);
+            });
+
+            chapterEl.appendChild(grid);
+            chaptersContainer.appendChild(chapterEl);
+        });
+
+        // 2. Rendre les exercices non associés à un chapitre (si présent)
+        const unmatchedExercises = exercisesByChapter['unmatched'] || [];
+        if (unmatchedExercises.length > 0) {
+            const chapterEl = document.createElement('div');
+            chapterEl.className = 'chapter-block';
+            chapterEl.innerHTML = `<h2 class="chapter-title">
+                <span class="chapter-icon">📚</span> Autres activités
+            </h2>`;
+
+            const grid = document.createElement('div');
+            grid.className = 'exercise-grid';
+
+            unmatchedExercises.forEach(ex => {
+                const submission = submissionsByExercice[ex.id];
+                const status = submission?.status || null;
+                const hasHints = ex.statut_aide !== false;
+
+                let cardClass = 'exercise-card';
+                let statusBadge = '';
+                let actionLabel = 'Commencer →';
+
+                if (status === 'valide' || status === 'publie') {
+                    cardClass += ' card-status-valide';
+                    statusBadge = '<span class="card-status-badge status-valide">✅ Validé</span>';
+                    actionLabel = 'Revoir →';
+                } else if (status === 'a_valider') {
+                    cardClass += ' card-status-en-attente';
+                    statusBadge = '<span class="card-status-badge status-attente">⏳ Chez ton prof</span>';
+                    actionLabel = 'Voir mon code →';
+                } else if (status === 'en_cours' || status === 'brouillon') {
+                    cardClass += ' card-status-revision';
+                    statusBadge = '<span class="card-status-badge status-revision">🔄 Corrections demandées</span>';
+                    actionLabel = 'Corriger →';
+                }
+
+                const card = document.createElement('button');
+                card.className = cardClass;
+                card.setAttribute('data-id', ex.id);
+                card.setAttribute('aria-label', `Ouvrir : ${ex.titre}`);
+
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span class="card-icon">${ex.type === 'quizz' ? '⚡' : (status === 'valide' || status === 'publie' ? '🎉' : '🧩')}</span>
+                        <div style="display:flex;gap:4px;align-items:center;">
+                            ${ex.type === 'quizz' ? '<span class="card-badge-aide" style="background:#e0e7ff;color:#4338ca;">⚡ Quizz</span>' : ''}
+                            ${hasHints && ex.type !== 'quizz' ? '<span class="card-badge-aide">💡 Aide</span>' : ''}
                             ${statusBadge}
                         </div>
                     </div>
@@ -459,31 +588,53 @@ async function openExercise(exerciceId) {
         // Injecter les données dans l'interface
         injectExerciseData(exData);
 
+        // Déterminer le type d'affichage
+        const isQuizz = exData.type === 'quizz';
+        const editorSection = document.getElementById('editorSection');
+        const resizeHandle = document.getElementById('resizeHandle');
+        const previewSection = document.getElementById('previewSection');
+        const quizzSection = document.getElementById('quizzSection');
+
+        if (isQuizz) {
+            if (editorSection) editorSection.classList.add('hidden');
+            if (resizeHandle) resizeHandle.classList.add('hidden');
+            if (previewSection) previewSection.classList.add('hidden');
+            if (quizzSection) quizzSection.classList.remove('hidden');
+            if (submitBtn) submitBtn.classList.add('hidden');
+            
+            startQuizz(exData);
+        } else {
+            if (editorSection) editorSection.classList.remove('hidden');
+            if (resizeHandle) resizeHandle.classList.remove('hidden');
+            if (previewSection) previewSection.classList.remove('hidden');
+            if (quizzSection) quizzSection.classList.add('hidden');
+            if (submitBtn) submitBtn.classList.remove('hidden');
+
+            // --- GESTION DU BROUILLON (Auto-Save) ---
+            const savedDraft = localStorage.getItem(`draft_${exerciceId}`);
+            if (savedDraft && htmlEditor && cssEditor && jsEditor) {
+                try {
+                    const draft = JSON.parse(savedDraft);
+                    htmlEditor.setValue(draft.html || '');
+                    cssEditor.setValue(draft.css || '');
+                    jsEditor.setValue(draft.js || '');
+                    console.log("📝 Brouillon restauré pour :", exerciceId);
+                } catch (e) { console.error("Erreur draft", e); }
+            }
+
+            // Forcer Monaco à recalculer sa taille
+            setTimeout(() => {
+                htmlEditor?.layout();
+                cssEditor?.layout();
+                jsEditor?.layout();
+                renderPreview();
+            }, 50);
+        }
+
         // Basculer vers le workspace
         lobbyView.classList.add('hidden');
         workspaceView.classList.remove('hidden');
-        submitBtn.classList.remove('hidden');
         chatFab.classList.remove('hidden');
-
-        // --- GESTION DU BROUILLON (Auto-Save) ---
-        const savedDraft = localStorage.getItem(`draft_${exerciceId}`);
-        if (savedDraft && htmlEditor && cssEditor && jsEditor) {
-            try {
-                const draft = JSON.parse(savedDraft);
-                htmlEditor.setValue(draft.html || '');
-                cssEditor.setValue(draft.css || '');
-                jsEditor.setValue(draft.js || '');
-                console.log("📝 Brouillon restauré pour :", exerciceId);
-            } catch (e) { console.error("Erreur draft", e); }
-        }
-
-        // Forcer Monaco à recalculer sa taille
-        setTimeout(() => {
-            htmlEditor?.layout();
-            cssEditor?.layout();
-            jsEditor?.layout();
-            renderPreview();
-        }, 50);
 
     } catch (e) {
         console.error('[openExercise] Erreur :', e);
@@ -498,17 +649,12 @@ async function openExercise(exerciceId) {
 function injectExerciseData(exData) {
     if (exerciseTitleEl) exerciseTitleEl.textContent = exData.titre || 'Exercice sans titre';
 
-    // Gestion du lien vers le cours complet (Masqué — maintenant dans la page dédiée Cours)
-    if (courseLink) {
-        courseLink.classList.add('hidden');
-    }
-
-    // Rendu des Blocs de Ressources (Énoncé & Théorie séparés)
-    if (courseContentEl && typeof window.marked !== 'undefined') {
+    // Rendu des Blocs de Ressources dans les Consignes
+    if (tabContentConsignes && typeof window.marked !== 'undefined') {
         const enonceHTML = window.marked.parse(exData.enonce_md || exData.consigne || 'Aucun énoncé.');
         const theorieHTML = window.marked.parse(exData.theorie_md || "Consulte ton cours pour réussir cet exercice !");
         
-        courseContentEl.innerHTML = `
+        tabContentConsignes.innerHTML = `
             <div class="resource-block block-enonce">
                 <h3>🎯 Ton Objectif</h3>
                 <div class="resource-content">${enonceHTML}</div>
@@ -518,6 +664,51 @@ function injectExerciseData(exData) {
                 <div class="resource-content">${theorieHTML}</div>
             </div>
         `;
+    }
+
+    // Réinitialiser sur l'onglet Consignes par défaut
+    switchSidebarTab('consignes');
+
+    // Charger et afficher la leçon complète de cours correspondante dans le deuxième onglet
+    if (tabContentLecon) {
+        tabContentLecon.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 0;">
+                <div class="loader-spinner" style="width:30px;height:30px;"></div>
+                <p style="margin-top:10px;font-size:12px;color:#64748b;">Chargement de la leçon...</p>
+            </div>
+        `;
+
+        const selectedCourse = courseManager.getSelectedCourse();
+        const matchedCh = selectedCourse ? courseManager.findChapterByDbLabel(selectedCourse, exData.chapitre) : null;
+
+        if (matchedCh && matchedCh.file) {
+            if (sidebarTabLeconBtn) sidebarTabLeconBtn.style.display = 'inline-flex';
+
+            const fileUrl = courseManager.getCourseFileUrl(selectedCourse, matchedCh.file);
+            fetch(fileUrl)
+                .then(res => {
+                    if (!res.ok) throw new Error("Fichier introuvable");
+                    return res.text();
+                })
+                .then(mdText => {
+                    if (typeof window.marked !== 'undefined') {
+                        tabContentLecon.innerHTML = `
+                            <div class="resource-block" style="background:transparent;border:none;box-shadow:none;padding:0;">
+                                <div class="resource-content">${window.marked.parse(mdText)}</div>
+                            </div>
+                        `;
+                    } else {
+                        tabContentLecon.innerHTML = `<pre style="white-space: pre-wrap;">${mdText}</pre>`;
+                    }
+                })
+                .catch(err => {
+                    console.error("Erreur chargement leçon sidebar :", err);
+                    tabContentLecon.innerHTML = `<p style="color:red;font-size:12px;padding:10px;text-align:center;">Impossible de charger la leçon complète.</p>`;
+                });
+        } else {
+            if (sidebarTabLeconBtn) sidebarTabLeconBtn.style.display = 'none';
+            tabContentLecon.innerHTML = `<p style="color:#64748b;font-size:12px;padding:20px;text-align:center;font-style:italic;">Aucune leçon complète pour ce chapitre.</p>`;
+        }
     }
 
     // Afficher/Masquer les boutons du header selon le mode
@@ -575,6 +766,46 @@ if (toggleSidebarBtn && resourcesSidebar) {
             jsEditor?.layout();
         }, 350);
     });
+}
+
+// Workspace Sidebar Tabs switching logic
+function switchSidebarTab(tab) {
+    if (tab === 'consignes') {
+        sidebarTabConsignesBtn?.classList.add('active');
+        sidebarTabLeconBtn?.classList.remove('active');
+        tabContentConsignes?.classList.remove('hidden');
+        tabContentLecon?.classList.add('hidden');
+    } else if (tab === 'lecon') {
+        sidebarTabConsignesBtn?.classList.remove('active');
+        sidebarTabLeconBtn?.classList.add('active');
+        tabContentConsignes?.classList.add('hidden');
+        tabContentLecon?.classList.remove('hidden');
+        
+        // Marquer automatiquement la leçon comme lue quand l'élève clique dessus
+        trackCurrentChapterAsRead();
+    }
+}
+
+async function trackCurrentChapterAsRead() {
+    if (!currentExercice) return;
+    const selectedCourse = courseManager.getSelectedCourse();
+    if (!selectedCourse) return;
+    
+    const matchedCh = courseManager.findChapterByDbLabel(selectedCourse, currentExercice.chapitre);
+    if (!matchedCh) return;
+    
+    const userEmail = currentUser?.email || userEmailEl?.textContent;
+    const googleUserId = currentUser?.uid || "";
+    if (userEmail) {
+        await progressManager.trackChapterRead(userEmail, selectedCourse.id, googleUserId, matchedCh.id);
+    }
+}
+
+if (sidebarTabConsignesBtn) {
+    sidebarTabConsignesBtn.addEventListener('click', () => switchSidebarTab('consignes'));
+}
+if (sidebarTabLeconBtn) {
+    sidebarTabLeconBtn.addEventListener('click', () => switchSidebarTab('lecon'));
 }
 
 // Fonction pour revenir proprement au lobby depuis le workspace, le cours ou l'examen
@@ -1131,6 +1362,18 @@ const sendFreeQuestion = async () => {
         });
         document.getElementById(loaderId)?.remove();
         appendMessage(res.data.reponse, 'assistant', 'Tuteur IA');
+
+        // Enregistrer la progression : interaction avec le tuteur
+        if (currentUser) {
+            const selectedCourse = courseManager.getSelectedCourse();
+            if (selectedCourse) {
+                progressManager.trackTutorInteraction(
+                    currentUser.email,
+                    selectedCourse.id,
+                    currentUser.uid
+                );
+            }
+        }
     } catch (e) {
         document.getElementById(loaderId)?.remove();
         appendMessage("Désolé, le tuteur n'est pas disponible pour le moment.", 'assistant', 'Tuteur IA');
@@ -1233,6 +1476,20 @@ function listenForProfFeedback(docId) {
         const isRevision = data.status === 'en_cours' || data.status === 'brouillon';
 
         if (isValidated || isRevision) {
+            // Enregistrer la progression si l'exercice est validé
+            if (isValidated && currentUser && currentExercice) {
+                const selectedCourse = courseManager.getSelectedCourse();
+                if (selectedCourse) {
+                    progressManager.trackExerciseAttempt(
+                        currentUser.email,
+                        selectedCourse.id,
+                        currentUser.uid,
+                        currentExercice.id,
+                        data.note_suggeree || 100
+                    );
+                }
+            }
+
             const icon = isValidated ? '✅' : '🔄';
             const title = isValidated
                 ? `**Exercice validé — Note : ${data.note_suggeree || 0}/100**`
@@ -1637,6 +1894,16 @@ async function openCourseReader(course) {
         } else {
             readerBody.innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit;">${mdText}</pre>`;
         }
+
+        // Enregistrer la progression : lecture du chapitre
+        if (currentUser && selectedCourse) {
+            progressManager.trackChapterRead(
+                currentUser.email,
+                selectedCourse.id,
+                currentUser.uid,
+                course.id || course.title
+            );
+        }
     } catch (e) {
         console.error("Erreur de chargement du cours :", e);
         readerBody.innerHTML = `
@@ -1666,5 +1933,225 @@ if (courseReaderModal) {
             courseReaderModal.classList.remove('visible-reader-modal');
             courseReaderModal.classList.add('hidden-reader-modal');
         }
+    });
+}
+
+// ============================================
+// 14. LOGIQUE QUIZZ (LMS SANS CODE)
+// ============================================
+let quizzState = {
+    questions: [],
+    currentIndex: 0,
+    selectedOption: null,
+    score: 0
+};
+
+function startQuizz(exData) {
+    quizzState = {
+        questions: exData.questions || [],
+        currentIndex: 0,
+        selectedOption: null,
+        score: 0
+    };
+
+    const titleEl = document.getElementById('quizzTitle');
+    if (titleEl) titleEl.textContent = exData.titre || "Quizz d'évaluation";
+
+    renderQuizzQuestion();
+}
+
+function renderQuizzQuestion() {
+    const progressEl = document.getElementById('quizzProgress');
+    const questionTextEl = document.getElementById('quizzQuestionText');
+    const optionsContainer = document.getElementById('quizzOptionsContainer');
+    const feedbackText = document.getElementById('quizzFeedbackText');
+    const submitBtn = document.getElementById('quizzSubmitBtn');
+    const nextBtn = document.getElementById('quizzNextBtn');
+
+    if (!questionTextEl || !optionsContainer) return;
+
+    if (feedbackText) {
+        feedbackText.textContent = '';
+        feedbackText.style.color = '';
+    }
+    if (submitBtn) {
+        submitBtn.style.display = 'none';
+        submitBtn.disabled = true;
+    }
+    if (nextBtn) nextBtn.style.display = 'none';
+
+    quizzState.selectedOption = null;
+
+    const total = quizzState.questions.length;
+    if (quizzState.currentIndex >= total) {
+        showQuizzCompletion();
+        return;
+    }
+
+    const currentQ = quizzState.questions[quizzState.currentIndex];
+    
+    if (progressEl) {
+        progressEl.textContent = `Question ${quizzState.currentIndex + 1} sur ${total}`;
+    }
+
+    questionTextEl.textContent = currentQ.question;
+    optionsContainer.innerHTML = '';
+
+    currentQ.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-secondary';
+        btn.style.textAlign = 'left';
+        btn.style.width = '100%';
+        btn.style.borderRadius = '12px';
+        btn.style.padding = '12px 16px';
+        btn.style.fontSize = '14px';
+        btn.style.transition = 'all 0.2s';
+        btn.textContent = opt;
+
+        btn.addEventListener('click', () => {
+            optionsContainer.querySelectorAll('button').forEach(b => {
+                b.style.borderColor = '';
+                b.style.backgroundColor = '';
+                b.style.color = '';
+            });
+
+            btn.style.borderColor = 'var(--md-sys-color-primary)';
+            btn.style.backgroundColor = 'var(--md-sys-color-primary-container)';
+            btn.style.color = 'var(--md-sys-color-on-primary-container)';
+
+            quizzState.selectedOption = idx;
+            if (submitBtn) {
+                submitBtn.style.display = 'inline-flex';
+                submitBtn.disabled = false;
+            }
+        });
+
+        optionsContainer.appendChild(btn);
+    });
+}
+
+function submitQuizzAnswer() {
+    const currentQ = quizzState.questions[quizzState.currentIndex];
+    const optionsContainer = document.getElementById('quizzOptionsContainer');
+    const feedbackText = document.getElementById('quizzFeedbackText');
+    const submitBtn = document.getElementById('quizzSubmitBtn');
+    const nextBtn = document.getElementById('quizzNextBtn');
+
+    if (quizzState.selectedOption === null) return;
+
+    if (submitBtn) submitBtn.style.display = 'none';
+
+    const isCorrect = quizzState.selectedOption === currentQ.correctAnswer;
+    if (isCorrect) {
+        quizzState.score++;
+        if (feedbackText) {
+            feedbackText.textContent = currentQ.successMessage || "✅ Bonne réponse !";
+            feedbackText.style.color = "green";
+        }
+    } else {
+        if (feedbackText) {
+            feedbackText.textContent = `❌ Mauvaise réponse.`;
+            feedbackText.style.color = "red";
+        }
+    }
+
+    if (optionsContainer) {
+        optionsContainer.querySelectorAll('button').forEach((b, idx) => {
+            b.disabled = true;
+            if (idx === currentQ.correctAnswer) {
+                b.style.borderColor = 'green';
+                b.style.backgroundColor = '#dcfce7';
+                b.style.color = '#15803d';
+            } else if (idx === quizzState.selectedOption && !isCorrect) {
+                b.style.borderColor = 'red';
+                b.style.backgroundColor = '#fee2e2';
+                b.style.color = '#991b1b';
+            }
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.style.display = 'inline-flex';
+        const isLast = quizzState.currentIndex === quizzState.questions.length - 1;
+        nextBtn.textContent = isLast ? "Terminer le quizz 🏆" : "Question suivante ➡️";
+    }
+}
+
+async function showQuizzCompletion() {
+    const questionCard = document.getElementById('quizzQuestionCard');
+    const progressEl = document.getElementById('quizzProgress');
+    const feedbackText = document.getElementById('quizzFeedbackText');
+    const nextBtn = document.getElementById('quizzNextBtn');
+
+    if (progressEl) progressEl.textContent = "Quizz complété !";
+    if (nextBtn) nextBtn.style.display = 'none';
+    if (feedbackText) feedbackText.textContent = '';
+
+    const total = quizzState.questions.length;
+    const finalPct = Math.round((quizzState.score / total) * 100);
+
+    if (questionCard) {
+        questionCard.innerHTML = `
+            <div style="text-align: center; padding: 24px 0;">
+                <span style="font-size: 48px;">🏆</span>
+                <h3 style="font-size: 20px; font-weight: 700; margin-top: 16px;">Félicitations !</h3>
+                <p style="font-size: 15px; margin-top: 8px;">Tu as terminé le quizz avec un score de :</p>
+                <div style="font-size: 32px; font-weight: 800; color: var(--md-sys-color-primary); margin-top: 12px;">
+                    ${quizzState.score} / ${total} (${finalPct}%)
+                </div>
+                <p style="font-size: 12px; color: #64748b; margin-top: 16px; font-style: italic;">
+                    Ton score a été envoyé au professeur.
+                </p>
+            </div>
+        `;
+    }
+
+    try {
+        const userEmail = currentUser?.email || userEmailEl?.textContent || 'eleve@test.com';
+        const googleUserId = currentUser?.uid || "";
+        const submissionData = {
+            exercice_id: currentExercice.id,
+            id_exercice: currentExercice.id,
+            titre_exercice: currentExercice.titre || "Quizz",
+            email_eleve: userEmail,
+            nom_eleve: userEmail.split('@')[0],
+            status: "valide",
+            feedback_ia: `L'élève a complété le quizz et obtenu le score de ${quizzState.score}/${total} (${finalPct}%).`,
+            note_suggeree: finalPct,
+            date_soumission: new Date().toISOString(),
+            autonomie: {
+                quizz_score: quizzState.score,
+                quizz_total: total
+            }
+        };
+
+        await addDoc(collection(db, "submissions"), submissionData);
+        console.log("📊 Soumission du quizz enregistrée avec succès !");
+
+        // Enregistrer la progression : exercice terminé
+        const selectedCourse = courseManager.getSelectedCourse();
+        if (selectedCourse) {
+            await progressManager.trackExerciseAttempt(
+                userEmail,
+                selectedCourse.id,
+                googleUserId,
+                currentExercice.id,
+                finalPct
+            );
+        }
+    } catch (e) {
+        console.error("Erreur d'envoi du score du quizz :", e);
+    }
+}
+
+// Enregistrer les écouteurs d'événements pour le quizz
+const quizzSubmitBtn = document.getElementById('quizzSubmitBtn');
+if (quizzSubmitBtn) quizzSubmitBtn.addEventListener('click', submitQuizzAnswer);
+
+const quizzNextBtn = document.getElementById('quizzNextBtn');
+if (quizzNextBtn) {
+    quizzNextBtn.addEventListener('click', () => {
+        quizzState.currentIndex++;
+        renderQuizzQuestion();
     });
 }

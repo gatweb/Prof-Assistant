@@ -89,16 +89,18 @@ export const generateMockSubmissions = async () => {
 };
 
 export const generateMockCourses = async () => {
-    // Initiation des deux cours
-    await setDoc(doc(db, "cours", "html_css"), {
-        titre: "Bases du HTML et CSS",
-        ia_active: true,
-        texte_cours: "Le HTML structure la page avec des balises comme div ou span. Le CSS permet de styliser le rendu, par exemple avec les sélecteurs de classe (.ma-classe) ou d'id (#mon-id). N'oublie pas la notion de box-model : padding, border, margin."
+    // Initiation des deux cours officiels dans la collection 'courses'
+    await setDoc(doc(db, "courses", "js-uaa5-classic"), {
+        id: "js-uaa5-classic",
+        title: "UAA5 : Algorithmique et Programmation",
+        teacher_id: "gatweb@gmail.com",
+        enrolled_students: [] // Tout le monde y a accès
     });
     
-    await setDoc(doc(db, "cours", "javascript"), {
-        titre: "Introduction à Javascript",
-        ia_active: true,
-        texte_cours: "Javascript permet de rendre une page interactive. Les variables se déclarent avec let ou const. Les boucles for (let i=0; i<10; i++) permettent de répéter une action. Attention aux conditions avec == ou ===."
+    await setDoc(doc(db, "courses", "rap-academy"), {
+        id: "rap-academy",
+        title: "Rap Star Academy : En route vers le succès",
+        teacher_id: "gatweb@gmail.com",
+        enrolled_students: [] // Tout le monde y a accès
     });
 };

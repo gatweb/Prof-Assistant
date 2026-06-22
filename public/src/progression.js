@@ -273,13 +273,18 @@ class ProgressionManager {
                         const status = sub.status || 'brouillon';
                         
                         td.innerHTML = `
-                            <div class="status-cell">
-                                <div class="status-dot ${status}" title="Statut: ${status}">
+                            <div class="status-cell" style="cursor: pointer;" title="Cliquer pour voir le détail de l'exercice">
+                                <div class="status-dot ${status}">
                                     ${this.getStatusIcon(status)}
                                 </div>
                                 <span class="note-badge">${score}/100</span>
                             </div>
                         `;
+                        td.addEventListener('click', () => {
+                            if (window.openDetailViewFromMatrix) {
+                                window.openDetailViewFromMatrix(sub);
+                            }
+                        });
 
                         if (status === 'valide' || status === 'publie') {
                             totalScore += score;

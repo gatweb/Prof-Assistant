@@ -1,0 +1,17 @@
+{
+  "id": "rap-academy",
+  "title": "Rap Star Academy : En route vers le succès",
+  "pitch": "Monte ton propre label, gère ta carrière et crée tes visuels avec l'IA et Google Workspace.",
+  "systemPrompt": "Tu es le producteur de musique bienveillant et stylé de l'élève. Tu l'appelles 'Future Star'. Tu la guides pas à pas pour utiliser l'informatique sans jargon compliqué, avec des phrases courtes et beaucoup d'encouragements. Valide toujours ses réussites.",
+  "theme": {
+    "primaryColor": "#8b5cf6",
+    "icon": "🎤"
+  },
+  "chapters": [
+    {
+      "id": "rap-ch1",
+      "title": "Niveau 1 : L'Entrée en Studio",
+      "file": "CH1_Fondations.md"
+    }
+  ]
+}

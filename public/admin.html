@@ -123,6 +123,39 @@
                     <div class="loader-placeholder">Chargement des chapitres...</div>
                 </div>
             </div>
+
+            <!-- Card Créer un Cours -->
+            <div class="md-card config-card mt-24">
+                <h3>➕ Créer un Nouveau Cours</h3>
+                <p class="config-desc">Configurez un nouveau module d'apprentissage et définissez les élèves autorisés à y accéder.</p>
+                <form id="createCourseForm" class="mt-16" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div class="form-group">
+                        <label for="newCourseId">Identifiant unique du cours (ex: <code>rap-academy</code>) :</label>
+                        <input type="text" id="newCourseId" class="md-input" placeholder="id-du-cours" required style="width: 100%;">
+                    </div>
+                    <div class="form-group">
+                        <label for="newCourseTitle">Titre du cours :</label>
+                        <input type="text" id="newCourseTitle" class="md-input" placeholder="Titre visible par les élèves" required style="width: 100%;">
+                    </div>
+                    <div class="form-group">
+                        <label for="newCourseEnrolled">Élèves inscrits (emails séparés par des virgules, laisser vide pour un accès libre) :</label>
+                        <textarea id="newCourseEnrolled" class="md-textarea" rows="2" placeholder="eleve1@test.com, eleve2@test.com" style="width: 100%; font-family: inherit;"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="align-self: flex-start;">Enregistrer le cours</button>
+                </form>
+                <div id="createCourseStatus" class="toggle-status-label mt-12" style="margin-left: 0;"></div>
+            </div>
+
+            <!-- Card Import Exercices -->
+            <div class="md-card config-card mt-24">
+                <h3>📥 Importer des Exercices</h3>
+                <p class="config-desc">Sélectionnez le fichier <code>exercices.json</code> de votre dossier de cours pour insérer automatiquement les exercices associés dans la base de données Firestore.</p>
+                <div class="mt-16" style="display: flex; gap: 12px; align-items: center;">
+                    <input type="file" id="importExercisesInput" accept=".json" style="display: none;">
+                    <button id="triggerImportBtn" class="btn-primary">Sélectionner exercices.json</button>
+                    <span id="importStatus" class="toggle-status-label" style="margin-left: 0;">Aucun fichier choisi</span>
+                </div>
+            </div>
         </div>
     </main>
 

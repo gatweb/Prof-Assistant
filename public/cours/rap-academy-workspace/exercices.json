@@ -1,0 +1,14 @@
+{
+  "course_id": "rap-academy",
+  "chapter_id": "rap-ch1",
+  "type": "quizz",
+  "title": "Validation du Studio",
+  "questions": [
+    {
+      "question": "Quelle est la combinaison secrète pour annuler une erreur sur ton clavier ?",
+      "options": ["Ctrl + C", "Alt + F4", "Ctrl + Z"],
+      "correctAnswer": 2,
+      "successMessage": "Boum ! Tu as le contrôle total de la machine."
+    }
+  ]
+}
