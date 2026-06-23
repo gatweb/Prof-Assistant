@@ -147,6 +147,9 @@
             </div>
         </aside>
 
+        <!-- Poignée de redimensionnement de la sidebar -->
+        <div class="sidebar-resize-handle" id="sidebarResizeHandle" role="separator" aria-label="Redimensionner la barre latérale"></div>
+
         <main class="workspace-main-content">
 
 
@@ -266,6 +269,70 @@
                         <button id="quizzSubmitBtn" class="btn-primary" style="display: none;">Valider la réponse</button>
                         <button id="quizzNextBtn" class="btn-primary" style="display: none;">Question suivante ➡️</button>
                     </div>
+                </div>
+            </section>
+
+            <!-- PANNEAU CRÉATIF : Rendu pour les exercices de type mission (LMS) -->
+            <section id="creativeSection" class="creative-section hidden">
+                <div class="creative-container">
+                    
+                    <!-- Carte 1 : Objectif & Outils -->
+                    <div class="creative-card">
+                        <div class="creative-card-header">
+                            <h2 id="creativeMissionTitle">🚀 Chapitre : Mission</h2>
+                        </div>
+                        <div class="creative-card-body">
+                            <div id="creativeMissionInstructions" class="markdown-content"></div>
+                            
+                            <div class="creative-tools-section">
+                                <span class="creative-tools-label">🛠️ Outils recommandés :</span>
+                                <div id="creativeToolsList" class="creative-tools-list">
+                                    <!-- Liens dynamiques vers les outils externes -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carte 2 : Assistant de Prompting (Sandbox IA) -->
+                    <div class="creative-card dark-card">
+                        <div class="creative-card-header">
+                            <span class="creative-card-icon">🤖</span>
+                            <h3>Assistant de Prompting (Sandbox)</h3>
+                        </div>
+                        <div class="creative-card-body">
+                            <p class="creative-card-desc">Expérimente tes prompts ici pour obtenir des conseils avant d'utiliser tes outils externes.</p>
+                            
+                            <div class="creative-sandbox-input-row">
+                                <textarea id="creativeSandboxInput" placeholder="Ex: Écris un prompt pour générer une image de logo de style vintage..."></textarea>
+                                <button id="creativeSandboxSendBtn" class="btn-primary">➤</button>
+                            </div>
+                            
+                            <div id="creativeSandboxOutput" class="creative-sandbox-output">
+                                <div class="sandbox-placeholder">
+                                    <div style="font-size: 32px; margin-bottom: 8px;">🤖</div>
+                                    L'assistant attend ton prompt pour t'aider...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carte 3 : Remise de ton travail -->
+                    <div class="creative-card">
+                        <div class="creative-card-header">
+                            <h3>📤 Remise de ta mission</h3>
+                        </div>
+                        <div class="creative-card-body">
+                            <div id="creativeSubmissionFields" class="creative-submission-fields">
+                                <!-- Conteneur pour les champs URL et/ou texte de rendu -->
+                            </div>
+                            
+                            <div class="creative-submission-footer">
+                                <span id="creativeSubmissionFeedback"></span>
+                                <button id="creativeValidateBtn" class="btn-primary">Valider ma mission 🚀</button>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </section>
 

@@ -43,6 +43,7 @@ const exportCodeBtn = document.getElementById('exportCodeBtn');
 const courseContentEl = document.getElementById('courseContent');
 const resourcesSidebar = document.getElementById('resourcesSidebar');
 const toggleSidebarBtn = document.getElementById('toggleSidebar');
+const sidebarResizeHandle = document.getElementById('sidebarResizeHandle');
 const courseLink = document.getElementById('courseLink');
 const resetExerciseBtn = document.getElementById('resetExerciseBtn');
 
@@ -594,25 +595,35 @@ async function openExercise(exerciceId) {
         injectExerciseData(exData);
 
         // Déterminer le type d'affichage
+        const selectedCourse = courseManager.getSelectedCourse();
+        const isCreativeCourse = selectedCourse && selectedCourse.workspaceType === 'creative';
         const isQuizz = exData.type === 'quizz';
         const editorSection = document.getElementById('editorSection');
         const resizeHandle = document.getElementById('resizeHandle');
         const previewSection = document.getElementById('previewSection');
         const quizzSection = document.getElementById('quizzSection');
+        const creativeSection = document.getElementById('creativeSection');
+
+        if (creativeSection) creativeSection.classList.add('hidden');
+        if (quizzSection) quizzSection.classList.add('hidden');
+        if (editorSection) editorSection.classList.add('hidden');
+        if (resizeHandle) resizeHandle.classList.add('hidden');
+        if (previewSection) previewSection.classList.add('hidden');
 
         if (isQuizz) {
-            if (editorSection) editorSection.classList.add('hidden');
-            if (resizeHandle) resizeHandle.classList.add('hidden');
-            if (previewSection) previewSection.classList.add('hidden');
             if (quizzSection) quizzSection.classList.remove('hidden');
             if (submitBtn) submitBtn.classList.add('hidden');
             
             startQuizz(exData);
+        } else if (isCreativeCourse) {
+            if (creativeSection) creativeSection.classList.remove('hidden');
+            if (submitBtn) submitBtn.classList.add('hidden');
+            
+            initCreativeWorkspace(exData);
         } else {
             if (editorSection) editorSection.classList.remove('hidden');
             if (resizeHandle) resizeHandle.classList.remove('hidden');
             if (previewSection) previewSection.classList.remove('hidden');
-            if (quizzSection) quizzSection.classList.add('hidden');
             if (submitBtn) submitBtn.classList.remove('hidden');
 
             // --- GESTION DU BROUILLON (Auto-Save) ---
@@ -1171,6 +1182,40 @@ document.addEventListener('mouseup', () => {
     document.body.style.userSelect = '';
     htmlEditor?.layout(); cssEditor?.layout(); jsEditor?.layout();
 });
+
+// --- SIDEBAR RESIZE HANDLE ---
+let isResizingSidebar = false;
+if (sidebarResizeHandle && resourcesSidebar) {
+    sidebarResizeHandle.addEventListener('mousedown', (e) => {
+        isResizingSidebar = true;
+        sidebarResizeHandle.classList.add('dragging');
+        resourcesSidebar.classList.add('resizing');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizingSidebar) return;
+        const w = Math.max(250, Math.min(600, e.clientX));
+        resourcesSidebar.style.width = `${w}px`;
+        htmlEditor?.layout();
+        cssEditor?.layout();
+        jsEditor?.layout();
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (!isResizingSidebar) return;
+        isResizingSidebar = false;
+        sidebarResizeHandle.classList.remove('dragging');
+        resourcesSidebar.classList.remove('resizing');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        htmlEditor?.layout();
+        cssEditor?.layout();
+        jsEditor?.layout();
+    });
+}
 
 // ============================================================
 // 9. DRAWER CHAT
@@ -2246,6 +2291,274 @@ if (sandboxPromptSendBtn && sandboxPromptInput && sandboxOutputPreview) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendPromptSandbox();
+        }
+    });
+}
+
+// --- WORKSPACE CRÉATIF LOGIC ---
+function initCreativeWorkspace(exData) {
+    const creativeMissionTitle = document.getElementById('creativeMissionTitle');
+    const creativeMissionInstructions = document.getElementById('creativeMissionInstructions');
+    const creativeToolsList = document.getElementById('creativeToolsList');
+    const creativeSubmissionFields = document.getElementById('creativeSubmissionFields');
+    const creativeSubmissionFeedback = document.getElementById('creativeSubmissionFeedback');
+    const creativeValidateBtn = document.getElementById('creativeValidateBtn');
+
+    if (creativeMissionTitle) {
+        creativeMissionTitle.textContent = exData.titre || 'Mission';
+    }
+
+    if (creativeMissionInstructions && typeof window.marked !== 'undefined') {
+        creativeMissionInstructions.innerHTML = window.marked.parse(exData.enonce_md || exData.consigne || 'Aucun énoncé.');
+    }
+
+    // Liens outils
+    if (creativeToolsList) {
+        let tools = exData.external_tools || [];
+        if (tools.length === 0) {
+            const titleLower = (exData.titre || '').toLowerCase();
+            const enonceLower = (exData.enonce_md || '').toLowerCase();
+            if (titleLower.includes('image') || enonceLower.includes('canva') || enonceLower.includes('visuel')) {
+                tools = [
+                    { name: "Canva", url: "https://canva.com" },
+                    { name: "Adobe Firefly", url: "https://firefly.adobe.com" }
+                ];
+            } else if (titleLower.includes('écriture') || enonceLower.includes('slogan') || enonceLower.includes('prompt')) {
+                tools = [
+                    { name: "Google Gemini", url: "https://gemini.google.com" },
+                    { name: "Google Docs", url: "https://docs.google.com" }
+                ];
+            } else if (titleLower.includes('musique') || enonceLower.includes('suno') || enonceLower.includes('sonore')) {
+                tools = [
+                    { name: "Suno AI", url: "https://suno.com" }
+                ];
+            } else if (titleLower.includes('vidéo') || enonceLower.includes('capcut') || enonceLower.includes('montage')) {
+                tools = [
+                    { name: "CapCut", url: "https://capcut.com" }
+                ];
+            } else {
+                tools = [
+                    { name: "Google Gemini", url: "https://gemini.google.com" },
+                    { name: "Google Docs", url: "https://docs.google.com" },
+                    { name: "Canva", url: "https://canva.com" }
+                ];
+            }
+        }
+        creativeToolsList.innerHTML = tools.map(t => `<a href="${t.url}" target="_blank" class="creative-tool-link-btn">🔗 ${t.name}</a>`).join('');
+    }
+
+    // Récupérer le brouillon de soumission
+    const savedDataRaw = localStorage.getItem(`creative_draft_${exData.id}`);
+    let savedUrl = '';
+    let savedText = '';
+    if (savedDataRaw) {
+        try {
+            const parsed = JSON.parse(savedDataRaw);
+            savedUrl = parsed.url || '';
+            savedText = parsed.text || '';
+        } catch (e) { }
+    }
+
+    // Injecter les champs de soumission
+    if (creativeSubmissionFields) {
+        creativeSubmissionFields.innerHTML = '';
+        const submissionType = exData.submission_type || 'both';
+
+        if (submissionType === 'url' || submissionType === 'both') {
+            creativeSubmissionFields.innerHTML += `
+                <div class="creative-input-group">
+                    <label for="creativeUrlInput">🔗 Lien de ta création (Canva, Google Doc, Suno, etc.) :</label>
+                    <input type="text" id="creativeUrlInput" placeholder="https://..." value="${savedUrl}" />
+                </div>
+            `;
+        }
+        if (submissionType === 'text' || submissionType === 'both') {
+            creativeSubmissionFields.innerHTML += `
+                <div class="creative-input-group">
+                    <label for="creativeTextInput">✍️ Saisis ton texte ou le prompt final utilisé :</label>
+                    <textarea id="creativeTextInput" placeholder="Saisis ton texte ici...">${savedText}</textarea>
+                </div>
+            `;
+        }
+
+        // Ajouter écouteurs d'auto-sauvegarde
+        const urlInput = document.getElementById('creativeUrlInput');
+        const textInput = document.getElementById('creativeTextInput');
+        const saveDraft = () => {
+            const draft = {
+                url: urlInput ? urlInput.value.trim() : '',
+                text: textInput ? textInput.value.trim() : ''
+            };
+            localStorage.setItem(`creative_draft_${exData.id}`, JSON.stringify(draft));
+        };
+        if (urlInput) urlInput.addEventListener('input', saveDraft);
+        if (textInput) textInput.addEventListener('input', saveDraft);
+    }
+
+    // Reset feedback
+    if (creativeSubmissionFeedback) {
+        creativeSubmissionFeedback.textContent = '';
+        creativeSubmissionFeedback.style.color = '';
+    }
+
+    if (creativeValidateBtn) {
+        creativeValidateBtn.disabled = false;
+        creativeValidateBtn.innerHTML = "Valider ma mission 🚀";
+    }
+}
+
+// Sandbox intégrée pour le dashboard créatif
+const creativeSandboxInput = document.getElementById('creativeSandboxInput');
+const creativeSandboxSendBtn = document.getElementById('creativeSandboxSendBtn');
+const creativeSandboxOutput = document.getElementById('creativeSandboxOutput');
+
+if (creativeSandboxSendBtn && creativeSandboxInput && creativeSandboxOutput) {
+    async function sendCreativeSandbox() {
+        const promptText = creativeSandboxInput.value.trim();
+        if (!promptText) return;
+
+        creativeSandboxSendBtn.disabled = true;
+        creativeSandboxSendBtn.innerHTML = "⏳";
+        creativeSandboxOutput.innerHTML = `
+            <div class="sandbox-loading" style="color: #64748b; font-family: sans-serif; text-align: center; padding: 20px 0;">
+                <div class="loader-spinner" style="margin: 0 auto 12px; height: 24px; width: 24px; border: 3px solid #f3f3f3; border-top: 3px solid var(--md-sys-color-primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                🤖 Le tuteur IA analyse ta demande...
+            </div>
+        `;
+
+        try {
+            const selectedCourse = courseManager.getSelectedCourse();
+            const genererSandboxIAFn = httpsCallable(functions, 'genererSandboxIA');
+            const res = await genererSandboxIAFn({
+                prompt: promptText,
+                course_id: selectedCourse?.id || "studio-creatif",
+                id_exercice: currentExercice?.id || ""
+            });
+
+            const data = res.data;
+            let outputHtml = '';
+
+            if (data.text) {
+                outputHtml += `<div style="text-align: left; margin-bottom: 16px; width: 100%; border-bottom: 1px solid #334155; padding-bottom: 12px; color: #cbd5e1; font-family: sans-serif; line-height: 1.5;">
+                    \${window.marked.parse(data.text)}
+                </div>`;
+            }
+
+            if (data.html) {
+                outputHtml += `<div style="width: 100%; border: 1.5px dashed #475569; padding: 16px; border-radius: 12px; background: rgba(255,255,255,0.02); display: flex; justify-content: center; align-items: center;">
+                    \${data.html}
+                </div>`;
+            }
+
+            creativeSandboxOutput.innerHTML = outputHtml || '<div style="color: #ef4444;">Aucun résultat généré. Réessaye avec un autre prompt !</div>';
+
+        } catch (e) {
+            console.error("Erreur Sandbox Prompt Créative :", e);
+            creativeSandboxOutput.innerHTML = `
+                <div style="color: #ef4444; font-family: sans-serif; text-align: center; padding: 20px 0;">
+                    ⚠️ Une erreur est survenue lors de la génération. Réessaye avec un prompt différent.
+                </div>
+            `;
+        } finally {
+            creativeSandboxSendBtn.disabled = false;
+            creativeSandboxSendBtn.innerHTML = "➤";
+        }
+    }
+
+    creativeSandboxSendBtn.addEventListener('click', sendCreativeSandbox);
+    creativeSandboxInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendCreativeSandbox();
+        }
+    });
+}
+
+// Bouton de validation de la mission créative
+const creativeValidateBtn = document.getElementById('creativeValidateBtn');
+if (creativeValidateBtn) {
+    creativeValidateBtn.addEventListener('click', async () => {
+        if (!currentExercice) return;
+
+        const urlInput = document.getElementById('creativeUrlInput');
+        const textInput = document.getElementById('creativeTextInput');
+        const urlVal = urlInput ? urlInput.value.trim() : '';
+        const textVal = textInput ? textInput.value.trim() : '';
+        const feedbackEl = document.getElementById('creativeSubmissionFeedback');
+
+        if (!urlVal && !textVal) {
+            alert("Veuillez remplir au moins un champ avant de soumettre !");
+            return;
+        }
+
+        creativeValidateBtn.disabled = true;
+        creativeValidateBtn.innerHTML = "⏳ Validation en cours...";
+
+        if (feedbackEl) {
+            feedbackEl.textContent = "⏳ Enregistrement du devoir...";
+            feedbackEl.style.color = "#475569";
+        }
+
+        const combinedSubmission = `[Lien soumis] : ${urlVal || 'Aucun'}\n\n[Texte/Prompt soumis] :\n${textVal || 'Aucun'}`;
+        const userEmail = userEmailEl?.textContent || 'inconnu@test.com';
+
+        try {
+            const corrigeFn = httpsCallable(functions, 'corrigerDevoir');
+            const response = await corrigeFn({
+                code_eleve: combinedSubmission,
+                id_exercice: currentExercice.id,
+                nom_eleve: userEmail.split('@')[0],
+                type: 'creative_submission',
+                titre_exercice: currentExercice.titre || 'Mission',
+                chapitre: currentExercice.chapitre || '',
+                code_html: '',
+                code_css: '',
+                code_js: '',
+                autonomie: {
+                    indices_niv1: 0,
+                    indices_niv2: 0,
+                    indices_niv3: 0,
+                    questions_ia: MAX_QUESTIONS - hintState.questionsLeft,
+                    copie_colle_ops: 0,
+                    copie_colle_caracteres: 0,
+                    sorties_page: 0,
+                    temps_hors_focus_sec: 0
+                }
+            });
+
+            const docId = response.data.docId;
+            const evalIA = response.data.evaluation;
+
+            hintState.currentDocId = docId;
+            hintState.currentCode = combinedSubmission;
+            updateHintButtons();
+
+            if (feedbackEl) {
+                feedbackEl.textContent = "✅ Mission validée avec succès !";
+                feedbackEl.style.color = "#16a34a";
+            }
+
+            if (evalIA?.feedback_eleve) {
+                appendMessage(
+                    `✨ **Retour sur ta Mission**\n\n\${evalIA.feedback_eleve}\n\n_Ton travail a été enregistré pour le professeur._`,
+                    'assistant', 'Tuteur IA'
+                );
+            } else {
+                appendMessage("📬 Ta mission a bien été enregistrée et validée !", 'assistant', 'Tuteur IA');
+            }
+
+            openDrawer(); // Ouvre l'onglet tuteur dans la sidebar
+
+        } catch (error) {
+            console.error('[Creative Submit] Erreur :', error);
+            if (feedbackEl) {
+                feedbackEl.textContent = "❌ Erreur de soumission";
+                feedbackEl.style.color = "#ef4444";
+            }
+            appendMessage("❌ Erreur lors de l'envoi de la mission. Vérifie ta connexion.", 'assistant', 'Tuteur IA');
+        } finally {
+            creativeValidateBtn.disabled = false;
+            creativeValidateBtn.innerHTML = "Valider ma mission 🚀";
         }
     });
 }

@@ -2399,30 +2399,40 @@ input:checked + .slider:before {
 /* Sidebar Tabs (Split-Screen LMS) */
 .sidebar-tabs {
     display: flex;
-    border-bottom: 1px solid var(--md-sys-color-outline-variant);
-    background: rgba(0, 0, 0, 0.02);
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 8px;
+    margin: 8px 12px;
+    gap: 4px;
+    border: 1px solid #e2e8f0;
 }
 
 .sidebar-tab-btn {
     flex: 1;
-    padding: 12px;
+    padding: 8px 12px;
     border: none;
-    background: none;
-    border-bottom: 2px solid transparent;
-    font-size: 13px;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 12px;
     font-weight: 600;
-    color: var(--md-sys-color-on-surface-variant);
+    color: #64748b;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
 .sidebar-tab-btn:hover {
-    background: rgba(0, 0, 0, 0.04);
+    background: rgba(0, 0, 0, 0.03);
+    color: #334155;
 }
 
 .sidebar-tab-btn.active {
-    border-bottom-color: var(--md-sys-color-primary);
+    background: #ffffff;
     color: var(--md-sys-color-primary);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
 }
 
 .resources-sidebar.collapsed .sidebar-tabs {
@@ -2547,4 +2557,254 @@ input:checked + .slider:before {
 /* Prompt Sandbox Styles */
 #prompt-sandbox-container {
     height: 100%;
+}
+
+/* Sidebar resize handle */
+.sidebar-resize-handle {
+    width: 6px;
+    background: transparent;
+    cursor: col-resize;
+    position: relative;
+    z-index: 100;
+    flex-shrink: 0;
+    transition: background 0.2s, border 0.2s;
+}
+.sidebar-resize-handle:hover,
+.sidebar-resize-handle.dragging {
+    background: var(--md-sys-color-primary-container, #e0f2fe);
+    border-left: 1px solid var(--md-sys-color-primary, #0284c7);
+    border-right: 1px solid var(--md-sys-color-primary, #0284c7);
+}
+.resources-sidebar.resizing {
+    transition: none !important;
+}
+.resources-sidebar.collapsed + .sidebar-resize-handle {
+    display: none;
+}
+
+/* Creative Workspace Layout */
+.creative-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #f8fafc;
+    overflow-y: auto;
+    padding: 24px;
+    height: 100%;
+}
+
+.creative-container {
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.creative-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.creative-card.dark-card {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f8fafc;
+}
+
+.creative-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 12px;
+}
+
+.dark-card .creative-card-header {
+    border-bottom-color: #334155;
+}
+
+.creative-card-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--md-sys-color-primary);
+    margin: 0;
+}
+
+.creative-card-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.creative-card-icon {
+    font-size: 20px;
+}
+
+.creative-card-desc {
+    font-size: 13px;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.creative-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.creative-tools-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 16px;
+}
+
+.creative-tools-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.5px;
+}
+
+.creative-tools-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.creative-tool-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid #e2e8f0;
+}
+
+.creative-tool-link-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+    transform: translateY(-1px);
+}
+
+/* Creative Sandbox styling */
+.creative-sandbox-input-row {
+    display: flex;
+    gap: 10px;
+}
+
+.creative-sandbox-input-row textarea {
+    flex: 1;
+    height: 64px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #475569;
+    background: #0f172a;
+    color: #fff;
+    font-family: inherit;
+    font-size: 13px;
+    resize: none;
+    outline: none;
+}
+
+.creative-sandbox-input-row textarea:focus {
+    border-color: var(--md-sys-color-primary);
+}
+
+.creative-sandbox-output {
+    min-height: 100px;
+    max-height: 250px;
+    background: #0f172a;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    padding: 14px;
+    overflow-y: auto;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #cbd5e1;
+}
+
+.creative-sandbox-output .sandbox-placeholder {
+    color: #64748b;
+    font-style: italic;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 80px;
+    text-align: center;
+}
+
+/* Submission styling */
+.creative-submission-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.creative-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.creative-input-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.creative-input-group input[type="text"],
+.creative-input-group textarea {
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.creative-input-group input:focus,
+.creative-input-group textarea:focus {
+    border-color: var(--md-sys-color-primary);
+}
+
+.creative-input-group textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+.creative-submission-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 16px;
+    margin-top: 8px;
+}
+
+.creative-submission-footer button {
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 8px;
+    font-weight: 600;
 }

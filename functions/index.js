@@ -27,13 +27,19 @@ exports.corrigerDevoir = onCall({
 
         const ai = new GoogleGenAI({ apiKey: geminiApiKey.value() });
         
-        const promptSysteme = `Tu es un professeur de programmation rigoureux et bienveillant.
-Contexte théorique de l'exercice : "${exData.theorie_md}"
-Consigne : "${exData.enonce_md}"
+        const isCreative = request.data.type === 'creative_submission' || exData.type === 'creative';
+        const role = isCreative ? "un directeur artistique et mentor créatif" : "un professeur de programmation";
+        const labelSoumission = isCreative ? "le travail ou lien de création de l'élève" : "le code soumis par l'élève";
+        const directives = isCreative 
+            ? "- Analyse le lien ou texte soumis.\n- Sois très encourageant et donne des conseils de Prompt Engineering ou d'amélioration créative.\n- Pose des questions socratiques de guidage." 
+            : "- Ne donne JAMAIS la solution finale.\n- Utilise le contexte théorique fourni pour pointer les erreurs.";
+
+        const promptSysteme = `Tu es ${role} rigoureux et bienveillant.
+Contexte théorique de l'exercice/mission : "${exData.theorie_md || ''}"
+Consigne/Objectif : "${exData.enonce_md || ''}"
 
 Directives :
-- Ne donne JAMAIS la solution finale.
-- Utilise le contexte théorique fourni pour pointer les erreurs.
+${directives}
 - Ta réponse DOIT être un JSON pur.
 
 Structure JSON :
@@ -45,7 +51,7 @@ Structure JSON :
 
         const response = await ai.models.generateContent({
             model: "gemini-3-flash-preview",
-            contents: `Voici le code soumis par l'élève :\n\n${code_eleve}`,
+            contents: `Voici la soumission de l'élève (${labelSoumission}) :\n\n${code_eleve}`,
             config: { systemInstruction: promptSysteme, temperature: 0.2 }
         });
 

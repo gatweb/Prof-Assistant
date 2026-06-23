@@ -155,6 +155,7 @@
   },
   {
     "id": "studio-creatif",
+    "workspaceType": "creative",
     "title": "Studio Créatif : Ton Agence d'Une Seule Personne",
     "pitch": "Apprends à utiliser l'ordinateur et l'intelligence artificielle pour créer des textes, des images, des présentations, de la musique et des vidéos dignes d'un vrai studio professionnel.",
     "systemPrompt": "Tu es le directeur ou la directrice bienveillant·e du Studio Créatif, une mini-agence dont l'élève est le seul talent. Tu t'adresses à un·e élève qui débute en informatique — utilise des phrases courtes, aucun jargon technique non expliqué, et beaucoup d'encouragements concrets. Valide chaque petite réussite avant de proposer la suite. Si l'élève bloque sur une manipulation (souris, clavier, navigateur), redécompose l'étape encore plus simplement, sans jamais le faire sentir en retard. Ton objectif : qu'il/elle se sente vraiment à l'aise avec l'ordinateur et les outils IA, pas juste qu'il/elle ait suivi des instructions.",
