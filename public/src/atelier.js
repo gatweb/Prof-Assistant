@@ -2439,13 +2439,13 @@ if (creativeSandboxSendBtn && creativeSandboxInput && creativeSandboxOutput) {
 
             if (data.text) {
                 outputHtml += `<div style="text-align: left; margin-bottom: 16px; width: 100%; border-bottom: 1px solid #334155; padding-bottom: 12px; color: #cbd5e1; font-family: sans-serif; line-height: 1.5;">
-                    \${window.marked.parse(data.text)}
+                    ${window.marked.parse(data.text)}
                 </div>`;
             }
 
             if (data.html) {
                 outputHtml += `<div style="width: 100%; border: 1.5px dashed #475569; padding: 16px; border-radius: 12px; background: rgba(255,255,255,0.02); display: flex; justify-content: center; align-items: center;">
-                    \${data.html}
+                    ${data.html}
                 </div>`;
             }
 
@@ -2539,7 +2539,7 @@ if (creativeValidateBtn) {
 
             if (evalIA?.feedback_eleve) {
                 appendMessage(
-                    `✨ **Retour sur ta Mission**\n\n\${evalIA.feedback_eleve}\n\n_Ton travail a été enregistré pour le professeur._`,
+                    `✨ **Retour sur ta Mission**\n\n${evalIA.feedback_eleve}\n\n_Ton travail a été enregistré pour le professeur._`,
                     'assistant', 'Tuteur IA'
                 );
             } else {
