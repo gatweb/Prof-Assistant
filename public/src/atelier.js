@@ -243,11 +243,11 @@ function setupCourseSelector() {
  */
 async function loadLobby() {
     // Reset Header UI
-    if (exerciseTitleEl) exerciseTitleEl.textContent = 'Choisis un exercice';
+    if (exerciseTitleEl) exerciseTitleEl.textContent = 'Accueil';
     if (backToLobbyBtn) {
         backToLobbyBtn.style.display = 'inline-flex';
         backToLobbyBtn.classList.add('active');
-        backToLobbyBtn.textContent = '🏠 Exercices';
+        backToLobbyBtn.textContent = '🏠 Accueil';
     }
     if (navCoursesBtn) {
         navCoursesBtn.style.display = 'none'; // Désactivé (Cours unifiés)
@@ -268,6 +268,31 @@ async function loadLobby() {
         const selectedCourse = courseManager.getSelectedCourse();
         const courseId = selectedCourse ? selectedCourse.id : 'js-uaa5-classic';
         const progressDocId = userEmail ? `${userEmail.replace(/\//g, '_')}_${courseId}` : '';
+
+        // Rendre le sélecteur de cours du Lobby (page d'accueil)
+        const lobbyCourseSelectorContainer = document.getElementById('lobbyCourseSelectorContainer');
+        if (lobbyCourseSelectorContainer) {
+            lobbyCourseSelectorContainer.innerHTML = '';
+            const allCourses = courseManager.getCourses();
+            allCourses.forEach(c => {
+                const isActive = selectedCourse && selectedCourse.id === c.id;
+                const card = document.createElement('div');
+                card.className = `lobby-course-card${isActive ? ' active' : ''}`;
+                card.innerHTML = `
+                    <span class="lobby-course-card-icon">${c.theme?.icon || '📚'}</span>
+                    <div class="lobby-course-card-title">${c.title}</div>
+                    <div class="lobby-course-card-desc">${c.pitch || 'Découvre ce cours passionnant !'}</div>
+                `;
+                card.addEventListener('click', () => {
+                    if (c.id !== courseId) {
+                        courseManager.selectCourse(c.id);
+                        setupCourseSelector();
+                        loadLobby();
+                    }
+                });
+                lobbyCourseSelectorContainer.appendChild(card);
+            });
+        }
 
         // Requêtes en parallèle : exercices + soumissions de l'élève + résultats d'examen + progression
         const [exercicesSnap, submissionsSnap, examResultsSnap, progressSnap] = await Promise.all([
@@ -868,7 +893,7 @@ function injectExerciseData(exData) {
     if (backToLobbyBtn) {
         backToLobbyBtn.style.display = 'inline-flex';
         backToLobbyBtn.classList.remove('active');
-        backToLobbyBtn.textContent = '🏠 Exercices';
+        backToLobbyBtn.textContent = '🏠 Accueil';
     }
     if (navCoursesBtn) {
         navCoursesBtn.style.display = 'none';
@@ -992,11 +1017,11 @@ if (sidebarTabTuteurBtn) {
 // Fonction pour revenir proprement au lobby depuis le workspace, le cours ou l'examen
 function switchToLobby() {
     // Reset Header UI
-    if (exerciseTitleEl) exerciseTitleEl.textContent = 'Choisis un exercice';
+    if (exerciseTitleEl) exerciseTitleEl.textContent = 'Accueil';
     if (backToLobbyBtn) {
         backToLobbyBtn.style.display = 'inline-flex';
         backToLobbyBtn.classList.add('active');
-        backToLobbyBtn.textContent = '🏠 Exercices';
+        backToLobbyBtn.textContent = '🏠 Accueil';
     }
     if (navCoursesBtn) {
         navCoursesBtn.style.display = 'inline-flex';
@@ -2051,7 +2076,7 @@ async function loadCourses() {
     if (backToLobbyBtn) {
         backToLobbyBtn.style.display = 'inline-flex';
         backToLobbyBtn.classList.remove('active');
-        backToLobbyBtn.textContent = '🏠 Exercices';
+        backToLobbyBtn.textContent = '🏠 Accueil';
     }
     if (navCoursesBtn) {
         navCoursesBtn.style.display = 'inline-flex';
