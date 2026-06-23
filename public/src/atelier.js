@@ -937,6 +937,13 @@ if (toggleSidebarBtn && resourcesSidebar) {
     toggleSidebarBtn.addEventListener('click', () => {
         const collapsed = resourcesSidebar.classList.toggle('collapsed');
         toggleSidebarBtn.textContent = collapsed ? '▶' : '◀';
+        
+        if (collapsed) {
+            resourcesSidebar.style.width = '';
+        } else {
+            resourcesSidebar.style.width = window.lastSidebarWidth || '320px';
+        }
+        
         // Recalculer le layout Monaco
         setTimeout(() => {
             htmlEditor?.layout();
@@ -1351,7 +1358,14 @@ document.addEventListener('mouseup', () => {
 
 // --- SIDEBAR RESIZE HANDLE ---
 let isResizingSidebar = false;
+window.lastSidebarWidth = localStorage.getItem('last_sidebar_width') || '320px';
+
 if (sidebarResizeHandle && resourcesSidebar) {
+    // Initialiser avec la dernière taille sauvegardée (si non replié)
+    if (!resourcesSidebar.classList.contains('collapsed')) {
+        resourcesSidebar.style.width = window.lastSidebarWidth;
+    }
+
     sidebarResizeHandle.addEventListener('mousedown', (e) => {
         isResizingSidebar = true;
         sidebarResizeHandle.classList.add('dragging');
@@ -1365,6 +1379,8 @@ if (sidebarResizeHandle && resourcesSidebar) {
         if (!isResizingSidebar) return;
         const w = Math.max(250, Math.min(600, e.clientX));
         resourcesSidebar.style.width = `${w}px`;
+        window.lastSidebarWidth = `${w}px`;
+        localStorage.setItem('last_sidebar_width', window.lastSidebarWidth);
         htmlEditor?.layout();
         cssEditor?.layout();
         jsEditor?.layout();
