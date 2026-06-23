@@ -2433,3 +2433,118 @@ input:checked + .slider:before {
     display: none !important;
 }
 
+/* Tuteur IA Tab Styles */
+.tuteur-chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 190px);
+    background: #f8fafc;
+}
+
+.tuteur-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tuteur-hints {
+    padding: 12px;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+}
+
+.hints-buttons-row {
+    display: flex;
+    gap: 8px;
+}
+
+.tuteur-hint-btn {
+    flex: 1;
+    padding: 8px 4px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.tuteur-hint-btn:disabled {
+    background: #f1f5f9;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+.tuteur-hint-btn#tuteurHintBtn1:not(:disabled) { background: #dcfce7; color: #166534; }
+.tuteur-hint-btn#tuteurHintBtn1:not(:disabled):hover { background: #bbf7d0; }
+.tuteur-hint-btn#tuteurHintBtn2:not(:disabled) { background: #fef9c3; color: #854d0e; }
+.tuteur-hint-btn#tuteurHintBtn2:not(:disabled):hover { background: #fef08a; }
+.tuteur-hint-btn#tuteurHintBtn3:not(:disabled) { background: #fee2e2; color: #991b1b; }
+.tuteur-hint-btn#tuteurHintBtn3:not(:disabled):hover { background: #fecaca; }
+
+.tuteur-input-box {
+    padding: 12px;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.free-question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tuteur-input-row {
+    display: flex;
+    gap: 8px;
+}
+
+.tuteur-input-row input {
+    flex: 1;
+    padding: 8px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+.tuteur-input-row input:focus {
+    border-color: var(--md-sys-color-primary);
+}
+
+.tuteur-send-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--md-sys-color-primary);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.tuteur-send-btn:hover {
+    background: #005a85;
+}
+
+/* Prompt Sandbox Styles */
+#prompt-sandbox-container {
+    height: 100%;
+}

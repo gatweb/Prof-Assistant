@@ -159,3 +159,55 @@ exports.demanderIndiceNiveau2 = onCall({
         throw new HttpsError("internal", "Service d'indices indisponible.");
     }
 });
+
+/**
+ * `genererSandboxIA` — Génère du texte et un rendu visuel HTML/CSS simulé
+ * pour le Prompt Sandbox de l'élève.
+ */
+exports.genererSandboxIA = onCall({
+    secrets: [geminiApiKey],
+    region: "europe-west1",
+    cors: true
+}, async (request) => {
+    if (!request.auth) throw new HttpsError("unauthenticated", "Connexion requise.");
+
+    const { prompt, course_id, id_exercice } = request.data;
+    if (!prompt) throw new HttpsError("invalid-argument", "Prompt manquant.");
+
+    try {
+        const ai = new GoogleGenAI({ apiKey: geminiApiKey.value() });
+
+        const systemInstruction = `Tu es l'assistant IA de création du Studio Créatif.
+L'élève te donne une consigne ou un prompt (ex: rédiger un slogan, décrire son bureau de rêve, inventer un logo ou un visuel).
+Tu dois analyser sa demande et retourner :
+1. "text" : Un retour ou conseil constructif (en Markdown) sur son prompt ou son idée, avec des astuces pour l'améliorer (Prompt Engineering).
+2. "html" : Une carte visuelle de prévisualisation HTML avec du style CSS en ligne (inline styles). Ce composant HTML doit simuler visuellement sa demande de manière esthétique (ex: si l'élève demande un bureau moderne, dessine en HTML/CSS un bureau stylisé avec des formes épurées, des plantes, un écran géant ; s'il demande une police, affiche un aperçu textuel élégant ; s'il demande un slogan, affiche-le sous forme de carte publicitaire haut de gamme). Utilise des dégradés modernes, du relief, de la transparence (rgba), des coins arrondis et une mise en page flexbox.
+
+Ta réponse doit obligatoirement être un objet JSON valide avec cette structure :
+{
+  "text": "commentaire et conseils de prompt engineering en markdown...",
+  "html": "<div style=\\"...\\">...</div>"
+}`;
+
+        const response = await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: `Voici le prompt soumis par l'élève :\n\n${prompt}`,
+            config: { 
+                systemInstruction,
+                temperature: 0.7
+            }
+        });
+
+        const jsonMatch = response.text.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+            return { text: response.text, html: null };
+        }
+        
+        const result = JSON.parse(jsonMatch[0]);
+        return result;
+
+    } catch (error) {
+        console.error("[genererSandboxIA] Erreur:", error);
+        throw new HttpsError("internal", "Erreur lors de la génération IA.");
+    }
+});

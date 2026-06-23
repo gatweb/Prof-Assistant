@@ -58,8 +58,10 @@ const closeReaderBtn = document.getElementById('closeReaderBtn');
 // Workspace Sidebar Tabs elements
 const sidebarTabConsignesBtn = document.getElementById('sidebarTabConsignesBtn');
 const sidebarTabLeconBtn = document.getElementById('sidebarTabLeconBtn');
+const sidebarTabTuteurBtn = document.getElementById('sidebarTabTuteurBtn');
 const tabContentConsignes = document.getElementById('tabContentConsignes');
 const tabContentLecon = document.getElementById('tabContentLecon');
+const tabContentTuteur = document.getElementById('tabContentTuteur');
 
 // Éditeur
 const runCodeBtn = document.getElementById('runCodeBtn');
@@ -70,6 +72,9 @@ const tabButtons = document.querySelectorAll('.tab-btn');
 const htmlEditorContainer = document.getElementById('html-editor-container');
 const cssEditorContainer = document.getElementById('css-editor-container');
 const jsEditorContainer = document.getElementById('js-editor-container');
+const sandboxPromptInput = document.getElementById('sandboxPromptInput');
+const sandboxPromptSendBtn = document.getElementById('sandboxPromptSendBtn');
+const sandboxOutputPreview = document.getElementById('sandboxOutputPreview');
 const resizeHandle = document.getElementById('resizeHandle');
 const editorSection = document.getElementById('editorSection');
 const splitWorkspace = document.getElementById('splitWorkspace');
@@ -79,16 +84,16 @@ const chatFab = document.getElementById('chatFab');
 const chatDrawer = document.getElementById('chatDrawer');
 const chatDrawerClose = document.getElementById('chatDrawerClose');
 const chatOverlay = document.getElementById('chatOverlay');
-const chatMessages = document.getElementById('chatMessages');
+const chatMessages = document.getElementById('tuteurMessages') || document.getElementById('chatMessages');
 const fabBadge = document.getElementById('fabBadge');
-const hintBtn1 = document.getElementById('hintBtn1');
-const hintBtn2 = document.getElementById('hintBtn2');
-const hintBtn3 = document.getElementById('hintBtn3');
+const hintBtn1 = document.getElementById('tuteurHintBtn1') || document.getElementById('hintBtn1');
+const hintBtn2 = document.getElementById('tuteurHintBtn2') || document.getElementById('hintBtn2');
+const hintBtn3 = document.getElementById('tuteurHintBtn3') || document.getElementById('hintBtn3');
 const freeQuestionToggle = document.getElementById('freeQuestionToggle');
 const freeQuestionPanel = document.getElementById('freeQuestionPanel');
-const questionCounter = document.getElementById('questionCounter');
-const chatInput = document.getElementById('chatInput');
-const chatSendBtn = document.getElementById('chatSendBtn');
+const questionCounter = document.getElementById('tuteurQuestionCounter') || document.getElementById('questionCounter');
+const chatInput = document.getElementById('tuteurChatInput') || document.getElementById('chatInput');
+const chatSendBtn = document.getElementById('tuteurChatSendBtn') || document.getElementById('chatSendBtn');
 const refreshCorrectionsBtn = document.getElementById('refreshCorrectionsBtn');
 const exportEmailBtn = document.getElementById('exportEmailBtn');
 
@@ -634,7 +639,17 @@ async function openExercise(exerciceId) {
         // Basculer vers le workspace
         lobbyView.classList.add('hidden');
         workspaceView.classList.remove('hidden');
-        chatFab.classList.remove('hidden');
+        if (chatFab) chatFab.classList.add('hidden'); // On cache le FAB au profit de la sidebar
+
+        const selectedCourse = courseManager.getSelectedCourse();
+        const tabPromptBtn = document.getElementById('tab-prompt');
+        if (tabPromptBtn) {
+            if (selectedCourse && selectedCourse.id === 'studio-creatif') {
+                tabPromptBtn.classList.remove('hidden');
+            } else {
+                tabPromptBtn.classList.add('hidden');
+            }
+        }
 
     } catch (e) {
         console.error('[openExercise] Erreur :', e);
@@ -773,16 +788,27 @@ function switchSidebarTab(tab) {
     if (tab === 'consignes') {
         sidebarTabConsignesBtn?.classList.add('active');
         sidebarTabLeconBtn?.classList.remove('active');
+        sidebarTabTuteurBtn?.classList.remove('active');
         tabContentConsignes?.classList.remove('hidden');
         tabContentLecon?.classList.add('hidden');
+        tabContentTuteur?.classList.add('hidden');
     } else if (tab === 'lecon') {
         sidebarTabConsignesBtn?.classList.remove('active');
         sidebarTabLeconBtn?.classList.add('active');
+        sidebarTabTuteurBtn?.classList.remove('active');
         tabContentConsignes?.classList.add('hidden');
         tabContentLecon?.classList.remove('hidden');
+        tabContentTuteur?.classList.add('hidden');
         
         // Marquer automatiquement la leçon comme lue quand l'élève clique dessus
         trackCurrentChapterAsRead();
+    } else if (tab === 'tuteur') {
+        sidebarTabConsignesBtn?.classList.remove('active');
+        sidebarTabLeconBtn?.classList.remove('active');
+        sidebarTabTuteurBtn?.classList.add('active');
+        tabContentConsignes?.classList.add('hidden');
+        tabContentLecon?.classList.add('hidden');
+        tabContentTuteur?.classList.remove('hidden');
     }
 }
 
@@ -806,6 +832,9 @@ if (sidebarTabConsignesBtn) {
 }
 if (sidebarTabLeconBtn) {
     sidebarTabLeconBtn.addEventListener('click', () => switchSidebarTab('lecon'));
+}
+if (sidebarTabTuteurBtn) {
+    sidebarTabTuteurBtn.addEventListener('click', () => switchSidebarTab('tuteur'));
 }
 
 // Fonction pour revenir proprement au lobby depuis le workspace, le cours ou l'examen
@@ -1084,6 +1113,11 @@ function switchTab(targetTab) {
     htmlEditorContainer.classList.toggle('hidden', targetTab !== 'html');
     cssEditorContainer.classList.toggle('hidden', targetTab !== 'css');
     jsEditorContainer.classList.toggle('hidden', targetTab !== 'js');
+    
+    const promptContainer = document.getElementById('prompt-sandbox-container');
+    if (promptContainer) {
+        promptContainer.classList.toggle('hidden', targetTab !== 'prompt');
+    }
 
     const indicator = liveIndicator;
     if (indicator) {
@@ -1174,11 +1208,7 @@ const appendMessage = (text, role, senderName = null) => {
 };
 
 const openDrawer = () => {
-    chatDrawer.classList.add('open');
-    chatDrawer.setAttribute('aria-hidden', 'false');
-    chatOverlay.classList.add('visible');
-    if (fabBadge) fabBadge.hidden = true;
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    switchSidebarTab('tuteur');
 };
 
 const closeDrawer = () => {
@@ -2155,3 +2185,68 @@ if (quizzNextBtn) {
         renderQuizzQuestion();
     });
 }
+
+// --- PROMPT SANDBOX LOGIC ---
+if (sandboxPromptSendBtn && sandboxPromptInput && sandboxOutputPreview) {
+    async function sendPromptSandbox() {
+        const promptText = sandboxPromptInput.value.trim();
+        if (!promptText) return;
+
+        sandboxPromptSendBtn.disabled = true;
+        sandboxPromptSendBtn.innerHTML = "⏳";
+        
+        sandboxOutputPreview.innerHTML = `
+            <div class="sandbox-loading" style="color: #64748b; font-family: sans-serif; text-align: center;">
+                <div class="loader-spinner" style="margin: 0 auto 12px; height: 24px; width: 24px; border: 3px solid #f3f3f3; border-top: 3px solid var(--md-sys-color-primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                🤖 Le tuteur IA génère ton aperçu...
+            </div>
+        `;
+
+        try {
+            const selectedCourse = courseManager.getSelectedCourse();
+            const genererSandboxIAFn = httpsCallable(functions, 'genererSandboxIA');
+            const res = await genererSandboxIAFn({
+                prompt: promptText,
+                course_id: selectedCourse?.id || "studio-creatif",
+                id_exercice: currentExercice?.id || ""
+            });
+
+            const data = res.data;
+            let outputHtml = '';
+
+            if (data.text) {
+                outputHtml += `<div style="text-align: left; margin-bottom: 16px; width: 100%; border-bottom: 1px solid #334155; padding-bottom: 12px; color: #cbd5e1; font-family: sans-serif; line-height: 1.5;">
+                    ${window.marked.parse(data.text)}
+                </div>`;
+            }
+
+            if (data.html) {
+                outputHtml += `<div style="width: 100%; border: 1.5px dashed #475569; padding: 16px; border-radius: 12px; background: rgba(255,255,255,0.02); display: flex; justify-content: center; align-items: center;">
+                    ${data.html}
+                </div>`;
+            }
+
+            sandboxOutputPreview.innerHTML = outputHtml || '<div style="color: #ef4444;">Aucun résultat généré. Réessaye avec un autre prompt !</div>';
+
+        } catch (e) {
+            console.error("Erreur Sandbox Prompt :", e);
+            sandboxOutputPreview.innerHTML = `
+                <div style="color: #ef4444; font-family: sans-serif;">
+                    ⚠️ Une erreur est survenue lors de la génération. Réessaye avec un prompt différent.
+                </div>
+            `;
+        } finally {
+            sandboxPromptSendBtn.disabled = false;
+            sandboxPromptSendBtn.innerHTML = "➤";
+        }
+    }
+
+    sandboxPromptSendBtn.addEventListener('click', sendPromptSandbox);
+    sandboxPromptInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendPromptSandbox();
+        }
+    });
+}
+

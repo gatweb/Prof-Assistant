@@ -102,6 +102,7 @@
             <div class="sidebar-tabs">
                 <button id="sidebarTabConsignesBtn" class="sidebar-tab-btn active">🎯 Consignes</button>
                 <button id="sidebarTabLeconBtn" class="sidebar-tab-btn">📖 Leçon complète</button>
+                <button id="sidebarTabTuteurBtn" class="sidebar-tab-btn">🧑‍🏫 Tuteur IA</button>
             </div>
             <div class="course-content-area" id="courseContent">
                 <div id="tabContentConsignes" class="tab-content">
@@ -109,6 +110,34 @@
                 </div>
                 <div id="tabContentLecon" class="tab-content hidden">
                     <div class="course-placeholder">Aucune leçon pour ce chapitre.</div>
+                </div>
+                <div id="tabContentTuteur" class="tab-content hidden">
+                    <div class="tuteur-chat-container">
+                        <div class="tuteur-messages" id="tuteurMessages">
+                            <div class="chat-bubble assistant">
+                                <div class="chat-bubble-content">Bonjour ! Je suis ton tuteur IA. Pose-moi une question sur cet exercice ou clique sur un bouton d'aide ci-dessous.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="tuteur-hints" id="tuteurHintsArea">
+                            <div class="hints-buttons-row">
+                                <button class="tuteur-hint-btn" id="tuteurHintBtn1" disabled>💡 Niv. 1<br><span style="font-size:10px;">Théorie</span></button>
+                                <button class="tuteur-hint-btn" id="tuteurHintBtn2" disabled>🔍 Niv. 2<br><span style="font-size:10px;">Mon code</span></button>
+                                <button class="tuteur-hint-btn" id="tuteurHintBtn3" disabled>🗺️ Niv. 3<br><span style="font-size:10px;">Structure</span></button>
+                            </div>
+                        </div>
+
+                        <div class="tuteur-input-box">
+                            <div class="free-question-header">
+                                <span>💬 Question libre</span>
+                                <span id="tuteurQuestionCounter" class="question-counter">5 restantes</span>
+                            </div>
+                            <div class="tuteur-input-row">
+                                <input type="text" id="tuteurChatInput" placeholder="Pose une question..." />
+                                <button id="tuteurChatSendBtn" class="tuteur-send-btn">➤</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="sidebar-footer">
@@ -136,6 +165,9 @@
                     <button class="tab-btn" role="tab" aria-selected="false" data-tab="js" id="tab-js">
                         <span class="tab-icon">🧩</span> JavaScript
                     </button>
+                    <button class="tab-btn hidden" role="tab" aria-selected="false" data-tab="prompt" id="tab-prompt">
+                        <span class="tab-icon">🤖</span> Prompt Sandbox
+                    </button>
                     <div class="live-indicator" id="liveIndicator">
                         <span class="live-dot"></span> <span class="live-text">Live</span>
                     </div>
@@ -145,6 +177,24 @@
                     <div id="html-editor-container" class="monaco-editor-pane" data-lang="html"></div>
                     <div id="css-editor-container"  class="monaco-editor-pane hidden" data-lang="css"></div>
                     <div id="js-editor-container"   class="monaco-editor-pane hidden" data-lang="javascript"></div>
+                    <div id="prompt-sandbox-container" class="monaco-editor-pane hidden" data-lang="prompt" style="display: flex; flex-direction: column; padding: 20px; background: #1e1e1e; color: #fff; overflow-y: auto; gap: 16px;">
+                        <div class="sandbox-input-area" style="display: flex; flex-direction: column; gap: 8px;">
+                            <label for="sandboxPromptInput" style="font-size: 14px; font-weight: 600; color: #cbd5e1;">Demande à l'IA (Prompt) :</label>
+                            <div style="display: flex; gap: 8px;">
+                                <textarea id="sandboxPromptInput" placeholder="Ex: Rédige une phrase accrocheuse pour mon agence de design, ou décris une image de bureau moderne..." style="flex: 1; height: 64px; padding: 10px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; font-family: inherit; font-size: 13px; resize: none;"></textarea>
+                                <button id="sandboxPromptSendBtn" class="btn-primary" style="height: 64px; width: 64px; display: flex; align-items: center; justify-content: center; font-size: 20px; border-radius: 8px;">➤</button>
+                            </div>
+                        </div>
+                        <div class="sandbox-output-area" style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
+                            <span style="font-size: 14px; font-weight: 600; color: #cbd5e1;">Résultat de la Sandbox :</span>
+                            <div id="sandboxOutputPreview" style="flex: 1; min-height: 150px; background: #0f172a; border-radius: 8px; border: 1px solid #475569; padding: 16px; overflow-y: auto; font-size: 13px; line-height: 1.6; color: #e2e8f0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 12px;">
+                                <div class="sandbox-placeholder" style="color: #64748b;">
+                                    <div style="font-size: 32px; margin-bottom: 8px;">🤖</div>
+                                    Saisis un prompt ci-dessus pour expérimenter avec l'IA.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -224,18 +274,17 @@
     </div><!-- fin #workspaceView -->
 
     <!-- =========================================================
-         FLOATING ACTION BUTTON — Chat & Corrections
-         (affiché uniquement dans le workspace, pas le lobby)
+         FLOATING ACTION BUTTON — Chat & Corrections (Masqué)
     ========================================================= -->
-    <button class="chat-fab hidden" id="chatFab" aria-label="Ouvrir le tuteur et les corrections">
+    <button class="chat-fab hidden" id="chatFab" aria-label="Ouvrir le tuteur et les corrections" style="display: none !important;">
         💬
         <span class="fab-badge" id="fabBadge" hidden>!</span>
     </button>
 
     <!-- =========================================================
-         CHAT DRAWER (slide-in depuis la droite)
+         CHAT DRAWER (Masqué)
     ========================================================= -->
-    <div class="chat-drawer" id="chatDrawer" aria-hidden="true">
+    <div class="chat-drawer" id="chatDrawer" aria-hidden="true" style="display: none !important;">
         <div class="drawer-header">
             <span>🧑‍🏫 Tuteur &amp; Corrections</span>
             <button class="drawer-close" id="chatDrawerClose" aria-label="Fermer">✕</button>
@@ -247,7 +296,6 @@
             </div>
         </div>
 
-        <!-- Indices Progressifs -->
         <div class="hints-area" id="hintsArea">
             <div class="hints-label">🆘 Besoin d'aide ?</div>
             <div class="hint-buttons">
@@ -263,7 +311,6 @@
             </div>
         </div>
 
-        <!-- Question Libre -->
         <div class="drawer-input-area">
             <button class="free-question-toggle" id="freeQuestionToggle">
                 💬 Question libre <span id="questionCounter" class="question-counter">5 restantes</span>
@@ -278,7 +325,7 @@
             <button id="exportEmailBtn" class="btn-secondary export-email-btn">📩 M'envoyer la conv.</button>
         </div>
     </div>
-    <div class="chat-overlay" id="chatOverlay"></div>
+    <div class="chat-overlay" id="chatOverlay" style="display: none !important;"></div>
 
     <!-- =========================================================
          LIBRAIRIES
