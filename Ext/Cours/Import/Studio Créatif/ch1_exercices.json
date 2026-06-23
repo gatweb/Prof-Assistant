@@ -1,30 +1,48 @@
-{
-  "course_id": "studio-creatif",
-  "chapter_id": "studio-ch1",
-  "type": "quizz",
-  "title": "Validation du Niveau 1",
-  "questions": [
-    {
-      "question": "Tu viens de faire une erreur de frappe. Quel raccourci utilises-tu pour l'annuler ?",
-      "options": ["Ctrl + V", "Ctrl + Z", "Ctrl + S"],
-      "correctAnswer": 1,
-      "successMessage": "Exact ! Ctrl + Z annule ta dernière action. Le droit à l'erreur, version informatique."
-    },
-    {
-      "question": "Tu as copié un mot avec Ctrl + C. Quel raccourci permet de le coller ailleurs ?",
-      "options": ["Ctrl + C à nouveau", "Ctrl + X", "Ctrl + V"],
-      "correctAnswer": 2,
-      "successMessage": "Parfait ! Ctrl + C copie, Ctrl + V colle. Le duo le plus utile de toute ta carrière informatique."
-    },
-    {
-      "question": "Pour demander une image à l'intelligence artificielle, tu dois...",
-      "options": [
-        "Dessiner toi-même un brouillon d'abord",
-        "Décrire avec des mots ce que tu veux voir",
-        "Avoir un compte payant obligatoirement"
-      ],
-      "correctAnswer": 1,
-      "successMessage": "Exactement ! Une bonne description textuelle suffit — on appelle ça un 'prompt', et on va apprendre à les rendre encore meilleurs au prochain niveau."
-    }
-  ]
-}
+[
+  {
+    "id": "studio-ch1-quizz",
+    "course_id": "studio-creatif",
+    "chapitre": "Niveau 1 : Bienvenue au Studio",
+    "titre": "Quizz : Validation du Niveau 1",
+    "type": "quizz",
+    "questions": [
+      {
+        "question": "Tu viens de faire une erreur de frappe. Quel raccourci utilises-tu pour l'annuler ?",
+        "options": ["Ctrl + V", "Ctrl + Z", "Ctrl + S"],
+        "correctAnswer": 1,
+        "successMessage": "Exact ! Ctrl + Z annule ta dernière action. Le droit à l'erreur, version informatique."
+      },
+      {
+        "question": "Tu as copié un mot avec Ctrl + C. Quel raccourci permet de le coller ailleurs ?",
+        "options": ["Ctrl + C à nouveau", "Ctrl + X", "Ctrl + V"],
+        "correctAnswer": 2,
+        "successMessage": "Parfait ! Ctrl + C copie, Ctrl + V colle. Le duo le plus utile de toute ta carrière informatique."
+      },
+      {
+        "question": "Pour demander une image à l'intelligence artificielle, tu dois...",
+        "options": [
+          "Dessiner toi-même un brouillon d'abord",
+          "Décrire avec des mots ce que tu veux voir",
+          "Avoir un compte payant obligatoirement"
+        ],
+        "correctAnswer": 1,
+        "successMessage": "Exactement ! Une bonne description textuelle suffit — on appelle ça un 'prompt', et on va apprendre à les rendre encore meilleurs au prochain niveau."
+      }
+    ]
+  },
+  {
+    "id": "studio-ch1-ex1-mission",
+    "course_id": "studio-creatif",
+    "chapitre": "Niveau 1 : Bienvenue au Studio",
+    "titre": "Première Mission : Choisis le nom de ton agence !",
+    "type": "creative",
+    "enonce_md": "### 🚀 Ta Mission : Créer l'identité de ton agence\n\nPour démarrer, tu dois trouver un nom original et un concept pour ton agence créative d'une seule personne (ex: agence de design d'intérieur pour ados, studio d'avatars pour streamers, etc.).\n\n### 📝 Consignes :\n1. Rends-toi sur **Google Gemini** pour brainstormer 5 idées de noms d'agence originaux à partir de tes passions.\n2. Choisis l'idée qui te plaît le plus.\n3. Crée un document Google Docs ou un design Canva pour noter le nom retenu et décris brièvement le style visuel de ton agence.\n4. Copie le lien de partage de ton document/design et colle-le ci-dessous. Indique également le prompt final qui t'a aidé à choisir !",
+    "theorie_md": "### Choisir un nom d'agence impactant\n\nUn bon nom doit être :\n- **Simple & Mémorable** : court et facile à prononcer.\n- **Évocateur** : il doit suggérer ce que tu fais (création, design, son, vidéo...).\n- **Original** : il doit se démarquer des autres.\n\n_Conseil d'Assistant IA_ : Décris tes passions à l'IA (ex: 'J'aime le basket et le pixel-art') et demande-lui de mélanger ces deux mondes pour trouver des noms uniques !",
+    "submission_type": "both",
+    "external_tools": [
+      { "name": "Google Gemini", "url": "https://gemini.google.com" },
+      { "name": "Canva", "url": "https://canva.com" },
+      { "name": "Google Docs", "url": "https://docs.google.com" }
+    ]
+  }
+]
