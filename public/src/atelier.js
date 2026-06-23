@@ -574,6 +574,12 @@ async function openExercise(exerciceId) {
         const exData = { id: docSnap.id, ...docSnap.data() };
         currentExercice = exData;
 
+        // Désabonner l'écouteur précédent si actif
+        if (profFeedbackUnsub) {
+            profFeedbackUnsub();
+            profFeedbackUnsub = null;
+        }
+
         // Réinitialiser l'état des hints pour le nouvel exercice
         hintState = {
             niv1Used: false,
@@ -591,8 +597,79 @@ async function openExercise(exerciceId) {
         updateHintButtons();
         updateQuestionCounter();
 
+        // Réinitialiser le chat
+        if (chatMessages) {
+            chatMessages.innerHTML = `
+                <div class="chat-bubble assistant">
+                    <div class="chat-sender-name">Tuteur IA</div>
+                    <div class="chat-bubble-content">Bonjour ! Je suis ton tuteur IA. Pose-moi une question sur cet exercice ou clique sur un bouton d'aide ci-dessous.</div>
+                </div>
+            `;
+        }
+        chatHistory = [];
+        const tuteurBadge = document.getElementById('tuteurTabBadge');
+        if (tuteurBadge) tuteurBadge.style.display = 'none';
+
+        // Récupérer la dernière soumission Firestore
+        let latestSub = null;
+        let isRevision = false;
+        let isPending = false;
+        let isValidated = false;
+        let subScore = 100;
+        const userEmail = currentUser?.email || userEmailEl?.textContent;
+        if (userEmail) {
+            try {
+                const subSnap = await getDocs(
+                    query(
+                        collection(db, 'submissions'),
+                        where('email_eleve', '==', userEmail),
+                        where('exercice_id', '==', exerciceId)
+                    )
+                );
+                if (!subSnap.empty) {
+                    const subs = subSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    subs.sort((a, b) => new Date(b.date_soumission) - new Date(a.date_soumission));
+                    latestSub = subs[0];
+
+                    if (latestSub) {
+                        hintState.currentDocId = latestSub.id;
+                        isValidated = latestSub.status === 'valide' || latestSub.status === 'publie';
+                        isRevision = latestSub.status === 'en_cours' || latestSub.status === 'brouillon';
+                        isPending = latestSub.status === 'a_valider';
+                        subScore = latestSub.note_suggeree !== undefined ? latestSub.note_suggeree : (latestSub.note || 100);
+                    }
+                }
+            } catch (err) {
+                console.error("Erreur lors de la récupération de la soumission :", err);
+            }
+        }
+
         // Injecter les données dans l'interface
         injectExerciseData(exData);
+
+        // Si une soumission existe, ajouter le feedback au chat
+        if (latestSub) {
+            if (isValidated) {
+                let msg = `🎉 **Exercice validé — Note : ${subScore}/100**\n\n${latestSub.feedback_ia || ''}`;
+                if (latestSub.prof_message) msg += `\n\n> 💬 *${latestSub.prof_message}*`;
+                appendMessage(msg, 'assistant', 'Professeur');
+            } else if (isRevision) {
+                let msg = `🔄 **Correction demandée**\n\n${latestSub.feedback_ia || ''}`;
+                if (latestSub.prof_message) msg += `\n\n> 💬 *${latestSub.prof_message}*`;
+                msg += '\n\n_Corrige et soumet à nouveau ! 💪_';
+                appendMessage(msg, 'assistant', 'Professeur');
+                
+                // Switcher automatiquement sur l'onglet tuteur pour que l'élève voie le feedback
+                switchSidebarTab('tuteur');
+            } else if (isPending) {
+                let msg = `⏳ **En attente de validation par ton professeur...**`;
+                if (latestSub.feedback_ia) msg += `\n\n${latestSub.feedback_ia}`;
+                appendMessage(msg, 'assistant', 'Tuteur IA');
+                
+                // Réactiver l'écoute en direct
+                listenForProfFeedback(latestSub.id);
+            }
+        }
 
         // Déterminer le type d'affichage
         const selectedCourse = courseManager.getSelectedCourse();
@@ -619,12 +696,63 @@ async function openExercise(exerciceId) {
             if (creativeSection) creativeSection.classList.remove('hidden');
             if (submitBtn) submitBtn.classList.add('hidden');
             
-            initCreativeWorkspace(exData);
+            initCreativeWorkspace(exData, latestSub);
+
+            // Mettre à jour l'affichage du bouton de validation créatif
+            const creativeValidateBtn = document.getElementById('creativeValidateBtn');
+            const creativeSubmissionFeedback = document.getElementById('creativeSubmissionFeedback');
+            if (creativeValidateBtn) {
+                if (isValidated) {
+                    creativeValidateBtn.textContent = `Mission validée ! (${subScore}/100) 🎉`;
+                    creativeValidateBtn.disabled = true;
+                    if (creativeSubmissionFeedback) {
+                        creativeSubmissionFeedback.textContent = "✅ Cette mission a été validée par le professeur.";
+                        creativeSubmissionFeedback.style.color = "#16a34a";
+                    }
+                } else if (isPending) {
+                    creativeValidateBtn.textContent = "⏳ En attente de validation...";
+                    creativeValidateBtn.disabled = true;
+                    if (creativeSubmissionFeedback) {
+                        creativeSubmissionFeedback.textContent = "⏳ Mission soumise. En attente de validation par le professeur.";
+                        creativeSubmissionFeedback.style.color = "#475569";
+                    }
+                } else if (isRevision) {
+                    creativeValidateBtn.textContent = "Soumettre à nouveau 🚀";
+                    creativeValidateBtn.disabled = false;
+                    if (creativeSubmissionFeedback) {
+                        creativeSubmissionFeedback.textContent = "🔄 Corrections demandées. Consulte l'onglet Tuteur IA.";
+                        creativeSubmissionFeedback.style.color = "#ea580c";
+                    }
+                } else {
+                    creativeValidateBtn.textContent = "Valider ma mission 🚀";
+                    creativeValidateBtn.disabled = false;
+                }
+            }
         } else {
             if (editorSection) editorSection.classList.remove('hidden');
             if (resizeHandle) resizeHandle.classList.remove('hidden');
             if (previewSection) previewSection.classList.remove('hidden');
             if (submitBtn) submitBtn.classList.remove('hidden');
+
+            // Mettre à jour l'affichage du bouton de soumission classique
+            if (submitBtn) {
+                if (isValidated) {
+                    submitBtn.textContent = `Exercice validé ! (${subScore}/100) 🎉`;
+                    submitBtn.disabled = true;
+                    submitBtn.style.background = "linear-gradient(135deg, #10b981 0%, #059669 100%)";
+                } else if (isPending) {
+                    submitBtn.textContent = "⏳ En attente de validation...";
+                    submitBtn.disabled = true;
+                } else if (isRevision) {
+                    submitBtn.textContent = "Soumettre à nouveau 🚀";
+                    submitBtn.disabled = false;
+                    submitBtn.style.background = "";
+                } else {
+                    submitBtn.textContent = "Soumettre mon code 🚀";
+                    submitBtn.disabled = false;
+                    submitBtn.style.background = "";
+                }
+            }
 
             // --- GESTION DU BROUILLON (Auto-Save) ---
             const savedDraft = localStorage.getItem(`draft_${exerciceId}`);
@@ -819,6 +947,20 @@ function switchSidebarTab(tab) {
         tabContentConsignes?.classList.add('hidden');
         tabContentLecon?.classList.add('hidden');
         tabContentTuteur?.classList.remove('hidden');
+        
+        // Cacher le badge de notification
+        const badge = document.getElementById('tuteurTabBadge');
+        if (badge) badge.style.display = 'none';
+    }
+}
+
+function showTuteurBadge() {
+    const isTuteurActive = sidebarTabTuteurBtn?.classList.contains('active');
+    if (!isTuteurActive) {
+        const badge = document.getElementById('tuteurTabBadge');
+        if (badge) {
+            badge.style.display = 'inline-block';
+        }
     }
 }
 
@@ -1240,9 +1382,12 @@ const appendMessage = (text, role, senderName = null) => {
     chatMessages.appendChild(bubble);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    // Notifier si le drawer est fermé
+    // Notifier si le drawer est fermé ou si on n'est pas sur le bon onglet
     if (role === 'assistant' && chatDrawer && !chatDrawer.classList.contains('open')) {
         if (fabBadge) fabBadge.hidden = false;
+    }
+    if (role === 'assistant') {
+        showTuteurBadge();
     }
 
     if (role === 'user' || role === 'assistant') {
@@ -1579,7 +1724,46 @@ function listenForProfFeedback(docId) {
             // 2. Afficher la notification non-intrusive
             showFeedbackNotification(isValidated ? "Travail validé !" : "Correction demandée");
 
-            // 3. Nettoyer l'écouteur si validé
+            // 3. Mettre à jour les boutons du workspace en temps réel
+            const selectedCourse = courseManager.getSelectedCourse();
+            const isCreativeCourse = selectedCourse && selectedCourse.workspaceType === 'creative';
+            const subScore = data.note_suggeree !== undefined ? data.note_suggeree : (data.note || 100);
+
+            if (isCreativeCourse) {
+                const creativeValidateBtn = document.getElementById('creativeValidateBtn');
+                const creativeSubmissionFeedback = document.getElementById('creativeSubmissionFeedback');
+                if (creativeValidateBtn) {
+                    if (isValidated) {
+                        creativeValidateBtn.textContent = `Mission validée ! (${subScore}/100) 🎉`;
+                        creativeValidateBtn.disabled = true;
+                        if (creativeSubmissionFeedback) {
+                            creativeSubmissionFeedback.textContent = "✅ Cette mission a été validée par le professeur.";
+                            creativeSubmissionFeedback.style.color = "#16a34a";
+                        }
+                    } else if (isRevision) {
+                        creativeValidateBtn.textContent = "Soumettre à nouveau 🚀";
+                        creativeValidateBtn.disabled = false;
+                        if (creativeSubmissionFeedback) {
+                            creativeSubmissionFeedback.textContent = "🔄 Corrections demandées. Consulte l'onglet Tuteur IA.";
+                            creativeSubmissionFeedback.style.color = "#ea580c";
+                        }
+                    }
+                }
+            } else {
+                if (submitBtn) {
+                    if (isValidated) {
+                        submitBtn.textContent = `Exercice validé ! (${subScore}/100) 🎉`;
+                        submitBtn.disabled = true;
+                        submitBtn.style.background = "linear-gradient(135deg, #10b981 0%, #059669 100%)";
+                    } else if (isRevision) {
+                        submitBtn.textContent = "Soumettre à nouveau 🚀";
+                        submitBtn.disabled = false;
+                        submitBtn.style.background = "";
+                    }
+                }
+            }
+
+            // 4. Nettoyer l'écouteur si validé
             if (isValidated) {
                 profFeedbackUnsub();
                 profFeedbackUnsub = null;
@@ -2295,7 +2479,7 @@ if (sandboxPromptSendBtn && sandboxPromptInput && sandboxOutputPreview) {
 }
 
 // --- WORKSPACE CRÉATIF LOGIC ---
-function initCreativeWorkspace(exData) {
+function initCreativeWorkspace(exData, latestSub = null) {
     const creativeMissionTitle = document.getElementById('creativeMissionTitle');
     const creativeMissionInstructions = document.getElementById('creativeMissionInstructions');
     const creativeToolsList = document.getElementById('creativeToolsList');
@@ -2346,16 +2530,33 @@ function initCreativeWorkspace(exData) {
         creativeToolsList.innerHTML = tools.map(t => `<a href="${t.url}" target="_blank" class="creative-tool-link-btn">🔗 ${t.name}</a>`).join('');
     }
 
-    // Récupérer le brouillon de soumission
-    const savedDataRaw = localStorage.getItem(`creative_draft_${exData.id}`);
+    // Récupérer le brouillon de soumission (depuis Firestore si présent, sinon depuis localStorage)
     let savedUrl = '';
     let savedText = '';
-    if (savedDataRaw) {
-        try {
-            const parsed = JSON.parse(savedDataRaw);
-            savedUrl = parsed.url || '';
-            savedText = parsed.text || '';
-        } catch (e) { }
+
+    if (latestSub && latestSub.code_eleve) {
+        const code = latestSub.code_eleve;
+        const linkMatch = code.match(/\[Lien soumis\]\s*:\s*([^\n]+)/);
+        if (linkMatch) {
+            savedUrl = linkMatch[1].trim();
+            if (savedUrl === 'Aucun') savedUrl = '';
+        }
+        const textSplit = code.split(/\[Texte\/Prompt soumis\]\s*:\s*\n?/);
+        if (textSplit.length > 1) {
+            savedText = textSplit[1].trim();
+            if (savedText === 'Aucun') savedText = '';
+        }
+    }
+
+    if (!savedUrl && !savedText) {
+        const savedDataRaw = localStorage.getItem(`creative_draft_${exData.id}`);
+        if (savedDataRaw) {
+            try {
+                const parsed = JSON.parse(savedDataRaw);
+                savedUrl = parsed.url || '';
+                savedText = parsed.text || '';
+            } catch (e) { }
+        }
     }
 
     // Injecter les champs de soumission

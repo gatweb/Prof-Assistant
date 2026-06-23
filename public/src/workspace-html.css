@@ -2443,6 +2443,18 @@ input:checked + .slider:before {
     display: none !important;
 }
 
+.tab-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 8px;
+    height: 8px;
+    background-color: #ef4444;
+    border-radius: 50%;
+    border: 1px solid #ffffff;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
 /* Tuteur IA Tab Styles */
 .tuteur-chat-container {
     display: flex;
