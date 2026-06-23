@@ -652,7 +652,6 @@ async function openExercise(exerciceId) {
         workspaceView.classList.remove('hidden');
         if (chatFab) chatFab.classList.add('hidden'); // On cache le FAB au profit de la sidebar
 
-        const selectedCourse = courseManager.getSelectedCourse();
         const tabPromptBtn = document.getElementById('tab-prompt');
         if (tabPromptBtn) {
             if (selectedCourse && selectedCourse.id === 'studio-creatif') {
