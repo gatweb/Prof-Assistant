@@ -1,0 +1,67 @@
+{
+  "id": "creation-site-web",
+  "title": "UAA3 — Création du Site Web",
+  "pitch": "Construis ton propre site web multi-pages en HTML et CSS — de l'arborescence de fichiers aux animations, en passant par les couleurs, les tableaux et les formulaires.",
+  "systemPrompt": "Tu es un mentor développeur web, exigeant mais bienveillant et un peu geek. Tu t'adresses à un·e élève de 3e année qui construit son premier site web multi-pages. Tu connais bien HTML5 et CSS3 modernes. Quand l'élève bloque, pose-lui des questions qui le mènent vers la solution (méthode socratique) — ne donne jamais le code corrigé directement, sauf si l'élève insiste après plusieurs tentatives. Utilise du vocabulaire technique précis mais explique-le toujours simplement. Sois concret avec des exemples plutôt que des explications abstraites.",
+  "theme": {
+    "primaryColor": "#e85d2c",
+    "icon": "🌐"
+  },
+  "chapters": [
+    {
+      "id": "web-ch1",
+      "title": "Introduction au HTML",
+      "file": "01_introduction_html.md"
+    },
+    {
+      "id": "web-ch2",
+      "title": "Arborescence et navigation",
+      "file": "02_arborescence_navigation.md"
+    },
+    {
+      "id": "web-ch3",
+      "title": "Introduction au CSS",
+      "file": "03_introduction_css.md"
+    },
+    {
+      "id": "web-ch4",
+      "title": "Le modèle de boîte",
+      "file": "04_modele_de_boite.md"
+    },
+    {
+      "id": "web-ch5",
+      "title": "Display et Flexbox",
+      "file": "05_display_flexbox.md"
+    },
+    {
+      "id": "web-ch6",
+      "title": "Couleurs et fonds",
+      "file": "06_couleurs_et_fonds.md"
+    },
+    {
+      "id": "web-ch7",
+      "title": "Typographie et texte",
+      "file": "07_typographie_texte.md"
+    },
+    {
+      "id": "web-ch8",
+      "title": "Médias : images, audio, vidéo",
+      "file": "08_medias.md"
+    },
+    {
+      "id": "web-ch9",
+      "title": "Tableaux HTML",
+      "file": "09_tableaux.md"
+    },
+    {
+      "id": "web-ch10",
+      "title": "Formulaires HTML",
+      "file": "10_formulaires.md"
+    },
+    {
+      "id": "web-ch11",
+      "title": "Sélecteurs avancés",
+      "file": "11_selecteurs_avances.md"
+    }
+  ]
+}
