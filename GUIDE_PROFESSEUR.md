@@ -112,6 +112,40 @@ Chaque document d'exercice dans la collection `exercices` peut être configuré 
      ```
      *(Note : `correctAnswer` est un index numérique qui commence à 0).*
 
+3. **Format Mission Créative (Workspace Créatif - sans code)** :
+   - Utilisé pour les cours de création numérique ou de bureautique hors programmation (ex: design graphique, création musicale, montage vidéo, rédaction).
+   - Pour activer ce mode, le fichier de configuration `config.json` du cours doit contenir le paramètre `"workspaceType": "creative"`.
+   - L'interface masque automatiquement les éditeurs Monaco et l'iframe d'aperçu au profit d'un tableau de bord de mission simplifié (contenant l'énoncé, les liens vers les outils externes requis, l'assistant de prompt et les zones de saisie de livrables).
+
+### ⚙️ Configuration du Workspace Créatif dans Firestore
+
+Lorsque le cours est en mode `"workspaceType": "creative"`, vous pouvez affiner le comportement des livrables pour chaque document d'exercice de la collection `exercices` :
+
+- **Type de livrable (`submission_type`)** :
+  Détermine ce que l'élève doit soumettre pour validation. Ajoutez le champ `submission_type` (String) avec l'une des valeurs suivantes :
+  - `"url"` : L'élève doit uniquement fournir un lien de partage externe (ex: lien Canva, Suno, Google Docs).
+  - `"text"` : L'élève doit uniquement saisir du texte ou son prompt final.
+  - `"both"` (valeur par défaut) : Demande à la fois un lien de partage et une explication textuelle.
+
+- **Liens d'outils personnalisés (`external_tools`)** :
+  Pour afficher des boutons d'accès rapide vers des outils spécifiques, ajoutez le champ `external_tools` (Array of Objects) structuré ainsi :
+  ```json
+  [
+    { "name": "Suno AI", "url": "https://suno.com" },
+    { "name": "CapCut", "url": "https://capcut.com" }
+  ]
+  ```
+  *Note : Si vous ne spécifiez pas ce champ, l'application analyse le titre et l'énoncé de l'exercice pour suggérer automatiquement les outils appropriés (Canva, Gemini, Docs, Suno ou CapCut).*
+
+---
+
+## 🏠 Page d'Accueil et Gestion Multi-Cours
+
+L'application intègre désormais une page d'**Accueil** unifiée (qui remplace le lobby classique) :
+- **Sélecteur de cours visuel** : Tous les cours auxquels l'élève a accès s'affichent sous forme de cartes premium résumant le titre et le pitch. Une carte "Actif" signale le cours en cours de consultation.
+- **Bascule instantanée** : Cliquer sur un cours met à jour le sélecteur d'en-tête et recharge immédiatement les chapitres et les exercices correspondants.
+- **Bouton d'en-tête** : Le bouton de retour au lobby s'appelle dorénavant **Accueil** et ramène l'élève vers ce tableau de bord général.
+
 ---
 
 ## 🔗 Association Théorie et Pratique (LMS)
