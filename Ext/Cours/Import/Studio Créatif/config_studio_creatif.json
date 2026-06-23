@@ -1,0 +1,52 @@
+{
+  "id": "studio-creatif",
+  "title": "Studio Créatif : Ton Agence d'Une Seule Personne",
+  "pitch": "Apprends à utiliser l'ordinateur et l'intelligence artificielle pour créer des textes, des images, des présentations, de la musique et des vidéos dignes d'un vrai studio professionnel.",
+  "systemPrompt": "Tu es le directeur ou la directrice bienveillant·e du Studio Créatif, une mini-agence dont l'élève est le seul talent. Tu t'adresses à un·e élève qui débute en informatique — utilise des phrases courtes, aucun jargon technique non expliqué, et beaucoup d'encouragements concrets. Valide chaque petite réussite avant de proposer la suite. Si l'élève bloque sur une manipulation (souris, clavier, navigateur), redécompose l'étape encore plus simplement, sans jamais le faire sentir en retard. Ton objectif : qu'il/elle se sente vraiment à l'aise avec l'ordinateur et les outils IA, pas juste qu'il/elle ait suivi des instructions.",
+  "theme": {
+    "primaryColor": "#0d9488",
+    "icon": "🎬"
+  },
+  "chapters": [
+    {
+      "id": "studio-ch1",
+      "title": "Niveau 1 : Bienvenue au Studio",
+      "file": "CH1_Bienvenue.md"
+    },
+    {
+      "id": "studio-ch2",
+      "title": "Niveau 2 : Ton Assistant, Pas Ton Remplaçant",
+      "file": "CH2_ComprendreIA.md"
+    },
+    {
+      "id": "studio-ch3",
+      "title": "Niveau 3 : Le Département Écriture",
+      "file": "CH3_Ecriture.md"
+    },
+    {
+      "id": "studio-ch4",
+      "title": "Niveau 4 : Le Département Image",
+      "file": "CH4_Image.md"
+    },
+    {
+      "id": "studio-ch5",
+      "title": "Niveau 5 : Le Département Slides",
+      "file": "CH5_Slides.md"
+    },
+    {
+      "id": "studio-ch6",
+      "title": "Niveau 6 : Le Département Musique",
+      "file": "CH6_Musique.md"
+    },
+    {
+      "id": "studio-ch7",
+      "title": "Niveau 7 : Le Département Vidéo",
+      "file": "CH7_Video.md"
+    },
+    {
+      "id": "studio-ch8",
+      "title": "Niveau 8 : Le Showreel Final",
+      "file": "CH8_Showreel.md"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "course_id": "studio-creatif",
+  "chapter_id": "studio-ch1",
+  "type": "quizz",
+  "title": "Validation du Niveau 1",
+  "questions": [
+    {
+      "question": "Tu viens de faire une erreur de frappe. Quel raccourci utilises-tu pour l'annuler ?",
+      "options": ["Ctrl + V", "Ctrl + Z", "Ctrl + S"],
+      "correctAnswer": 1,
+      "successMessage": "Exact ! Ctrl + Z annule ta dernière action. Le droit à l'erreur, version informatique."
+    },
+    {
+      "question": "Tu as copié un mot avec Ctrl + C. Quel raccourci permet de le coller ailleurs ?",
+      "options": ["Ctrl + C à nouveau", "Ctrl + X", "Ctrl + V"],
+      "correctAnswer": 2,
+      "successMessage": "Parfait ! Ctrl + C copie, Ctrl + V colle. Le duo le plus utile de toute ta carrière informatique."
+    },
+    {
+      "question": "Pour demander une image à l'intelligence artificielle, tu dois...",
+      "options": [
+        "Dessiner toi-même un brouillon d'abord",
+        "Décrire avec des mots ce que tu veux voir",
+        "Avoir un compte payant obligatoirement"
+      ],
+      "correctAnswer": 1,
+      "successMessage": "Exactement ! Une bonne description textuelle suffit — on appelle ça un 'prompt', et on va apprendre à les rendre encore meilleurs au prochain niveau."
+    }
+  ]
+}
