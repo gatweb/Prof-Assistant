@@ -148,7 +148,14 @@ listenToAuthStatus((user) => {
         setupCourseSelector();
         // Initialiser le gestionnaire d'examen
         examManager.init(() => {
-            switchToLobby();
+            const urlParams = new URLSearchParams(window.location.search);
+            const exId = urlParams.get('ex');
+
+            if (exId) {
+                openExercise(exId);
+            } else {
+                switchToLobby();
+            }
         });
     }).catch(err => {
         console.error("Erreur de chargement des cours :", err);
@@ -186,16 +193,6 @@ listenToAuthStatus((user) => {
                 }
             }
         });
-    }
-
-    // Au chargement : vérifier si un exercice est demandé dans l'URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const exId = urlParams.get('ex');
-
-    if (exId) {
-        openExercise(exId);
-    } else {
-        loadLobby();
     }
 
     // Reprendre l'écoute prof si une soumission était en attente
@@ -598,6 +595,16 @@ async function openExercise(exerciceId) {
 
         const exData = { id: docSnap.id, ...docSnap.data() };
         currentExercice = exData;
+
+        // Synchroniser le cours actif avec celui de l'exercice
+        const targetCourseId = exData.course_id || exData.id_cours;
+        if (targetCourseId) {
+            courseManager.selectCourse(targetCourseId);
+            const courseSelector = document.getElementById('courseSelector');
+            if (courseSelector) {
+                courseSelector.value = targetCourseId;
+            }
+        }
 
         // Désabonner l'écouteur précédent si actif
         if (profFeedbackUnsub) {

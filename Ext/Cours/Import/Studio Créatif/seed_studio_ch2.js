@@ -73,6 +73,7 @@ const EXERCICES = [
         titre: "Le Test du Détective",
         chapitre: CHAPITRE,
         course_id: COURSE_ID,
+        type: "creative",
 
         enonce_md: `
 ### 🕵️ Mission : piège l'IA et observe sa réaction
