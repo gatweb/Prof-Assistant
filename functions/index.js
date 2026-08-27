@@ -67,7 +67,7 @@ Structure JSON :
 
         try {
             const response = await ai.models.generateContent({
-                model: "gemini-2.0-flash",
+                model: "gemini-2.5-flash-lite",
                 contents: `Voici la soumission de l'élève (${labelSoumission}) :\n\n${code_eleve}`,
                 config: { systemInstruction: promptSysteme, temperature: 0.2 }
             });
@@ -155,7 +155,7 @@ Règles :
 
         try {
             const response = await ai.models.generateContent({
-                model: "gemini-2.0-flash",
+                model: "gemini-2.5-flash-lite",
                 contents: contentsArray,
                 config: { systemInstruction, temperature: 0.7 }
             });
@@ -168,10 +168,10 @@ Règles :
                     reponse: "⏳ *Le quota de l'assistant IA est temporairement atteint. N'hésite pas à consulter la fiche mémo et les raccourcis à gauche de ton écran en attendant !*" 
                 };
             }
-            // Tentative de fallback sur gemini-1.5-flash
+            // Tentative de fallback sur gemini-2.5-flash
             try {
                 const fbResponse = await ai.models.generateContent({
-                    model: "gemini-1.5-flash",
+                    model: "gemini-2.5-flash",
                     contents: contentsArray,
                     config: { systemInstruction, temperature: 0.7 }
                 });
@@ -209,7 +209,7 @@ exports.demanderIndiceNiveau2 = onCall({
         const ai = new GoogleGenAI({ apiKey: geminiApiKey.value() });
 
         const response = await ai.models.generateContent({
-            model: "gemini-2.0-flash",
+            model: "gemini-2.5-flash-lite",
             contents: `Voici le code de l'élève :\n${code_eleve}`,
             config: { 
                 systemInstruction: exData.indices.niveau_2_prompt,
@@ -253,7 +253,7 @@ Ta réponse doit obligatoirement être un objet JSON valide avec cette structure
 }`;
 
         const response = await ai.models.generateContent({
-            model: "gemini-2.0-flash",
+            model: "gemini-2.5-flash-lite",
             contents: `Voici le prompt soumis par l'élève :\n\n${prompt}`,
             config: { 
                 systemInstruction,
@@ -485,7 +485,7 @@ Format de sortie OBLIGATOIRE : Un JSON pur respectant cette structure exacte :
 }`;
 
         const geminiRes = await ai.models.generateContent({
-            model: "gemini-2.0-flash",
+            model: "gemini-2.5-flash-lite",
             contents: `Génère le QCM de ${nombreQuestions} questions sur le sujet suivant : "${sujet}".`,
             config: {
                 systemInstruction: systemInstruction,
