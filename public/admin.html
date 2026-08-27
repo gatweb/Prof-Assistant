@@ -26,6 +26,7 @@
             <div class="tabs">
                 <button class="tab-link active" data-target="listView">📥 Flux de corrections</button>
                 <button class="tab-link" data-target="progressionView">📊 Suivi de progression</button>
+                <button class="tab-link" data-target="usersView">👥 Élèves & Classes</button>
                 <button class="tab-link" data-target="quizView">📝 Générateur de Quiz</button>
                 <button class="tab-link" data-target="configView">⚙️ Configuration</button>
             </div>
@@ -113,22 +114,31 @@
             </div>
         </div>
 
-        <!-- Filtres Progression (Cours + Recherche Élève/Classe) -->
+        <!-- Filtres Progression (Cours + Classe + Recherche Élève) -->
         <div class="md-card mt-16 p-16" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: #ffffff; border-radius: 12px;">
-            <div style="flex: 1.5; min-width: 200px;">
+            <div style="flex: 1.5; min-width: 180px;">
                 <select id="progressionCourseSelect" class="md-input" style="padding: 10px 14px; font-size: 13px; cursor: pointer;">
-                    <option value="all">📚 Tous les cours (Vue complète)</option>
-                    <option value="bureautique-3e">📄 Bureautique & Google Workspace (3e)</option>
-                    <option value="dactylo-3e">⌨️ Dactylographie (3e)</option>
+                    <option value="dactylo-3e" selected>⌨️ Dactylographie (3e)</option>
+                    <option value="bureautique-3e">📄 Bureautique & Workspace (3e)</option>
                     <option value="creation-site-web">🌐 Création Web HTML/CSS</option>
                     <option value="js-uaa5-classic">💛 Algorithmique JS</option>
                     <option value="studio-creatif">🎬 Studio Créatif</option>
+                    <option value="all">📚 Tous les cours (Vue d'ensemble)</option>
                 </select>
             </div>
-            <div style="flex: 2; min-width: 220px;">
-                <input type="text" id="progressionSearchInput" class="md-input" placeholder="🔍 Filtrer par élève ou classe (ex: 3G1, Lucas)..." style="padding: 10px 14px; font-size: 13px;">
+            <div style="flex: 1; min-width: 140px;">
+                <select id="progressionClassSelect" class="md-input" style="padding: 10px 14px; font-size: 13px; cursor: pointer;">
+                    <option value="all">🏫 Toutes classes</option>
+                    <option value="3G1">Classe 3G1</option>
+                    <option value="3G2">Classe 3G2</option>
+                    <option value="3TT">Classe 3TT</option>
+                    <option value="unassigned">⚠️ Non assignés</option>
+                </select>
             </div>
-            <div id="progressionStatsSummary" style="display: flex; gap: 8px; align-items: center;">
+            <div style="flex: 2; min-width: 200px;">
+                <input type="text" id="progressionSearchInput" class="md-input" placeholder="🔍 Filtrer par élève (nom ou email)..." style="padding: 10px 14px; font-size: 13px;">
+            </div>
+            <div id="progressionStatsSummary" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                 <!-- Statistiques dynamiques (Nombre d'élèves, complétion) -->
             </div>
         </div>
@@ -139,6 +149,56 @@
                 <!-- La grille sera générée ici -->
                 <div class="loader-placeholder">Initialisation de la matrice...</div>
             </div>
+        </div>
+    </main>
+
+    <!-- Vue principale : Gestion des Élèves & Classes -->
+    <main id="usersView" class="admin-container hidden">
+        <div class="header-actions">
+            <div>
+                <h2>👥 Gestion des Élèves & Classes</h2>
+                <p class="subtitle">Attribuez vos élèves à leurs classes respectives (ex: 3G1, 3G2, 3TT) pour filtrer facilement les copies et la progression.</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button id="refreshUsersBtn" class="btn-secondary">🔄 Actualiser</button>
+            </div>
+        </div>
+
+        <!-- Filtres et Statistiques Élèves -->
+        <div class="md-card mt-16 p-16" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: #ffffff; border-radius: 12px;">
+            <div style="flex: 2; min-width: 220px;">
+                <input type="text" id="usersSearchInput" class="md-input" placeholder="🔍 Rechercher un élève par nom ou email..." style="padding: 10px 14px; font-size: 13px;">
+            </div>
+            <div style="flex: 1.5; min-width: 180px;">
+                <select id="usersClassFilter" class="md-input" style="padding: 10px 14px; font-size: 13px; cursor: pointer;">
+                    <option value="all">📚 Toutes les classes</option>
+                    <option value="3G1">Classe 3G1</option>
+                    <option value="3G2">Classe 3G2</option>
+                    <option value="3TT">Classe 3TT</option>
+                    <option value="unassigned">⚠️ Non assignés</option>
+                </select>
+            </div>
+            <div id="usersStatsBadge" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <!-- Badges d'effectif injectés dynamiquement -->
+            </div>
+        </div>
+
+        <!-- Tableau des Élèves -->
+        <div class="md-card mt-16 p-0" style="overflow-x: auto; border-radius: 12px;">
+            <table class="admin-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; text-align: left; font-size: 13px; color: #475569;">
+                        <th style="padding: 12px 16px;">Élève</th>
+                        <th style="padding: 12px 16px;">Email</th>
+                        <th style="padding: 12px 16px;">Classe assignée</th>
+                        <th style="padding: 12px 16px; text-align: center;">Copies soumises</th>
+                        <th style="padding: 12px 16px; text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <tr><td colspan="5" style="text-align: center; padding: 24px; color: #64748b;">Chargement des élèves...</td></tr>
+                </tbody>
+            </table>
         </div>
     </main>
 

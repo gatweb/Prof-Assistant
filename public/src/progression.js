@@ -24,6 +24,7 @@ class ProgressionManager {
         this.exportBtn = document.getElementById('exportCsvBtn');
         this.refreshBtn = document.getElementById('refreshProgressionBtn');
         this.courseSelect = document.getElementById('progressionCourseSelect');
+        this.classSelect = document.getElementById('progressionClassSelect');
         this.searchInput = document.getElementById('progressionSearchInput');
         this.statsSummary = document.getElementById('progressionStatsSummary');
         this.modal = document.getElementById('chapterModal');
@@ -43,6 +44,12 @@ class ProgressionManager {
         if (this.courseSelect) {
             this.courseSelect.addEventListener('change', () => {
                 this.processData();
+                this.renderMatrix();
+            });
+        }
+
+        if (this.classSelect) {
+            this.classSelect.addEventListener('change', () => {
                 this.renderMatrix();
             });
         }
@@ -96,6 +103,9 @@ class ProgressionManager {
                 if (targetId === 'progressionView') {
                     this.loadData();
                 }
+                if (targetId === 'usersView') {
+                    window.loadUsersManagement?.();
+                }
             });
         });
     }
@@ -104,15 +114,17 @@ class ProgressionManager {
         this.matrixContainer.innerHTML = '<div class="loader-placeholder">Chargement des données en cours...</div>';
         
         try {
-            const [exs, subs, examResultsSnap] = await Promise.all([
+            const [exs, subs, examResultsSnap, usersSnap] = await Promise.all([
                 getAllExercises(),
                 getAllSubmissions(),
-                getDocs(collection(db, "exam_results"))
+                getDocs(collection(db, "exam_results")),
+                getDocs(collection(db, "users"))
             ]);
 
             this.exercices = exs;
             this.submissions = subs;
             this.examResultsSnap = examResultsSnap;
+            this.usersSnap = usersSnap;
 
             this.processData();
             this.renderMatrix();
@@ -123,7 +135,7 @@ class ProgressionManager {
     }
 
     processData() {
-        const selectedCourse = this.courseSelect?.value || "all";
+        const selectedCourse = this.courseSelect?.value || "dactylo-3e";
 
         // Filtrer les exercices selon le cours choisi
         let filteredExercises = this.exercices;
@@ -137,7 +149,7 @@ class ProgressionManager {
                     return cId.includes("bureautique") || ch.includes("bureautique") || ch.includes("drive") || ch.includes("docs") || id.startsWith("bur-");
                 }
                 if (selectedCourse === "dactylo-3e") {
-                    return cId.includes("dactylo") || ch.includes("dactylo") || ch.includes("ligne de base") || ch.includes("ligne supérieure") || ch.includes("ligne inférieure") || id.startsWith("dac-");
+                    return cId.includes("dactylo") || ch.includes("dactylo") || ch.includes("ligne de base") || ch.includes("ligne supérieure") || ch.includes("ligne inférieure") || ch.includes("accents") || id.startsWith("dac-");
                 }
                 if (selectedCourse === "creation-site-web") {
                     return cId.includes("site-web") || cId.includes("html") || ch.includes("html") || ch.includes("css") || id.startsWith("uaa3-");
@@ -165,8 +177,7 @@ class ProgressionManager {
         if (this.examResultsSnap) {
             this.examResultsSnap.forEach(docSnap => {
                 const res = docSnap.data();
-                const email = res.email_eleve || "anonyme@test.com";
-                // Conserver le résultat le plus récent
+                const email = (res.email_eleve || "anonyme@test.com").toLowerCase().trim();
                 const existing = this.examResults[email];
                 if (!existing || new Date(res.date) > new Date(existing.date)) {
                     this.examResults[email] = res;
@@ -174,14 +185,27 @@ class ProgressionManager {
             });
         }
 
+        // 1.8 Mapper les classes depuis la collection users
+        const userClassMap = {};
+        if (this.usersSnap) {
+            this.usersSnap.forEach(docSnap => {
+                const data = docSnap.data();
+                const email = (data.email || docSnap.id).toLowerCase().trim();
+                if (data.classe || data.class) {
+                    userClassMap[email] = data.classe || data.class;
+                }
+            });
+        }
+
         // 2. Extraire la liste unique des élèves et mapper leurs soumissions
         const studentMap = {};
         this.submissions.forEach(sub => {
-            const email = sub.email_eleve || "anonyme@test.com";
+            const email = (sub.email_eleve || "anonyme@test.com").toLowerCase().trim();
             if (!studentMap[email]) {
                 studentMap[email] = {
                     email: email,
                     nom: sub.nom_eleve || email.split('@')[0],
+                    classe: userClassMap[email] || sub.classe || '',
                     submissions: {},
                     hasAwaiting: false
                 };
@@ -198,18 +222,35 @@ class ProgressionManager {
             }
         });
 
-        // Inclure également les élèves ayant uniquement passé l'examen
+        // Inclure également les élèves ayant uniquement passé l'examen ou enregistrés dans users
         Object.keys(this.examResults).forEach(email => {
             if (!studentMap[email]) {
                 const res = this.examResults[email];
                 studentMap[email] = {
                     email: email,
                     nom: res.nom_eleve || email.split('@')[0],
+                    classe: userClassMap[email] || '',
                     submissions: {},
                     hasAwaiting: false
                 };
             }
         });
+
+        if (this.usersSnap) {
+            this.usersSnap.forEach(docSnap => {
+                const data = docSnap.data();
+                const email = (data.email || docSnap.id).toLowerCase().trim();
+                if (email && email !== "gatweb@gmail.com" && !studentMap[email]) {
+                    studentMap[email] = {
+                        email: email,
+                        nom: data.nom || data.displayName || email.split('@')[0],
+                        classe: data.classe || data.class || '',
+                        submissions: {},
+                        hasAwaiting: false
+                    };
+                }
+            });
+        }
 
         this.students = Object.values(studentMap).sort((a,b) => a.nom.localeCompare(b.nom));
     }
@@ -231,12 +272,23 @@ class ProgressionManager {
     renderMatrix() {
         let displayStudents = this.students;
 
+        // Filtre par classe
+        const selectedClass = this.classSelect?.value || "all";
+        if (selectedClass !== "all") {
+            if (selectedClass === "unassigned") {
+                displayStudents = displayStudents.filter(s => !s.classe);
+            } else {
+                displayStudents = displayStudents.filter(s => s.classe === selectedClass);
+            }
+        }
+
         // Filtre par recherche élève ou classe
         const searchTerm = (this.searchInput?.value || "").toLowerCase().trim();
         if (searchTerm) {
             displayStudents = displayStudents.filter(s => 
                 s.nom.toLowerCase().includes(searchTerm) || 
-                s.email.toLowerCase().includes(searchTerm)
+                s.email.toLowerCase().includes(searchTerm) ||
+                (s.classe && s.classe.toLowerCase().includes(searchTerm))
             );
         }
 
@@ -334,10 +386,16 @@ class ProgressionManager {
             const tr = document.createElement('tr');
             tr.className = 'student-row';
 
-            // Nom de l'élève (Sticky)
+            // Nom de l'élève (Sticky) avec badge de classe
             const tdName = document.createElement('td');
             tdName.className = 'sticky-col';
-            tdName.innerHTML = `<strong>${student.nom}</strong><br><small>${student.email}</small>`;
+            tdName.innerHTML = `
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
+                    <strong>${student.nom}</strong>
+                    ${student.classe ? `<span class="class-badge-pill" style="background:#e2e8f0; color:#334155;">${student.classe}</span>` : ''}
+                </div>
+                <small style="color:#64748b; font-size:11px;">${student.email}</small>
+            `;
             tr.appendChild(tdName);
 
             // Calcul de la moyenne globale pour cet élève

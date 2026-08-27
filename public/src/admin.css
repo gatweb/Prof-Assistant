@@ -195,3 +195,138 @@ Detail View (Split Screen Administration)
 .btn-secondary.danger:hover {
     background-color: #ffdad6;
 }
+
+/* ========================================================
+   Course Accordions & Configuration Modules
+   ======================================================== */
+.course-accordion {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    background: #ffffff;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+}
+.course-accordion:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.course-accordion-header {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+}
+.course-accordion.open .course-accordion-header {
+    border-bottom-color: #e2e8f0;
+    background: #f1f5f9;
+}
+.course-accordion-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+}
+.course-accordion-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-toggle-all {
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: white;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.btn-toggle-all:hover {
+    background: #e2e8f0;
+}
+.course-accordion-body {
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+}
+.chapter-config-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    transition: background 0.15s ease;
+}
+.chapter-config-item:hover {
+    background: #f1f5f9;
+}
+.chapter-config-item label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #334155;
+    cursor: pointer;
+    width: 100%;
+}
+
+/* ========================================================
+   Users & Class Management Table
+   ======================================================== */
+.admin-table th {
+    padding: 14px 18px;
+    font-weight: 700;
+    font-size: 13px;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
+}
+.admin-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+    vertical-align: middle;
+}
+.admin-table tr:hover {
+    background: #f8fafc;
+}
+.class-badge-pill {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.class-select-dropdown {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    font-size: 13px;
+    font-weight: 600;
+    background: white;
+    cursor: pointer;
+}
+.btn-danger-icon {
+    background: #fee2e2;
+    color: #ef4444;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.btn-danger-icon:hover {
+    background: #fecaca;
+}

@@ -3,7 +3,7 @@ import { getSubmissionsToGrade, updateSubmissionStatus, generateMockSubmissions,
 import { functions } from './firebase/config.js';
 import { httpsCallable } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-functions.js";
 import { formatDate } from './utils.js';
-import { doc, onSnapshot, collection, addDoc, query, where, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { doc, onSnapshot, collection, addDoc, query, where, setDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 // ============================================
 // 1. Contrôle d'accès strict
@@ -549,82 +549,135 @@ async function initConfigTab() {
 
 async function renderChaptersConfig() {
     try {
-        // Récupérer tous les exercices pour extraire la liste unique des chapitres
         const exsSnap = await getDocs(collection(db, "exercices"));
-        const chaptersSet = new Set();
         
-        // Liste ordonnée de référence pour les chapitres standard
-        const orderedChapters = [
-            "HTML & CSS",
-            "CH1 — Introduction à JavaScript",
-            "CH2 — Variables, types et opérateurs",
-            "CH3 — Entrées / Sorties interactives",
-            "CH4 — Chaînes de caractères",
-            "CH5 — Conditions",
-            "CH6 — Boucles",
-            "CH7 — Structures combinées",
-            "CH8 — Fonctions prédéfinies",
-            "CH9 — Algorithmes",
-            "CH10 — Projets"
-        ];
+        // Définition des cours et de leur icône
+        const courseGroups = {
+            "dactylo-3e": { title: "Dactylographie & Clavier Pro (3e)", icon: "⌨️", chapters: [] },
+            "bureautique-3e": { title: "Bureautique & Google Workspace (3e)", icon: "📄", chapters: [] },
+            "creation-site-web": { title: "UAA3 — Création du Site Web HTML/CSS", icon: "🌐", chapters: [] },
+            "js-uaa5-classic": { title: "UAA5 : Algorithmique et Programmation", icon: "💛", chapters: [] },
+            "studio-creatif": { title: "Studio Créatif : Ton Agence d'Une Seule Personne", icon: "🎬", chapters: [] },
+            "rap-academy-workspace": { title: "Rap Star Academy : En route vers le succès", icon: "🎤", chapters: [] },
+            "autre": { title: "Autres Modules & Exercices", icon: "📁", chapters: [] }
+        };
+
+        const chaptersSet = new Set();
+        const chapterToCourse = {};
 
         exsSnap.forEach(docSnap => {
             const data = docSnap.data();
-            if (data.chapitre) {
-                chaptersSet.add(data.chapitre);
+            const ch = data.chapitre;
+            if (!ch) return;
+
+            chaptersSet.add(ch);
+
+            const cId = (data.course_id || "").toLowerCase();
+            const chLower = ch.toLowerCase();
+
+            if (cId.includes("dactylo") || chLower.includes("dactylo") || chLower.includes("ligne de base") || chLower.includes("ligne supérieure") || chLower.includes("ligne inférieure") || chLower.includes("accents") || chLower.includes("test final")) {
+                chapterToCourse[ch] = "dactylo-3e";
+            } else if (cId.includes("bureautique") || chLower.includes("bureautique") || chLower.includes("drive") || chLower.includes("docs") || chLower.includes("gmail") || chLower.includes("feuille")) {
+                chapterToCourse[ch] = "bureautique-3e";
+            } else if (cId.includes("site-web") || cId.includes("html") || chLower.includes("html") || chLower.includes("css") || chLower.includes("arborescence") || chLower.includes("flexbox") || chLower.includes("tableaux html")) {
+                chapterToCourse[ch] = "creation-site-web";
+            } else if (cId.includes("js") || cId.includes("uaa5") || chLower.includes("javascript") || chLower.includes("variables") || chLower.includes("boucle") || chLower.includes("fonction") || chLower.includes("algorithme")) {
+                chapterToCourse[ch] = "js-uaa5-classic";
+            } else if (cId.includes("studio") || chLower.includes("studio") || chLower.includes("département")) {
+                chapterToCourse[ch] = "studio-creatif";
+            } else if (cId.includes("rap") || chLower.includes("rap")) {
+                chapterToCourse[ch] = "rap-academy-workspace";
+            } else {
+                chapterToCourse[ch] = "autre";
             }
         });
 
-        // Convertir en tableau et trier selon orderedChapters ou alphabétiquement
-        const sortedChapters = Array.from(chaptersSet).sort((a, b) => {
-            const idxA = orderedChapters.indexOf(a);
-            const idxB = orderedChapters.indexOf(b);
-            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-            if (idxA !== -1) return -1;
-            if (idxB !== -1) return 1;
-            return a.localeCompare(b);
+        // Distribuer les chapitres uniques dans leurs groupes
+        Array.from(chaptersSet).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })).forEach(ch => {
+            const targetCourse = chapterToCourse[ch] || "autre";
+            courseGroups[targetCourse].chapters.push(ch);
         });
 
-        if (sortedChapters.length === 0) {
-            adminChaptersList.innerHTML = '<p class="config-desc">Aucun chapitre trouvé dans les exercices.</p>';
+        const activeGroups = Object.entries(courseGroups).filter(([_, group]) => group.chapters.length > 0);
+
+        if (activeGroups.length === 0) {
+            adminChaptersList.innerHTML = '<p class="config-desc">Aucun chapitre trouvé dans la base.</p>';
             return;
         }
 
-        adminChaptersList.innerHTML = sortedChapters.map(ch => {
-            const isDisabled = dbSettings.disabled_chapters.includes(ch);
-            // Si le chapitre n'est pas désactivé, il est "actif" donc coché
-            const isChecked = !isDisabled;
+        adminChaptersList.innerHTML = activeGroups.map(([groupId, group], index) => {
+            const activeCount = group.chapters.filter(ch => !dbSettings.disabled_chapters.includes(ch)).length;
+            const totalCount = group.chapters.length;
+            const isOpen = index === 0 ? 'open' : '';
 
             return `
-                <div class="chapter-config-item">
-                    <label class="checkbox-container">
-                        <input type="checkbox" data-chapter="${ch}" ${isChecked ? 'checked' : ''}>
-                        <span class="checkmark"></span>
-                        <span class="chapter-name-label">${ch}</span>
-                    </label>
+                <div class="course-accordion ${isOpen}" id="acc-${groupId}">
+                    <div class="course-accordion-header" onclick="this.parentElement.classList.toggle('open')">
+                        <div class="course-accordion-title">
+                            <span>${group.icon}</span>
+                            <span>${group.title}</span>
+                            <span class="badge" style="background:#e2e8f0; color:#334155; font-size:11px;">
+                                ${activeCount}/${totalCount} actif${activeCount > 1 ? 's' : ''}
+                            </span>
+                        </div>
+                        <div class="course-accordion-actions" onclick="event.stopPropagation()">
+                            <button type="button" class="btn-toggle-all" onclick="toggleCourseChapters('${groupId}', true)">✅ Tout activer</button>
+                            <button type="button" class="btn-toggle-all" onclick="toggleCourseChapters('${groupId}', false)">❌ Tout masquer</button>
+                            <span style="font-size:14px; margin-left:6px; color:#94a3b8;">▼</span>
+                        </div>
+                    </div>
+                    <div class="course-accordion-body">
+                        ${group.chapters.map(ch => {
+                            const isDisabled = dbSettings.disabled_chapters.includes(ch);
+                            const isChecked = !isDisabled;
+                            return `
+                                <div class="chapter-config-item">
+                                    <label>
+                                        <input type="checkbox" data-group="${groupId}" data-chapter="${ch}" ${isChecked ? 'checked' : ''} onchange="onChapterCheckboxChange(this)">
+                                        <span class="chapter-name-label">${ch}</span>
+                                    </label>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
                 </div>
             `;
         }).join('');
 
-        // Attacher les écouteurs sur les cases à cocher
-        adminChaptersList.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', async () => {
-                const chapterName = checkbox.getAttribute('data-chapter');
-                const isChecked = checkbox.checked;
+        // Exposer les handlers globalement pour les onclick inline
+        window.toggleCourseChapters = async (groupId, enable) => {
+            const group = courseGroups[groupId];
+            if (!group) return;
 
-                if (isChecked) {
-                    // Retirer de la liste des désactivés
-                    dbSettings.disabled_chapters = dbSettings.disabled_chapters.filter(ch => ch !== chapterName);
+            group.chapters.forEach(ch => {
+                if (enable) {
+                    dbSettings.disabled_chapters = dbSettings.disabled_chapters.filter(c => c !== ch);
                 } else {
-                    // Ajouter à la liste des désactivés
-                    if (!dbSettings.disabled_chapters.includes(chapterName)) {
-                        dbSettings.disabled_chapters.push(chapterName);
+                    if (!dbSettings.disabled_chapters.includes(ch)) {
+                        dbSettings.disabled_chapters.push(ch);
                     }
                 }
-
-                await setDoc(doc(db, "config", "settings"), dbSettings);
             });
-        });
+
+            await setDoc(doc(db, "config", "settings"), dbSettings);
+            renderChaptersConfig();
+        };
+
+        window.onChapterCheckboxChange = async (checkbox) => {
+            const chapterName = checkbox.getAttribute('data-chapter');
+            const isChecked = checkbox.checked;
+
+            if (isChecked) {
+                dbSettings.disabled_chapters = dbSettings.disabled_chapters.filter(ch => ch !== chapterName);
+            } else {
+                if (!dbSettings.disabled_chapters.includes(chapterName)) {
+                    dbSettings.disabled_chapters.push(chapterName);
+                }
+            }
+
+            await setDoc(doc(db, "config", "settings"), dbSettings);
+            renderChaptersConfig();
+        };
 
     } catch (e) {
         console.error("Erreur de rendu config chapitres :", e);
@@ -902,5 +955,213 @@ if (testGeminiModelsBtn) {
         }
     });
 }
+
+// ============================================
+// 11. GESTION DES ÉLÈVES & ATTRIBUTION DE CLASSES
+// ============================================
+let allLoadedStudents = [];
+
+const usersTableBody = document.getElementById('usersTableBody');
+const usersSearchInput = document.getElementById('usersSearchInput');
+const usersClassFilter = document.getElementById('usersClassFilter');
+const usersStatsBadge = document.getElementById('usersStatsBadge');
+const refreshUsersBtn = document.getElementById('refreshUsersBtn');
+
+async function loadUsersData() {
+    if (!usersTableBody) return;
+
+    usersTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:#64748b;">⏳ Chargement des élèves et des classes...</td></tr>';
+
+    try {
+        const [usersSnap, subsSnap] = await Promise.all([
+            getDocs(collection(db, "users")),
+            getDocs(collection(db, "submissions"))
+        ]);
+
+        const studentMap = {};
+
+        // 1. Charger les utilisateurs déjà enregistrés dans la collection "users"
+        usersSnap.forEach(docSnap => {
+            const data = docSnap.data();
+            const email = (data.email || docSnap.id).toLowerCase().trim();
+            if (email && email !== ADMIN_EMAIL.toLowerCase()) {
+                studentMap[email] = {
+                    id: docSnap.id,
+                    email: email,
+                    nom: data.nom || data.displayName || email.split('@')[0],
+                    classe: data.classe || data.class || '',
+                    submissionsCount: 0
+                };
+            }
+        });
+
+        // 2. Détecter les élèves depuis les soumissions pour ne perdre personne
+        subsSnap.forEach(docSnap => {
+            const sub = docSnap.data();
+            const email = (sub.email_eleve || '').toLowerCase().trim();
+            if (email && email !== ADMIN_EMAIL.toLowerCase()) {
+                if (!studentMap[email]) {
+                    studentMap[email] = {
+                        id: email,
+                        email: email,
+                        nom: sub.nom_eleve || email.split('@')[0],
+                        classe: sub.classe || '',
+                        submissionsCount: 0
+                    };
+                }
+                studentMap[email].submissionsCount++;
+                if (!studentMap[email].classe && sub.classe) {
+                    studentMap[email].classe = sub.classe;
+                }
+            }
+        });
+
+        allLoadedStudents = Object.values(studentMap).sort((a, b) => a.nom.localeCompare(b.nom));
+        renderUsersTable();
+
+    } catch (err) {
+        console.error('[Users Management] Erreur chargement :', err);
+        usersTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:red;">❌ Erreur lors du chargement des élèves.</td></tr>';
+    }
+}
+
+function renderUsersTable() {
+    if (!usersTableBody) return;
+
+    const searchTerm = (usersSearchInput?.value || "").toLowerCase().trim();
+    const classFilter = usersClassFilter?.value || "all";
+
+    // Statistiques par classe
+    const counts = { "3G1": 0, "3G2": 0, "3TT": 0, "unassigned": 0 };
+    allLoadedStudents.forEach(s => {
+        if (s.classe === "3G1") counts["3G1"]++;
+        else if (s.classe === "3G2") counts["3G2"]++;
+        else if (s.classe === "3TT") counts["3TT"]++;
+        else counts["unassigned"]++;
+    });
+
+    if (usersStatsBadge) {
+        usersStatsBadge.innerHTML = `
+            <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px;">Total: ${allLoadedStudents.length}</span>
+            <span class="badge" style="background:#dcfce7; color:#15803d; padding:4px 8px;">3G1: ${counts["3G1"]}</span>
+            <span class="badge" style="background:#fef3c7; color:#b45309; padding:4px 8px;">3G2: ${counts["3G2"]}</span>
+            <span class="badge" style="background:#f3e8ff; color:#7e22ce; padding:4px 8px;">3TT: ${counts["3TT"]}</span>
+            ${counts["unassigned"] > 0 ? `<span class="badge" style="background:#fee2e2; color:#b91c1c; padding:4px 8px;">Non assignés: ${counts["unassigned"]}</span>` : ''}
+        `;
+    }
+
+    // Filtrage
+    const filtered = allLoadedStudents.filter(s => {
+        const matchesSearch = s.nom.toLowerCase().includes(searchTerm) || s.email.toLowerCase().includes(searchTerm);
+        if (!matchesSearch) return false;
+
+        if (classFilter === "all") return true;
+        if (classFilter === "unassigned") return !s.classe;
+        return s.classe === classFilter;
+    });
+
+    if (filtered.length === 0) {
+        usersTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:#64748b;">Aucun élève ne correspond aux critères.</td></tr>';
+        return;
+    }
+
+    usersTableBody.innerHTML = filtered.map(s => {
+        const safeEmailKey = encodeURIComponent(s.email);
+        return `
+            <tr id="user-row-${safeEmailKey}">
+                <td>
+                    <div style="font-weight: 700; color: #0f172a;">${s.nom}</div>
+                </td>
+                <td style="color: #64748b; font-family: monospace; font-size: 13px;">
+                    ${s.email}
+                </td>
+                <td>
+                    <select class="class-select-dropdown" id="select-class-${safeEmailKey}" onchange="saveStudentClass('${s.email}', this.value)">
+                        <option value="" ${!s.classe ? 'selected' : ''}>-- Non assigné --</option>
+                        <option value="3G1" ${s.classe === '3G1' ? 'selected' : ''}>3G1</option>
+                        <option value="3G2" ${s.classe === '3G2' ? 'selected' : ''}>3G2</option>
+                        <option value="3TT" ${s.classe === '3TT' ? 'selected' : ''}>3TT</option>
+                        <option value="3GT" ${s.classe === '3GT' ? 'selected' : ''}>3GT</option>
+                    </select>
+                    <span id="save-status-${safeEmailKey}" style="font-size: 11px; margin-left: 6px; color: green;"></span>
+                </td>
+                <td style="text-align: center;">
+                    <span class="badge" style="background:#f1f5f9; color:#475569;">
+                        ${s.submissionsCount} copie${s.submissionsCount > 1 ? 's' : ''}
+                    </span>
+                </td>
+                <td style="text-align: right;">
+                    <button class="btn-danger-icon" title="Supprimer cet élève" onclick="deleteStudentProfile('${s.email}', '${s.nom}')">
+                        🗑️ Supprimer
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Fonction de sauvegarde de la classe
+window.saveStudentClass = async (email, newClass) => {
+    const safeEmailKey = encodeURIComponent(email);
+    const statusEl = document.getElementById(`save-status-${safeEmailKey}`);
+    if (statusEl) statusEl.textContent = "⏳...";
+
+    try {
+        // Enregistrer / Mettre à jour dans la collection "users"
+        await setDoc(doc(db, "users", email), {
+            email: email,
+            classe: newClass,
+            role: "eleve",
+            date_update: new Date().toISOString()
+        }, { merge: true });
+
+        // Mettre à jour l'objet en mémoire
+        const student = allLoadedStudents.find(s => s.email === email);
+        if (student) student.classe = newClass;
+
+        if (statusEl) {
+            statusEl.textContent = "✓ Enregistré";
+            setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 2000);
+        }
+
+    } catch (err) {
+        console.error("Erreur mise à jour classe :", err);
+        if (statusEl) statusEl.textContent = "❌ Erreur";
+    }
+};
+
+// Fonction de suppression de profil élève
+window.deleteStudentProfile = async (email, nom) => {
+    if (!confirm(`⚠️ Êtes-vous sûr de vouloir supprimer l'élève ${nom} (${email}) de la liste ?`)) {
+        return;
+    }
+
+    try {
+        // Supprimer de la collection users
+        await deleteDoc(doc(db, "users", email));
+
+        // Retirer de la mémoire locale
+        allLoadedStudents = allLoadedStudents.filter(s => s.email !== email);
+        renderUsersTable();
+
+    } catch (err) {
+        console.error("Erreur suppression élève :", err);
+        alert("Erreur lors de la suppression.");
+    }
+};
+
+// Écouteurs de recherche et filtres
+if (usersSearchInput) {
+    usersSearchInput.addEventListener('input', renderUsersTable);
+}
+if (usersClassFilter) {
+    usersClassFilter.addEventListener('change', renderUsersTable);
+}
+if (refreshUsersBtn) {
+    refreshUsersBtn.addEventListener('click', loadUsersData);
+}
+
+// Exposer globalement pour l'activation d'onglet
+window.loadUsersManagement = loadUsersData;
 
 
