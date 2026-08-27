@@ -23,11 +23,12 @@ class ProgressionManager {
         this.filterBtn = document.getElementById('filterToGradeBtn');
         this.exportBtn = document.getElementById('exportCsvBtn');
         this.refreshBtn = document.getElementById('refreshProgressionBtn');
+        this.courseSelect = document.getElementById('progressionCourseSelect');
+        this.searchInput = document.getElementById('progressionSearchInput');
+        this.statsSummary = document.getElementById('progressionStatsSummary');
         this.modal = document.getElementById('chapterModal');
         this.closeModalBtn = this.modal?.querySelector('.close-modal');
 
-        // Tabs logic handled globally in admin.js? 
-        // We'll manage it here for now if not present elsewhere.
         this.initTabs();
 
         if (this.filterBtn) {
@@ -35,6 +36,19 @@ class ProgressionManager {
                 this.isFilterActive = !this.isFilterActive;
                 this.filterBtn.classList.toggle('active', this.isFilterActive);
                 this.filterBtn.style.backgroundColor = this.isFilterActive ? 'var(--md-sys-color-primary-container)' : '';
+                this.renderMatrix();
+            });
+        }
+
+        if (this.courseSelect) {
+            this.courseSelect.addEventListener('change', () => {
+                this.processData();
+                this.renderMatrix();
+            });
+        }
+
+        if (this.searchInput) {
+            this.searchInput.addEventListener('input', () => {
                 this.renderMatrix();
             });
         }
@@ -109,9 +123,38 @@ class ProgressionManager {
     }
 
     processData() {
+        const selectedCourse = this.courseSelect?.value || "all";
+
+        // Filtrer les exercices selon le cours choisi
+        let filteredExercises = this.exercices;
+        if (selectedCourse !== "all") {
+            filteredExercises = this.exercices.filter(ex => {
+                const cId = (ex.course_id || "").toLowerCase();
+                const ch = (ex.chapitre || "").toLowerCase();
+                const id = (ex.id || "").toLowerCase();
+
+                if (selectedCourse === "bureautique-3e") {
+                    return cId.includes("bureautique") || ch.includes("bureautique") || ch.includes("drive") || ch.includes("docs") || id.startsWith("bur-");
+                }
+                if (selectedCourse === "dactylo-3e") {
+                    return cId.includes("dactylo") || ch.includes("dactylo") || ch.includes("ligne de base") || ch.includes("ligne supérieure") || ch.includes("ligne inférieure") || id.startsWith("dac-");
+                }
+                if (selectedCourse === "creation-site-web") {
+                    return cId.includes("site-web") || cId.includes("html") || ch.includes("html") || ch.includes("css") || id.startsWith("uaa3-");
+                }
+                if (selectedCourse === "js-uaa5-classic") {
+                    return cId.includes("js") || cId.includes("uaa5") || ch.includes("js") || ch.includes("boucle") || ch.includes("fonction") || id.startsWith("uaa5-");
+                }
+                if (selectedCourse === "studio-creatif") {
+                    return cId.includes("studio") || ch.includes("studio") || id.startsWith("studio-");
+                }
+                return cId === selectedCourse;
+            });
+        }
+
         // 1. Grouper les exercices par chapitre
         this.chapters = {};
-        this.exercices.forEach(ex => {
+        filteredExercises.forEach(ex => {
             const ch = ex.chapitre || "Général";
             if (!this.chapters[ch]) this.chapters[ch] = [];
             this.chapters[ch].push(ex);
@@ -144,7 +187,7 @@ class ProgressionManager {
                 };
             }
             
-            // On garde la soumission la plus récente pour cet exercice (ou on priorise les statuts validés?)
+            // On garde la soumission la plus récente pour cet exercice
             const exId = sub.exercice_id || sub.id_exercice;
             if (exId) {
                 const existing = studentMap[email].submissions[exId];
@@ -187,12 +230,50 @@ class ProgressionManager {
 
     renderMatrix() {
         let displayStudents = this.students;
-        if (this.isFilterActive) {
-            displayStudents = this.students.filter(s => s.hasAwaiting);
+
+        // Filtre par recherche élève ou classe
+        const searchTerm = (this.searchInput?.value || "").toLowerCase().trim();
+        if (searchTerm) {
+            displayStudents = displayStudents.filter(s => 
+                s.nom.toLowerCase().includes(searchTerm) || 
+                s.email.toLowerCase().includes(searchTerm)
+            );
         }
 
-        if (this.exercices.length === 0) {
-            this.matrixContainer.innerHTML = '<div class="loader-placeholder">Aucun exercice créé pour le moment.</div>';
+        // Filtre des copies en attente
+        if (this.isFilterActive) {
+            displayStudents = displayStudents.filter(s => s.hasAwaiting);
+        }
+
+        // Calcul des statistiques globales pour le bandeau
+        let totalValidatedScores = 0;
+        let countValidated = 0;
+        let awaitingCount = 0;
+
+        displayStudents.forEach(s => {
+            if (s.hasAwaiting) awaitingCount++;
+            Object.values(s.submissions).forEach(sub => {
+                if (sub.status === 'valide' && sub.note_suggeree !== undefined) {
+                    totalValidatedScores += Number(sub.note_suggeree);
+                    countValidated++;
+                }
+            });
+        });
+
+        const overallAvg = countValidated > 0 ? Math.round(totalValidatedScores / countValidated) : "--";
+
+        if (this.statsSummary) {
+            this.statsSummary.innerHTML = `
+                <span class="badge" style="background:#e0f2fe;color:#0369a1;font-size:12px;padding:4px 10px;">👥 ${displayStudents.length} Élève${displayStudents.length > 1 ? 's' : ''}</span>
+                <span class="badge" style="background:#dcfce7;color:#15803d;font-size:12px;padding:4px 10px;">📊 Moyenne : ${overallAvg}${overallAvg !== '--' ? '%' : ''}</span>
+                <span class="badge" style="background:#fef3c7;color:#b45309;font-size:12px;padding:4px 10px;">⏳ ${awaitingCount} en attente</span>
+            `;
+        }
+
+        const totalExercises = Object.values(this.chapters).reduce((acc, curr) => acc + curr.length, 0);
+
+        if (totalExercises === 0) {
+            this.matrixContainer.innerHTML = '<div class="loader-placeholder">Aucun exercice pour ce cours dans la base de données.</div>';
             return;
         }
 

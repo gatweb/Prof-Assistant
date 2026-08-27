@@ -42,64 +42,159 @@ if(logoutBtn) {
 }
 
 // ============================================
-// 2. Gestion de la Vue Liste
+// 2. Gestion de la Vue Liste & Filtres Multi-Classes
 // ============================================
 const listView = document.getElementById('listView');
 const detailView = document.getElementById('detailView');
 const tbody = document.getElementById('submissionsTableBody');
+const filterStudentSearch = document.getElementById('filterStudentSearch');
+const filterCourseSelect = document.getElementById('filterCourseSelect');
+const filterStatusSelect = document.getElementById('filterStatusSelect');
+const refreshSubmissionsBtn = document.getElementById('refreshSubmissionsBtn');
 
-let currentCopies = [];
+let allLoadedCopies = [];
 let currentViewingCopyId = null;
+
+// Helper métadonnées des cours
+function getCourseMeta(courseId, exerciseTitle = "") {
+    const id = (courseId || "").toLowerCase();
+    const title = (exerciseTitle || "").toLowerCase();
+
+    if (id.includes("bureautique") || title.includes("drive") || title.includes("docs") || title.includes("styles") || title.includes("sommaire")) {
+        return { label: "Bureautique 3e", color: "#1d4ed8", bg: "#dbeafe", icon: "📄" };
+    }
+    if (id.includes("dactylo") || id.startsWith("dac-") || title.includes("dactylographie") || title.includes("ligne de base") || title.includes("agilefingers")) {
+        return { label: "Dactylo 3e", color: "#047857", bg: "#d1fae5", icon: "⌨️" };
+    }
+    if (id.includes("site-web") || id.includes("html") || id.includes("css") || title.includes("html") || title.includes("css")) {
+        return { label: "Web HTML/CSS", color: "#c2410c", bg: "#ffedd5", icon: "🌐" };
+    }
+    if (id.includes("js") || id.includes("uaa5") || title.includes("boucle") || title.includes("fonction") || title.includes("dom")) {
+        return { label: "JS UAA5", color: "#a16207", bg: "#fef9c3", icon: "💛" };
+    }
+    if (id.includes("studio") || title.includes("canva") || title.includes("suno") || title.includes("prompt")) {
+        return { label: "Studio Créatif", color: "#7e22ce", bg: "#f3e8ff", icon: "🎬" };
+    }
+    return { label: courseId || "Général", color: "#475569", bg: "#f1f5f9", icon: "📚" };
+}
+
+function getStatusBadge(status, note) {
+    if (status === "valide") {
+        return `<span class="badge" style="background:#dcfce7;color:#15803d;font-size:11px;">✅ Validé (${note ?? 100}/100)</span>`;
+    }
+    if (status === "a_corriger") {
+        return `<span class="badge" style="background:#fee2e2;color:#b91c1c;font-size:11px;">🔄 À réviser</span>`;
+    }
+    return `<span class="badge" style="background:#fef3c7;color:#b45309;font-size:11px;">⏳ En attente</span>`;
+}
+
+function renderSubmissionsTable() {
+    if (!tbody) return;
+
+    const searchTerm = (filterStudentSearch?.value || "").toLowerCase().trim();
+    const selectedCourse = filterCourseSelect?.value || "all";
+    const selectedStatus = filterStatusSelect?.value || "a_valider";
+
+    let filtered = allLoadedCopies.filter(copy => {
+        // Filtre Statut
+        if (selectedStatus !== "all") {
+            if (selectedStatus === "a_valider" && copy.status !== "a_valider") return false;
+            if (selectedStatus === "valide" && copy.status !== "valide") return false;
+            if (selectedStatus === "a_corriger" && copy.status !== "a_corriger") return false;
+        }
+
+        // Filtre Cours
+        if (selectedCourse !== "all") {
+            const cId = (copy.course_id || "").toLowerCase();
+            const exTitle = (copy.titre_exercice || "").toLowerCase();
+            const meta = getCourseMeta(cId, exTitle);
+            
+            if (selectedCourse === "bureautique-3e" && meta.label !== "Bureautique 3e") return false;
+            if (selectedCourse === "dactylo-3e" && meta.label !== "Dactylo 3e") return false;
+            if (selectedCourse === "creation-site-web" && meta.label !== "Web HTML/CSS") return false;
+            if (selectedCourse === "js-uaa5-classic" && meta.label !== "JS UAA5") return false;
+            if (selectedCourse === "studio-creatif" && meta.label !== "Studio Créatif") return false;
+        }
+
+        // Filtre Recherche (Nom élève, email, ou classe)
+        if (searchTerm) {
+            const nom = (copy.nom_eleve || "").toLowerCase();
+            const email = (copy.email_eleve || "").toLowerCase();
+            const titre = (copy.titre_exercice || "").toLowerCase();
+            const matches = nom.includes(searchTerm) || email.includes(searchTerm) || titre.includes(searchTerm);
+            if (!matches) return false;
+        }
+
+        return true;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-16" style="color: #64748b;">Aucune copie ne correspond aux filtres sélectionnés.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = '';
+    // Tri par date de soumission (plus récent en haut)
+    const sorted = [...filtered].sort((a,b) => new Date(b.date_soumission || 0) - new Date(a.date_soumission || 0));
+    
+    sorted.forEach(copy => {
+        const tr = document.createElement('tr');
+        const dateStr = formatDate(copy.date_soumission);
+        const meta = getCourseMeta(copy.course_id, copy.titre_exercice);
+        const statusBadge = getStatusBadge(copy.status, copy.note_suggeree);
+
+        tr.innerHTML = `
+            <td>
+                <strong>${copy.nom_eleve || "Anonyme"}</strong>
+                ${copy.email_eleve ? `<div style="font-size:11px;color:#64748b;">${copy.email_eleve}</div>` : ''}
+            </td>
+            <td>
+                <span class="badge" style="background:${meta.bg};color:${meta.color};font-size:11px;padding:3px 8px;border-radius:6px;vertical-align:middle;margin-left:0;">
+                    ${meta.icon} ${meta.label}
+                </span>
+            </td>
+            <td>${copy.titre_exercice || "-"}</td>
+            <td>${statusBadge}</td>
+            <td style="font-size:12px;color:#64748b;">${dateStr}</td>
+            <td><button class="btn-primary btn-sm" onclick="window.openDetailView('${copy.id}')">Évaluer</button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
 
 async function loadSubmissionsList() {
     try {
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-16">Chargement des copies...</td></tr>';
+        if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center py-16">Chargement des copies...</td></tr>';
         
-        // Branchement temps réel (onSnapshot) pour voir les copies arriver en direct
-        const q = query(collection(db, "submissions"), where("status", "==", "a_valider"));
+        // Écoute temps réel de toutes les soumissions récentes
+        const q = collection(db, "submissions");
         
         onSnapshot(q, (snapshot) => {
-            currentCopies = [];
+            allLoadedCopies = [];
             snapshot.forEach((doc) => {
-                currentCopies.push({ id: doc.id, ...doc.data() });
+                allLoadedCopies.push({ id: doc.id, ...doc.data() });
             });
 
-            if (currentCopies.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-16">🎉 Aucune copie en attente !</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = '';
-            // Tri par date de soumission (plus récent en haut)
-            const sortedCopies = [...currentCopies].sort((a,b) => new Date(b.date_soumission) - new Date(a.date_soumission));
-            
-            sortedCopies.forEach(copy => {
-                const tr = document.createElement('tr');
-                
-                const dateStr = formatDate(copy.date_soumission);
-
-                tr.innerHTML = `
-                    <td><strong>${copy.nom_eleve || "Anonyme"}</strong></td>
-                    <td>${copy.titre_exercice || "-"}</td>
-                    <td>${dateStr}</td>
-                    <td><button class="btn-primary btn-sm" onclick="window.openDetailView('${copy.id}')">Ouvrir</button></td>
-                `;
-                tbody.appendChild(tr);
-            });
+            renderSubmissionsTable();
         });
     } catch (e) {
         console.error("ERREUR FIRESTORE DETAIL :", e);
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-16" style="color:#ba1a1a">❌ Erreur de connexion Firestore (${e.message || e}).</td></tr>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="text-center py-16" style="color:#ba1a1a">❌ Erreur de connexion Firestore (${e.message || e}).</td></tr>`;
     }
 }
 
-// Fonction globale injectée pour le onclick HTML
+// Événements sur la barre de filtres
+if (filterStudentSearch) filterStudentSearch.addEventListener('input', renderSubmissionsTable);
+if (filterCourseSelect) filterCourseSelect.addEventListener('change', renderSubmissionsTable);
+if (filterStatusSelect) filterStatusSelect.addEventListener('change', renderSubmissionsTable);
+if (refreshSubmissionsBtn) refreshSubmissionsBtn.addEventListener('click', renderSubmissionsTable);
+
 // Variable globale pour suivre d'où on vient avant d'ouvrir le détail
 window.lastViewBeforeDetail = 'listView';
 
 // Fonction globale injectée pour le onclick HTML
 window.openDetailView = (id) => {
-    const copy = currentCopies.find(c => c.id === id);
+    const copy = allLoadedCopies.find(c => c.id === id);
     if (!copy) return;
     
     window.lastViewBeforeDetail = 'listView';
@@ -123,6 +218,9 @@ window.openDetailViewFromCopy = (copy) => {
     document.getElementById('detailExerciseName').textContent = copy.titre_exercice || "Exercice Inconnu";
     document.getElementById('feedbackIaInput').value = copy.feedback_ia || "";
     document.getElementById('scoreInput').value = copy.note_suggeree || 0;
+    if (document.getElementById('profMessageInput')) {
+        document.getElementById('profMessageInput').value = copy.prof_message || "";
+    }
     
     // Masquer les onglets pendant la correction pour maximiser l'espace
     const tabs = document.querySelector('.admin-tabs-container');
@@ -154,12 +252,56 @@ window.openDetailViewFromCopy = (copy) => {
     document.getElementById('statPageExits').textContent = auto.sorties_page || 0;
     document.getElementById('statTimeOutside').textContent = auto.temps_hors_focus_sec !== undefined ? `${auto.temps_hors_focus_sec}s` : '0s';
     
-    // Injection du code dans Monaco
-    const codeData = copy.code_eleve || "// Aucun code n'a été fourni";
-    if (monacoEditorInstance) {
-        monacoEditorInstance.setValue(codeData);
+    // Détection du mode : Code vs Bureautique / Outils Externes
+    const codeData = copy.code_eleve || "";
+    const editorContainer = document.getElementById('editor-container');
+    const officeContainer = document.getElementById('office-preview-container');
+
+    const isOffice = copy.type === 'office_submission' || copy.type === 'office' || codeData.includes('http') || codeData.includes('[Lien Document]');
+
+    if (isOffice && officeContainer) {
+        if (editorContainer) editorContainer.classList.add('hidden');
+        officeContainer.classList.remove('hidden');
+
+        // Extraire l'URL si présente
+        const urlMatch = codeData.match(/https?:\/\/[^\s\n]+/);
+        const url = urlMatch ? urlMatch[0] : null;
+
+        officeContainer.innerHTML = `
+            <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:24px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <span style="font-size:32px;">📄</span>
+                    <div>
+                        <h3 style="margin:0;color:#38bdf8;font-size:18px;">Travail Bureautique / Dactylographie</h3>
+                        <p style="margin:4px 0 0;color:#94a3b8;font-size:13px;">Document ou score soumis par l'élève</p>
+                    </div>
+                </div>
+
+                ${url ? `
+                <div style="margin-top:20px;padding:16px;background:#0f172a;border-radius:8px;border:1px solid #3b82f6;">
+                    <div style="color:#93c5fd;font-size:12px;font-weight:600;text-transform:uppercase;">🔗 Lien vers le document de l'élève :</div>
+                    <a href="${url}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;color:#38bdf8;font-size:15px;font-weight:bold;text-decoration:none;word-break:break-all;">
+                        ${url} ↗
+                    </a>
+                </div>
+                ` : ''}
+
+                <div style="margin-top:20px;">
+                    <div style="color:#94a3b8;font-size:12px;font-weight:600;text-transform:uppercase;margin-bottom:8px;">📝 Contenu transmis :</div>
+                    <pre style="background:#0f172a;padding:16px;border-radius:8px;color:#e2e8f0;font-family:inherit;font-size:13px;white-space:pre-wrap;line-height:1.5;">${codeData || "Aucun texte additionnel."}</pre>
+                </div>
+            </div>
+        `;
     } else {
-        pendingCodeToSet = codeData;
+        if (officeContainer) officeContainer.classList.add('hidden');
+        if (editorContainer) editorContainer.classList.remove('hidden');
+
+        // Injection du code dans Monaco
+        if (monacoEditorInstance) {
+            monacoEditorInstance.setValue(codeData || "// Aucun code n'a été fourni");
+        } else {
+            pendingCodeToSet = codeData || "// Aucun code n'a été fourni";
+        }
     }
 };
 
@@ -519,31 +661,39 @@ if (triggerImportBtn && importExercisesInput) {
                 importStatus.textContent = `Importation de ${exercises.length} exercice(s)...`;
                 
                 for (const ex of exercises) {
-                    if (!ex.title || !ex.course_id) {
-                        throw new Error("Chaque exercice doit posséder un 'title' et un 'course_id'.");
+                    const titre = ex.titre || ex.title;
+                    const courseId = ex.course_id || ex.courseId || "bureautique-3e";
+
+                    if (!titre) {
+                        throw new Error("Chaque exercice doit posséder un 'titre' (ou 'title').");
                     }
 
+                    const docId = ex.id || `ex-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+
                     const newDoc = {
-                        titre: ex.title,
-                        course_id: ex.course_id,
-                        chapitre_id: ex.chapter_id || "",
-                        chapitre: ex.chapter_name || "Général",
-                        type: ex.type || "code",
-                        enonce_md: ex.enonce_md || "Réponds aux questions ci-dessous.",
-                        theorie_md: ex.theorie_md || "",
-                        is_hidden: false,
-                        statut_aide: true
+                        titre: titre,
+                        course_id: courseId,
+                        chapitre_id: ex.chapitre_id || ex.chapter_id || "",
+                        chapitre: ex.chapitre || ex.chapter_name || "Général",
+                        type: ex.type || "office",
+                        enonce_md: ex.enonce_md || ex.enonce || "Consignes de l'exercice...",
+                        theorie_md: ex.theorie_md || ex.theorie || "",
+                        is_hidden: ex.is_hidden || false,
+                        statut_aide: ex.statut_aide !== undefined ? ex.statut_aide : true
                     };
                     
                     if (ex.questions) newDoc.questions = ex.questions;
                     if (ex.indices) newDoc.indices = ex.indices;
+                    if (ex.external_tools) newDoc.external_tools = ex.external_tools;
+                    if (ex.submission_type) newDoc.submission_type = ex.submission_type;
+                    if (ex.code_depart) newDoc.code_depart = ex.code_depart;
 
-                    await addDoc(collection(db, "exercices"), newDoc);
+                    await setDoc(doc(db, "exercices", docId), newDoc, { merge: true });
                 }
 
-                importStatus.textContent = "✅ Importation réussie !";
+                importStatus.textContent = `✅ ${exercises.length} exercice(s) importé(s) avec succès !`;
                 importStatus.style.color = "green";
-                alert("✅ Les exercices ont été importés dans la base de données Firestore !");
+                alert(`✅ ${exercises.length} exercices/quizz ont été importés dans la base de données Firestore !`);
                 
                 if (typeof renderChaptersConfig === 'function') {
                     renderChaptersConfig();

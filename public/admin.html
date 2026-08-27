@@ -35,7 +35,10 @@
     <!-- Vue principale 1 : Le flux des copies à traiter -->
     <main id="listView" class="admin-container">
         <div class="header-actions">
-            <h2>Copies en attente de validation</h2>
+            <div>
+                <h2>📥 Flux des Copies & Évaluations</h2>
+                <p class="subtitle">Gérez et validez les devoirs de vos différentes classes</p>
+            </div>
             <!-- Boutons de DEV -->
             <div style="display:flex;gap:8px;">
                 <button id="generateMockBtn" class="btn-secondary mock-btn">🧪 Générer copies</button>
@@ -43,26 +46,54 @@
             </div>
         </div>
 
+        <!-- Barre de Filtres Multi-Classes & Multi-Cours -->
+        <div class="md-card mt-16 p-16" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: #ffffff; border-radius: 12px;">
+            <div style="flex: 2; min-width: 220px;">
+                <input type="text" id="filterStudentSearch" class="md-input" placeholder="🔍 Rechercher un élève ou une classe (ex: 3G1, Lucas)..." style="padding: 10px 14px; font-size: 13px;">
+            </div>
+            <div style="flex: 1.5; min-width: 180px;">
+                <select id="filterCourseSelect" class="md-input" style="padding: 10px 14px; font-size: 13px; cursor: pointer;">
+                    <option value="all">📚 Tous les cours</option>
+                    <option value="bureautique-3e">📄 Bureautique & Google Workspace (3e)</option>
+                    <option value="dactylo-3e">⌨️ Dactylographie (3e)</option>
+                    <option value="creation-site-web">🌐 Création Web HTML/CSS</option>
+                    <option value="js-uaa5-classic">💛 Algorithmique JS</option>
+                    <option value="studio-creatif">🎬 Studio Créatif</option>
+                </select>
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+                <select id="filterStatusSelect" class="md-input" style="padding: 10px 14px; font-size: 13px; cursor: pointer;">
+                    <option value="a_valider" selected>⏳ En attente de validation</option>
+                    <option value="valide">✅ Validées</option>
+                    <option value="a_corriger">🔄 Corrections demandées</option>
+                    <option value="all">📑 Toutes les copies</option>
+                </select>
+            </div>
+            <button id="refreshSubmissionsBtn" class="btn-secondary" style="padding: 10px 16px; font-size: 13px;">🔄 Rafraîchir</button>
+        </div>
+
         <!-- Widget : Météo de la classe (Insights) -->
-        <div class="md-card mt-24" style="background-color: var(--md-sys-color-primary-container);">
-            <h3 style="margin-top:0; color: var(--md-sys-color-on-primary-container);">🌥️ Météo de la Classe (Top Difficultés)</h3>
-            <div id="insightsContainer" style="display:flex; gap:12px; flex-wrap:wrap; margin-top:16px;">
+        <div class="md-card mt-16" style="background-color: var(--md-sys-color-primary-container);">
+            <h3 style="margin-top:0; color: var(--md-sys-color-on-primary-container); font-size: 15px;">🌥️ Météo de la Classe (Top Difficultés)</h3>
+            <div id="insightsContainer" style="display:flex; gap:12px; flex-wrap:wrap; margin-top:10px;">
                 <span class="badge" style="background-color: rgba(0,0,0,0.1); color: inherit;">Chargement des statistiques...</span>
             </div>
         </div>
         
-        <div class="md-card mt-24 p-0">
+        <div class="md-card mt-16 p-0">
             <table class="md-table">
                 <thead>
                     <tr>
-                        <th>Nom de l'élève</th>
-                        <th>Titre de l'exercice</th>
-                        <th>Date de Soumission</th>
+                        <th>Élève</th>
+                        <th>Cours</th>
+                        <th>Titre de l'exercice / Module</th>
+                        <th>Statut / Note</th>
+                        <th>Date</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="submissionsTableBody">
-                    <tr><td colspan="4" class="text-center py-16">Chargement sécurisé des bases...</td></tr>
+                    <tr><td colspan="6" class="text-center py-16">Chargement sécurisé des bases...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -72,8 +103,8 @@
     <main id="progressionView" class="admin-container hidden">
         <div class="header-actions">
             <div>
-                <h2>Suivi Global de la Classe</h2>
-                <p class="subtitle">Vue matricielle des exercices par élève</p>
+                <h2>📊 Suivi Global des Classes & Progression</h2>
+                <p class="subtitle">Vue matricielle par cours et suivi individualisé des élèves</p>
             </div>
             <div class="filter-actions">
                 <button id="filterToGradeBtn" class="btn-secondary">🔍 Copies à corriger</button>
@@ -82,8 +113,28 @@
             </div>
         </div>
 
+        <!-- Filtres Progression (Cours + Recherche Élève/Classe) -->
+        <div class="md-card mt-16 p-16" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: #ffffff; border-radius: 12px;">
+            <div style="flex: 1.5; min-width: 200px;">
+                <select id="progressionCourseSelect" class="md-input" style="padding: 10px 14px; font-size: 13px; cursor: pointer;">
+                    <option value="all">📚 Tous les cours (Vue complète)</option>
+                    <option value="bureautique-3e">📄 Bureautique & Google Workspace (3e)</option>
+                    <option value="dactylo-3e">⌨️ Dactylographie (3e)</option>
+                    <option value="creation-site-web">🌐 Création Web HTML/CSS</option>
+                    <option value="js-uaa5-classic">💛 Algorithmique JS</option>
+                    <option value="studio-creatif">🎬 Studio Créatif</option>
+                </select>
+            </div>
+            <div style="flex: 2; min-width: 220px;">
+                <input type="text" id="progressionSearchInput" class="md-input" placeholder="🔍 Filtrer par élève ou classe (ex: 3G1, Lucas)..." style="padding: 10px 14px; font-size: 13px;">
+            </div>
+            <div id="progressionStatsSummary" style="display: flex; gap: 8px; align-items: center;">
+                <!-- Statistiques dynamiques (Nombre d'élèves, complétion) -->
+            </div>
+        </div>
+
         <!-- Matrix Container -->
-        <div class="progression-matrix-wrapper mt-24">
+        <div class="progression-matrix-wrapper mt-16">
             <div id="progressionMatrix" class="matrix-scroll-container">
                 <!-- La grille sera générée ici -->
                 <div class="loader-placeholder">Initialisation de la matrice...</div>
@@ -269,8 +320,11 @@
                 <button id="backToListBtn" class="btn-text">← Revenir au tableau de bord</button>
                 <h3 id="detailStudentName" class="ml-16">Nom de l'élève</h3>
             </div>
-            <!-- L'éditeur prendra tout l'espace restant ici -->
+            <!-- Zone Code (Monaco) ou Zone Document Bureautique (Preview) -->
             <div id="editor-container" class="admin-editor-wrapper"></div>
+            <div id="office-preview-container" class="admin-editor-wrapper hidden" style="background: #0f172a; padding: 24px; overflow-y: auto; color: #f8fafc;">
+                <!-- Aperçu dynamique pour Bureautique / Dactylo / Liens Docs -->
+            </div>
         </section>
 
         <!-- Panel Droit : Formulaire de l'IA modifiable -->
