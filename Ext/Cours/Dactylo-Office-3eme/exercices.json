@@ -164,5 +164,114 @@
         "successMessage": "✅ Exact ! Contrairement à l'anglais, le français met une espace avant les signes de ponctuation doubles (: ; ! ?)."
       }
     ]
+  },
+  {
+    "id": "dac-ch5-exercice",
+    "titre": "Phrases avec ponctuation typographique",
+    "chapitre": "Module 5 : Typographie avancée (espaces, guillemets, tirets)",
+    "course_id": "dactylo-3e",
+    "type": "office",
+    "enonce_md": "Recopie dans un Google Doc 3 phrases contenant chacune : une question, une exclamation, et une citation entre guillemets français « ». Respecte les espaces insécables. Dépose le lien du document.",
+    "theorie_md": "Rappel : espace insécable avant `: ; ! ?`, aucune espace avant `, .`, espace insécable à l'intérieur des guillemets français.",
+    "external_tools": [
+      { "name": "Google Docs", "url": "https://docs.google.com" }
+    ],
+    "submission_type": "url"
+  },
+  {
+    "id": "dac-ch5-quizz",
+    "titre": "Quiz : Typographie Avancée",
+    "chapitre": "Module 5 : Typographie avancée (espaces, guillemets, tirets)",
+    "course_id": "dactylo-3e",
+    "type": "quizz",
+    "questions": [
+      {
+        "question": "Quel type de guillemets utilise-t-on en typographie française ?",
+        "options": ["Les guillemets droits \" \"", "Les guillemets français « »", "Les deux indifféremment", "Aucun, on utilise des parenthèses"],
+        "correctAnswer": 1,
+        "successMessage": "✅ Exact ! Les guillemets français « » sont la norme en français, avec une espace insécable à l'intérieur."
+      },
+      {
+        "question": "À quoi sert une espace insécable ?",
+        "options": ["À aller plus vite en tapant", "À empêcher qu'un signe se retrouve seul en début de ligne", "À remplacer la barre d'espace normale", "Elle ne sert à rien en français"],
+        "correctAnswer": 1,
+        "successMessage": "✅ Correct ! Elle garde le signe collé au mot précédent même si la ligne doit se couper."
+      }
+    ]
+  },
+  {
+    "id": "dac-ch6-entrainement",
+    "titre": "Séance d'entraînement — Chiffres",
+    "chapitre": "Module 6 : Chiffres et accents directs (é è à ç ù)",
+    "course_id": "dactylo-3e",
+    "type": "office",
+    "enonce_md": "Réalise 3 sessions d'entraînement sur AgileFingers avec des chiffres et des mots accentués (é, è, à, ç). Dépose ton meilleur score.\n\n**Objectif minimum : 20 mots/minute, 90% de précision.**",
+    "theorie_md": "Rappel : sur AZERTY belge, les chiffres nécessitent Shift. Sans Shift, la même rangée donne é, è, à, ç — des caractères très fréquents en français.",
+    "external_tools": [
+      { "name": "AgileFingers", "url": "https://agilefingers.com/fr" }
+    ],
+    "submission_type": "text"
+  },
+  {
+    "id": "dac-ch6-quizz",
+    "titre": "Quiz : Chiffres et Accents Directs",
+    "chapitre": "Module 6 : Chiffres et accents directs (é è à ç ù)",
+    "course_id": "dactylo-3e",
+    "type": "quizz",
+    "questions": [
+      {
+        "question": "Comment obtient-on le chiffre 7 sur un clavier AZERTY belge ?",
+        "options": ["Directement, sans Shift", "Avec Shift", "Avec Alt", "Ce n'est pas possible"],
+        "correctAnswer": 1,
+        "successMessage": "✅ Exact ! Contrairement au QWERTY anglophone, les chiffres demandent Shift sur AZERTY belge."
+      },
+      {
+        "question": "Que tape-t-on si on appuie sur la touche du 7 SANS Shift ?",
+        "options": ["Rien", "è", "7 quand même", "Un symbole aléatoire"],
+        "correctAnswer": 1,
+        "successMessage": "✅ Bravo ! Sans Shift, cette touche donne è — un des caractères les plus utilisés en français."
+      }
+    ]
+  },
+  {
+    "id": "dac-ch7-exercice",
+    "titre": "Mots avec accents composés",
+    "chapitre": "Module 7 : Accents composés (touches mortes ^ et ¨)",
+    "course_id": "dactylo-3e",
+    "type": "office",
+    "enonce_md": "Tape une liste de 10 mots contenant chacun un accent circonflexe ou un tréma (ex : forêt, île, Noël, août, naïve). Dépose ta liste.",
+    "theorie_md": "Rappel : une touche morte ne s'affiche pas seule. `^` (sans Shift) + voyelle = accent circonflexe. `¨` (avec Shift) + voyelle = tréma.",
+    "external_tools": [
+      { "name": "Google Docs", "url": "https://docs.google.com" }
+    ],
+    "submission_type": "both"
+  },
+  {
+    "id": "dac-ch7-quizz",
+    "titre": "Quiz : Accents Composés",
+    "chapitre": "Module 7 : Accents composés (touches mortes ^ et ¨)",
+    "course_id": "dactylo-3e",
+    "type": "quizz",
+    "questions": [
+      {
+        "question": "Que se passe-t-il si tu appuies sur la touche morte `^` puis sur `a` ?",
+        "options": ["Rien ne s'affiche", "Ça affiche â", "Ça affiche ^ puis a séparément", "Ça bloque le clavier"],
+        "correctAnswer": 1,
+        "successMessage": "✅ Exact ! La touche morte se combine avec la voyelle suivante pour former â."
+      }
+    ]
+  },
+  {
+    "id": "dac-ch8-evaluation",
+    "titre": "Test final chronométré",
+    "chapitre": "Module 8 : Test final chronométré",
+    "course_id": "dactylo-3e",
+    "type": "office",
+    "enonce_md": "Réalise le test final AgileFingers (3 minutes, texte complet). Dépose ton résultat (mots/minute + précision).\n\n**Barème : ≥25 mpm et ≥95% = Excellent | ≥20 mpm et ≥90% = Acquis | En dessous = à retravailler.**",
+    "theorie_md": "Ce test synthétise tous les modules : lettres, majuscules, ponctuation, chiffres et accents.",
+    "external_tools": [
+      { "name": "AgileFingers", "url": "https://agilefingers.com/fr" }
+    ],
+    "submission_type": "text"
   }
 ]

@@ -28,6 +28,26 @@
       "id": "dac-ch4",
       "title": "Module 4 : G, H, les majuscules et la ponctuation de base",
       "file": "04_majuscules_ponctuation.md"
+    },
+    {
+      "id": "dac-ch5",
+      "title": "Module 5 : Typographie avancée (espaces, guillemets, tirets)",
+      "file": "05_typographie_avancee.md"
+    },
+    {
+      "id": "dac-ch6",
+      "title": "Module 6 : Chiffres et accents directs (é è à ç ù)",
+      "file": "06_chiffres_accents.md"
+    },
+    {
+      "id": "dac-ch7",
+      "title": "Module 7 : Accents composés (touches mortes ^ et ¨)",
+      "file": "07_accents_composes.md"
+    },
+    {
+      "id": "dac-ch8",
+      "title": "Module 8 : Test final chronométré",
+      "file": "08_test_final.md"
     }
   ]
 }

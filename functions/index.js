@@ -59,28 +59,28 @@ Structure JSON :
   "erreurs_detectees": ["erreur 1", "erreur 2"]
 }`;
 
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: `Voici la soumission de l'élève (${labelSoumission}) :\n\n${code_eleve}`,
-            config: { systemInstruction: promptSysteme, temperature: 0.2 }
-        });
-
         let jsonEvaluation = {
-            feedback_eleve: "Travail bien reçu ! Ton professeur va relire ta soumission.",
+            feedback_eleve: "Travail bien enregistré ! Ton professeur va relire ta soumission.",
             note_suggeree: 85,
             erreurs_detectees: []
         };
 
         try {
+            const response = await ai.models.generateContent({
+                model: "gemini-2.0-flash",
+                contents: `Voici la soumission de l'élève (${labelSoumission}) :\n\n${code_eleve}`,
+                config: { systemInstruction: promptSysteme, temperature: 0.2 }
+            });
+
             const jsonMatch = response.text.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 jsonEvaluation = JSON.parse(jsonMatch[0]);
-            }
-        } catch (parseErr) {
-            console.warn("[corrigerDevoir] Fallback JSON parse :", parseErr.message);
-            if (response.text) {
+            } else if (response.text) {
                 jsonEvaluation.feedback_eleve = response.text;
             }
+        } catch (aiErr) {
+            console.warn("[corrigerDevoir] Note : Évaluation IA non disponible (quota ou indisponibilité) :", aiErr.message);
+            // On conserve le feedback par défaut pour ne JAMAIS bloquer la remise de devoir de l'élève
         }
 
         const submissionData = {
@@ -102,8 +102,8 @@ Structure JSON :
         return { docId: docRef.id, evaluation: jsonEvaluation };
 
     } catch (error) {
-        console.error("[corrigerDevoir] Erreur:", error);
-        throw new HttpsError("internal", error.message || "Erreur lors de la correction.");
+        console.error("[corrigerDevoir] Erreur critique Firestore:", error);
+        throw new HttpsError("internal", error.message || "Erreur lors de l'enregistrement du travail.");
     }
 });
 
@@ -153,16 +153,38 @@ Règles :
 2. Pose des questions de guidage courtes et bienveillantes.
 3. Reste concis et adapté à des adolescents de 3e secondaire (14-15 ans).`;
 
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: contentsArray,
-            config: { systemInstruction, temperature: 0.7 }
-        });
+        try {
+            const response = await ai.models.generateContent({
+                model: "gemini-2.0-flash",
+                contents: contentsArray,
+                config: { systemInstruction, temperature: 0.7 }
+            });
 
-        return { reponse: response.text };
+            return { reponse: response.text };
+        } catch (apiErr) {
+            console.warn("[interrogerTuteur] Erreur Gemini API :", apiErr.message);
+            if (apiErr.message?.includes("RESOURCE_EXHAUSTED") || apiErr.message?.includes("credits are depleted")) {
+                return { 
+                    reponse: "⏳ *Le quota de l'assistant IA est temporairement atteint. N'hésite pas à consulter la fiche mémo et les raccourcis à gauche de ton écran en attendant !*" 
+                };
+            }
+            // Tentative de fallback sur gemini-1.5-flash
+            try {
+                const fbResponse = await ai.models.generateContent({
+                    model: "gemini-1.5-flash",
+                    contents: contentsArray,
+                    config: { systemInstruction, temperature: 0.7 }
+                });
+                return { reponse: fbResponse.text };
+            } catch (fbErr) {
+                return { 
+                    reponse: "Je rencontre une petite difficulté momentanée de connexion. Consulte la théorie et les raccourcis à gauche !" 
+                };
+            }
+        }
     } catch (error) {
         console.error("[interrogerTuteur] Erreur détaillée:", error);
-        throw new HttpsError("internal", error.message || "Tuteur indisponible.");
+        return { reponse: "Je suis temporairement indisponible. Réessaie dans un instant !" };
     }
 });
 
@@ -187,7 +209,7 @@ exports.demanderIndiceNiveau2 = onCall({
         const ai = new GoogleGenAI({ apiKey: geminiApiKey.value() });
 
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-2.0-flash",
             contents: `Voici le code de l'élève :\n${code_eleve}`,
             config: { 
                 systemInstruction: exData.indices.niveau_2_prompt,
@@ -231,7 +253,7 @@ Ta réponse doit obligatoirement être un objet JSON valide avec cette structure
 }`;
 
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-2.0-flash",
             contents: `Voici le prompt soumis par l'élève :\n\n${prompt}`,
             config: { 
                 systemInstruction,
@@ -463,7 +485,7 @@ Format de sortie OBLIGATOIRE : Un JSON pur respectant cette structure exacte :
 }`;
 
         const geminiRes = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-2.0-flash",
             contents: `Génère le QCM de ${nombreQuestions} questions sur le sujet suivant : "${sujet}".`,
             config: {
                 systemInstruction: systemInstruction,
