@@ -138,14 +138,32 @@ let hintState = {
 // ============================================================
 // 3. AUTHENTIFICATION
 // ============================================================
-listenToAuthStatus((user) => {
+// 3. AUTHENTIFICATION & INITIALISATION
+// ============================================================
+let isViewingSpecificCourse = false;
+
+listenToAuthStatus(async (user) => {
     if (!user) { window.location.href = "index.html"; return; }
     currentUser = user;
     if (userEmailEl) userEmailEl.textContent = user.email;
 
-    // Charger les cours dynamiquement et filtrer selon les droits de l'élève
-    courseManager.loadCourses(user.email).then(() => {
+    // 1. Charger immédiatement les réglages prof en direct pour filtrer les cours avant affichage
+    try {
+        const settingsSnap = await getDoc(doc(db, "config", "settings"));
+        if (settingsSnap.exists()) {
+            const data = settingsSnap.data();
+            disabledChapters = data.disabled_chapters || [];
+            examActive = data.exam_active !== false;
+        }
+    } catch (err) {
+        console.warn("Erreur lecture settings initiale :", err);
+    }
+
+    // 2. Charger les cours et configurer le sélecteur
+    try {
+        await courseManager.loadCourses(user.email);
         setupCourseSelector();
+        
         // Initialiser le gestionnaire d'examen
         examManager.init(() => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -157,11 +175,11 @@ listenToAuthStatus((user) => {
                 switchToLobby();
             }
         });
-    }).catch(err => {
+    } catch (err) {
         console.error("Erreur de chargement des cours :", err);
-    });
+    }
 
-    // Écouter les réglages prof en temps réel (chapitres désactivés + examen actif)
+    // 3. Écouter les réglages prof en temps réel (chapitres désactivés + examen actif)
     if (!configUnsub) {
         configUnsub = onSnapshot(doc(db, "config", "settings"), (snapshot) => {
             if (snapshot.exists()) {
@@ -185,14 +203,10 @@ listenToAuthStatus((user) => {
 
             setupCourseSelector();
 
-            // Si on est dans la vue Lobby ou Cours, on recharge pour masquer/afficher les chapitres
+            // Si on est dans la vue Lobby, on recharge pour masquer/afficher immédiatement
             const examView = document.getElementById('examView');
             if (workspaceView.classList.contains('hidden') && (!examView || examView.classList.contains('hidden'))) {
-                if (coursesView && !coursesView.classList.contains('hidden')) {
-                    loadCourses();
-                } else {
-                    loadLobby();
-                }
+                loadLobby();
             }
         });
     }
@@ -207,16 +221,38 @@ listenToAuthStatus((user) => {
 if (logoutBtn) logoutBtn.addEventListener('click', async () => await logoutUser());
 
 // ============================================================
-// 4. LOBBY — Chargement et rendu des exercices & cours
+// 4. LOBBY — Portail d'accueil sobre & Vue Cours
 // ============================================================
 
 function isCourseActive(course, disabledChaptersList = []) {
     if (!course) return false;
-    if (disabledChaptersList.includes(course.title) || disabledChaptersList.includes(course.id)) return false;
+    
+    // 1. Blocage direct par ID de cours ou Titre
+    if (disabledChaptersList.includes(course.id) || disabledChaptersList.includes(course.title)) {
+        return false;
+    }
+    
     if (!course.chapters || course.chapters.length === 0) return true;
     
-    // Si TOUS les chapitres du cours sont dans disabled_chapters, le cours est considéré inactif
-    const activeChapters = course.chapters.filter(ch => !disabledChaptersList.includes(ch.title) && !disabledChaptersList.includes(ch.id));
+    // 2. Vérification des chapitres du cours
+    const activeChapters = course.chapters.filter(ch => {
+        const title = ch.title || '';
+        const id = ch.id || '';
+        
+        if (disabledChaptersList.includes(title) || disabledChaptersList.includes(id)) return false;
+        
+        // Comparaison souple pour rattraper les préfixes "CH1 — " ou "Module 1 : "
+        const isMatchedDisabled = disabledChaptersList.some(dis => {
+            const disLower = dis.toLowerCase().trim();
+            const titleLower = title.toLowerCase().trim();
+            return disLower === titleLower || 
+                   (disLower.length > 5 && titleLower.includes(disLower)) || 
+                   (titleLower.length > 5 && disLower.includes(titleLower));
+        });
+        
+        return !isMatchedDisabled;
+    });
+
     return activeChapters.length > 0;
 }
 
@@ -254,18 +290,27 @@ function setupCourseSelector() {
     }
 
     courseSelector.onchange = (e) => {
-        courseManager.selectCourse(e.target.value);
-        if (coursesView && !coursesView.classList.contains('hidden')) {
-            loadCourses();
-        } else {
-            loadLobby();
-        }
+        openCourseLobby(e.target.value);
     };
 }
 
+// Ouvrir un cours spécifique
+window.openCourseLobby = (courseId) => {
+    isViewingSpecificCourse = true;
+    courseManager.selectCourse(courseId);
+    setupCourseSelector();
+    loadLobby();
+};
+
+// Revenir au portail d'accueil sobre (sélection de cours)
+window.openPortalHome = () => {
+    isViewingSpecificCourse = false;
+    loadLobby();
+};
+
 /**
- * Charge tous les documents de la collection `exercices` depuis Firestore
- * et les affiche groupés par `chapitre`.
+ * Charge la vue Lobby : soit le portail des cours (accueil sobre),
+ * soit les modules du cours choisi.
  */
 async function loadLobby() {
     // Reset Header UI
@@ -276,13 +321,13 @@ async function loadLobby() {
         backToLobbyBtn.textContent = '🏠 Accueil';
     }
     if (navCoursesBtn) {
-        navCoursesBtn.style.display = 'none'; // Désactivé (Cours unifiés)
+        navCoursesBtn.style.display = 'none';
     }
     if (exportCodeBtn) exportCodeBtn.style.display = 'none';
     if (submitBtn) submitBtn.classList.add('hidden');
 
     // Reset Lobby UI
-    lobbyLoader.querySelector('p').textContent = 'Chargement des exercices...';
+    lobbyLoader.querySelector('p').textContent = 'Chargement...';
     lobbyLoader.classList.remove('hidden');
     lobbyContent.classList.add('hidden');
     lobbyView.classList.remove('hidden');
@@ -294,12 +339,12 @@ async function loadLobby() {
         const allCourses = courseManager.getCourses();
         const activeCourses = allCourses.filter(c => isCourseActive(c, disabledChapters));
 
-        // Si aucun cours n'est actif
+        // 1. Si aucun cours n'est actif
         if (activeCourses.length === 0) {
             chaptersContainer.innerHTML = `
                 <div class="lobby-empty">
                     <p style="font-size: 18px; font-weight: 700; color: #1e293b;">🔒 Aucun cours n'est actuellement ouvert</p>
-                    <p style="color: #64748b;">Votre professeur activera les modules de cours très prochainement !</p>
+                    <p style="color: #64748b;">Votre professeur activera les modules de cours prochainement !</p>
                 </div>`;
             const lobbyCourseSection = document.querySelector('.lobby-courses-section');
             if (lobbyCourseSection) lobbyCourseSection.style.display = 'none';
@@ -308,54 +353,70 @@ async function loadLobby() {
             return;
         }
 
+        // Si 1 seul cours actif, on ouvre directement ce cours
+        if (activeCourses.length === 1) {
+            isViewingSpecificCourse = true;
+            if (courseManager.getSelectedCourse()?.id !== activeCourses[0].id) {
+                courseManager.selectCourse(activeCourses[0].id);
+            }
+        }
+
         let selectedCourse = courseManager.getSelectedCourse();
         if (!selectedCourse || !isCourseActive(selectedCourse, disabledChapters)) {
             selectedCourse = activeCourses[0];
             courseManager.selectCourse(selectedCourse.id);
-            setupCourseSelector();
         }
 
-        const courseId = selectedCourse ? selectedCourse.id : 'js-uaa5-classic';
-        const progressDocId = userEmail ? `${userEmail.replace(/\//g, '_')}_${courseId}` : '';
-
-        // Rendre le sélecteur de cours du Lobby (page d'accueil sobre)
-        const lobbyCourseSelectorContainer = document.getElementById('lobbyCourseSelectorContainer');
         const lobbyCourseSection = document.querySelector('.lobby-courses-section');
+        const lobbyCourseSelectorContainer = document.getElementById('lobbyCourseSelectorContainer');
 
-        if (lobbyCourseSelectorContainer) {
-            lobbyCourseSelectorContainer.innerHTML = '';
-            
-            if (activeCourses.length <= 1) {
-                // S'il n'y a qu'un cours actif, on n'encombre pas l'accueil avec les cartes de sélection
-                if (lobbyCourseSection) lobbyCourseSection.style.display = 'none';
-            } else {
-                if (lobbyCourseSection) lobbyCourseSection.style.display = 'block';
+        // ========================================================
+        // CAS A : ACCUEIL SOBRE (PORTAIL DE SÉLECTION DE COURS)
+        // ========================================================
+        if (!isViewingSpecificCourse) {
+            if (lobbyCourseSection) lobbyCourseSection.style.display = 'block';
+            if (lobbyCourseSelectorContainer) {
+                lobbyCourseSelectorContainer.innerHTML = '';
                 activeCourses.forEach(c => {
-                    const isActive = selectedCourse && selectedCourse.id === c.id;
                     const activeCount = (c.chapters || []).filter(ch => !disabledChapters.includes(ch.title) && !disabledChapters.includes(ch.id)).length;
 
                     const card = document.createElement('div');
-                    card.className = `lobby-course-card${isActive ? ' active' : ''}`;
+                    card.className = `lobby-course-card`;
                     card.innerHTML = `
                         <span class="lobby-course-card-icon">${c.theme?.icon || '📚'}</span>
                         <div class="lobby-course-card-title">${c.title}</div>
                         <div class="lobby-course-card-desc">${c.pitch || 'Découvre ce cours passionnant !'}</div>
                         <div class="lobby-course-card-footer">
                             <span class="lobby-course-card-badge">${activeCount} module${activeCount > 1 ? 's' : ''}</span>
-                            <span class="lobby-course-card-btn">${isActive ? 'En cours ➔' : 'Sélectionner ➔'}</span>
+                            <span class="lobby-course-card-btn">Accéder au cours ➔</span>
                         </div>
                     `;
                     card.addEventListener('click', () => {
-                        if (c.id !== courseId) {
-                            courseManager.selectCourse(c.id);
-                            setupCourseSelector();
-                            loadLobby();
-                        }
+                        openCourseLobby(c.id);
                     });
                     lobbyCourseSelectorContainer.appendChild(card);
                 });
             }
+
+            // Sur le portail d'accueil, on ne charge AUCUN chapitre en dessous !
+            chaptersContainer.innerHTML = '';
+            
+            // Masquer la bannière d'examen sur le portail d'accueil général
+            const examBanner = document.getElementById('lobbyExamBanner');
+            if (examBanner) examBanner.classList.add('hidden');
+
+            lobbyLoader.classList.add('hidden');
+            lobbyContent.classList.remove('hidden');
+            return;
         }
+
+        // ========================================================
+        // CAS B : VUE COURS SÉLECTIONNÉ (AFFICHAGE DES MODULES)
+        // ========================================================
+        if (lobbyCourseSection) lobbyCourseSection.style.display = 'none';
+
+        const courseId = selectedCourse.id;
+        const progressDocId = userEmail ? `${userEmail.replace(/\//g, '_')}_${courseId}` : '';
 
         // Requêtes en parallèle : exercices + soumissions de l'élève + résultats d'examen + progression
         const [exercicesSnap, submissionsSnap, examResultsSnap, progressSnap] = await Promise.all([
@@ -463,6 +524,7 @@ async function loadLobby() {
                         <p>${selectedCourse?.pitch || 'Modules et activités disponibles'}</p>
                     </div>
                 </div>
+                ${activeCourses.length > 1 ? `<button type="button" class="btn-secondary" onclick="openPortalHome()" style="font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 8px; cursor: pointer; background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155;">‹ Choisir un autre cours</button>` : ''}
             </div>
         `;
         const courseChapters = selectedCourse ? selectedCourse.chapters : [];
@@ -1144,7 +1206,10 @@ if (sidebarTabTuteurBtn) {
 }
 
 // Fonction pour revenir proprement au lobby depuis le workspace, le cours ou l'examen
-function switchToLobby() {
+function switchToLobby(resetToPortal = true) {
+    if (resetToPortal) {
+        isViewingSpecificCourse = false;
+    }
     // Reset Header UI
     if (exerciseTitleEl) exerciseTitleEl.textContent = 'Accueil';
     if (backToLobbyBtn) {
@@ -1153,8 +1218,7 @@ function switchToLobby() {
         backToLobbyBtn.textContent = '🏠 Accueil';
     }
     if (navCoursesBtn) {
-        navCoursesBtn.style.display = 'inline-flex';
-        navCoursesBtn.classList.remove('active');
+        navCoursesBtn.style.display = 'none';
     }
     if (exportCodeBtn) exportCodeBtn.style.display = 'none';
     if (submitBtn) submitBtn.classList.add('hidden');

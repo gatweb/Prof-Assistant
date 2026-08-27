@@ -659,6 +659,13 @@ async function renderChaptersConfig() {
                 }
             });
 
+            if (enable) {
+                dbSettings.disabled_chapters = dbSettings.disabled_chapters.filter(c => c !== groupId && c !== group.title);
+            } else {
+                if (!dbSettings.disabled_chapters.includes(groupId)) dbSettings.disabled_chapters.push(groupId);
+                if (!dbSettings.disabled_chapters.includes(group.title)) dbSettings.disabled_chapters.push(group.title);
+            }
+
             await setDoc(doc(db, "config", "settings"), dbSettings);
             renderChaptersConfig();
         };
