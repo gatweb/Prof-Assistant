@@ -129,17 +129,33 @@ exports.interrogerTuteur = onCall({
 
         const ai = new GoogleGenAI({ apiKey: geminiApiKey.value() });
 
-        const contentsArray = [];
+        // Construction robuste de l'historique (Gemini exige que le premier message soit "user" et alterne user/model)
+        const rawHistory = [];
         (historique || []).forEach(msg => {
             const txt = msg.parts?.[0]?.text || msg.text || (typeof msg.content === 'string' ? msg.content : '');
             if (txt) {
+                const role = (msg.role === 'assistant' || msg.role === 'model') ? 'model' : 'user';
+                rawHistory.push({ role, text: String(txt) });
+            }
+        });
+        rawHistory.push({ role: 'user', text: String(question) });
+
+        // Nettoyage : 1. Trouver le premier message 'user'
+        const firstUserIdx = rawHistory.findIndex(m => m.role === 'user');
+        const validHistory = firstUserIdx !== -1 ? rawHistory.slice(firstUserIdx) : [{ role: 'user', text: String(question) }];
+
+        // 2. Fusionner les messages consécutifs du même rôle
+        const contentsArray = [];
+        validHistory.forEach(item => {
+            if (contentsArray.length > 0 && contentsArray[contentsArray.length - 1].role === item.role) {
+                contentsArray[contentsArray.length - 1].parts[0].text += `\n${item.text}`;
+            } else {
                 contentsArray.push({
-                    role: msg.role === 'assistant' || msg.role === 'model' ? 'model' : 'user',
-                    parts: [{ text: String(txt) }]
+                    role: item.role,
+                    parts: [{ text: item.text }]
                 });
             }
         });
-        contentsArray.push({ role: "user", parts: [{ text: String(question) }] });
 
         // Utilise le prompt système du cours s'il est fourni, sinon le prompt par défaut.
         const baseSystemPrompt = system_prompt_custom || `Tu es un tuteur d'informatique Socratique bienveillant.
@@ -162,21 +178,18 @@ Règles :
 
             return { reponse: response.text };
         } catch (apiErr) {
-            console.warn("[interrogerTuteur] Erreur Gemini API :", apiErr.message);
-            if (apiErr.message?.includes("RESOURCE_EXHAUSTED") || apiErr.message?.includes("credits are depleted")) {
-                return { 
-                    reponse: "⏳ *Le quota de l'assistant IA est temporairement atteint. N'hésite pas à consulter la fiche mémo et les raccourcis à gauche de ton écran en attendant !*" 
-                };
-            }
-            // Tentative de fallback sur gemini-2.5-flash
+            console.error("[interrogerTuteur] Erreur Gemini API :", apiErr);
+            
+            // Tentative de secours avec uniquement la question courante (au cas où l'historique poserait problème)
             try {
-                const fbResponse = await ai.models.generateContent({
-                    model: "gemini-2.5-flash",
-                    contents: contentsArray,
+                const singleRes = await ai.models.generateContent({
+                    model: "gemini-2.5-flash-lite",
+                    contents: `Question de l'élève : ${question}`,
                     config: { systemInstruction, temperature: 0.7 }
                 });
-                return { reponse: fbResponse.text };
-            } catch (fbErr) {
+                return { reponse: singleRes.text };
+            } catch (singleErr) {
+                console.error("[interrogerTuteur] Erreur fallback simple :", singleErr);
                 return { 
                     reponse: "Je rencontre une petite difficulté momentanée de connexion. Consulte la théorie et les raccourcis à gauche !" 
                 };
