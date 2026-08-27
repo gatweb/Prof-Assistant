@@ -7,9 +7,6 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 
 const geminiApiKey = defineSecret("GEMINI_API_KEY");
-const googleClientId = defineSecret("GOOGLE_CLIENT_ID");
-const googleClientSecret = defineSecret("GOOGLE_CLIENT_SECRET");
-const googleRefreshToken = defineSecret("GOOGLE_TEACHER_REFRESH_TOKEN");
 
 /**
  * `corrigerDevoir` — Analyse le travail/code et injecte la théorie de l'exercice dans le prompt.
@@ -298,7 +295,6 @@ function getGoogleClients(customAccessToken) {
  * `creerFormulaireGoogleForms` — Crée un formulaire Google Forms en mode Quiz.
  */
 exports.creerFormulaireGoogleForms = onCall({
-    secrets: [googleClientId, googleClientSecret, googleRefreshToken],
     region: "europe-west1",
     cors: true
 }, async (request) => {
@@ -392,7 +388,7 @@ exports.creerFormulaireGoogleForms = onCall({
  * et crée automatiquement le Google Form complet en mode Quiz dans le dossier Drive partagé.
  */
 exports.genererQuizGoogleFormsIA = onCall({
-    secrets: [geminiApiKey, googleClientId, googleClientSecret, googleRefreshToken],
+    secrets: [geminiApiKey],
     region: "europe-west1",
     cors: true
 }, async (request) => {
