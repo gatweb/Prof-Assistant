@@ -185,8 +185,9 @@ class ProgressionManager {
             });
         }
 
-        // 1.8 Mapper les classes depuis la collection users
+        // 1.8 Mapper les classes et statuts depuis la collection users
         const userClassMap = {};
+        const userStatusMap = {};
         if (this.usersSnap) {
             this.usersSnap.forEach(docSnap => {
                 const data = docSnap.data();
@@ -194,6 +195,7 @@ class ProgressionManager {
                 if (data.classe || data.class) {
                     userClassMap[email] = data.classe || data.class;
                 }
+                userStatusMap[email] = data.status || 'actif';
             });
         }
 
@@ -206,6 +208,7 @@ class ProgressionManager {
                     email: email,
                     nom: sub.nom_eleve || email.split('@')[0],
                     classe: userClassMap[email] || sub.classe || '',
+                    status: userStatusMap[email] || 'actif',
                     submissions: {},
                     hasAwaiting: false
                 };
@@ -230,6 +233,7 @@ class ProgressionManager {
                     email: email,
                     nom: res.nom_eleve || email.split('@')[0],
                     classe: userClassMap[email] || '',
+                    status: userStatusMap[email] || 'actif',
                     submissions: {},
                     hasAwaiting: false
                 };
@@ -245,6 +249,7 @@ class ProgressionManager {
                         email: email,
                         nom: data.nom || data.displayName || email.split('@')[0],
                         classe: data.classe || data.class || '',
+                        status: data.status || 'actif',
                         submissions: {},
                         hasAwaiting: false
                     };
@@ -271,6 +276,9 @@ class ProgressionManager {
 
     renderMatrix() {
         let displayStudents = this.students;
+
+        // Exclure les élèves archivés de la matrice active
+        displayStudents = displayStudents.filter(s => s.status !== 'archive');
 
         // Filtre par classe
         const selectedClass = this.classSelect?.value || "all";

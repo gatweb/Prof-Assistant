@@ -957,20 +957,23 @@ if (testGeminiModelsBtn) {
 }
 
 // ============================================
-// 11. GESTION DES ÉLÈVES & ATTRIBUTION DE CLASSES
+// 11. GESTION DES ÉLÈVES, CLASSES LIBRES & ARCHIVAGE
 // ============================================
 let allLoadedStudents = [];
+let allKnownClasses = new Set(["3GB", "3CB", "3G1", "3G2", "3TT", "4TT", "4G1"]);
 
 const usersTableBody = document.getElementById('usersTableBody');
 const usersSearchInput = document.getElementById('usersSearchInput');
 const usersClassFilter = document.getElementById('usersClassFilter');
+const usersStatusFilter = document.getElementById('usersStatusFilter');
 const usersStatsBadge = document.getElementById('usersStatsBadge');
 const refreshUsersBtn = document.getElementById('refreshUsersBtn');
+const classListSuggestions = document.getElementById('classListSuggestions');
 
 async function loadUsersData() {
     if (!usersTableBody) return;
 
-    usersTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:#64748b;">⏳ Chargement des élèves et des classes...</td></tr>';
+    usersTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:24px; color:#64748b;">⏳ Chargement des élèves et des classes...</td></tr>';
 
     try {
         const [usersSnap, subsSnap] = await Promise.all([
@@ -980,16 +983,20 @@ async function loadUsersData() {
 
         const studentMap = {};
 
-        // 1. Charger les utilisateurs déjà enregistrés dans la collection "users"
+        // 1. Charger les utilisateurs de Firestore
         usersSnap.forEach(docSnap => {
             const data = docSnap.data();
             const email = (data.email || docSnap.id).toLowerCase().trim();
             if (email && email !== ADMIN_EMAIL.toLowerCase()) {
+                const classe = data.classe || data.class || '';
+                if (classe) allKnownClasses.add(classe);
+
                 studentMap[email] = {
                     id: docSnap.id,
                     email: email,
                     nom: data.nom || data.displayName || email.split('@')[0],
-                    classe: data.classe || data.class || '',
+                    classe: classe,
+                    status: data.status || 'actif', // actif ou archive
                     submissionsCount: 0
                 };
             }
@@ -1001,27 +1008,64 @@ async function loadUsersData() {
             const email = (sub.email_eleve || '').toLowerCase().trim();
             if (email && email !== ADMIN_EMAIL.toLowerCase()) {
                 if (!studentMap[email]) {
+                    const classe = sub.classe || '';
+                    if (classe) allKnownClasses.add(classe);
+
                     studentMap[email] = {
                         id: email,
                         email: email,
                         nom: sub.nom_eleve || email.split('@')[0],
-                        classe: sub.classe || '',
+                        classe: classe,
+                        status: 'actif',
                         submissionsCount: 0
                     };
                 }
                 studentMap[email].submissionsCount++;
                 if (!studentMap[email].classe && sub.classe) {
                     studentMap[email].classe = sub.classe;
+                    allKnownClasses.add(sub.classe);
                 }
             }
         });
 
         allLoadedStudents = Object.values(studentMap).sort((a, b) => a.nom.localeCompare(b.nom));
+        updateClassDropdowns();
         renderUsersTable();
 
     } catch (err) {
         console.error('[Users Management] Erreur chargement :', err);
-        usersTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:red;">❌ Erreur lors du chargement des élèves.</td></tr>';
+        usersTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:24px; color:red;">❌ Erreur lors du chargement des élèves.</td></tr>';
+    }
+}
+
+// Met à jour les suggestions et les sélecteurs de classes
+function updateClassDropdowns() {
+    // 1. Datalist pour le champ libre
+    if (classListSuggestions) {
+        classListSuggestions.innerHTML = Array.from(allKnownClasses).sort().map(c => `<option value="${c}">`).join('');
+    }
+
+    // 2. Filtre de classe dans la vue Élèves
+    if (usersClassFilter) {
+        const currentVal = usersClassFilter.value || "all";
+        const sortedClasses = Array.from(allKnownClasses).sort();
+        usersClassFilter.innerHTML = `
+            <option value="all">📚 Toutes les classes</option>
+            ${sortedClasses.map(c => `<option value="${c}" ${currentVal === c ? 'selected' : ''}>Classe ${c}</option>`).join('')}
+            <option value="unassigned" ${currentVal === 'unassigned' ? 'selected' : ''}>⚠️ Non assignés</option>
+        `;
+    }
+
+    // 3. Filtre de classe dans la vue Progression
+    const progClassSelect = document.getElementById('progressionClassSelect');
+    if (progClassSelect) {
+        const currentVal = progClassSelect.value || "all";
+        const sortedClasses = Array.from(allKnownClasses).sort();
+        progClassSelect.innerHTML = `
+            <option value="all">🏫 Toutes classes</option>
+            ${sortedClasses.map(c => `<option value="${c}" ${currentVal === c ? 'selected' : ''}>Classe ${c}</option>`).join('')}
+            <option value="unassigned" ${currentVal === 'unassigned' ? 'selected' : ''}>⚠️ Non assignés</option>
+        `;
     }
 }
 
@@ -1030,45 +1074,61 @@ function renderUsersTable() {
 
     const searchTerm = (usersSearchInput?.value || "").toLowerCase().trim();
     const classFilter = usersClassFilter?.value || "all";
+    const statusFilter = usersStatusFilter?.value || "active";
 
-    // Statistiques par classe
-    const counts = { "3G1": 0, "3G2": 0, "3TT": 0, "unassigned": 0 };
+    // Statistiques
+    let activeCount = 0;
+    let archivedCount = 0;
+    const classCounts = {};
+
     allLoadedStudents.forEach(s => {
-        if (s.classe === "3G1") counts["3G1"]++;
-        else if (s.classe === "3G2") counts["3G2"]++;
-        else if (s.classe === "3TT") counts["3TT"]++;
-        else counts["unassigned"]++;
+        if (s.status === 'archive') {
+            archivedCount++;
+        } else {
+            activeCount++;
+            const c = s.classe || 'Non assigné';
+            classCounts[c] = (classCounts[c] || 0) + 1;
+        }
     });
 
     if (usersStatsBadge) {
+        const topClassesBadges = Object.entries(classCounts)
+            .map(([c, cnt]) => `<span class="badge" style="background:#f1f5f9; color:#334155; padding:4px 8px;">${c}: ${cnt}</span>`)
+            .join(' ');
+
         usersStatsBadge.innerHTML = `
-            <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px;">Total: ${allLoadedStudents.length}</span>
-            <span class="badge" style="background:#dcfce7; color:#15803d; padding:4px 8px;">3G1: ${counts["3G1"]}</span>
-            <span class="badge" style="background:#fef3c7; color:#b45309; padding:4px 8px;">3G2: ${counts["3G2"]}</span>
-            <span class="badge" style="background:#f3e8ff; color:#7e22ce; padding:4px 8px;">3TT: ${counts["3TT"]}</span>
-            ${counts["unassigned"] > 0 ? `<span class="badge" style="background:#fee2e2; color:#b91c1c; padding:4px 8px;">Non assignés: ${counts["unassigned"]}</span>` : ''}
+            <span class="badge" style="background:#dcfce7; color:#15803d; padding:4px 8px;">🟢 ${activeCount} Actifs</span>
+            ${archivedCount > 0 ? `<span class="badge" style="background:#fef3c7; color:#b45309; padding:4px 8px;">📦 ${archivedCount} Archivés</span>` : ''}
+            ${topClassesBadges}
         `;
     }
 
     // Filtrage
     const filtered = allLoadedStudents.filter(s => {
-        const matchesSearch = s.nom.toLowerCase().includes(searchTerm) || s.email.toLowerCase().includes(searchTerm);
+        const matchesSearch = s.nom.toLowerCase().includes(searchTerm) || s.email.toLowerCase().includes(searchTerm) || (s.classe && s.classe.toLowerCase().includes(searchTerm));
         if (!matchesSearch) return false;
 
+        // Filtre de statut
+        if (statusFilter === "active" && s.status === 'archive') return false;
+        if (statusFilter === "archived" && s.status !== 'archive') return false;
+
+        // Filtre de classe
         if (classFilter === "all") return true;
         if (classFilter === "unassigned") return !s.classe;
         return s.classe === classFilter;
     });
 
     if (filtered.length === 0) {
-        usersTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:#64748b;">Aucun élève ne correspond aux critères.</td></tr>';
+        usersTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:24px; color:#64748b;">Aucun élève ne correspond aux critères de filtre.</td></tr>';
         return;
     }
 
     usersTableBody.innerHTML = filtered.map(s => {
         const safeEmailKey = encodeURIComponent(s.email);
+        const isArchived = s.status === 'archive';
+
         return `
-            <tr id="user-row-${safeEmailKey}">
+            <tr id="user-row-${safeEmailKey}" style="${isArchived ? 'opacity: 0.75; background: #fafafa;' : ''}">
                 <td>
                     <div style="font-weight: 700; color: #0f172a;">${s.nom}</div>
                 </td>
@@ -1076,14 +1136,24 @@ function renderUsersTable() {
                     ${s.email}
                 </td>
                 <td>
-                    <select class="class-select-dropdown" id="select-class-${safeEmailKey}" onchange="saveStudentClass('${s.email}', this.value)">
-                        <option value="" ${!s.classe ? 'selected' : ''}>-- Non assigné --</option>
-                        <option value="3G1" ${s.classe === '3G1' ? 'selected' : ''}>3G1</option>
-                        <option value="3G2" ${s.classe === '3G2' ? 'selected' : ''}>3G2</option>
-                        <option value="3TT" ${s.classe === '3TT' ? 'selected' : ''}>3TT</option>
-                        <option value="3GT" ${s.classe === '3GT' ? 'selected' : ''}>3GT</option>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <input 
+                            type="text" 
+                            list="classListSuggestions" 
+                            value="${s.classe || ''}" 
+                            placeholder="Ex: 3GB, 3CB..." 
+                            class="md-input" 
+                            style="padding: 6px 10px; font-size: 13px; font-weight: 700; width: 110px; text-transform: uppercase;" 
+                            onchange="saveStudentClass('${s.email}', this.value)"
+                        />
+                        <span id="save-status-${safeEmailKey}" style="font-size: 11px; color: green;"></span>
+                    </div>
+                </td>
+                <td>
+                    <select class="class-select-dropdown" style="padding: 4px 8px; font-size: 12px;" onchange="saveStudentStatus('${s.email}', this.value)">
+                        <option value="actif" ${!isArchived ? 'selected' : ''}>🟢 Actif</option>
+                        <option value="archive" ${isArchived ? 'selected' : ''}>📦 Archivé</option>
                     </select>
-                    <span id="save-status-${safeEmailKey}" style="font-size: 11px; margin-left: 6px; color: green;"></span>
                 </td>
                 <td style="text-align: center;">
                     <span class="badge" style="background:#f1f5f9; color:#475569;">
@@ -1091,9 +1161,14 @@ function renderUsersTable() {
                     </span>
                 </td>
                 <td style="text-align: right;">
-                    <button class="btn-danger-icon" title="Supprimer cet élève" onclick="deleteStudentProfile('${s.email}', '${s.nom}')">
-                        🗑️ Supprimer
-                    </button>
+                    <div style="display:flex; gap:6px; justify-content: flex-end;">
+                        <button class="btn-action-icon" title="Télécharger le dossier complet des travaux" onclick="downloadStudentDossier('${s.email}', '${s.nom}', '${s.classe || ''}')" style="background: #e0f2fe; color: #0369a1; border:none; border-radius:6px; padding:6px 10px; font-size:12px; font-weight:600; cursor:pointer;">
+                            📦 Télécharger dossier
+                        </button>
+                        <button class="btn-danger-icon" title="Supprimer cet élève" onclick="confirmDeleteStudent('${s.email}', '${s.nom}', '${s.classe || ''}')">
+                            🗑️
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -1106,49 +1181,220 @@ window.saveStudentClass = async (email, newClass) => {
     const statusEl = document.getElementById(`save-status-${safeEmailKey}`);
     if (statusEl) statusEl.textContent = "⏳...";
 
+    const cleanClass = (newClass || '').trim().toUpperCase();
+
     try {
-        // Enregistrer / Mettre à jour dans la collection "users"
         await setDoc(doc(db, "users", email), {
             email: email,
-            classe: newClass,
+            classe: cleanClass,
             role: "eleve",
             date_update: new Date().toISOString()
         }, { merge: true });
 
-        // Mettre à jour l'objet en mémoire
         const student = allLoadedStudents.find(s => s.email === email);
-        if (student) student.classe = newClass;
+        if (student) student.classe = cleanClass;
+
+        if (cleanClass) allKnownClasses.add(cleanClass);
+        updateClassDropdowns();
 
         if (statusEl) {
-            statusEl.textContent = "✓ Enregistré";
+            statusEl.textContent = "✓";
             setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 2000);
         }
 
     } catch (err) {
         console.error("Erreur mise à jour classe :", err);
-        if (statusEl) statusEl.textContent = "❌ Erreur";
+        if (statusEl) statusEl.textContent = "❌";
     }
 };
 
-// Fonction de suppression de profil élève
-window.deleteStudentProfile = async (email, nom) => {
-    if (!confirm(`⚠️ Êtes-vous sûr de vouloir supprimer l'élève ${nom} (${email}) de la liste ?`)) {
+// Fonction de sauvegarde du statut (Actif / Archivé)
+window.saveStudentStatus = async (email, newStatus) => {
+    try {
+        await setDoc(doc(db, "users", email), {
+            email: email,
+            status: newStatus,
+            date_update: new Date().toISOString()
+        }, { merge: true });
+
+        const student = allLoadedStudents.find(s => s.email === email);
+        if (student) student.status = newStatus;
+
+        renderUsersTable();
+
+    } catch (err) {
+        console.error("Erreur mise à jour statut :", err);
+        alert("Erreur lors de la mise à jour du statut.");
+    }
+};
+
+// 📦 TÉLÉCHARGER LE DOSSIER COMPLET DES TRAVAUX D'UN ÉLÈVE (Export HTML & Markdown)
+window.downloadStudentDossier = async (email, nom, classe) => {
+    try {
+        const qSubs = query(collection(db, "submissions"), where("email_eleve", "==", email));
+        const subsSnap = await getDocs(qSubs);
+        const submissions = [];
+
+        subsSnap.forEach(docSnap => {
+            submissions.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        // Trier par date
+        submissions.sort((a, b) => new Date(a.date_soumission || 0) - new Date(b.date_soumission || 0));
+
+        const exportDate = new Date().toLocaleDateString('fr-FR', {
+            year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+
+        // Génération du contenu HTML formaté et imprimable
+        const htmlContent = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Dossier d'apprentissage — ${nom} (${classe || 'Classe non assignée'})</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1e293b; background: #f8fafc; padding: 40px; margin: 0; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .header { border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
+        h1 { margin: 0 0 10px 0; color: #0f172a; }
+        .meta-tag { display: inline-block; background: #eff6ff; color: #1d4ed8; padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 14px; margin-right: 8px; }
+        .summary-table { width: 100%; border-collapse: collapse; margin: 24px 0; }
+        .summary-table th, .summary-table td { border: 1px solid #e2e8f0; padding: 12px; text-align: left; }
+        .summary-table th { background: #f1f5f9; font-weight: 700; }
+        .badge-success { background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 6px; font-weight: bold; }
+        .badge-waiting { background: #fef3c7; color: #b45309; padding: 2px 8px; border-radius: 6px; font-weight: bold; }
+        .work-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin-bottom: 24px; background: #ffffff; }
+        .work-card-header { display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 14px; font-weight: 700; }
+        pre { background: #0f172a; color: #f8fafc; padding: 16px; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 13px; white-space: pre-wrap; }
+        .feedback-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 14px; margin-top: 14px; border-radius: 0 8px 8px 0; }
+        @media print { body { background: white; padding: 0; } .container { box-shadow: none; padding: 0; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📁 Dossier d'Apprentissage & Travaux Élève</h1>
+            <div>
+                <span class="meta-tag">👤 ${nom}</span>
+                <span class="meta-tag">✉️ ${email}</span>
+                <span class="meta-tag">🏫 Classe : ${classe || 'Non assignée'}</span>
+                <span class="meta-tag">📅 Exporté le : ${exportDate}</span>
+            </div>
+        </div>
+
+        <h2>📊 Synthèse des Travaux (${submissions.length} au total)</h2>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Activité / Module</th>
+                    <th>Date</th>
+                    <th>Statut</th>
+                    <th>Note / Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${submissions.map((sub, idx) => `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td><strong>${sub.titre_exercice || 'Exercice'}</strong></td>
+                        <td>${sub.date_soumission ? new Date(sub.date_soumission).toLocaleDateString('fr-FR') : '-'}</td>
+                        <td><span class="${sub.status === 'valide' ? 'badge-success' : 'badge-waiting'}">${sub.status === 'valide' ? 'Validé' : 'En attente'}</span></td>
+                        <td><strong>${sub.note_suggeree !== undefined ? sub.note_suggeree + '/100' : '-'}</strong></td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+
+        <h2>📝 Détail exhaustif des soumissions</h2>
+        ${submissions.map((sub, idx) => `
+            <div class="work-card">
+                <div class="work-card-header">
+                    <span>${idx + 1}. ${sub.titre_exercice || 'Exercice'} (${sub.type || 'standard'})</span>
+                    <span>Note : ${sub.note_suggeree !== undefined ? sub.note_suggeree + '/100' : 'Non noté'}</span>
+                </div>
+                <div>
+                    <strong>Contenu soumis / Code élève :</strong>
+                    <pre>${escapeHtml(sub.code_eleve || sub.code_html || 'Aucun contenu textuel')}</pre>
+                </div>
+                ${sub.feedback_ia ? `
+                    <div class="feedback-box">
+                        <strong>🤖 Évaluation du Tuteur IA :</strong>
+                        <p style="margin: 6px 0 0 0;">${escapeHtml(sub.feedback_ia)}</p>
+                    </div>
+                ` : ''}
+                ${sub.prof_message ? `
+                    <div class="feedback-box" style="background:#f0fdf4; border-left-color:#22c55e;">
+                        <strong>🧑‍🏫 Commentaire de l'enseignant :</strong>
+                        <p style="margin: 6px 0 0 0;">${escapeHtml(sub.prof_message)}</p>
+                    </div>
+                ` : ''}
+            </div>
+        `).join('')}
+    </div>
+</body>
+</html>`;
+
+        // Déclencher le téléchargement du fichier HTML dans le navigateur
+        const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const safeName = nom.replace(/[^a-zA-Z0-9_-]/g, '_');
+        const safeClass = (classe || 'SansClasse').replace(/[^a-zA-Z0-9_-]/g, '_');
+        a.href = url;
+        a.download = `Dossier_Travaux_${safeName}_${safeClass}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        return true;
+
+    } catch (err) {
+        console.error("Erreur lors de l'export des travaux :", err);
+        alert("Erreur lors du téléchargement des travaux de l'élève.");
+        return false;
+    }
+};
+
+// Suppression avec proposition de téléchargement préalable
+window.confirmDeleteStudent = async (email, nom, classe) => {
+    const choice = confirm(
+        `⚠️ Vous allez supprimer l'élève ${nom} (${email}).\n\n` +
+        `💡 Souhaitez-vous d'abord TÉLÉCHARGER le dossier complet de tous ses travaux avant de supprimer son profil ?\n\n` +
+        `• Cliquez sur [OK] pour télécharger le dossier puis supprimer\n` +
+        `• Cliquez sur [Annuler] si vous voulez abandonner ou l'archiver à la place`
+    );
+
+    if (!choice) return;
+
+    // 1. Télécharger les travaux
+    await window.downloadStudentDossier(email, nom, classe);
+
+    // 2. Confirmation finale de suppression
+    if (!confirm(`Le dossier a été téléchargé. Confirmez-vous la suppression définitive du compte de ${nom} de la base ?`)) {
         return;
     }
 
     try {
-        // Supprimer de la collection users
         await deleteDoc(doc(db, "users", email));
-
-        // Retirer de la mémoire locale
         allLoadedStudents = allLoadedStudents.filter(s => s.email !== email);
         renderUsersTable();
-
     } catch (err) {
-        console.error("Erreur suppression élève :", err);
+        console.error("Erreur suppression :", err);
         alert("Erreur lors de la suppression.");
     }
 };
+
+function escapeHtml(text) {
+    if (!text) return '';
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
 
 // Écouteurs de recherche et filtres
 if (usersSearchInput) {
@@ -1156,6 +1402,9 @@ if (usersSearchInput) {
 }
 if (usersClassFilter) {
     usersClassFilter.addEventListener('change', renderUsersTable);
+}
+if (usersStatusFilter) {
+    usersStatusFilter.addEventListener('change', renderUsersTable);
 }
 if (refreshUsersBtn) {
     refreshUsersBtn.addEventListener('click', loadUsersData);
