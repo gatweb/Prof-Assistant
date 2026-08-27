@@ -285,6 +285,17 @@
                     <span id="importStatus" class="toggle-status-label" style="margin-left: 0;">Aucun fichier choisi</span>
                 </div>
             </div>
+
+            <!-- Card Diagnostic API Gemini -->
+            <div class="md-card config-card mt-24">
+                <h3>🤖 Diagnostic Clé API Gemini & Modèles Actifs</h3>
+                <p class="config-desc">Interrogez directement votre clé <code>GEMINI_API_KEY</code> sur Google AI Studio pour vérifier son quota et la liste exacte des modèles utilisables.</p>
+                <div class="mt-16">
+                    <button id="testGeminiModelsBtn" class="btn-secondary">🔍 Tester ma clé & Lister les modèles Gemini</button>
+                    <div id="geminiModelsStatus" class="mt-12" style="font-size: 13px;"></div>
+                    <div id="geminiModelsList" class="mt-12" style="max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; display: none;"></div>
+                </div>
+            </div>
         </div>
     </main>
 

@@ -620,7 +620,38 @@ Format de sortie OBLIGATOIRE : Un JSON pur respectant cette structure exacte :
 
     } catch (error) {
         console.error("[genererQuizGoogleFormsIA] Erreur:", error);
-        throw new HttpsError("internal", error.message || "Erreur lors de la génération du quiz.");
+        throw new HttpsError("internal", error.message || "Erreur lors de la génération du quiz IA.");
     }
 });
 
+/**
+ * `listerModelesGemini` — Interroge directement la clé API Gemini
+ * pour retourner la liste exacte des modèles disponibles sur le compte.
+ */
+exports.listerModelesGemini = onCall({
+    secrets: [geminiApiKey],
+    region: "europe-west1",
+    cors: true
+}, async (request) => {
+    if (!request.auth) throw new HttpsError("unauthenticated", "Connexion requise.");
+
+    try {
+        const ai = new GoogleGenAI({ apiKey: geminiApiKey.value() });
+        const listRes = await ai.models.list();
+        const models = [];
+        
+        for await (const m of listRes) {
+            models.push({
+                name: m.name,
+                displayName: m.displayName,
+                description: m.description,
+                supportedGenerationMethods: m.supportedActions || m.supportedGenerationMethods
+            });
+        }
+
+        return { success: true, count: models.length, models: models };
+    } catch (error) {
+        console.error("[listerModelesGemini] Erreur:", error);
+        throw new HttpsError("internal", error.message || "Impossible de lister les modèles.");
+    }
+});

@@ -463,7 +463,7 @@ async function processAction(newStatus) {
 
     // Label lisible pour la confirmation
     const label = newStatus === 'valide' ? '✅ Valider l\'exercice' : '❌ Demander des corrections';
-    const copy  = currentCopies.find(c => c.id === currentViewingCopyId);
+    const copy  = allLoadedCopies.find(c => c.id === currentViewingCopyId);
     const nomEleve = copy?.nom_eleve || 'l\'élève';
     if (!confirm(`${label} pour ${nomEleve} ?`)) return;
 
@@ -849,6 +849,56 @@ if (generateQuizForm) {
         } finally {
             generateQuizSubmitBtn.disabled = false;
             generateQuizSubmitBtn.innerHTML = "🚀 Générer le QCM & Publier sur Google Forms";
+        }
+    });
+}
+
+// ============================================
+// 10. DIAGNOSTIC CLÉ API GEMINI & MODÈLES
+// ============================================
+const testGeminiModelsBtn = document.getElementById('testGeminiModelsBtn');
+const geminiModelsStatus = document.getElementById('geminiModelsStatus');
+const geminiModelsList = document.getElementById('geminiModelsList');
+
+if (testGeminiModelsBtn) {
+    testGeminiModelsBtn.addEventListener('click', async () => {
+        testGeminiModelsBtn.disabled = true;
+        testGeminiModelsBtn.textContent = "⏳ Interrogation de Google AI Studio...";
+        if (geminiModelsStatus) {
+            geminiModelsStatus.textContent = "Connexion à l'API Gemini en cours...";
+            geminiModelsStatus.style.color = "orange";
+        }
+        if (geminiModelsList) geminiModelsList.style.display = "none";
+
+        try {
+            const listFn = httpsCallable(functions, 'listerModelesGemini');
+            const result = await listFn();
+            const data = result.data;
+
+            if (geminiModelsStatus) {
+                geminiModelsStatus.textContent = `✅ Clé API Valide ! ${data.count} modèle(s) détecté(s) sur votre compte Google AI Studio :`;
+                geminiModelsStatus.style.color = "green";
+            }
+
+            if (geminiModelsList && data.models) {
+                geminiModelsList.style.display = "block";
+                geminiModelsList.innerHTML = data.models.map(m => `
+                    <div style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;">
+                        <strong style="color: #0f172a;">${m.name}</strong> 
+                        ${m.displayName ? `<span style="color: #64748b;">(${m.displayName})</span>` : ''}
+                        <div style="font-size: 11px; color: #475569;">${m.description || 'Pas de description'}</div>
+                    </div>
+                `).join('');
+            }
+        } catch (err) {
+            console.error('[Diagnostic Gemini] Erreur :', err);
+            if (geminiModelsStatus) {
+                geminiModelsStatus.textContent = `❌ Erreur clé API : ${err.message}`;
+                geminiModelsStatus.style.color = "red";
+            }
+        } finally {
+            testGeminiModelsBtn.disabled = false;
+            testGeminiModelsBtn.textContent = "🔍 Tester ma clé & Lister les modèles Gemini";
         }
     });
 }
