@@ -1,0 +1,82 @@
+[
+  {
+    "id": "dac-ch1-entrainement",
+    "titre": "Séance d'entraînement — Ligne de base",
+    "chapitre": "Module 1 : La posture et la ligne de base (QSDF - JKLM)",
+    "course_id": "dactylo-3e",
+    "type": "office",
+    "enonce_md": "Réalise 3 sessions d'entraînement sur AgileFingers (leçon Ligne de base) sans regarder tes mains. Dépose ensuite ton meilleur score (mots/minute + précision) sous forme de capture d'écran ou de lien.\n\n**Objectif minimum : 15 mots/minute, 90% de précision.**",
+    "theorie_md": "Rappel : les touches Q-S-D-F (main gauche) et J-K-L-M (main droite) forment la ligne de base. Les index se posent sur F et J, qui possèdent un petit repère tactile.",
+    "external_tools": [
+      { "name": "AgileFingers", "url": "https://agilefingers.com/fr" }
+    ],
+    "submission_type": "text"
+  },
+  {
+    "id": "dac-ch1-quizz",
+    "titre": "Quiz : Maîtrise de la Ligne de Base",
+    "chapitre": "Module 1 : La posture et la ligne de base (QSDF - JKLM)",
+    "course_id": "dactylo-3e",
+    "type": "quizz",
+    "questions": [
+      {
+        "question": "Sur quelles touches tes deux index doivent-ils se positionner au repos ?",
+        "options": ["Sur D et K", "Sur F et J", "Sur S et L", "Sur Q et M"],
+        "correctAnswer": 1,
+        "successMessage": "✅ Exact ! Les touches F et J possèdent de petits repères tactiles pour placer tes index sans regarder."
+      },
+      {
+        "question": "Quel doigt de la main droite est responsable de la frappe de la touche M ?",
+        "options": ["L'index", "Le majeur", "L'annulaire", "L'auriculaire"],
+        "correctAnswer": 3,
+        "successMessage": "✅ Bravo ! Sur le clavier AZERTY belge, la touche M se trouve sur la ligne de base, actionnée par l'auriculaire droit."
+      },
+      {
+        "question": "Où doivent reposer tes pouces ?",
+        "options": ["Sur la touche Entrée", "Sur la barre d'espace", "Sur la touche Shift", "Ils ne servent pas en dactylographie"],
+        "correctAnswer": 1,
+        "successMessage": "✅ Correct ! Les deux pouces se posent sur la barre d'espace, un seul appuyant à la fois."
+      }
+    ]
+  },
+  {
+    "id": "dac-ch2-entrainement",
+    "titre": "Séance d'entraînement — Ligne supérieure",
+    "chapitre": "Module 2 : La ligne supérieure et les voyelles",
+    "course_id": "dactylo-3e",
+    "type": "office",
+    "enonce_md": "Réalise 3 sessions d'entraînement sur AgileFingers (leçon Ligne supérieure). Pense à toujours revenir sur la ligne de base entre deux lettres. Dépose ton meilleur score.\n\n**Objectif minimum : 18 mots/minute, 90% de précision.**",
+    "theorie_md": "Rappel : la ligne supérieure (A-Z-E-R-T-Y-U-I-O-P) se tape en étirant le doigt depuis sa touche de base, puis en revenant immédiatement. Les index couvrent deux touches chacun (R/T et Y/U).",
+    "external_tools": [
+      { "name": "AgileFingers", "url": "https://agilefingers.com/fr" }
+    ],
+    "submission_type": "text"
+  },
+  {
+    "id": "dac-ch2-quizz",
+    "titre": "Quiz : La Ligne Supérieure",
+    "chapitre": "Module 2 : La ligne supérieure et les voyelles",
+    "course_id": "dactylo-3e",
+    "type": "quizz",
+    "questions": [
+      {
+        "question": "Quel doigt tape la touche E ?",
+        "options": ["Index gauche", "Majeur gauche", "Annulaire gauche", "Auriculaire gauche"],
+        "correctAnswer": 1,
+        "successMessage": "✅ Exact ! Le E se trouve juste au-dessus du D, donc c'est le majeur gauche qui s'en charge."
+      },
+      {
+        "question": "Quelles sont les deux touches couvertes par l'index droit sur la ligne supérieure ?",
+        "options": ["I et O", "T et Y", "Y et U", "U et I"],
+        "correctAnswer": 2,
+        "successMessage": "✅ Bravo ! L'index droit s'étire vers Y et vers U, tout en gardant J comme point d'ancrage."
+      },
+      {
+        "question": "Après avoir tapé une lettre de la ligne supérieure, que doit faire ton doigt ?",
+        "options": ["Rester en l'air, prêt pour la suite", "Revenir immédiatement sur sa touche de la ligne de base", "Se poser sur la barre d'espace", "Peu importe, tant que la lettre est tapée"],
+        "correctAnswer": 1,
+        "successMessage": "✅ Correct ! Revenir sur la ligne de base garde ton repère intact pour la frappe suivante."
+      }
+    ]
+  }
+]

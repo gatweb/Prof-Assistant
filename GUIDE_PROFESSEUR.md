@@ -1,163 +1,99 @@
-# 🎓 Guide Professeur : Gérer les Exercices sur ProfAssistant
+# 🎓 Guide Professeur : ProfAssistant (Version 2026)
 
-Ce guide t'explique comment ajouter ou modifier du contenu pédagogique dans le système "Headless" via Firestore.
-
-## 📁 Structure d'un Exercice dans Firestore
-
-Les exercices sont stockés dans la collection \`exercices\`. Chaque document représente un défi pour l'élève.
-
-### Champs Obligatoires :
-- **\`titre\`** (String) : Nom affiché dans le lobby (ex: "Les sélecteurs CSS").
-- **\`chapitre\`** (String) : Catégorie pour grouper les exercices (ex: "CSS Fondamentaux").
-- **\`enonce_md\`** (Markdown) : Les instructions claires de ce que l'élève doit faire.
-- **\`theorie_md\`** (Markdown) : Le rappel de cours (apparaît dans la sidebar Notebook).
-- **\`code_depart\`** (String) : Le code injecté dans Monaco Editor au chargement.
-
-### Indices & Tutorat (RAG) :
-Le système utilise ces champs pour nourrir l'IA (Gemini) :
-- **\`indices.niveau_1_md\`** : Un premier indice textuel simple.
-- **\`indices.niveau_2_prompt\`** : Une consigne spécifique pour l'IA (ex: "Aide l'élève sur le Box Model sans donner la réponse").
-- **\`indices.niveau_3_md\`** : La solution ou un indice très fort.
+Ce guide récapitule l'ensemble du fonctionnement de **ProfAssistant**, la création de cours, la gestion des exercices et la génération d'évaluations Google Forms.
 
 ---
 
-## ✍️ Comment ajouter un cours ?
+## 🏗️ 1. Architecture des Cours
 
-Pour le moment, l'ajout se fait via la console Firestore ou via un script de "seeding".
+Chaque cours possède son propre dossier sous `public/cours/<course-id>/`.
 
-### Méthode Recommandée (Script) :
-Utilise le fichier \`scratch/seed_html_exercise.js\` comme modèle :
-1. Copie le fichier.
-2. Modifie les variables \`titre\`, \`enonce_md\`, etc.
-3. Exécute le script :
-   \`\`\`bash
-   NODE_PATH=./functions/node_modules node mon_nouveau_cours.js
-   \`\`\`
+### Structure d'un dossier de cours :
+```
+public/cours/bureautique-3e/
+├── config.json               <- Métadonnées, thème, persona IA et liste des chapitres
+├── 01_drive_organisation.md  <- Contenu Markdown du Module 1
+├── 02_docs_mise_en_page.md   <- Contenu Markdown du Module 2
+└── exercices.json            <- Exercices et Quizz associés (optionnel)
+```
 
-## 💡 Conseils pour L'IA
-Pour que le tuteur soit efficace, assure-toi que le champ \`theorie_md\` contient les concepts clés. L'IA s'en servira comme "source de vérité" pour répondre à l'élève.
+### Modes d'affichage (`workspaceType` dans `config.json`) :
+- **`"office"` (Bureautique & Google Workspace) :** Masque Monaco Editor. Propose une interface à 2 panneaux : Consignes + Aide-mémoire / raccourcis + Dépôt de lien Google Doc à gauche, et le **Tuteur Socratique IA** conversationnel à droite.
+- **`"creative"` (Studio Créatif) :** Masque Monaco Editor. Propose un tableau de bord de mission (liens Canva/IA, sandbox de prompting, remise de mission).
+- **`"coding"` (ou absent) :** Active Monaco Editor (HTML/CSS/JS) + console + prévisualisation temps réel.
+
+### Compilation et Déploiement :
+1. Pour régénérer le manifeste global :
+   ```bash
+   node scripts/compile-courses.js
+   ```
+2. Pour déployer sur Firebase :
+   ```bash
+   npx firebase-tools deploy --only hosting
+   ```
 
 ---
-*ProfAssistant - L'enseignement du code, simplifié par l'IA.*
 
+## 📝 2. Générateur de Quiz Google Forms (IA)
 
-1. Ajouter le Cours Théorique (Code/Hébergement)
-Chaque cours possède son propre dossier sous public/cours/.
+Un outil dédié dans le **Dashboard Professeur** (`/admin.html` > Onglet *📝 Générateur de Quiz*) permet de créer des évaluations auto-corrigées directement sur votre Google Drive.
 
-Créer le dossier du cours : Créez un nouveau sous-dossier, par exemple public/cours/bureautique-excel/.
+### Fonctionnement :
+1. Indiquez le titre, le sujet/notion à évaluer (ex: *"Les styles de titres et le sommaire dans Google Docs"*), le niveau et le nombre de questions.
+2. *(Optionnel)* Renseignez l'**ID du dossier Google Drive** où enregistrer le formulaire.
+3. Cliquez sur **🚀 Générer le QCM & Publier sur Google Forms**.
+4. L'IA Gemini structure les questions, options, bonnes réponses et feedbacks pédagogiques, puis l'API Google Forms crée le quiz et vous fournit :
+   - Le **lien d'édition Professeur**.
+   - Le **lien de réponse Élèves**.
 
-Y placer les chapitres Markdown : Ajoutez vos fichiers Markdown pour chaque chapitre dans ce dossier (ex: 01_prise_en_main.md, 02_formules.md).
+### Compte de Service Google Cloud :
+- Adresse du robot créateur : `bot-createur-forms@profassistant-61fde.iam.gserviceaccount.com`
+- Pour que les formulaires soient rangés dans un dossier spécifique de votre Drive, partagez ce dossier avec l'adresse du robot ci-dessus en mode **Éditeur**.
 
-Créer le fichier config.json : Dans ce même dossier, créez un fichier config.json contenant la structure suivante :
+---
 
-json
+## 🧩 3. Types d'Exercices Firestore (Collection `exercices`)
+
+### Type `office` (Dépôt Google Docs / Drive) :
+```json
 {
-  "id": "bureautique-excel",
-  "title": "Bureautique : Excel Immersif",
-  "pitch": "Maîtrisez les feuilles de calcul sous forme de jeu de rôle d'entreprise.",
-  "systemPrompt": "Tu es un chef de projet exigeant mais pédagogue. Tu t'adresses à ton nouvel assistant (l'élève). Guide-le sans lui donner la formule Excel exacte.",
-  "theme": {
-    "primaryColor": "#10b981",
-    "icon": "📊"
-  },
-  "chapters": [
+  "id": "bur-ch1-ex1-arborescence",
+  "titre": "Créer et partager son arborescence Drive",
+  "chapitre": "Module 1 : Prise en main de Google Drive & Organisation",
+  "course_id": "bureautique-3e",
+  "type": "office",
+  "enonce_md": "Consignes de la mission...",
+  "theorie_md": "Rappels sur la gestion des droits de partage...",
+  "submission_type": "url"
+}
+```
+
+### Type `quizz` (QCM interne interactif) :
+```json
+{
+  "id": "bur-ch1-quizz",
+  "titre": "Quiz de validation Module 1",
+  "chapitre": "Module 1 : Prise en main de Google Drive & Organisation",
+  "course_id": "bureautique-3e",
+  "type": "quizz",
+  "questions": [
     {
-      "id": "excel-ch1",
-      "title": "Prise en main d'Excel",
-      "file": "01_prise_en_main.md"
-    },
-    {
-      "id": "excel-ch2",
-      "title": "Les Formules de calcul",
-      "file": "02_formules.md"
+      "question": "Quel raccourci permet de coller du texte sans conserver sa mise en forme d'origine ?",
+      "options": ["Ctrl + V", "Ctrl + Maj + V", "Ctrl + Alt + V", "Ctrl + C"],
+      "correctAnswer": 1,
+      "successMessage": "✅ Exact ! Ctrl + Maj + V colle le texte brut en adoptant le style de votre document."
     }
   ]
 }
-Compiler le manifeste : Pour enregistrer le cours dans l'application, lancez le script de compilation :
-
-bash
-node scripts/compile-courses.js
-Déployer la théorie : Mettez en ligne les nouveaux fichiers :
-
-bash
-npx firebase-tools deploy --only hosting
-2. Ajouter les Exercices du Cours (Firestore)
-Les exercices sont stockés dans la base de données Cloud Firestore, dans la collection exercices.
-
-Pour lier un exercice à un cours spécifique :
-
-- Créez un document d'exercice dans la collection exercices sur la console Firebase.
-- Ajoutez un champ course_id (de type string) contenant l'identifiant du cours défini dans le config.json (ex: bureautique-excel).
-
-### Types d'Exercices disponibles :
-Chaque document d'exercice dans la collection `exercices` peut être configuré sous deux formats :
-
-1. **Format Code (par défaut)** :
-   - L'élève doit écrire du code (HTML/CSS/JS) dans l'éditeur Monaco.
-   - Laissez le champ `type` vide ou égal à `"code"`.
-   
-2. **Format Quizz interactif (sans code)** :
-   - L'élève répond à un quizz à choix multiples (le code Monaco et l'aperçu en direct sont masqués).
-   - Ajoutez le champ **`type`** (String) avec la valeur `"quizz"`.
-   - Ajoutez le champ **`questions`** (Array of Objects) structuré ainsi :
-     ```json
-     [
-       {
-         "question": "Quelle est la touche pour annuler une action ?",
-         "options": ["Ctrl + C", "Ctrl + V", "Ctrl + Z", "Ctrl + A"],
-         "correctAnswer": 2,
-         "successMessage": "✅ Parfait ! Le raccourci Ctrl + Z annule le dernier changement."
-       }
-     ]
-     ```
-     *(Note : `correctAnswer` est un index numérique qui commence à 0).*
-
-3. **Format Mission Créative (Workspace Créatif - sans code)** :
-   - Utilisé pour les cours de création numérique ou de bureautique hors programmation (ex: design graphique, création musicale, montage vidéo, rédaction).
-   - Pour activer ce mode, le fichier de configuration `config.json` du cours doit contenir le paramètre `"workspaceType": "creative"`.
-   - L'interface masque automatiquement les éditeurs Monaco et l'iframe d'aperçu au profit d'un tableau de bord de mission simplifié (contenant l'énoncé, les liens vers les outils externes requis, l'assistant de prompt et les zones de saisie de livrables).
-
-### ⚙️ Configuration du Workspace Créatif dans Firestore
-
-Lorsque le cours est en mode `"workspaceType": "creative"`, vous pouvez affiner le comportement des livrables pour chaque document d'exercice de la collection `exercices` :
-
-- **Type de livrable (`submission_type`)** :
-  Détermine ce que l'élève doit soumettre pour validation. Ajoutez le champ `submission_type` (String) avec l'une des valeurs suivantes :
-  - `"url"` : L'élève doit uniquement fournir un lien de partage externe (ex: lien Canva, Suno, Google Docs).
-  - `"text"` : L'élève doit uniquement saisir du texte ou son prompt final.
-  - `"both"` (valeur par défaut) : Demande à la fois un lien de partage et une explication textuelle.
-
-- **Liens d'outils personnalisés (`external_tools`)** :
-  Pour afficher des boutons d'accès rapide vers des outils spécifiques, ajoutez le champ `external_tools` (Array of Objects) structuré ainsi :
-  ```json
-  [
-    { "name": "Suno AI", "url": "https://suno.com" },
-    { "name": "CapCut", "url": "https://capcut.com" }
-  ]
-  ```
-  *Note : Si vous ne spécifiez pas ce champ, l'application analyse le titre et l'énoncé de l'exercice pour suggérer automatiquement les outils appropriés (Canva, Gemini, Docs, Suno ou CapCut).*
+```
 
 ---
 
-## 🏠 Page d'Accueil et Gestion Multi-Cours
+## 🚀 4. Commandes Utiles de Déploiement
 
-L'application intègre désormais une page d'**Accueil** unifiée (qui remplace le lobby classique) :
-- **Sélecteur de cours visuel** : Tous les cours auxquels l'élève a accès s'affichent sous forme de cartes premium résumant le titre et le pitch. Une carte "Actif" signale le cours en cours de consultation.
-- **Bascule instantanée** : Cliquer sur un cours met à jour le sélecteur d'en-tête et recharge immédiatement les chapitres et les exercices correspondants.
-- **Bouton d'en-tête** : Le bouton de retour au lobby s'appelle dorénavant **Accueil** et ramène l'élève vers ce tableau de bord général.
-
----
-
-## 🔗 Association Théorie et Pratique (LMS)
-
-Le système associe automatiquement la théorie (supports Markdown) et la pratique (exercices/quizz Firestore) au sein de chaque chapitre :
-
-1. **Mapping par Chapitre** :
-   Dans Firestore, le champ **`chapitre`** de l'exercice doit contenir le titre de votre chapitre défini dans le `config.json` (ex: pour le titre de chapitre `"Introduction à JavaScript"`, vous pouvez nommer le chapitre Firestore `"CH1 — Introduction à JavaScript"` ou simplement `"Introduction à JavaScript"`). La correspondance est insensible à la casse et fonctionne par inclusion partielle.
-
-2. **Rendu dans le Lobby** :
-   - La leçon théorique s'affiche automatiquement en première position sous le chapitre.
-   - Les exercices et quizz correspondants s'affichent ensuite (les quizz s'affichant en premier).
-
-3. **Split-Screen automatique** :
-   - Lorsqu'un élève ouvre un exercice ou quizz, le système charge automatiquement le support de cours complet de son chapitre dans l'onglet **"Leçon complète"** de sa sidebar de gauche.
+| Action | Commande |
+|---|---|
+| Mettre en ligne le frontend | `npx firebase-tools deploy --only hosting` |
+| Mettre en ligne les Cloud Functions | `npx firebase-tools deploy --only functions` |
+| Synchroniser les dépendances Bun | `cd functions && bun install` |
+| Tester les fonctions en local | `cd functions && node -c index.js` |

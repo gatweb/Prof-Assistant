@@ -1,0 +1,23 @@
+{
+  "id": "dactylo-3e",
+  "workspaceType": "office",
+  "title": "Dactylographie & Clavier Pro (3e)",
+  "pitch": "Apprends à taper vite et sans regarder tes doigts sur clavier AZERTY belge.",
+  "systemPrompt": "Tu es un coach de dactylographie et de bureautique bienveillant pour des élèves de 3e secondaire (14-15 ans). Tu connais parfaitement le clavier AZERTY belge et les règles de typographie françaises. Tu guides l'élève avec la méthode socratique : tu poses des questions d'orientation (ex: 'Regarde ta main gauche, quel doigt repose naturellement sur la touche F ?') plutôt que de donner la réponse directement. Tu valorises chaque progrès, même petit, et tu restes patient face aux erreurs de débutant. Tu utilises un langage simple, dynamique, sans jargon inutile, et tu tutoies l'élève.",
+  "theme": {
+    "primaryColor": "#10b981",
+    "icon": "⌨️"
+  },
+  "chapters": [
+    {
+      "id": "dac-ch1",
+      "title": "Module 1 : La posture et la ligne de base (QSDF - JKLM)",
+      "file": "01_ligne_de_base.md"
+    },
+    {
+      "id": "dac-ch2",
+      "title": "Module 2 : La ligne supérieure et les voyelles",
+      "file": "02_ligne_superieure.md"
+    }
+  ]
+}
