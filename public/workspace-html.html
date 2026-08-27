@@ -345,6 +345,119 @@
                 </div>
             </section>
 
+            <!-- PANNEAU BUREAUTIQUE : Rendu sans Monaco pour les cours de Bureautique / Google Workspace -->
+            <section id="officeSection" class="office-section hidden">
+                <div class="office-container">
+                    
+                    <!-- Colonne Gauche : Mission & Remise de document -->
+                    <div class="office-col-left">
+                        <!-- Carte 1 : Consignes de l'Activité -->
+                        <div class="office-card">
+                            <div class="office-card-header">
+                                <h2 id="officeMissionTitle">📄 Module : Bureautique</h2>
+                            </div>
+                            <div class="office-card-body">
+                                <div id="officeMissionInstructions" class="markdown-content"></div>
+                                
+                                <div class="office-tools-section">
+                                    <span class="office-tools-label">🚀 Outils en ligne recommandés :</span>
+                                    <div id="officeToolsList" class="office-tools-list">
+                                        <a href="https://docs.google.com" target="_blank" class="office-tool-link-btn">📄 Google Docs</a>
+                                        <a href="https://drive.google.com" target="_blank" class="office-tool-link-btn">📁 Google Drive</a>
+                                        <a href="https://mail.google.com" target="_blank" class="office-tool-link-btn">✉️ Gmail</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Carte 2 : Boîte à Outils & Raccourcis -->
+                        <div class="office-card memo-card">
+                            <div class="office-card-header">
+                                <h3>⌨️ Aide-mémoire & Raccourcis clés</h3>
+                            </div>
+                            <div class="office-card-body memo-body">
+                                <div class="shortcut-pills">
+                                    <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>B</kbd> <strong>Gras</strong></span>
+                                    <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>I</kbd> <em>Italique</em></span>
+                                    <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>U</kbd> <u>Souligné</u></span>
+                                    <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>Z</kbd> Annuler</span>
+                                    <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>K</kbd> Lien</span>
+                                    <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>Maj</kbd>+<kbd>V</kbd> Coller brut</span>
+                                    <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>Entrée</kbd> Saut de page</span>
+                                </div>
+                                <div class="typo-tip">
+                                    💡 <strong>Règle typographique :</strong> N'oublie pas l'espace insécable avant les signes de ponctuation doubles (<strong>: ; ? !</strong>).
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Carte 3 : Remise du document Google Docs/Drive -->
+                        <div class="office-card">
+                            <div class="office-card-header">
+                                <h3>📤 Remise de ton travail</h3>
+                            </div>
+                            <div class="office-card-body">
+                                <div class="office-input-group">
+                                    <label for="officeDocUrlInput">🔗 Lien de partage de ton Google Doc ou Dossier Drive :</label>
+                                    <input type="url" id="officeDocUrlInput" placeholder="https://docs.google.com/document/d/..." />
+                                    <small class="helper-text">Assure-toi que les droits de partage sont réglés sur <em>"Tous les utilisateurs disposant du lien : Lecteur ou Commentateur"</em>.</small>
+                                </div>
+                                <div class="office-input-group" style="margin-top: 12px;">
+                                    <label for="officeNotesInput">💬 Commentaire ou questions pour le professeur (optionnel) :</label>
+                                    <textarea id="officeNotesInput" placeholder="Ex: J'ai appliqué les styles Titre 1 et Titre 2 et ajouté la table des matières..."></textarea>
+                                </div>
+                                <div class="office-submission-footer">
+                                    <span id="officeSubmissionFeedback"></span>
+                                    <button id="officeValidateBtn" class="btn-primary">Soumettre mon document 🚀</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Colonne Droite : Tuteur Socratique IA Bureautique -->
+                    <div class="office-col-right">
+                        <div class="office-chat-card">
+                            <div class="office-chat-header">
+                                <div class="chat-header-info">
+                                    <div class="tuteur-avatar">🧑‍🏫</div>
+                                    <div>
+                                        <h3>Tuteur Socratique Bureautique</h3>
+                                        <span class="tuteur-status-dot"></span> <span class="tuteur-status-text">En ligne pour t'aider</span>
+                                    </div>
+                                </div>
+                                <button id="officeClearChatBtn" class="btn-icon" title="Effacer l'historique de chat">🗑️</button>
+                            </div>
+
+                            <div class="office-chat-messages" id="officeChatMessages">
+                                <div class="chat-bubble assistant">
+                                    <div class="chat-bubble-content">
+                                        Bonjour ! Je suis ton tuteur d'informatique. Je suis là pour t'accompagner pas à pas dans l'apprentissage de Google Docs, Drive et des règles de typographie. Quelle manipulation souhaites-tu réaliser ?
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Suggestions de questions rapides -->
+                            <div class="office-quick-questions">
+                                <span class="quick-title">💡 Questions fréquentes :</span>
+                                <div class="quick-buttons-row">
+                                    <button class="quick-pill-btn" data-q="Comment insérer un saut de page dans Google Docs ?">📄 Saut de page</button>
+                                    <button class="quick-pill-btn" data-q="Comment appliquer un style Titre 1 ou Titre 2 ?">🏷️ Styles de titres</button>
+                                    <button class="quick-pill-btn" data-q="Comment insérer une table des matières automatique ?">📑 Sommaire</button>
+                                    <button class="quick-pill-btn" data-q="Quelle est la règle pour les espaces devant la ponctuation ?">📏 Typographie</button>
+                                </div>
+                            </div>
+
+                            <!-- Zone de saisie -->
+                            <div class="office-chat-input-row">
+                                <input type="text" id="officeChatInput" placeholder="Pose une question au tuteur..." />
+                                <button id="officeChatSendBtn" class="btn-primary">➤</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
         </main>
 
     </div><!-- fin #workspaceView -->

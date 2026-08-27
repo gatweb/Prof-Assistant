@@ -26,6 +26,7 @@
             <div class="tabs">
                 <button class="tab-link active" data-target="listView">📥 Flux de corrections</button>
                 <button class="tab-link" data-target="progressionView">📊 Suivi de progression</button>
+                <button class="tab-link" data-target="quizView">📝 Générateur de Quiz</button>
                 <button class="tab-link" data-target="configView">⚙️ Configuration</button>
             </div>
         </div>
@@ -86,6 +87,76 @@
             <div id="progressionMatrix" class="matrix-scroll-container">
                 <!-- La grille sera générée ici -->
                 <div class="loader-placeholder">Initialisation de la matrice...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Vue principale : Générateur de Quiz Google Forms -->
+    <main id="quizView" class="admin-container hidden">
+        <div class="header-actions">
+            <div>
+                <h2>📝 Générateur de Quiz & Évaluations</h2>
+                <p class="subtitle">Générez des QCM avec Gemini et créez automatiquement des formulaires auto-corrigés sur votre Google Drive.</p>
+            </div>
+        </div>
+
+        <div class="grid-config mt-24">
+            <!-- Formulaire de génération -->
+            <div class="md-card config-card">
+                <h3>✨ Paramètres du Quiz</h3>
+                <form id="generateQuizForm" class="mt-16" style="display: flex; flex-direction: column; gap: 14px;">
+                    <div class="form-group">
+                        <label for="quizTitleInput">Titre du Quiz / Évaluation :</label>
+                        <input type="text" id="quizTitleInput" class="md-input" placeholder="Ex: Évaluation 1 : Styles & Typographie dans Google Docs" required style="width: 100%;">
+                    </div>
+                    <div class="form-group">
+                        <label for="quizTopicInput">Sujet détaillé ou Notions à évaluer :</label>
+                        <textarea id="quizTopicInput" class="md-textarea" rows="3" placeholder="Ex: Les styles Titre 1 et Titre 2, la table des matières automatique, le saut de page vs saut de section, et les règles d'espaces insécables." required style="width: 100%; font-family: inherit;"></textarea>
+                    </div>
+                    <div style="display: flex; gap: 16px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="quizLevelInput">Niveau :</label>
+                            <input type="text" id="quizLevelInput" class="md-input" value="3e secondaire (14-15 ans)" style="width: 100%;">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="quizQuestionsCount">Nombre de questions :</label>
+                            <select id="quizQuestionsCount" class="md-input" style="width: 100%;">
+                                <option value="5">5 questions (Rapide)</option>
+                                <option value="10" selected>10 questions (Standard)</option>
+                                <option value="15">15 questions (Complet)</option>
+                                <option value="20">20 questions (Examen)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" id="generateQuizSubmitBtn" class="btn-primary" style="align-self: flex-start; margin-top: 8px;">
+                        🚀 Générer le QCM & Publier sur Google Forms
+                    </button>
+                </form>
+                <div id="quizGenerationStatus" class="toggle-status-label mt-12" style="margin-left: 0;"></div>
+            </div>
+
+            <!-- Résultat et Prévisualisation -->
+            <div id="quizResultCard" class="md-card config-card hidden mt-24">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 id="resultQuizTitle">🎉 Quiz Généré avec Succès</h3>
+                    <span id="resultQuizBadge" class="badge" style="background: #22c55e; color: white;">Prêt</span>
+                </div>
+                
+                <div id="quizLinksContainer" class="mt-16" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <a id="quizEditLink" href="#" target="_blank" class="btn-primary" style="text-decoration: none;">
+                        ✏️ Ouvrir dans Google Forms (Édition)
+                    </a>
+                    <a id="quizResponderLink" href="#" target="_blank" class="btn-secondary" style="text-decoration: none;">
+                        🔗 Lien de réponse pour les élèves
+                    </a>
+                </div>
+
+                <div class="mt-24">
+                    <h4>📋 Aperçu des questions générées :</h4>
+                    <div id="quizQuestionsPreview" class="mt-12" style="display: flex; flex-direction: column; gap: 14px;">
+                        <!-- Injecté dynamiquement -->
+                    </div>
+                </div>
             </div>
         </div>
     </main>

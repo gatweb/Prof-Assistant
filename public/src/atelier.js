@@ -706,14 +706,17 @@ async function openExercise(exerciceId) {
         // Déterminer le type d'affichage
         const selectedCourse = courseManager.getSelectedCourse();
         const isCreativeCourse = selectedCourse && selectedCourse.workspaceType === 'creative';
+        const isOfficeCourse = selectedCourse && (selectedCourse.workspaceType === 'office' || selectedCourse.workspaceType === 'bureautique');
         const isQuizz = exData.type === 'quizz';
         const editorSection = document.getElementById('editorSection');
         const resizeHandle = document.getElementById('resizeHandle');
         const previewSection = document.getElementById('previewSection');
         const quizzSection = document.getElementById('quizzSection');
         const creativeSection = document.getElementById('creativeSection');
+        const officeSection = document.getElementById('officeSection');
 
         if (creativeSection) creativeSection.classList.add('hidden');
+        if (officeSection) officeSection.classList.add('hidden');
         if (quizzSection) quizzSection.classList.add('hidden');
         if (editorSection) editorSection.classList.add('hidden');
         if (resizeHandle) resizeHandle.classList.add('hidden');
@@ -724,6 +727,42 @@ async function openExercise(exerciceId) {
             if (submitBtn) submitBtn.classList.add('hidden');
             
             startQuizz(exData);
+        } else if (isOfficeCourse) {
+            if (officeSection) officeSection.classList.remove('hidden');
+            if (submitBtn) submitBtn.classList.add('hidden');
+            
+            initOfficeWorkspace(exData, latestSub);
+
+            // Mettre à jour l'affichage du bouton de validation bureautique
+            const officeValidateBtn = document.getElementById('officeValidateBtn');
+            const officeSubmissionFeedback = document.getElementById('officeSubmissionFeedback');
+            if (officeValidateBtn) {
+                if (isValidated) {
+                    officeValidateBtn.textContent = `Document validé ! (${subScore}/100) 🎉`;
+                    officeValidateBtn.disabled = true;
+                    if (officeSubmissionFeedback) {
+                        officeSubmissionFeedback.textContent = "✅ Ce travail a été validé par le professeur.";
+                        officeSubmissionFeedback.style.color = "#16a34a";
+                    }
+                } else if (isPending) {
+                    officeValidateBtn.textContent = "⏳ En attente de validation...";
+                    officeValidateBtn.disabled = true;
+                    if (officeSubmissionFeedback) {
+                        officeSubmissionFeedback.textContent = "⏳ Document soumis. En attente de validation par le professeur.";
+                        officeSubmissionFeedback.style.color = "#475569";
+                    }
+                } else if (isRevision) {
+                    officeValidateBtn.textContent = "Soumettre à nouveau 🚀";
+                    officeValidateBtn.disabled = false;
+                    if (officeSubmissionFeedback) {
+                        officeSubmissionFeedback.textContent = "🔄 Corrections demandées. Consulte le tuteur IA.";
+                        officeSubmissionFeedback.style.color = "#ea580c";
+                    }
+                } else {
+                    officeValidateBtn.textContent = "Soumettre mon document 🚀";
+                    officeValidateBtn.disabled = false;
+                }
+            }
         } else if (isCreativeCourse) {
             if (creativeSection) creativeSection.classList.remove('hidden');
             if (submitBtn) submitBtn.classList.add('hidden');
@@ -1775,9 +1814,30 @@ function listenForProfFeedback(docId) {
             // 3. Mettre à jour les boutons du workspace en temps réel
             const selectedCourse = courseManager.getSelectedCourse();
             const isCreativeCourse = selectedCourse && selectedCourse.workspaceType === 'creative';
+            const isOfficeCourse = selectedCourse && (selectedCourse.workspaceType === 'office' || selectedCourse.workspaceType === 'bureautique');
             const subScore = data.note_suggeree !== undefined ? data.note_suggeree : (data.note || 100);
 
-            if (isCreativeCourse) {
+            if (isOfficeCourse) {
+                const officeValidateBtn = document.getElementById('officeValidateBtn');
+                const officeSubmissionFeedback = document.getElementById('officeSubmissionFeedback');
+                if (officeValidateBtn) {
+                    if (isValidated) {
+                        officeValidateBtn.textContent = `Document validé ! (${subScore}/100) 🎉`;
+                        officeValidateBtn.disabled = true;
+                        if (officeSubmissionFeedback) {
+                            officeSubmissionFeedback.textContent = "✅ Ce travail a été validé par le professeur.";
+                            officeSubmissionFeedback.style.color = "#16a34a";
+                        }
+                    } else if (isRevision) {
+                        officeValidateBtn.textContent = "Soumettre à nouveau 🚀";
+                        officeValidateBtn.disabled = false;
+                        if (officeSubmissionFeedback) {
+                            officeSubmissionFeedback.textContent = "🔄 Corrections demandées. Consulte le tuteur IA.";
+                            officeSubmissionFeedback.style.color = "#ea580c";
+                        }
+                    }
+                }
+            } else if (isCreativeCourse) {
                 const creativeValidateBtn = document.getElementById('creativeValidateBtn');
                 const creativeSubmissionFeedback = document.getElementById('creativeSubmissionFeedback');
                 if (creativeValidateBtn) {
@@ -2810,4 +2870,262 @@ if (creativeValidateBtn) {
         }
     });
 }
+
+/* =========================================================
+   ESPACE BUREAUTIQUE — INITIALISATION & LOGIQUE CHAT/DEVOIR
+   ========================================================= */
+
+let officeChatHistory = [];
+
+function initOfficeWorkspace(exData, latestSub = null) {
+    const officeMissionTitle = document.getElementById('officeMissionTitle');
+    const officeMissionInstructions = document.getElementById('officeMissionInstructions');
+    const officeDocUrlInput = document.getElementById('officeDocUrlInput');
+    const officeNotesInput = document.getElementById('officeNotesInput');
+    const officeValidateBtn = document.getElementById('officeValidateBtn');
+
+    if (officeMissionTitle) {
+        officeMissionTitle.textContent = exData.titre || 'Module Bureautique';
+    }
+
+    if (officeMissionInstructions && typeof window.marked !== 'undefined') {
+        officeMissionInstructions.innerHTML = window.marked.parse(exData.enonce_md || exData.consigne || 'Consultez les objectifs du cours.');
+    }
+
+    // Récupération des données soumises ou brouillon
+    let savedUrl = '';
+    let savedNotes = '';
+
+    if (latestSub && latestSub.code_eleve) {
+        const code = latestSub.code_eleve;
+        const linkMatch = code.match(/\[Lien Document\]\s*:\s*([^\n]+)/);
+        if (linkMatch) {
+            savedUrl = linkMatch[1].trim();
+            if (savedUrl === 'Aucun') savedUrl = '';
+        }
+        const textSplit = code.split(/\[Commentaires élève\]\s*:\s*\n?/);
+        if (textSplit.length > 1) {
+            savedNotes = textSplit[1].trim();
+            if (savedNotes === 'Aucun') savedNotes = '';
+        }
+    }
+
+    if (!savedUrl && !savedNotes) {
+        const savedRaw = localStorage.getItem(`office_draft_${exData.id}`);
+        if (savedRaw) {
+            try {
+                const parsed = JSON.parse(savedRaw);
+                savedUrl = parsed.url || '';
+                savedNotes = parsed.notes || '';
+            } catch (e) { }
+        }
+    }
+
+    if (officeDocUrlInput) officeDocUrlInput.value = savedUrl;
+    if (officeNotesInput) officeNotesInput.value = savedNotes;
+
+    // Auto-save brouillon
+    const saveOfficeDraft = () => {
+        const draft = {
+            url: officeDocUrlInput ? officeDocUrlInput.value.trim() : '',
+            notes: officeNotesInput ? officeNotesInput.value.trim() : ''
+        };
+        localStorage.setItem(`office_draft_${exData.id}`, JSON.stringify(draft));
+    };
+
+    if (officeDocUrlInput) officeDocUrlInput.oninput = saveOfficeDraft;
+    if (officeNotesInput) officeNotesInput.oninput = saveOfficeDraft;
+}
+
+// Fonction d'ajout de bulle de chat bureautique
+function appendOfficeMessage(text, role = 'assistant') {
+    const messagesEl = document.getElementById('officeChatMessages');
+    if (!messagesEl) return;
+
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${role}`;
+    
+    const content = document.createElement('div');
+    content.className = 'chat-bubble-content';
+
+    if (typeof window.marked !== 'undefined') {
+        content.innerHTML = window.marked.parse(text);
+    } else {
+        content.textContent = text;
+    }
+
+    bubble.appendChild(content);
+    messagesEl.appendChild(bubble);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+// Envoi d'une question au tuteur bureautique
+async function sendOfficeChatMessage(customQuestion = null) {
+    const inputEl = document.getElementById('officeChatInput');
+    const sendBtn = document.getElementById('officeChatSendBtn');
+    const question = (customQuestion || (inputEl ? inputEl.value : '')).trim();
+
+    if (!question) return;
+
+    if (inputEl && !customQuestion) {
+        inputEl.value = '';
+    }
+
+    // Afficher la bulle utilisateur
+    appendOfficeMessage(question, 'user');
+
+    if (sendBtn) sendBtn.disabled = true;
+
+    // Historique conversationnel
+    officeChatHistory.push({ role: 'user', parts: [{ text: question }] });
+
+    const selectedCourse = courseManager.getSelectedCourse();
+    const systemPromptCustom = selectedCourse ? selectedCourse.systemPrompt : null;
+
+    try {
+        const tuteurFn = httpsCallable(functions, 'interrogerTuteur');
+        const res = await tuteurFn({
+            question: question,
+            historique: officeChatHistory.slice(-8), // 8 derniers messages
+            id_exercice: currentExercice ? currentExercice.id : 'general',
+            system_prompt_custom: systemPromptCustom
+        });
+
+        const reply = res.data.reponse || "Je suis à ton écoute pour toute question sur la bureautique.";
+        officeChatHistory.push({ role: 'model', parts: [{ text: reply }] });
+        appendOfficeMessage(reply, 'assistant');
+
+    } catch (err) {
+        console.error('[Office Chat] Erreur:', err);
+        appendOfficeMessage("Désolé, je rencontre une petite difficulté de connexion. Réessaie dans un instant !", 'assistant');
+    } finally {
+        if (sendBtn) sendBtn.disabled = false;
+    }
+}
+
+// Écouteurs pour le Chat Bureautique
+const officeChatSendBtn = document.getElementById('officeChatSendBtn');
+const officeChatInput = document.getElementById('officeChatInput');
+const officeClearChatBtn = document.getElementById('officeClearChatBtn');
+
+if (officeChatSendBtn) {
+    officeChatSendBtn.addEventListener('click', () => sendOfficeChatMessage());
+}
+
+if (officeChatInput) {
+    officeChatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendOfficeChatMessage();
+        }
+    });
+}
+
+if (officeClearChatBtn) {
+    officeClearChatBtn.addEventListener('click', () => {
+        const messagesEl = document.getElementById('officeChatMessages');
+        if (messagesEl) {
+            messagesEl.innerHTML = `
+                <div class="chat-bubble assistant">
+                    <div class="chat-bubble-content">
+                        Historique réinitialisé ! Comment puis-je t'aider sur ton document aujourd'hui ?
+                    </div>
+                </div>
+            `;
+        }
+        officeChatHistory = [];
+    });
+}
+
+// Boutons de questions rapides
+document.querySelectorAll('.quick-pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const q = btn.getAttribute('data-q');
+        if (q) sendOfficeChatMessage(q);
+    });
+});
+
+// Soumission du travail de Bureautique
+const officeValidateBtn = document.getElementById('officeValidateBtn');
+if (officeValidateBtn) {
+    officeValidateBtn.addEventListener('click', async () => {
+        if (!currentExercice) return;
+
+        const docUrlInput = document.getElementById('officeDocUrlInput');
+        const notesInput = document.getElementById('officeNotesInput');
+        const urlVal = docUrlInput ? docUrlInput.value.trim() : '';
+        const notesVal = notesInput ? notesInput.value.trim() : '';
+        const feedbackEl = document.getElementById('officeSubmissionFeedback');
+
+        if (!urlVal) {
+            alert("Veuillez coller le lien de votre document Google Docs ou Drive avant de soumettre !");
+            return;
+        }
+
+        officeValidateBtn.disabled = true;
+        officeValidateBtn.innerHTML = "⏳ Envoi en cours...";
+
+        if (feedbackEl) {
+            feedbackEl.textContent = "⏳ Enregistrement du travail...";
+            feedbackEl.style.color = "#475569";
+        }
+
+        const combinedSubmission = `[Lien Document] : ${urlVal}\n\n[Commentaires élève] :\n${notesVal || 'Aucun'}`;
+        const userEmail = userEmailEl?.textContent || 'eleve@ecole.be';
+
+        try {
+            const corrigeFn = httpsCallable(functions, 'corrigerDevoir');
+            const response = await corrigeFn({
+                code_eleve: combinedSubmission,
+                id_exercice: currentExercice.id,
+                nom_eleve: userEmail.split('@')[0],
+                type: 'office_submission',
+                titre_exercice: currentExercice.titre || 'Module Bureautique',
+                chapitre: currentExercice.chapitre || '',
+                code_html: '',
+                code_css: '',
+                code_js: '',
+                autonomie: {
+                    indices_niv1: 0,
+                    indices_niv2: 0,
+                    indices_niv3: 0,
+                    questions_ia: officeChatHistory.length,
+                    copie_colle_ops: 0,
+                    copie_colle_caracteres: 0,
+                    sorties_page: 0,
+                    temps_hors_focus_sec: 0
+                }
+            });
+
+            const docId = response.data.docId;
+            const evalIA = response.data.evaluation;
+
+            if (feedbackEl) {
+                feedbackEl.textContent = "✅ Document soumis avec succès !";
+                feedbackEl.style.color = "#16a34a";
+            }
+
+            if (evalIA?.feedback_eleve) {
+                appendOfficeMessage(
+                    `✨ **Retour de ton Tuteur**\n\n${evalIA.feedback_eleve}\n\n_Ton travail a été enregistré pour le professeur._`,
+                    'assistant'
+                );
+            } else {
+                appendOfficeMessage("📬 Ton travail a bien été enregistré pour le professeur !", 'assistant');
+            }
+
+        } catch (error) {
+            console.error('[Office Submit] Erreur :', error);
+            if (feedbackEl) {
+                feedbackEl.textContent = "❌ Erreur lors de l'envoi";
+                feedbackEl.style.color = "#ef4444";
+            }
+            appendOfficeMessage("❌ Erreur lors de l'envoi du document. Vérifie ta connexion et réessaie.", 'assistant');
+        } finally {
+            officeValidateBtn.disabled = false;
+            officeValidateBtn.innerHTML = "Soumettre mon document 🚀";
+        }
+    });
+}
+
 

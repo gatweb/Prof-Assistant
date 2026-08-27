@@ -1,5 +1,7 @@
 import { listenToAuthStatus, logoutUser } from './firebase/auth.js';
 import { getSubmissionsToGrade, updateSubmissionStatus, generateMockSubmissions, generateMockCourses, db } from './firebase/db.js';
+import { functions } from './firebase/config.js';
+import { httpsCallable } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-functions.js";
 import { formatDate } from './utils.js';
 import { doc, onSnapshot, collection, addDoc, query, where, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
@@ -603,4 +605,100 @@ if (createCourseForm) {
         }
     });
 }
+
+// ============================================
+// 9. GÉNÉRATEUR DE QUIZ GOOGLE FORMS (IA)
+// ============================================
+const generateQuizForm = document.getElementById('generateQuizForm');
+const generateQuizSubmitBtn = document.getElementById('generateQuizSubmitBtn');
+const quizGenerationStatus = document.getElementById('quizGenerationStatus');
+const quizResultCard = document.getElementById('quizResultCard');
+const resultQuizTitle = document.getElementById('resultQuizTitle');
+const quizEditLink = document.getElementById('quizEditLink');
+const quizResponderLink = document.getElementById('quizResponderLink');
+const quizQuestionsPreview = document.getElementById('quizQuestionsPreview');
+
+if (generateQuizForm) {
+    generateQuizForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const title = document.getElementById('quizTitleInput').value.trim();
+        const topic = document.getElementById('quizTopicInput').value.trim();
+        const level = document.getElementById('quizLevelInput').value.trim();
+        const count = parseInt(document.getElementById('quizQuestionsCount').value, 10) || 10;
+
+        if (!topic) return;
+
+        generateQuizSubmitBtn.disabled = true;
+        generateQuizSubmitBtn.innerHTML = "⏳ Génération IA & Création Google Forms...";
+        quizGenerationStatus.textContent = "Génération du quiz en cours avec Gemini...";
+        quizGenerationStatus.style.color = "orange";
+
+        try {
+            const quizFn = httpsCallable(functions, 'genererQuizGoogleFormsIA');
+            const result = await quizFn({
+                sujet: topic,
+                titreQuiz: title || "Quiz Bureautique",
+                niveau: level,
+                nombreQuestions: count
+            });
+
+            const data = result.data;
+
+            quizGenerationStatus.textContent = data.message || "✅ Quiz généré avec succès !";
+            quizGenerationStatus.style.color = "green";
+
+            // Affichage des résultats
+            if (quizResultCard) {
+                quizResultCard.classList.remove('hidden');
+
+                if (resultQuizTitle) {
+                    resultQuizTitle.textContent = `🎉 Quiz : ${data.quizData?.titre || title}`;
+                }
+
+                if (data.editUri) {
+                    quizEditLink.href = data.editUri;
+                    quizEditLink.style.display = "inline-flex";
+                } else {
+                    quizEditLink.style.display = "none";
+                }
+
+                if (data.responderUri) {
+                    quizResponderLink.href = data.responderUri;
+                    quizResponderLink.style.display = "inline-flex";
+                } else {
+                    quizResponderLink.style.display = "none";
+                }
+
+                // Affichage du détail des questions générées
+                if (quizQuestionsPreview && data.quizData?.questions) {
+                    quizQuestionsPreview.innerHTML = data.quizData.questions.map((q, idx) => `
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px;">
+                            <div style="font-weight: 700; color: #1e293b; margin-bottom: 8px;">
+                                ${idx + 1}. ${q.intitule}
+                            </div>
+                            <ul style="margin: 0 0 8px 0; padding-left: 20px; font-size: 13px; color: #475569;">
+                                ${q.options.map(opt => `
+                                    <li style="${opt === q.bonne_reponse ? 'font-weight: 700; color: #16a34a;' : ''}">
+                                        ${opt} ${opt === q.bonne_reponse ? '✓ (Bonne réponse)' : ''}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                            ${q.explication ? `<div style="font-size: 12px; color: #64748b; background: #eff6ff; padding: 6px 10px; border-radius: 6px;">💡 Feedback : ${q.explication}</div>` : ''}
+                        </div>
+                    `).join('');
+                }
+            }
+
+        } catch (err) {
+            console.error('[Quiz Generator] Erreur :', err);
+            quizGenerationStatus.textContent = `❌ Erreur : ${err.message}`;
+            quizGenerationStatus.style.color = "red";
+        } finally {
+            generateQuizSubmitBtn.disabled = false;
+            generateQuizSubmitBtn.innerHTML = "🚀 Générer le QCM & Publier sur Google Forms";
+        }
+    });
+}
+
 

@@ -69,13 +69,15 @@ class ProgressionManager {
                 tabLinks.forEach(l => l.classList.remove('active'));
                 link.classList.add('active');
 
-                // Toggle visibility of mains
-                document.getElementById('listView').classList.add('hidden');
-                document.getElementById('progressionView').classList.add('hidden');
-                const configView = document.getElementById('configView');
-                if (configView) configView.classList.add('hidden');
+                // Toggle visibility of all main containers
+                document.querySelectorAll('main.admin-container').forEach(view => {
+                    view.classList.add('hidden');
+                });
                 
-                document.getElementById(targetId).classList.remove('hidden');
+                const targetView = document.getElementById(targetId);
+                if (targetView) {
+                    targetView.classList.remove('hidden');
+                }
 
                 if (targetId === 'progressionView') {
                     this.loadData();

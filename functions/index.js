@@ -1,14 +1,18 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const { GoogleGenAI } = require("@google/genai");
+const { google } = require("googleapis");
 const admin = require("firebase-admin");
 
 admin.initializeApp();
 
 const geminiApiKey = defineSecret("GEMINI_API_KEY");
+const googleClientId = defineSecret("GOOGLE_CLIENT_ID");
+const googleClientSecret = defineSecret("GOOGLE_CLIENT_SECRET");
+const googleRefreshToken = defineSecret("GOOGLE_TEACHER_REFRESH_TOKEN");
 
 /**
- * `corrigerDevoir` — Analyse le code et injecte la théorie de l'exercice dans le prompt.
+ * `corrigerDevoir` — Analyse le travail/code et injecte la théorie de l'exercice dans le prompt.
  */
 exports.corrigerDevoir = onCall({ 
     secrets: [geminiApiKey],
@@ -22,17 +26,26 @@ exports.corrigerDevoir = onCall({
 
     try {
         const exDoc = await admin.firestore().collection("exercices").doc(id_exercice).get();
-        if (!exDoc.exists) throw new HttpsError("not-found", "Exercice introuvable.");
-        const exData = exDoc.data();
+        const exData = exDoc.exists ? exDoc.data() : {};
 
         const ai = new GoogleGenAI({ apiKey: geminiApiKey.value() });
         
         const isCreative = request.data.type === 'creative_submission' || exData.type === 'creative';
-        const role = isCreative ? "un directeur artistique et mentor créatif" : "un professeur de programmation";
-        const labelSoumission = isCreative ? "le travail ou lien de création de l'élève" : "le code soumis par l'élève";
-        const directives = isCreative 
-            ? "- Analyse le lien ou texte soumis.\n- Sois très encourageant et donne des conseils de Prompt Engineering ou d'amélioration créative.\n- Pose des questions socratiques de guidage." 
-            : "- Ne donne JAMAIS la solution finale.\n- Utilise le contexte théorique fourni pour pointer les erreurs.";
+        const isOffice = request.data.type === 'office_submission' || exData.type === 'office';
+        
+        let role = "un professeur de programmation";
+        let labelSoumission = "le code soumis par l'élève";
+        let directives = "- Ne donne JAMAIS la solution finale.\n- Utilise le contexte théorique fourni pour pointer les erreurs.";
+
+        if (isCreative) {
+            role = "un directeur artistique et mentor créatif";
+            labelSoumission = "le travail ou lien de création de l'élève";
+            directives = "- Analyse le lien ou texte soumis.\n- Sois très encourageant et donne des conseils de Prompt Engineering ou d'amélioration créative.\n- Pose des questions socratiques de guidage.";
+        } else if (isOffice) {
+            role = "un professeur de bureautique et de communication numérique bienveillant pour des élèves de 3e secondaire";
+            labelSoumission = "le lien du document Google Docs/Drive ou le texte soumis par l'élève";
+            directives = "- Analyse la réponse ou le lien fourni par l'élève.\n- Félicite les efforts et vérifie le respect des consignes (mise en page, styles, typographie, organisation des dossiers, partages).\n- Donne des astuces pratiques et des raccourcis clavier utiles.\n- Pose des questions d'approfondissement socratiques.";
+        }
 
         const promptSysteme = `Tu es ${role} rigoureux et bienveillant.
 Contexte théorique de l'exercice/mission : "${exData.theorie_md || ''}"
@@ -217,3 +230,260 @@ Ta réponse doit obligatoirement être un objet JSON valide avec cette structure
         throw new HttpsError("internal", "Erreur lors de la génération IA.");
     }
 });
+
+/**
+ * Initialise le client OAuth2 avec les identifiants Enseignant
+ */
+function getGoogleFormsClient(customAccessToken) {
+    if (customAccessToken) {
+        const oauth2Client = new google.auth.OAuth2();
+        oauth2Client.setCredentials({ access_token: customAccessToken });
+        return google.forms({ version: "v1", auth: oauth2Client });
+    }
+
+    try {
+        const clientId = googleClientId.value();
+        const clientSecret = googleClientSecret.value();
+        const refreshToken = googleRefreshToken.value();
+
+        if (!clientId || !clientSecret || !refreshToken) {
+            throw new Error("Secrets Google OAuth non configurés.");
+        }
+
+        const oauth2Client = new google.auth.OAuth2(
+            clientId,
+            clientSecret,
+            "https://developers.google.com/oauthplayground"
+        );
+        oauth2Client.setCredentials({ refresh_token: refreshToken });
+        return google.forms({ version: "v1", auth: oauth2Client });
+    } catch (e) {
+        console.warn("[Google Forms] Secrets non initialisés ou indisponibles:", e.message);
+        return null;
+    }
+}
+
+/**
+ * `creerFormulaireGoogleForms` — Crée un formulaire Google Forms en mode Quiz.
+ */
+exports.creerFormulaireGoogleForms = onCall({
+    secrets: [googleClientId, googleClientSecret, googleRefreshToken],
+    region: "europe-west1",
+    cors: true
+}, async (request) => {
+    if (!request.auth) throw new HttpsError("unauthenticated", "Connexion requise.");
+
+    const { titre, description, accessToken } = request.data;
+    const forms = getGoogleFormsClient(accessToken);
+
+    if (!forms) {
+        throw new HttpsError(
+            "failed-precondition",
+            "Configuration OAuth requise. Veuillez configurer GOOGLE_TEACHER_REFRESH_TOKEN dans Firebase Secrets ou fournir un accessToken valide."
+        );
+    }
+
+    try {
+        // 1. Création du formulaire
+        const createRes = await forms.forms.create({
+            requestBody: {
+                info: {
+                    title: titre || "Évaluation Bureautique - 3e",
+                    documentTitle: titre || "Évaluation Bureautique"
+                }
+            }
+        });
+
+        const formId = createRes.data.formId;
+
+        // 2. Activer le mode Quiz (auto-correction)
+        await forms.forms.batchUpdate({
+            formId: formId,
+            requestBody: {
+                requests: [
+                    {
+                        updateSettings: {
+                            settings: {
+                                quizSettings: { isQuiz: true }
+                            },
+                            updateMask: "quizSettings.isQuiz"
+                        }
+                    }
+                ]
+            }
+        });
+
+        return {
+            success: true,
+            formId: formId,
+            responderUri: createRes.data.responderUri,
+            editUri: `https://docs.google.com/forms/d/${formId}/edit`
+        };
+    } catch (error) {
+        console.error("[creerFormulaireGoogleForms] Erreur:", error);
+        throw new HttpsError("internal", error.message || "Erreur lors de la création du formulaire Google Forms.");
+    }
+});
+
+/**
+ * `genererQuizGoogleFormsIA` — Utilise Gemini pour générer des questions structurées
+ * et crée automatiquement le Google Form complet en mode Quiz dans le Drive du prof.
+ */
+exports.genererQuizGoogleFormsIA = onCall({
+    secrets: [geminiApiKey, googleClientId, googleClientSecret, googleRefreshToken],
+    region: "europe-west1",
+    cors: true
+}, async (request) => {
+    if (!request.auth) throw new HttpsError("unauthenticated", "Connexion requise.");
+
+    const { 
+        sujet, 
+        niveau = "3e secondaire (14-15 ans)", 
+        nombreQuestions = 10,
+        titreQuiz = "Quiz Bureautique",
+        accessToken 
+    } = request.data;
+
+    if (!sujet) throw new HttpsError("invalid-argument", "Le sujet du quiz est obligatoire.");
+
+    try {
+        const ai = new GoogleGenAI({ apiKey: geminiApiKey.value() });
+
+        // 1. Générer les questions via Gemini
+        const systemInstruction = `Tu es un concepteur pédagogique expert en Bureautique (Google Docs, Drive, Sheets, Gmail, règles de typographie, dactylographie, raccourcis).
+Tu dois générer un questionnaire à choix multiples (QCM) de ${nombreQuestions} questions pour le niveau : ${niveau}.
+Chaque question doit avoir :
+- un intitulé clair et précis
+- 4 options distinctes
+- 1 seule bonne réponse (exactMatch)
+- une explication pédagogique (feedback) expliquant pourquoi c'est la bonne réponse
+- 1 point par question
+
+Format de sortie OBLIGATOIRE : Un JSON pur respectant cette structure exacte :
+{
+  "titre": "${titreQuiz}",
+  "description": "Évaluation formative sur ${sujet}",
+  "questions": [
+    {
+      "intitule": "Comment insérer un saut de page dans Google Docs ?",
+      "options": [
+        "Menu Insertion > Saut > Saut de page",
+        "Menu Format > Page > Saut",
+        "Menu Outils > Sauts",
+        "Double-clic en bas de page"
+      ],
+      "bonne_reponse": "Menu Insertion > Saut > Saut de page",
+      "explication": "Le menu Insertion permet d'ajouter tous les nouveaux éléments structurels au document, ou via le raccourci Ctrl + Entrée."
+    }
+  ]
+}`;
+
+        const geminiRes = await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: `Génère le QCM de ${nombreQuestions} questions sur le sujet suivant : "${sujet}".`,
+            config: {
+                systemInstruction: systemInstruction,
+                temperature: 0.3
+            }
+        });
+
+        const jsonMatch = geminiRes.text.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+            throw new Error("L'IA n'a pas retourné de JSON valide.");
+        }
+
+        const quizData = JSON.parse(jsonMatch[0]);
+
+        // 2. Création et insertion dans Google Forms
+        const forms = getGoogleFormsClient(accessToken);
+        
+        // Si les credentials Google ne sont pas encore configurés, renvoyer les données structurées pour prévisualisation
+        if (!forms) {
+            return {
+                success: true,
+                mode: "preview_only",
+                message: "Quiz généré avec succès par l'IA ! Configurez vos clés Google API pour la publication automatique sur Google Drive.",
+                quizData: quizData
+            };
+        }
+
+        // Création du formulaire
+        const createRes = await forms.forms.create({
+            requestBody: {
+                info: {
+                    title: quizData.titre || titreQuiz,
+                    documentTitle: quizData.titre || titreQuiz
+                }
+            }
+        });
+
+        const formId = createRes.data.formId;
+
+        // Préparation des requêtes de mise à jour (Quiz mode + ajout des items)
+        const requests = [
+            {
+                updateSettings: {
+                    settings: {
+                        quizSettings: { isQuiz: true }
+                    },
+                    updateMask: "quizSettings.isQuiz"
+                }
+            }
+        ];
+
+        (quizData.questions || []).forEach((q, index) => {
+            requests.push({
+                createItem: {
+                    item: {
+                        title: q.intitule,
+                        description: q.explication ? `💡 Astuce : ${q.explication}` : undefined,
+                        questionItem: {
+                            question: {
+                                required: true,
+                                grading: {
+                                    pointValue: 1,
+                                    correctAnswers: {
+                                        answers: [{ value: q.bonne_reponse }]
+                                    },
+                                    whenRight: {
+                                        generalFeedback: { text: "Excellent ! 🎯" }
+                                    },
+                                    whenWrong: {
+                                        generalFeedback: { text: q.explication || "Vérifie les menus ou raccourcis dans ton cours." }
+                                    }
+                                },
+                                choiceQuestion: {
+                                    type: "RADIO",
+                                    options: q.options.map(opt => ({ value: opt })),
+                                    shuffle: true
+                                }
+                            }
+                        }
+                    },
+                    location: {
+                        index: index
+                    }
+                }
+            });
+        });
+
+        await forms.forms.batchUpdate({
+            formId: formId,
+            requestBody: { requests }
+        });
+
+        return {
+            success: true,
+            mode: "created",
+            formId: formId,
+            responderUri: createRes.data.responderUri,
+            editUri: `https://docs.google.com/forms/d/${formId}/edit`,
+            quizData: quizData
+        };
+
+    } catch (error) {
+        console.error("[genererQuizGoogleFormsIA] Erreur:", error);
+        throw new HttpsError("internal", error.message || "Erreur lors de la génération du quiz.");
+    }
+});
+
