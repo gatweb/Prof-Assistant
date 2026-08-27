@@ -60,25 +60,40 @@ Structure JSON :
 }`;
 
         const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
+            model: "gemini-2.5-flash",
             contents: `Voici la soumission de l'élève (${labelSoumission}) :\n\n${code_eleve}`,
             config: { systemInstruction: promptSysteme, temperature: 0.2 }
         });
 
-        const jsonMatch = response.text.match(/\{[\s\S]*\}/);
-        const jsonEvaluation = JSON.parse(jsonMatch ? jsonMatch[0] : response.text);
+        let jsonEvaluation = {
+            feedback_eleve: "Travail bien reçu ! Ton professeur va relire ta soumission.",
+            note_suggeree: 85,
+            erreurs_detectees: []
+        };
+
+        try {
+            const jsonMatch = response.text.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                jsonEvaluation = JSON.parse(jsonMatch[0]);
+            }
+        } catch (parseErr) {
+            console.warn("[corrigerDevoir] Fallback JSON parse :", parseErr.message);
+            if (response.text) {
+                jsonEvaluation.feedback_eleve = response.text;
+            }
+        }
 
         const submissionData = {
             code_eleve: code_eleve,
             id_exercice: id_exercice,
             exercice_id: id_exercice,
-            titre_exercice: exData.titre,
+            titre_exercice: exData.titre || "Exercice",
             email_eleve: request.auth.token.email,
             nom_eleve: nom_eleve || request.auth.token.name || request.auth.token.email.split('@')[0] || "Anonyme",
             status: "a_valider",
             feedback_ia: jsonEvaluation.feedback_eleve,
-            note_suggeree: jsonEvaluation.note_suggeree,
-            erreurs_detectees: jsonEvaluation.erreurs_detectees,
+            note_suggeree: jsonEvaluation.note_suggeree || 80,
+            erreurs_detectees: jsonEvaluation.erreurs_detectees || [],
             date_soumission: new Date().toISOString(),
             autonomie: request.data.autonomie || {}
         };
@@ -88,7 +103,7 @@ Structure JSON :
 
     } catch (error) {
         console.error("[corrigerDevoir] Erreur:", error);
-        throw new HttpsError("internal", "Erreur lors de la correction.");
+        throw new HttpsError("internal", error.message || "Erreur lors de la correction.");
     }
 });
 
@@ -103,41 +118,51 @@ exports.interrogerTuteur = onCall({
     if (!request.auth) throw new HttpsError("unauthenticated", "Connexion requise.");
 
     const { question, historique, id_exercice, system_prompt_custom } = request.data;
-    if (!question || !id_exercice) throw new HttpsError("invalid-argument", "Données manquantes.");
+    if (!question) throw new HttpsError("invalid-argument", "Question manquante.");
 
     try {
-        const exDoc = await admin.firestore().collection("exercices").doc(id_exercice).get();
-        const exData = exDoc.exists ? exDoc.data() : null;
+        let exData = null;
+        if (id_exercice && id_exercice !== 'general') {
+            const exDoc = await admin.firestore().collection("exercices").doc(id_exercice).get();
+            if (exDoc.exists) exData = exDoc.data();
+        }
 
         const ai = new GoogleGenAI({ apiKey: geminiApiKey.value() });
 
-        const contentsArray = (historique || []).map(msg => ({
-            role: msg.role,
-            parts: [{ text: msg.parts[0].text }]
-        }));
-        contentsArray.push({ role: "user", parts: [{ text: question }] });
+        const contentsArray = [];
+        (historique || []).forEach(msg => {
+            const txt = msg.parts?.[0]?.text || msg.text || (typeof msg.content === 'string' ? msg.content : '');
+            if (txt) {
+                contentsArray.push({
+                    role: msg.role === 'assistant' || msg.role === 'model' ? 'model' : 'user',
+                    parts: [{ text: String(txt) }]
+                });
+            }
+        });
+        contentsArray.push({ role: "user", parts: [{ text: String(question) }] });
 
         // Utilise le prompt système du cours s'il est fourni, sinon le prompt par défaut.
         const baseSystemPrompt = system_prompt_custom || `Tu es un tuteur d'informatique Socratique bienveillant.
 Ton but est d'aider l'élève à trouver la réponse par lui-même.`;
 
         const systemInstruction = `${baseSystemPrompt}
-${exData ? `CONCOURS THÉORIQUE DE L'EXERCICE :\n${exData.theorie_md}` : ""}
+${exData?.theorie_md ? `CONCOURS THÉORIQUE DE L'EXERCICE :\n${exData.theorie_md}` : ""}
 
 Règles :
-1. Ne donne JAMAIS le code corrigé.
-2. Basé tes explications sur la théorie fournie.
-3. Pose des questions de guidage.`;
+1. Ne donne JAMAIS la réponse finale toute faite.
+2. Pose des questions de guidage courtes et bienveillantes.
+3. Reste concis et adapté à des adolescents de 3e secondaire (14-15 ans).`;
 
         const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
+            model: "gemini-2.5-flash",
             contents: contentsArray,
             config: { systemInstruction, temperature: 0.7 }
         });
 
         return { reponse: response.text };
     } catch (error) {
-        throw new HttpsError("internal", "Tuteur indisponible.");
+        console.error("[interrogerTuteur] Erreur détaillée:", error);
+        throw new HttpsError("internal", error.message || "Tuteur indisponible.");
     }
 });
 
@@ -162,7 +187,7 @@ exports.demanderIndiceNiveau2 = onCall({
         const ai = new GoogleGenAI({ apiKey: geminiApiKey.value() });
 
         const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
+            model: "gemini-2.5-flash",
             contents: `Voici le code de l'élève :\n${code_eleve}`,
             config: { 
                 systemInstruction: exData.indices.niveau_2_prompt,
@@ -206,7 +231,7 @@ Ta réponse doit obligatoirement être un objet JSON valide avec cette structure
 }`;
 
         const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
+            model: "gemini-2.5-flash",
             contents: `Voici le prompt soumis par l'élève :\n\n${prompt}`,
             config: { 
                 systemInstruction,
@@ -438,7 +463,7 @@ Format de sortie OBLIGATOIRE : Un JSON pur respectant cette structure exacte :
 }`;
 
         const geminiRes = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
+            model: "gemini-2.5-flash",
             contents: `Génère le QCM de ${nombreQuestions} questions sur le sujet suivant : "${sujet}".`,
             config: {
                 systemInstruction: systemInstruction,

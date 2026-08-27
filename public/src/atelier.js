@@ -2883,13 +2883,71 @@ function initOfficeWorkspace(exData, latestSub = null) {
     const officeDocUrlInput = document.getElementById('officeDocUrlInput');
     const officeNotesInput = document.getElementById('officeNotesInput');
     const officeValidateBtn = document.getElementById('officeValidateBtn');
+    const officeToolsList = document.getElementById('officeToolsList');
+
+    const isDactylo = (exData.course_id === 'dactylo-3e') || (exData.id && exData.id.startsWith('dac-'));
+    const isTextSubmission = exData.submission_type === 'text' || isDactylo;
 
     if (officeMissionTitle) {
-        officeMissionTitle.textContent = exData.titre || 'Module Bureautique';
+        officeMissionTitle.textContent = exData.titre || (isDactylo ? 'Séance de Dactylographie' : 'Module Bureautique');
     }
 
     if (officeMissionInstructions && typeof window.marked !== 'undefined') {
         officeMissionInstructions.innerHTML = window.marked.parse(exData.enonce_md || exData.consigne || 'Consultez les objectifs du cours.');
+    }
+
+    // Adaptations des labels et boutons selon le type d'exercice
+    if (officeDocUrlInput) {
+        const label = officeDocUrlInput.previousElementSibling;
+        if (label && label.tagName === 'LABEL') {
+            label.textContent = isTextSubmission 
+                ? "🔗 Lien de capture ou profil (optionnel) :" 
+                : "🔗 Lien de partage de ton Google Doc ou Dossier Drive :";
+        }
+        officeDocUrlInput.placeholder = isTextSubmission 
+            ? "https://... (optionnel)" 
+            : "https://docs.google.com/document/d/...";
+    }
+
+    if (officeNotesInput) {
+        const label = officeNotesInput.previousElementSibling;
+        if (label && label.tagName === 'LABEL') {
+            label.textContent = isDactylo 
+                ? "⚡ Ton score de frappe & commentaires :" 
+                : "💬 Commentaire ou questions pour le professeur (optionnel) :";
+        }
+        officeNotesInput.placeholder = isDactylo 
+            ? "Ex: 22 mots/minute, 95% de précision sans regarder mes mains !" 
+            : "Ex: J'ai appliqué les styles Titre 1 et Titre 2 et ajouté la table des matières...";
+    }
+
+    if (officeValidateBtn) {
+        officeValidateBtn.innerHTML = isDactylo 
+            ? "Valider mon entraînement 🚀" 
+            : "Soumettre mon document 🚀";
+    }
+
+    // Outils recommandés dynamiques
+    if (officeToolsList) {
+        if (exData.external_tools && exData.external_tools.length > 0) {
+            officeToolsList.innerHTML = exData.external_tools.map(tool => `
+                <a href="${tool.url}" target="_blank" rel="noopener noreferrer" class="office-tool-link-btn">
+                    🚀 ${tool.name} ↗
+                </a>
+            `).join('');
+        } else if (isDactylo) {
+            officeToolsList.innerHTML = `
+                <a href="https://agilefingers.com/fr" target="_blank" rel="noopener noreferrer" class="office-tool-link-btn">
+                    ⌨️ AgileFingers (Entraînement) ↗
+                </a>
+            `;
+        } else {
+            officeToolsList.innerHTML = `
+                <a href="https://docs.google.com" target="_blank" rel="noopener noreferrer" class="office-tool-link-btn">📄 Google Docs ↗</a>
+                <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer" class="office-tool-link-btn">📁 Google Drive ↗</a>
+                <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer" class="office-tool-link-btn">✉️ Gmail ↗</a>
+            `;
+        }
     }
 
     // Récupération des données soumises ou brouillon
@@ -2991,7 +3049,7 @@ async function sendOfficeChatMessage(customQuestion = null) {
             system_prompt_custom: systemPromptCustom
         });
 
-        const reply = res.data.reponse || "Je suis à ton écoute pour toute question sur la bureautique.";
+        const reply = res.data?.reponse || "Je suis à ton écoute pour toute question sur la bureautique ou la dactylographie.";
         officeChatHistory.push({ role: 'model', parts: [{ text: reply }] });
         appendOfficeMessage(reply, 'assistant');
 
@@ -3028,7 +3086,7 @@ if (officeClearChatBtn) {
             messagesEl.innerHTML = `
                 <div class="chat-bubble assistant">
                     <div class="chat-bubble-content">
-                        Historique réinitialisé ! Comment puis-je t'aider sur ton document aujourd'hui ?
+                        Historique réinitialisé ! Comment puis-je t'aider aujourd'hui ?
                     </div>
                 </div>
             `;
@@ -3045,7 +3103,7 @@ document.querySelectorAll('.quick-pill-btn').forEach(btn => {
     });
 });
 
-// Soumission du travail de Bureautique
+// Soumission du travail de Bureautique / Dactylographie
 const officeValidateBtn = document.getElementById('officeValidateBtn');
 if (officeValidateBtn) {
     officeValidateBtn.addEventListener('click', async () => {
@@ -3057,12 +3115,16 @@ if (officeValidateBtn) {
         const notesVal = notesInput ? notesInput.value.trim() : '';
         const feedbackEl = document.getElementById('officeSubmissionFeedback');
 
-        if (!urlVal) {
-            alert("Veuillez coller le lien de votre document Google Docs ou Drive avant de soumettre !");
+        const isDactylo = (currentExercice.course_id === 'dactylo-3e') || (currentExercice.id && currentExercice.id.startsWith('dac-'));
+        const isTextOnly = currentExercice.submission_type === 'text' || isDactylo;
+
+        if (!isTextOnly && !urlVal && !notesVal) {
+            alert("Veuillez coller le lien de votre document Google Docs/Drive ou renseigner un commentaire avant de soumettre !");
             return;
         }
 
         officeValidateBtn.disabled = true;
+        const prevBtnHtml = officeValidateBtn.innerHTML;
         officeValidateBtn.innerHTML = "⏳ Envoi en cours...";
 
         if (feedbackEl) {
@@ -3070,7 +3132,7 @@ if (officeValidateBtn) {
             feedbackEl.style.color = "#475569";
         }
 
-        const combinedSubmission = `[Lien Document] : ${urlVal}\n\n[Commentaires élève] :\n${notesVal || 'Aucun'}`;
+        const combinedSubmission = `[Lien Document] : ${urlVal || 'Non requis / Aucun'}\n\n[Commentaires élève] :\n${notesVal || "Séance d'entraînement validée."}`;
         const userEmail = userEmailEl?.textContent || 'eleve@ecole.be';
 
         try {
@@ -3080,7 +3142,7 @@ if (officeValidateBtn) {
                 id_exercice: currentExercice.id,
                 nom_eleve: userEmail.split('@')[0],
                 type: 'office_submission',
-                titre_exercice: currentExercice.titre || 'Module Bureautique',
+                titre_exercice: currentExercice.titre || 'Entraînement',
                 chapitre: currentExercice.chapitre || '',
                 code_html: '',
                 code_css: '',
@@ -3097,11 +3159,10 @@ if (officeValidateBtn) {
                 }
             });
 
-            const docId = response.data.docId;
-            const evalIA = response.data.evaluation;
+            const evalIA = response.data?.evaluation;
 
             if (feedbackEl) {
-                feedbackEl.textContent = "✅ Document soumis avec succès !";
+                feedbackEl.textContent = "✅ Travail enregistré avec succès !";
                 feedbackEl.style.color = "#16a34a";
             }
 
@@ -3120,10 +3181,10 @@ if (officeValidateBtn) {
                 feedbackEl.textContent = "❌ Erreur lors de l'envoi";
                 feedbackEl.style.color = "#ef4444";
             }
-            appendOfficeMessage("❌ Erreur lors de l'envoi du document. Vérifie ta connexion et réessaie.", 'assistant');
+            appendOfficeMessage("❌ Erreur lors de l'envoi. Vérifie ta connexion et réessaie.", 'assistant');
         } finally {
             officeValidateBtn.disabled = false;
-            officeValidateBtn.innerHTML = "Soumettre mon document 🚀";
+            officeValidateBtn.innerHTML = prevBtnHtml;
         }
     });
 }
