@@ -626,6 +626,7 @@ if (generateQuizForm) {
         const topic = document.getElementById('quizTopicInput').value.trim();
         const level = document.getElementById('quizLevelInput').value.trim();
         const count = parseInt(document.getElementById('quizQuestionsCount').value, 10) || 10;
+        const folderId = document.getElementById('quizDriveFolderId') ? document.getElementById('quizDriveFolderId').value.trim() : '';
 
         if (!topic) return;
 
@@ -640,7 +641,8 @@ if (generateQuizForm) {
                 sujet: topic,
                 titreQuiz: title || "Quiz Bureautique",
                 niveau: level,
-                nombreQuestions: count
+                nombreQuestions: count,
+                folderId: folderId || undefined
             });
 
             const data = result.data;

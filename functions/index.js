@@ -231,36 +231,67 @@ Ta réponse doit obligatoirement être un objet JSON valide avec cette structure
     }
 });
 
+const fs = require("fs");
+const path = require("path");
+
 /**
- * Initialise le client OAuth2 avec les identifiants Enseignant
+ * Initialise les clients Google Forms et Google Drive
+ * (Service Account ou OAuth2)
  */
-function getGoogleFormsClient(customAccessToken) {
+function getGoogleClients(customAccessToken) {
     if (customAccessToken) {
         const oauth2Client = new google.auth.OAuth2();
         oauth2Client.setCredentials({ access_token: customAccessToken });
-        return google.forms({ version: "v1", auth: oauth2Client });
+        return {
+            forms: google.forms({ version: "v1", auth: oauth2Client }),
+            drive: google.drive({ version: "v3", auth: oauth2Client })
+        };
     }
 
+    // 1. Clé de compte de service (Service Account)
+    const saPath = path.join(__dirname, "service-account.json");
+    if (fs.existsSync(saPath)) {
+        try {
+            const auth = new google.auth.GoogleAuth({
+                keyFile: saPath,
+                scopes: [
+                    "https://www.googleapis.com/auth/forms.body",
+                    "https://www.googleapis.com/auth/drive",
+                    "https://www.googleapis.com/auth/drive.file"
+                ]
+            });
+            return {
+                forms: google.forms({ version: "v1", auth }),
+                drive: google.drive({ version: "v3", auth })
+            };
+        } catch (e) {
+            console.error("[Google Service Account] Erreur auth:", e.message);
+        }
+    }
+
+    // 2. Fallback Secrets OAuth
     try {
         const clientId = googleClientId.value();
         const clientSecret = googleClientSecret.value();
         const refreshToken = googleRefreshToken.value();
 
-        if (!clientId || !clientSecret || !refreshToken) {
-            throw new Error("Secrets Google OAuth non configurés.");
+        if (clientId && clientSecret && refreshToken) {
+            const oauth2Client = new google.auth.OAuth2(
+                clientId,
+                clientSecret,
+                "https://developers.google.com/oauthplayground"
+            );
+            oauth2Client.setCredentials({ refresh_token: refreshToken });
+            return {
+                forms: google.forms({ version: "v1", auth: oauth2Client }),
+                drive: google.drive({ version: "v3", auth: oauth2Client })
+            };
         }
-
-        const oauth2Client = new google.auth.OAuth2(
-            clientId,
-            clientSecret,
-            "https://developers.google.com/oauthplayground"
-        );
-        oauth2Client.setCredentials({ refresh_token: refreshToken });
-        return google.forms({ version: "v1", auth: oauth2Client });
     } catch (e) {
-        console.warn("[Google Forms] Secrets non initialisés ou indisponibles:", e.message);
-        return null;
+        console.warn("[Google Forms] Secrets OAuth non disponibles:", e.message);
     }
+
+    return null;
 }
 
 /**
@@ -273,17 +304,19 @@ exports.creerFormulaireGoogleForms = onCall({
 }, async (request) => {
     if (!request.auth) throw new HttpsError("unauthenticated", "Connexion requise.");
 
-    const { titre, description, accessToken } = request.data;
-    const forms = getGoogleFormsClient(accessToken);
+    const { titre, description, folderId, accessToken } = request.data;
+    const clients = getGoogleClients(accessToken);
 
-    if (!forms) {
+    if (!clients) {
         throw new HttpsError(
             "failed-precondition",
-            "Configuration OAuth requise. Veuillez configurer GOOGLE_TEACHER_REFRESH_TOKEN dans Firebase Secrets ou fournir un accessToken valide."
+            "Identifiants Google non configurés (Service Account ou OAuth2 requis)."
         );
     }
 
     try {
+        const { forms, drive } = clients;
+
         // 1. Création du formulaire
         const createRes = await forms.forms.create({
             requestBody: {
@@ -296,7 +329,36 @@ exports.creerFormulaireGoogleForms = onCall({
 
         const formId = createRes.data.formId;
 
-        // 2. Activer le mode Quiz (auto-correction)
+        // 2. Déplacer dans le dossier Drive partagé si fourni
+        if (folderId && drive) {
+            try {
+                await drive.files.update({
+                    fileId: formId,
+                    addParents: folderId,
+                    fields: "id, parents"
+                });
+            } catch (errDrive) {
+                console.warn("[creerFormulaireGoogleForms] Impossible de déplacer dans le dossier Drive :", errDrive.message);
+            }
+        }
+
+        // 3. Donner les droits d'édition au compte enseignant
+        if (drive && request.auth.token.email) {
+            try {
+                await drive.permissions.create({
+                    fileId: formId,
+                    requestBody: {
+                        role: "writer",
+                        type: "user",
+                        emailAddress: request.auth.token.email
+                    }
+                });
+            } catch (permErr) {
+                console.warn("[Drive Permission] Note :", permErr.message);
+            }
+        }
+
+        // 4. Activer le mode Quiz (auto-correction)
         await forms.forms.batchUpdate({
             formId: formId,
             requestBody: {
@@ -327,7 +389,7 @@ exports.creerFormulaireGoogleForms = onCall({
 
 /**
  * `genererQuizGoogleFormsIA` — Utilise Gemini pour générer des questions structurées
- * et crée automatiquement le Google Form complet en mode Quiz dans le Drive du prof.
+ * et crée automatiquement le Google Form complet en mode Quiz dans le dossier Drive partagé.
  */
 exports.genererQuizGoogleFormsIA = onCall({
     secrets: [geminiApiKey, googleClientId, googleClientSecret, googleRefreshToken],
@@ -341,6 +403,7 @@ exports.genererQuizGoogleFormsIA = onCall({
         niveau = "3e secondaire (14-15 ans)", 
         nombreQuestions = 10,
         titreQuiz = "Quiz Bureautique",
+        folderId,
         accessToken 
     } = request.data;
 
@@ -395,10 +458,10 @@ Format de sortie OBLIGATOIRE : Un JSON pur respectant cette structure exacte :
         const quizData = JSON.parse(jsonMatch[0]);
 
         // 2. Création et insertion dans Google Forms
-        const forms = getGoogleFormsClient(accessToken);
+        const clients = getGoogleClients(accessToken);
         
         // Si les credentials Google ne sont pas encore configurés, renvoyer les données structurées pour prévisualisation
-        if (!forms) {
+        if (!clients) {
             return {
                 success: true,
                 mode: "preview_only",
@@ -406,6 +469,8 @@ Format de sortie OBLIGATOIRE : Un JSON pur respectant cette structure exacte :
                 quizData: quizData
             };
         }
+
+        const { forms, drive } = clients;
 
         // Création du formulaire
         const createRes = await forms.forms.create({
@@ -418,6 +483,35 @@ Format de sortie OBLIGATOIRE : Un JSON pur respectant cette structure exacte :
         });
 
         const formId = createRes.data.formId;
+
+        // Déplacer dans le dossier Drive partagé si fourni
+        if (folderId && drive) {
+            try {
+                await drive.files.update({
+                    fileId: formId,
+                    addParents: folderId,
+                    fields: "id, parents"
+                });
+            } catch (errDrive) {
+                console.warn("[genererQuizGoogleFormsIA] Impossible de déplacer dans le dossier Drive :", errDrive.message);
+            }
+        }
+
+        // Donner les droits d'édition au compte enseignant
+        if (drive && request.auth.token.email) {
+            try {
+                await drive.permissions.create({
+                    fileId: formId,
+                    requestBody: {
+                        role: "writer",
+                        type: "user",
+                        emailAddress: request.auth.token.email
+                    }
+                });
+            } catch (permErr) {
+                console.warn("[Drive Permission] Note :", permErr.message);
+            }
+        }
 
         // Préparation des requêtes de mise à jour (Quiz mode + ajout des items)
         const requests = [
