@@ -126,6 +126,9 @@
                             <div class="chat-bubble assistant">
                                 <div class="chat-bubble-content">Bonjour ! Je suis ton tuteur IA. Pose-moi une question sur cet exercice ou clique sur un bouton d'aide ci-dessous.</div>
                             </div>
+                            <div class="tuteur-typing-indicator hidden" id="tuteurTypingIndicator">
+                                <span></span><span></span><span></span>
+                            </div>
                         </div>
                         
                         <div class="tuteur-hints" id="tuteurHintsArea">
@@ -159,10 +162,7 @@
         <!-- Poignée de redimensionnement de la sidebar -->
         <div class="sidebar-resize-handle" id="sidebarResizeHandle" role="separator" aria-label="Redimensionner la barre latérale"></div>
 
-        <main class="workspace-main-content">
-
-
-        <!-- Split pane -->
+        <!-- Split pane principal -->
         <main class="split-workspace" id="splitWorkspace">
 
             <!-- PANNEAU GAUCHE : Éditeurs -->
@@ -347,10 +347,10 @@
 
             <!-- PANNEAU BUREAUTIQUE : Rendu sans Monaco pour les cours de Bureautique / Google Workspace -->
             <section id="officeSection" class="office-section hidden">
-                <div class="office-container">
+                <div class="office-container" id="officeContainer">
                     
                     <!-- Colonne Gauche : Mission & Remise de document -->
-                    <div class="office-col-left">
+                    <div class="office-col-left" id="officeColLeft">
                         <!-- Carte 1 : Consignes de l'Activité -->
                         <div class="office-card">
                             <div class="office-card-header">
@@ -414,8 +414,13 @@
                         </div>
                     </div>
 
+                    <!-- Poignée de redimensionnement entre Gauche et Tuteur -->
+                    <div class="office-resize-handle" id="officeResizeHandle" role="separator" aria-label="Redimensionner le tuteur">
+                        <button id="officeExpandTuteurBtn" class="office-expand-btn hidden" title="Développer le Tuteur IA">🤖 ◀</button>
+                    </div>
+
                     <!-- Colonne Droite : Tuteur Socratique IA Bureautique -->
-                    <div class="office-col-right">
+                    <div class="office-col-right" id="officeColRight">
                         <div class="office-chat-card">
                             <div class="office-chat-header">
                                 <div class="chat-header-info">
@@ -425,7 +430,10 @@
                                         <span class="tuteur-status-dot"></span> <span class="tuteur-status-text">En ligne pour t'aider</span>
                                     </div>
                                 </div>
-                                <button id="officeClearChatBtn" class="btn-icon" title="Effacer l'historique de chat">🗑️</button>
+                                <div class="chat-header-actions" style="display:flex; gap:6px; align-items:center;">
+                                    <button id="officeToggleCollapseBtn" class="btn-icon" title="Réduire / Agrandir le Tuteur">◀▶</button>
+                                    <button id="officeClearChatBtn" class="btn-icon" title="Effacer l'historique de chat">🗑️</button>
+                                </div>
                             </div>
 
                             <div class="office-chat-messages" id="officeChatMessages">
@@ -433,6 +441,9 @@
                                     <div class="chat-bubble-content">
                                         Bonjour ! Je suis ton tuteur d'informatique. Je suis là pour t'accompagner pas à pas dans l'apprentissage de Google Docs, Drive et des règles de typographie. Quelle manipulation souhaites-tu réaliser ?
                                     </div>
+                                </div>
+                                <div class="tuteur-typing-indicator hidden" id="officeTypingIndicator">
+                                    <span></span><span></span><span></span>
                                 </div>
                             </div>
 

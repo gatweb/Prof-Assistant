@@ -9,6 +9,41 @@ admin.initializeApp();
 const geminiApiKey = defineSecret("GEMINI_API_KEY");
 
 /**
+ * Cascade de modèles Gemini pour garantir la haute disponibilité et la pérennité long terme :
+ * - Tier 1 : "gemini-flash-lite-latest" & "gemini-3.5-flash-lite" (Ultra-rapide ~800ms, idéal pour l'interactivité élève)
+ * - Tier 2 : "gemini-flash-latest" & "gemini-3.5-flash" (Équilibré et polyvalent)
+ * - Tier 3 : "gemini-2.5-flash" (Modèle LTS officiel pérenne)
+ */
+const GEMINI_MODELS_CASCADE = [
+    "gemini-flash-lite-latest",
+    "gemini-3.5-flash-lite",
+    "gemini-flash-latest",
+    "gemini-3.5-flash",
+    "gemini-2.5-flash"
+];
+
+/**
+ * Exécute generateContent avec bascule automatique sur le modèle suivant en cas d'erreur (quota, 503, etc.)
+ */
+async function generateWithModelCascade(ai, options) {
+    let lastError = null;
+    for (const model of GEMINI_MODELS_CASCADE) {
+        try {
+            const response = await ai.models.generateContent({
+                model,
+                contents: options.contents,
+                config: options.config
+            });
+            return { response, modelUsed: model };
+        } catch (err) {
+            lastError = err;
+            console.warn(`[GeminiCascade] Échec avec le modèle '${model}' (${err.message}). Tentative sur le modèle de secours suivant...`);
+        }
+    }
+    throw lastError || new Error("Tous les modèles de la cascade Gemini ont échoué.");
+}
+
+/**
  * `corrigerDevoir` — Analyse le travail/code et injecte la théorie de l'exercice dans le prompt.
  */
 exports.corrigerDevoir = onCall({ 
@@ -66,8 +101,7 @@ Structure JSON :
         };
 
         try {
-            const response = await ai.models.generateContent({
-                model: "gemini-3.5-flash-lite",
+            const { response } = await generateWithModelCascade(ai, {
                 contents: `Voici la soumission de l'élève (${labelSoumission}) :\n\n${code_eleve}`,
                 config: { systemInstruction: promptSysteme, temperature: 0.2 }
             });
@@ -170,8 +204,7 @@ Règles :
 3. Reste concis et adapté à des adolescents de 3e secondaire (14-15 ans).`;
 
         try {
-            const response = await ai.models.generateContent({
-                model: "gemini-3.5-flash-lite",
+            const { response } = await generateWithModelCascade(ai, {
                 contents: contentsArray,
                 config: { systemInstruction, temperature: 0.7 }
             });
@@ -182,8 +215,7 @@ Règles :
             
             // Tentative de secours avec uniquement la question courante (au cas où l'historique poserait problème)
             try {
-                const singleRes = await ai.models.generateContent({
-                    model: "gemini-3.5-flash-lite",
+                const { response: singleRes } = await generateWithModelCascade(ai, {
                     contents: `Question de l'élève : ${question}`,
                     config: { systemInstruction, temperature: 0.7 }
                 });
@@ -221,17 +253,17 @@ exports.demanderIndiceNiveau2 = onCall({
 
         const ai = new GoogleGenAI({ apiKey: geminiApiKey.value() });
 
-        const response = await ai.models.generateContent({
-            model: "gemini-3.5-flash-lite",
+        const { response } = await generateWithModelCascade(ai, {
             contents: `Voici le code de l'élève :\n${code_eleve}`,
             config: { 
-                systemInstruction: exData.indices.niveau_2_prompt,
+                systemInstruction: exData.indices?.niveau_2_prompt || "Aide l'élève à trouver son erreur sans donner la solution.",
                 temperature: 0.5 
             }
         });
 
         return { reponse: response.text };
     } catch (error) {
+        console.error("[demanderIndiceNiveau2] Erreur:", error);
         throw new HttpsError("internal", "Service d'indices indisponible.");
     }
 });
@@ -265,8 +297,7 @@ Ta réponse doit obligatoirement être un objet JSON valide avec cette structure
   "html": "<div style=\\"...\\">...</div>"
 }`;
 
-        const response = await ai.models.generateContent({
-            model: "gemini-3.5-flash-lite",
+        const { response } = await generateWithModelCascade(ai, {
             contents: `Voici le prompt soumis par l'élève :\n\n${prompt}`,
             config: { 
                 systemInstruction,
@@ -497,8 +528,7 @@ Format de sortie OBLIGATOIRE : Un JSON pur respectant cette structure exacte :
   ]
 }`;
 
-        const geminiRes = await ai.models.generateContent({
-            model: "gemini-3.5-flash-lite",
+        const { response: geminiRes } = await generateWithModelCascade(ai, {
             contents: `Génère le QCM de ${nombreQuestions} questions sur le sujet suivant : "${sujet}".`,
             config: {
                 systemInstruction: systemInstruction,

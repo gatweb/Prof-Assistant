@@ -17,12 +17,15 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const functions = getFunctions(app, "europe-west1");
 
-// Connexion aux émulateurs Firebase uniquement en mode local (développement)
-if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+// Connexion aux émulateurs Firebase uniquement en mode émulateur explicite (port 5000 ou paramètre ?emulator=true)
+const isEmulatorRequested = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") && 
+    (window.location.port === "5000" || window.location.search.includes("emulator=true"));
+
+if (isEmulatorRequested) {
   console.warn("⚠️ [DEV] Connexion aux émulateurs Firebase locaux (127.0.0.1)");
   connectAuthEmulator(auth, "http://127.0.0.1:9099");
   connectFirestoreEmulator(db, "127.0.0.1", 8080);
   connectFunctionsEmulator(functions, "127.0.0.1", 5001);
 } else {
-  console.log("🚀 [PROD] Connexion à la base de données Firebase de production");
+  console.log("🚀 [FIREBASE] Connexion aux services Firebase de production");
 }

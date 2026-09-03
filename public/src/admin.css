@@ -84,12 +84,53 @@ Material 3 Data Table Styling
 Detail View (Split Screen Administration)
 -----------------------------------------
 */
-/* La partie div detailView utilise un height calculé via style en ligne pour forcer la dimension */
+#detailView {
+    height: calc(100vh - 64px);
+    display: flex;
+    overflow: hidden;
+    min-height: 0;
+    min-width: 0;
+}
 
 .read-only-panel {
     display: flex;
     flex-direction: column;
-    border-right: 1px solid var(--md-sys-color-outline);
+    min-height: 0;
+    min-width: 250px;
+    overflow: hidden;
+}
+
+.detail-resize-handle {
+    width: 10px;
+    background: transparent;
+    cursor: col-resize;
+    position: relative;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    user-select: none;
+    z-index: 20;
+}
+
+.detail-resize-handle::after {
+    content: "";
+    width: 4px;
+    height: 48px;
+    background: #cbd5e1;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.detail-resize-handle:hover::after,
+.detail-resize-handle.dragging::after {
+    background: var(--md-sys-color-primary, #006493);
+    height: 72px;
+}
+
+.detail-resize-handle.dragging {
+    background: rgba(0, 100, 147, 0.08);
 }
 
 .panel-header {
@@ -98,6 +139,7 @@ Detail View (Split Screen Administration)
     padding: 16px 24px;
     background-color: #1e1e1e; /* Match initial Monaco BG pour un bel effet */
     color: white;
+    flex-shrink: 0;
 }
 
 .btn-text {
@@ -117,14 +159,19 @@ Detail View (Split Screen Administration)
     flex: 1;
     position: relative;
     width: 100%;
+    min-height: 0;
     background-color: #1e1e1e;
+    overflow: hidden;
 }
 
 .feedback-panel {
     flex: 1; /* Prends le reste de l'espace */
+    min-height: 0;
+    min-width: 300px;
     padding: 24px;
     background-color: var(--md-sys-color-background);
     overflow-y: auto;
+    scrollbar-gutter: stable;
 }
 
 .correction-card {

@@ -13,6 +13,11 @@ let currentAdminUser = null;
 
 // Écoute de l'état asynchrone (s'exécute au chargement)
 listenToAuthStatus((user) => {
+    const isDemoMode = window.location.search.includes("demo=true");
+    if (!user && isDemoMode) {
+        user = { email: ADMIN_EMAIL, displayName: "Professeur Admin (Démo)", uid: "demo-admin-123" };
+    }
+
     if (!user) {
         window.location.href = "index.html";
         return;
@@ -441,6 +446,50 @@ if (window.monaco && window.monaco.editor) {
     initMonaco();
 } else {
     document.addEventListener('monacoReady', initMonaco);
+}
+
+// ============================================
+// 4b. Redimensionnement de la Vue de Détail Professeur
+// ============================================
+const detailResizeHandle = document.getElementById('detailResizeHandle');
+const detailReadOnlyPanel = document.getElementById('detailReadOnlyPanel');
+let isResizingDetail = false;
+let lastDetailWidth = localStorage.getItem('last_admin_detail_width') || '55%';
+
+if (detailReadOnlyPanel && detailResizeHandle) {
+    detailReadOnlyPanel.style.width = lastDetailWidth;
+
+    detailResizeHandle.addEventListener('mousedown', (e) => {
+        isResizingDetail = true;
+        detailResizeHandle.classList.add('dragging');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizingDetail) return;
+        const totalW = window.innerWidth;
+        const newW = Math.max(280, Math.min(totalW - 320, e.clientX));
+        const pct = ((newW / totalW) * 100).toFixed(1) + '%';
+        detailReadOnlyPanel.style.width = pct;
+        lastDetailWidth = pct;
+        localStorage.setItem('last_admin_detail_width', pct);
+        if (monacoEditorInstance?.layout) {
+            monacoEditorInstance.layout();
+        }
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (!isResizingDetail) return;
+        isResizingDetail = false;
+        detailResizeHandle.classList.remove('dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        if (monacoEditorInstance?.layout) {
+            monacoEditorInstance.layout();
+        }
+    });
 }
 
 // ============================================

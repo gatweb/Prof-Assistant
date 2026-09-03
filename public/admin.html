@@ -402,7 +402,7 @@
     <!-- Vue secondaire 2 : L'interface de correction en Split Screen (désactivée par défaut) -->
     <main id="detailView" class="hidden" style="height: calc(100vh - 64px); display: flex;">
         <!-- Panel Gauche : Code élève -->
-        <section class="read-only-panel" style="width: 55%;">
+        <section class="read-only-panel" id="detailReadOnlyPanel" style="width: 55%;">
             <div class="panel-header">
                 <button id="backToListBtn" class="btn-text">← Revenir au tableau de bord</button>
                 <h3 id="detailStudentName" class="ml-16">Nom de l'élève</h3>
@@ -414,8 +414,11 @@
             </div>
         </section>
 
+        <!-- Poignée de redimensionnement professeur -->
+        <div class="detail-resize-handle" id="detailResizeHandle" role="separator" aria-label="Redimensionner les panneaux"></div>
+
         <!-- Panel Droit : Formulaire de l'IA modifiable -->
-        <section class="feedback-panel">
+        <section class="feedback-panel" id="detailFeedbackPanel">
             <div class="md-card correction-card">
                 <h2>Outil de Correction Assistant-IA</h2>
                 

@@ -143,6 +143,10 @@ let hintState = {
 let isViewingSpecificCourse = false;
 
 listenToAuthStatus(async (user) => {
+    const isDemoMode = window.location.search.includes("demo=true");
+    if (!user && isDemoMode) {
+        user = { email: "demo@ecole.be", displayName: "Élève Démo", uid: "demo-user-123" };
+    }
     if (!user) { window.location.href = "index.html"; return; }
     currentUser = user;
     if (userEmailEl) userEmailEl.textContent = user.email;
@@ -1582,6 +1586,79 @@ if (sidebarResizeHandle && resourcesSidebar) {
         htmlEditor?.layout();
         cssEditor?.layout();
         jsEditor?.layout();
+    });
+}
+
+// --- BUREAUTIQUE TUTEUR RESIZE HANDLE & COLLAPSE ---
+const officeResizeHandle = document.getElementById('officeResizeHandle');
+const officeColRight = document.getElementById('officeColRight');
+const officeToggleCollapseBtn = document.getElementById('officeToggleCollapseBtn');
+const officeExpandTuteurBtn = document.getElementById('officeExpandTuteurBtn');
+let isResizingOffice = false;
+let lastOfficeTuteurWidth = localStorage.getItem('last_office_tuteur_width') || '360px';
+
+const setOfficeTuteurCollapsed = (collapsed) => {
+    if (!officeColRight) return;
+    officeColRight.classList.toggle('collapsed', collapsed);
+    if (officeExpandTuteurBtn) {
+        officeExpandTuteurBtn.classList.toggle('hidden', !collapsed);
+    }
+    localStorage.setItem('office_tuteur_collapsed', collapsed ? 'true' : 'false');
+};
+
+if (officeColRight && officeResizeHandle) {
+    const isOfficeCollapsed = localStorage.getItem('office_tuteur_collapsed') === 'true';
+    if (isOfficeCollapsed) {
+        setOfficeTuteurCollapsed(true);
+    } else {
+        officeColRight.style.width = lastOfficeTuteurWidth;
+        if (officeExpandTuteurBtn) officeExpandTuteurBtn.classList.add('hidden');
+    }
+
+    officeResizeHandle.addEventListener('mousedown', (e) => {
+        if (e.target === officeExpandTuteurBtn) return;
+        if (officeColRight.classList.contains('collapsed')) return;
+        isResizingOffice = true;
+        officeResizeHandle.classList.add('dragging');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizingOffice) return;
+        const container = document.getElementById('officeContainer');
+        const containerRect = container?.getBoundingClientRect();
+        if (!containerRect) return;
+        const newWidth = Math.max(260, Math.min(750, containerRect.right - e.clientX));
+        officeColRight.style.width = `${newWidth}px`;
+        lastOfficeTuteurWidth = `${newWidth}px`;
+        localStorage.setItem('last_office_tuteur_width', lastOfficeTuteurWidth);
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (!isResizingOffice) return;
+        isResizingOffice = false;
+        officeResizeHandle.classList.remove('dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+    });
+
+    // Double clic pour basculer rapidement
+    officeResizeHandle.addEventListener('dblclick', () => {
+        const isCollapsed = officeColRight.classList.contains('collapsed');
+        setOfficeTuteurCollapsed(!isCollapsed);
+    });
+}
+
+if (officeToggleCollapseBtn) {
+    officeToggleCollapseBtn.addEventListener('click', () => setOfficeTuteurCollapsed(true));
+}
+
+if (officeExpandTuteurBtn) {
+    officeExpandTuteurBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setOfficeTuteurCollapsed(false);
     });
 }
 
@@ -3174,6 +3251,14 @@ async function sendOfficeChatMessage(customQuestion = null) {
 
     if (sendBtn) sendBtn.disabled = true;
 
+    // Afficher l'indicateur de frappe animé
+    const typingIndicator = document.getElementById('officeTypingIndicator');
+    const messagesEl = document.getElementById('officeChatMessages');
+    if (typingIndicator) {
+        typingIndicator.classList.remove('hidden');
+        if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
     // Historique conversationnel
     officeChatHistory.push({ role: 'user', parts: [{ text: question }] });
 
@@ -3197,7 +3282,9 @@ async function sendOfficeChatMessage(customQuestion = null) {
         console.error('[Office Chat] Erreur:', err);
         appendOfficeMessage("Désolé, je rencontre une petite difficulté de connexion. Réessaie dans un instant !", 'assistant');
     } finally {
+        if (typingIndicator) typingIndicator.classList.add('hidden');
         if (sendBtn) sendBtn.disabled = false;
+        if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 }
 

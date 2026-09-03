@@ -235,6 +235,9 @@
     flex-direction: row; /* Sidebar + Main Content */
     flex: 1; 
     min-height: 0; 
+    min-width: 0;
+    height: calc(100vh - 56px);
+    overflow: hidden;
     background: #f8fafc;
 }
 #workspaceView.hidden { display: none !important; }
@@ -242,12 +245,14 @@
 /* Sidebar de Ressources (NotebookLM Style) */
 .resources-sidebar {
     width: 320px;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
     border-right: 1px solid var(--md-sys-color-outline-variant);
     display: flex;
     flex-direction: column;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 0;
+    height: 100%;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 50;
     overflow: hidden;
     flex-shrink: 0;
@@ -258,11 +263,12 @@
 }
 
 .sidebar-header {
-    padding: 16px;
+    padding: 14px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    flex-shrink: 0;
 }
 
 .sidebar-header h3 {
@@ -276,8 +282,13 @@
     display: none;
 }
 
+.sidebar-tabs {
+    flex-shrink: 0;
+}
+
 .course-content-area {
     flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -288,12 +299,15 @@
 
 #tabContentConsignes, #tabContentLecon {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
+    scrollbar-gutter: stable;
     padding: 16px;
 }
 
 #tabContentTuteur {
     flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -687,7 +701,9 @@ body {
     display: flex;
     flex: 1;
     overflow: hidden;
-    height: calc(100vh - 110px); /* Ajusté pour le nouveau header */
+    min-height: 0;
+    min-width: 0;
+    height: 100%;
 }
 
 /* --- Panneau Éditeur --- */
@@ -2313,7 +2329,9 @@ input:checked + .slider:before {
 
 .reader-modal-body {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
+    scrollbar-gutter: stable;
     padding: 32px 40px;
     line-height: 1.7;
     color: #334155;
@@ -2483,6 +2501,7 @@ input:checked + .slider:before {
     display: flex;
     flex-direction: column;
     flex: 1;
+    min-height: 0;
     height: 100%;
     background: #f8fafc;
     overflow: hidden;
@@ -2490,11 +2509,45 @@ input:checked + .slider:before {
 
 .tuteur-messages {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
+    scrollbar-gutter: stable;
     padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+/* Indicateur de frappe IA élégant */
+.tuteur-typing-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 14px;
+    background: #e2e8f0;
+    border-radius: 18px;
+    align-self: flex-start;
+    margin-bottom: 4px;
+}
+
+.tuteur-typing-indicator.hidden {
+    display: none !important;
+}
+
+.tuteur-typing-indicator span {
+    width: 6px;
+    height: 6px;
+    background: #64748b;
+    border-radius: 50%;
+    animation: typingBounce 1.2s infinite ease-in-out;
+}
+
+.tuteur-typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.tuteur-typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-5px); }
 }
 
 .tuteur-hints {
@@ -3000,106 +3053,211 @@ input:checked + .slider:before {
 .office-section {
     flex: 1;
     display: flex;
+    min-height: 0;
+    min-width: 0;
     overflow: hidden;
-    background: #f8fafc;
-    height: calc(100vh - 60px);
+    background: #f1f5f9;
+    height: 100%;
 }
 
 .office-container {
     display: flex;
+    flex-direction: row;
     width: 100%;
     height: 100%;
-    gap: 20px;
-    padding: 20px;
+    min-height: 0;
+    min-width: 0;
+    gap: 0;
+    padding: 16px 20px;
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 .office-col-left {
     flex: 1;
+    min-height: 0;
+    min-width: 320px;
     display: flex;
     flex-direction: column;
     gap: 16px;
     overflow-y: auto;
-    max-width: 50%;
+    scrollbar-gutter: stable;
+    padding-right: 14px;
+}
+
+/* Poignée de redimensionnement bureautique */
+.office-resize-handle {
+    width: 12px;
+    background: transparent;
+    cursor: col-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin: 0 4px;
+    position: relative;
+    z-index: 10;
+    transition: background 0.2s;
+    user-select: none;
+}
+
+.office-resize-handle::after {
+    content: "";
+    width: 4px;
+    height: 48px;
+    background: #cbd5e1;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.office-resize-handle:hover::after,
+.office-resize-handle.dragging::after {
+    background: var(--md-sys-color-primary, #006493);
+    height: 72px;
+    width: 5px;
+}
+
+.office-resize-handle.dragging {
+    background: rgba(0, 100, 147, 0.08);
+}
+
+.office-expand-btn {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--md-sys-color-primary, #006493);
+    color: white;
+    border: none;
+    border-radius: 20px 0 0 20px;
+    padding: 10px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: -3px 0 10px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.office-expand-btn:hover {
+    background: #004d73;
+    padding-left: 14px;
+    box-shadow: -4px 0 14px rgba(0, 0, 0, 0.22);
+}
+
+.office-expand-btn.hidden {
+    display: none !important;
 }
 
 .office-col-right {
-    flex: 1.2;
+    width: 360px; /* Moins de place par défaut (~30-35% de l'écran) */
+    min-width: 260px;
+    max-width: 750px;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     height: 100%;
-    min-width: 380px;
+    flex-shrink: 0;
+    transition: width 0.2s ease, opacity 0.2s ease;
+}
+
+.office-col-right.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .office-card {
     background: #ffffff;
     border-radius: 16px;
     border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.office-card:hover {
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
 }
 
 .office-card-header {
-    padding: 14px 18px;
+    padding: 14px 20px;
     background: #f8fafc;
     border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .office-card-header h2,
 .office-card-header h3 {
     margin: 0;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .office-card-body {
-    padding: 16px 18px;
+    padding: 18px 20px;
     color: #334155;
     font-size: 14px;
     line-height: 1.6;
 }
 
 .office-tools-section {
-    margin-top: 14px;
-    padding-top: 12px;
+    margin-top: 16px;
+    padding-top: 14px;
     border-top: 1px dashed #cbd5e1;
 }
 
 .office-tools-label {
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     color: #64748b;
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .office-tools-list {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
 .office-tool-link-btn {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     background: #eff6ff;
     color: #1d4ed8;
     border: 1px solid #bfdbfe;
-    padding: 6px 12px;
-    border-radius: 8px;
+    padding: 8px 14px;
+    border-radius: 10px;
     font-size: 13px;
     font-weight: 600;
     text-decoration: none;
     transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.08);
 }
 
 .office-tool-link-btn:hover {
     background: #dbeafe;
+    border-color: #93c5fd;
     transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
 }
 
 /* Aide-mémoire & raccourcis */
@@ -3112,39 +3270,42 @@ input:checked + .slider:before {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .shortcut-pill {
     background: #ffffff;
     border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    padding: 4px 8px;
+    border-radius: 8px;
+    padding: 5px 10px;
     font-size: 12px;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    gap: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .shortcut-pill kbd {
     background: #f1f5f9;
     border: 1px solid #cbd5e1;
-    border-radius: 4px;
-    padding: 1px 4px;
+    border-bottom: 2px solid #94a3b8;
+    border-radius: 5px;
+    padding: 2px 6px;
     font-size: 11px;
     font-family: inherit;
     font-weight: 700;
-    color: #334155;
+    color: #1e293b;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.05);
 }
 
 .typo-tip {
     font-size: 13px;
     color: #166534;
     background: #dcfce7;
-    padding: 8px 12px;
-    border-radius: 8px;
-    border-left: 3px solid #22c55e;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border-left: 4px solid #22c55e;
+    line-height: 1.5;
 }
 
 /* Remise du travail */
@@ -3162,38 +3323,39 @@ input:checked + .slider:before {
 
 .office-input-group input[type="url"],
 .office-input-group textarea {
-    padding: 10px 12px;
+    padding: 10px 14px;
     border: 1px solid #cbd5e1;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 13px;
     font-family: inherit;
     background: #ffffff;
     color: #1e293b;
-    transition: border-color 0.2s;
+    transition: all 0.2s ease;
 }
 
 .office-input-group textarea {
-    height: 70px;
+    height: 75px;
     resize: vertical;
 }
 
 .office-input-group input[type="url"]:focus,
 .office-input-group textarea:focus {
     outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    border-color: var(--md-sys-color-primary, #006493);
+    box-shadow: 0 0 0 3px rgba(0, 100, 147, 0.12);
 }
 
 .helper-text {
     font-size: 11px;
     color: #64748b;
+    margin-top: 2px;
 }
 
 .office-submission-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 14px;
+    margin-top: 16px;
     gap: 12px;
 }
 
@@ -3202,10 +3364,11 @@ input:checked + .slider:before {
     background: #ffffff;
     border-radius: 16px;
     border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 0;
     overflow: hidden;
 }
 
@@ -3213,15 +3376,16 @@ input:checked + .slider:before {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 18px;
+    padding: 12px 16px;
     background: #ffffff;
     border-bottom: 1px solid #e2e8f0;
+    flex-shrink: 0;
 }
 
 .chat-header-info {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .tuteur-avatar {
@@ -3234,31 +3398,35 @@ input:checked + .slider:before {
     align-items: center;
     justify-content: center;
     font-size: 18px;
+    flex-shrink: 0;
 }
 
 .chat-header-info h3 {
     margin: 0;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
     color: #0f172a;
+    line-height: 1.2;
 }
 
 .tuteur-status-dot {
     display: inline-block;
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
     background: #22c55e;
     border-radius: 50%;
 }
 
 .tuteur-status-text {
-    font-size: 12px;
+    font-size: 11px;
     color: #64748b;
 }
 
 .office-chat-messages {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
+    scrollbar-gutter: stable;
     padding: 16px;
     display: flex;
     flex-direction: column;
@@ -3267,17 +3435,20 @@ input:checked + .slider:before {
 }
 
 .office-quick-questions {
-    padding: 10px 16px;
+    flex-shrink: 0;
+    padding: 10px 14px;
     background: #ffffff;
     border-top: 1px solid #f1f5f9;
 }
 
 .quick-title {
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
     color: #64748b;
     margin-bottom: 6px;
     display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .quick-buttons-row {
@@ -3285,13 +3456,17 @@ input:checked + .slider:before {
     gap: 6px;
     overflow-x: auto;
     padding-bottom: 4px;
+    scrollbar-width: none;
+}
+.quick-buttons-row::-webkit-scrollbar {
+    display: none;
 }
 
 .quick-pill-btn {
     background: #f1f5f9;
     border: 1px solid #e2e8f0;
     border-radius: 20px;
-    padding: 5px 10px;
+    padding: 6px 12px;
     font-size: 12px;
     font-weight: 500;
     color: #334155;
@@ -3304,9 +3479,11 @@ input:checked + .slider:before {
     background: #e2e8f0;
     color: #0f172a;
     border-color: #cbd5e1;
+    transform: translateY(-1px);
 }
 
 .office-chat-input-row {
+    flex-shrink: 0;
     display: flex;
     gap: 8px;
     padding: 12px 16px;
@@ -3318,14 +3495,16 @@ input:checked + .slider:before {
     flex: 1;
     padding: 10px 14px;
     border: 1px solid #cbd5e1;
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 13px;
     font-family: inherit;
+    transition: border-color 0.2s;
 }
 
 .office-chat-input-row input:focus {
     outline: none;
-    border-color: #2563eb;
+    border-color: var(--md-sys-color-primary, #006493);
+    box-shadow: 0 0 0 3px rgba(0, 100, 147, 0.1);
 }
 
 @media (max-width: 900px) {
@@ -3336,7 +3515,11 @@ input:checked + .slider:before {
     .office-col-left {
         max-width: 100%;
     }
+    .office-resize-handle {
+        display: none;
+    }
     .office-col-right {
+        width: 100% !important;
         min-height: 450px;
     }
 }

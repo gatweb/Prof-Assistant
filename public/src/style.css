@@ -24,6 +24,45 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+/* Universal sleek scrollbars (Webkit / Chromium / Safari) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+/* Scrollbars pour surfaces sombres */
+.dark-theme ::-webkit-scrollbar-thumb,
+.dark-card ::-webkit-scrollbar-thumb,
+.console-output::-webkit-scrollbar-thumb,
+.admin-editor-wrapper::-webkit-scrollbar-thumb {
+  background-color: #475569;
+}
+
+.dark-theme ::-webkit-scrollbar-thumb:hover,
+.dark-card ::-webkit-scrollbar-thumb:hover,
+.console-output::-webkit-scrollbar-thumb:hover,
+.admin-editor-wrapper::-webkit-scrollbar-thumb:hover {
+  background-color: #64748b;
 }
 
 body {
@@ -34,6 +73,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
 /* Typographie simplifiée */
