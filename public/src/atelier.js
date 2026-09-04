@@ -3289,7 +3289,7 @@ function initOfficeWorkspace(exData, latestSub = null) {
     const memoSlide1 = document.getElementById('memoSlide1');
     const memoSlide2 = document.getElementById('memoSlide2');
     const memoSlide3 = document.getElementById('memoSlide3');
-    const memoReminderContent = document.getElementById('memoReminderContent');
+    const memoReminderContent = document.getElementById('memoCourseReminderText') || document.getElementById('memoReminderContent');
 
     if (officeMemoCard) {
         officeMemoCard.classList.remove('hidden');
@@ -3309,9 +3309,18 @@ function initOfficeWorkspace(exData, latestSub = null) {
         if (n > totalMemoSlides) n = 1;
         currentMemoSlide = n;
 
-        if (memoSlide1) memoSlide1.classList.toggle('active', currentMemoSlide === 1);
-        if (memoSlide2) memoSlide2.classList.toggle('active', currentMemoSlide === 2);
-        if (memoSlide3) memoSlide3.classList.toggle('active', currentMemoSlide === 3);
+        if (memoSlide1) {
+            memoSlide1.classList.toggle('active', currentMemoSlide === 1);
+            memoSlide1.classList.toggle('hidden', currentMemoSlide !== 1);
+        }
+        if (memoSlide2) {
+            memoSlide2.classList.toggle('active', currentMemoSlide === 2);
+            memoSlide2.classList.toggle('hidden', currentMemoSlide !== 2);
+        }
+        if (memoSlide3) {
+            memoSlide3.classList.toggle('active', currentMemoSlide === 3);
+            memoSlide3.classList.toggle('hidden', currentMemoSlide !== 3);
+        }
 
         if (memoPageIndicator) {
             memoPageIndicator.textContent = `${currentMemoSlide} / ${totalMemoSlides}`;

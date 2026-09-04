@@ -3379,7 +3379,12 @@ input:checked + .slider:before {
 }
 
 .memo-slide {
+    display: none;
     animation: fadeInSlide 0.2s ease-in-out;
+}
+
+.memo-slide.active {
+    display: block !important;
 }
 
 @keyframes fadeInSlide {
