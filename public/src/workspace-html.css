@@ -3089,13 +3089,13 @@ input:checked + .slider:before {
     scrollbar-gutter: stable;
     padding-right: 14px;
     padding-bottom: 48px; /* Marge de confort au bas pour visualiser et cliquer sur le bouton de remise */
-    scrollbar-width: thin;
-    scrollbar-color: #64748b #e2e8f0;
+    scrollbar-width: auto; /* Barre d'ascenseur standard bien visible et facile à attraper */
+    scrollbar-color: #475569 #e2e8f0;
 }
 
 /* Ascenseur visible garanti pour la colonne des consignes */
 .office-col-left::-webkit-scrollbar {
-    width: 10px;
+    width: 12px;
 }
 
 .office-col-left::-webkit-scrollbar-track {
@@ -3104,13 +3104,13 @@ input:checked + .slider:before {
 }
 
 .office-col-left::-webkit-scrollbar-thumb {
-    background-color: #64748b;
+    background-color: #475569;
     border-radius: 8px;
     border: 2px solid #e2e8f0;
 }
 
 .office-col-left::-webkit-scrollbar-thumb:hover {
-    background-color: #334155;
+    background-color: #1e293b;
 }
 
 /* Poignée de redimensionnement bureautique contrastée et interactive */
@@ -3388,6 +3388,13 @@ input:checked + .slider:before {
     justify-content: space-between;
     margin-top: 16px;
     gap: 12px;
+    position: sticky;
+    bottom: -18px;
+    background: #ffffff;
+    padding-top: 12px;
+    padding-bottom: 6px;
+    border-top: 1px solid #f1f5f9;
+    z-index: 5;
 }
 
 /* Chat Card Bureautique */

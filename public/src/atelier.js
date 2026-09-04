@@ -3183,6 +3183,16 @@ function initOfficeWorkspace(exData, latestSub = null) {
         officeMissionInstructions.innerHTML = window.marked.parse(exData.enonce_md || exData.consigne || 'Consultez les objectifs du cours.');
     }
 
+    // Masquer l'aide-mémoire Google Docs dans les cours de dactylographie (gain d'espace vertical immédiat)
+    const officeMemoCard = document.getElementById('officeMemoCard');
+    if (officeMemoCard) {
+        if (isDactylo) {
+            officeMemoCard.classList.add('hidden');
+        } else {
+            officeMemoCard.classList.remove('hidden');
+        }
+    }
+
     // Adaptations des labels et boutons selon le type d'exercice
     if (officeDocUrlInput) {
         const label = officeDocUrlInput.previousElementSibling;
