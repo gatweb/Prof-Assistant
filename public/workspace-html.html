@@ -39,6 +39,9 @@
             <button id="dyslexiaToggleBtn" class="btn-dyslexia" title="Activer / Désactiver le confort de lecture adapté à la dyslexie">
                 📖 Dyslexie
             </button>
+            <button id="resetExerciseBtn" class="btn-icon-header" title="Réinitialiser mon exercice / travail">
+                🔄 Réinitialiser
+            </button>
             <button id="exportCodeBtn" class="btn-icon-header" title="Exporter mon code (HTML/CSS/JS)">
                 💾 Exporter
             </button>
@@ -158,11 +161,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="sidebar-footer">
-                <button id="resetExerciseBtn" class="btn-danger-outline" title="Effacer mon brouillon et recommencer">
-                    🔄 Réinitialiser l'exercice
-                </button>
             </div>
         </aside>
 
@@ -367,33 +365,54 @@
                                 <div id="officeMissionInstructions" class="markdown-content"></div>
                                 
                                 <div class="office-tools-section">
-                                    <span class="office-tools-label">🚀 Outils en ligne recommandés :</span>
+                                    <span class="office-tools-label">🛠️ Outils & Ressources recommandés :</span>
                                     <div id="officeToolsList" class="office-tools-list">
-                                        <a href="https://docs.google.com" target="_blank" class="office-tool-link-btn">📄 Google Docs</a>
-                                        <a href="https://drive.google.com" target="_blank" class="office-tool-link-btn">📁 Google Drive</a>
-                                        <a href="https://mail.google.com" target="_blank" class="office-tool-link-btn">✉️ Gmail</a>
+                                        <!-- Outils externes et bouton Leçon complète injectés ici -->
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Carte 2 : Boîte à Outils & Raccourcis -->
+                        <!-- Carte 2 : Boîte à Outils, Astuces & Rappels (Carrousel interactif 3D) -->
                         <div class="office-card memo-card" id="officeMemoCard">
-                            <div class="office-card-header">
-                                <h3>⌨️ Aide-mémoire & Raccourcis clés</h3>
+                            <div class="office-card-header memo-header-flex">
+                                <h3 id="memoCardHeaderTitle">💡 Boîte à Outils & Rappels</h3>
+                                <div class="memo-carousel-nav">
+                                    <button id="memoPrevBtn" class="btn-icon memo-nav-btn" type="button" title="Astuce précédente">◀</button>
+                                    <span id="memoPageIndicator" class="memo-page-indicator">1 / 3</span>
+                                    <button id="memoNextBtn" class="btn-icon memo-nav-btn" type="button" title="Astuce suivante">▶</button>
+                                </div>
                             </div>
                             <div class="office-card-body memo-body">
-                                <div class="shortcut-pills">
-                                    <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>B</kbd> <strong>Gras</strong></span>
-                                    <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>I</kbd> <em>Italique</em></span>
-                                    <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>U</kbd> <u>Souligné</u></span>
-                                    <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>Z</kbd> Annuler</span>
-                                    <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>K</kbd> Lien</span>
-                                    <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>Maj</kbd>+<kbd>V</kbd> Coller brut</span>
-                                    <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>Entrée</kbd> Saut de page</span>
+                                <!-- Slide 1 : Raccourcis Clavier 3D -->
+                                <div class="memo-slide" id="memoSlide1">
+                                    <div class="memo-slide-title">⌨️ Raccourcis clés essentiels</div>
+                                    <div class="shortcut-pills">
+                                        <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>B</kbd> <strong>Gras</strong></span>
+                                        <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>I</kbd> <em>Italique</em></span>
+                                        <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>U</kbd> <u>Souligné</u></span>
+                                        <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>Z</kbd> Annuler</span>
+                                        <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>K</kbd> Lien</span>
+                                        <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>Maj</kbd>+<kbd>V</kbd> Coller brut</span>
+                                        <span class="shortcut-pill"><kbd>Ctrl</kbd>+<kbd>Entrée</kbd> Saut de page</span>
+                                    </div>
                                 </div>
-                                <div class="typo-tip">
-                                    💡 <strong>Règle typographique :</strong> N'oublie pas l'espace insécable avant les signes de ponctuation doubles (<strong>: ; ? !</strong>).
+
+                                <!-- Slide 2 : Rappel du cours -->
+                                <div class="memo-slide hidden" id="memoSlide2">
+                                    <div class="memo-slide-title">📖 Rappel clé du cours</div>
+                                    <div id="memoCourseReminderText" class="memo-reminder-content">
+                                        Rappel : la ligne de base (Q-S-D-F et J-K-L-M) est la position de départ. Les index se posent toujours sur F et J qui possèdent un repère tactile !
+                                    </div>
+                                </div>
+
+                                <!-- Slide 3 : Règles & Astuces Pro -->
+                                <div class="memo-slide hidden" id="memoSlide3">
+                                    <div class="memo-slide-title">📏 Typographie & Conseils Pro</div>
+                                    <div class="memo-reminder-content">
+                                        💡 <strong>Règle typographique :</strong> N'oublie pas l'espace insécable avant les signes de ponctuation doubles (<strong>: ; ? !</strong>).<br>
+                                        ⚡ <strong>Conseil :</strong> Regarde toujours l'écran et non tes mains pour développer la mémoire musculaire des doigts !
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -426,14 +445,14 @@
                         <button id="officeExpandTuteurBtn" class="office-expand-btn hidden" title="Développer le Tuteur IA">🤖 ◀</button>
                     </div>
 
-                    <!-- Colonne Droite : Tuteur Socratique IA Bureautique -->
+                    <!-- Colonne Droite : Tuteur IA Socratique Unifié -->
                     <div class="office-col-right" id="officeColRight">
                         <div class="office-chat-card">
                             <div class="office-chat-header">
                                 <div class="chat-header-info">
                                     <div class="tuteur-avatar">🧑‍🏫</div>
                                     <div>
-                                        <h3>Tuteur Socratique Bureautique</h3>
+                                        <h3>Tuteur IA Socratique</h3>
                                         <span class="tuteur-status-dot"></span> <span class="tuteur-status-text">En ligne pour t'aider</span>
                                     </div>
                                 </div>
@@ -443,10 +462,19 @@
                                 </div>
                             </div>
 
+                            <!-- 3 Paliers d'Indices Socratiques -->
+                            <div class="office-tuteur-hints" id="officeTuteurHintsArea">
+                                <div class="hints-buttons-row">
+                                    <button class="tuteur-hint-btn" id="officeHintBtn1" type="button" disabled>💡 Niv. 1<br><span style="font-size:10px;">Théorie</span></button>
+                                    <button class="tuteur-hint-btn" id="officeHintBtn2" type="button" disabled>🔍 Niv. 2<br><span style="font-size:10px;">Mon travail</span></button>
+                                    <button class="tuteur-hint-btn" id="officeHintBtn3" type="button" disabled>🗺️ Niv. 3<br><span style="font-size:10px;">Structure</span></button>
+                                </div>
+                            </div>
+
                             <div class="office-chat-messages" id="officeChatMessages">
                                 <div class="chat-bubble assistant">
                                     <div class="chat-bubble-content">
-                                        Bonjour ! Je suis ton tuteur d'informatique. Je suis là pour t'accompagner pas à pas dans l'apprentissage de Google Docs, Drive et des règles de typographie. Quelle manipulation souhaites-tu réaliser ?
+                                        Bonjour ! Je suis ton tuteur IA. Pose-moi une question sur ton activité ou clique sur un bouton d'indice ci-dessus pour que je te guide pas à pas.
                                     </div>
                                 </div>
                                 <div class="tuteur-typing-indicator hidden" id="officeTypingIndicator">
@@ -458,17 +486,23 @@
                             <div class="office-quick-questions">
                                 <span class="quick-title">💡 Questions fréquentes :</span>
                                 <div class="quick-buttons-row">
+                                    <button class="quick-pill-btn" data-q="Comment bien positionner mes doigts sur la ligne de base ?">⌨️ Position des doigts</button>
                                     <button class="quick-pill-btn" data-q="Comment insérer un saut de page dans Google Docs ?">📄 Saut de page</button>
                                     <button class="quick-pill-btn" data-q="Comment appliquer un style Titre 1 ou Titre 2 ?">🏷️ Styles de titres</button>
-                                    <button class="quick-pill-btn" data-q="Comment insérer une table des matières automatique ?">📑 Sommaire</button>
                                     <button class="quick-pill-btn" data-q="Quelle est la règle pour les espaces devant la ponctuation ?">📏 Typographie</button>
                                 </div>
                             </div>
 
-                            <!-- Zone de saisie -->
-                            <div class="office-chat-input-row">
-                                <input type="text" id="officeChatInput" placeholder="Pose une question au tuteur..." />
-                                <button id="officeChatSendBtn" class="btn-primary">➤</button>
+                            <!-- Zone de saisie avec compteur de questions libres -->
+                            <div class="office-tuteur-input-box">
+                                <div class="free-question-header">
+                                    <span>💬 Question libre</span>
+                                    <span id="officeQuestionCounter" class="question-counter">5 restantes</span>
+                                </div>
+                                <div class="office-chat-input-row">
+                                    <input type="text" id="officeChatInput" placeholder="Pose une question au tuteur..." />
+                                    <button id="officeChatSendBtn" class="btn-primary">➤</button>
+                                </div>
                             </div>
                         </div>
                     </div>

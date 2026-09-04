@@ -780,6 +780,15 @@ async function openExercise(exerciceId) {
                 </div>
             `;
         }
+        const officeChatMsgsInit = document.getElementById('officeChatMessages');
+        if (officeChatMsgsInit) {
+            officeChatMsgsInit.innerHTML = `
+                <div class="chat-bubble assistant">
+                    <div class="chat-sender-name">Tuteur IA</div>
+                    <div class="chat-bubble-content">Bonjour ! Je suis ton tuteur IA pour cette séance. Découvre mes indices progressifs ou pose-moi une question !</div>
+                </div>
+            `;
+        }
         chatHistory = [];
         const tuteurBadge = document.getElementById('tuteurTabBadge');
         if (tuteurBadge) tuteurBadge.style.display = 'none';
@@ -864,6 +873,13 @@ async function openExercise(exerciceId) {
         if (resizeHandle) resizeHandle.classList.add('hidden');
         if (previewSection) previewSection.classList.add('hidden');
 
+        // Réinitialiser la barre latérale gauche pour les cours de code ou créatifs
+        if (!isOfficeCourse) {
+            if (resourcesSidebar) resourcesSidebar.style.display = '';
+            if (sidebarResizeHandle) sidebarResizeHandle.style.display = '';
+        }
+        if (resetExerciseBtn) resetExerciseBtn.style.display = 'inline-flex';
+
         if (isQuizz) {
             if (quizzSection) quizzSection.classList.remove('hidden');
             if (submitBtn) submitBtn.classList.add('hidden');
@@ -873,11 +889,12 @@ async function openExercise(exerciceId) {
             if (officeSection) officeSection.classList.remove('hidden');
             if (submitBtn) submitBtn.classList.add('hidden');
             
-            // Replier la sidebar gauche par défaut en bureautique pour libérer tout l'espace
+            // Masquer complètement la sidebar gauche en bureautique pour éliminer les doublons
             if (resourcesSidebar) {
-                resourcesSidebar.classList.add('collapsed');
-                resourcesSidebar.style.width = '';
-                if (toggleSidebarBtn) toggleSidebarBtn.textContent = '▶';
+                resourcesSidebar.style.display = 'none';
+            }
+            if (sidebarResizeHandle) {
+                sidebarResizeHandle.style.display = 'none';
             }
             
             initOfficeWorkspace(exData, latestSub);
@@ -1295,6 +1312,11 @@ function switchToLobby(resetToPortal = true) {
     if (exportCodeBtn) exportCodeBtn.style.display = 'none';
     if (submitBtn) submitBtn.classList.add('hidden');
     if (chatFab) chatFab.classList.add('hidden');
+    if (resetExerciseBtn) resetExerciseBtn.style.display = 'none';
+
+    // Rétablir la visibilité par défaut de la sidebar si elle a été masquée en bureautique
+    if (resourcesSidebar) resourcesSidebar.style.display = '';
+    if (sidebarResizeHandle) sidebarResizeHandle.style.display = '';
 
     lobbyView.classList.remove('hidden');
     workspaceView.classList.add('hidden');
@@ -1468,14 +1490,34 @@ function scheduleAutoSave() {
     }, 1500);
 }
 
-// --- LOGIQUE RESET ---
+// --- LOGIQUE RESET UNIFIÉE ---
 if (resetExerciseBtn) {
     resetExerciseBtn.addEventListener('click', () => {
         if (!currentExercice) return;
-        if (confirm("Voulez-vous vraiment réinitialiser cet exercice ? Votre code actuel sera perdu.")) {
-            localStorage.removeItem(`draft_${currentExercice.id}`);
-            // Recharger l'exercice (ce qui injectera le code de départ)
-            openExercise(currentExercice.id);
+
+        const selectedCourse = courseManager.getSelectedCourse();
+        const isOfficeCourse = selectedCourse && (selectedCourse.workspaceType === 'office' || selectedCourse.workspaceType === 'bureautique');
+        const isQuizz = currentExercice.type === 'quizz';
+
+        if (isQuizz) {
+            if (confirm("Voulez-vous recommencer ce quiz depuis la première question ?")) {
+                startQuizz(currentExercice);
+            }
+        } else if (isOfficeCourse) {
+            if (confirm("Voulez-vous réinitialiser vos saisies pour cet exercice ?")) {
+                localStorage.removeItem(`office_draft_${currentExercice.id}`);
+                const docUrlInput = document.getElementById('officeDocUrlInput');
+                const notesInput = document.getElementById('officeNotesInput');
+                if (docUrlInput) docUrlInput.value = '';
+                if (notesInput) notesInput.value = '';
+                openExercise(currentExercice.id);
+            }
+        } else {
+            if (confirm("Voulez-vous vraiment réinitialiser cet exercice ? Votre code actuel sera perdu.")) {
+                localStorage.removeItem(`draft_${currentExercice.id}`);
+                // Recharger l'exercice (ce qui injectera le code de départ)
+                openExercise(currentExercice.id);
+            }
         }
     });
 }
@@ -1735,25 +1777,50 @@ if (officeExpandTuteurBtn) {
 // 9. DRAWER CHAT
 // ============================================================
 const appendMessage = (text, role, senderName = null) => {
-    if (!chatMessages) return;
-    const bubble = document.createElement('div');
-    bubble.className = `chat-bubble ${role}`;
-    if (senderName) {
-        const nameEl = document.createElement('div');
-        nameEl.className = 'chat-sender-name';
-        nameEl.textContent = senderName;
-        bubble.appendChild(nameEl);
+    // 1. Ajouter au chat principal (drawer / onglet tuteur)
+    if (chatMessages) {
+        const bubble = document.createElement('div');
+        bubble.className = `chat-bubble ${role}`;
+        if (senderName) {
+            const nameEl = document.createElement('div');
+            nameEl.className = 'chat-sender-name';
+            nameEl.textContent = senderName;
+            bubble.appendChild(nameEl);
+        }
+        const contentEl = document.createElement('div');
+        contentEl.className = 'chat-bubble-content';
+        if (role === 'assistant' && typeof window.marked !== 'undefined') {
+            contentEl.innerHTML = window.marked.parse(text);
+        } else {
+            contentEl.textContent = text;
+        }
+        bubble.appendChild(contentEl);
+        chatMessages.appendChild(bubble);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
     }
-    const contentEl = document.createElement('div');
-    contentEl.className = 'chat-bubble-content';
-    if (role === 'assistant' && typeof window.marked !== 'undefined') {
-        contentEl.innerHTML = window.marked.parse(text);
-    } else {
-        contentEl.textContent = text;
+
+    // 2. Synchroniser avec le chat de l'espace Bureautique / Dactylographie
+    const officeChatMsgs = document.getElementById('officeChatMessages');
+    if (officeChatMsgs) {
+        const officeBubble = document.createElement('div');
+        officeBubble.className = `chat-bubble ${role}`;
+        if (senderName) {
+            const nameEl = document.createElement('div');
+            nameEl.className = 'chat-sender-name';
+            nameEl.textContent = senderName;
+            officeBubble.appendChild(nameEl);
+        }
+        const contentEl = document.createElement('div');
+        contentEl.className = 'chat-bubble-content';
+        if (role === 'assistant' && typeof window.marked !== 'undefined') {
+            contentEl.innerHTML = window.marked.parse(text);
+        } else {
+            contentEl.textContent = text;
+        }
+        officeBubble.appendChild(contentEl);
+        officeChatMsgs.appendChild(officeBubble);
+        officeChatMsgs.scrollTop = officeChatMsgs.scrollHeight;
     }
-    bubble.appendChild(contentEl);
-    chatMessages.appendChild(bubble);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
 
     // Notifier si le drawer est fermé ou si on n'est pas sur le bon onglet
     if (role === 'assistant' && chatDrawer && !chatDrawer.classList.contains('open')) {
@@ -1787,23 +1854,39 @@ if (chatOverlay) chatOverlay.addEventListener('click', closeDrawer);
 // 10. INDICES PROGRESSIFS — Depuis Firestore (pas de Cloud Function)
 // ============================================================
 function updateHintButtons() {
-    if (!hintBtn1) return;
-
-    // Les indices viennent du document Firestore de l'exercice
     const hasStatutAide = currentExercice?.statut_aide !== false;
-    const hasIndices = !!hintState.indices;
 
-    // N1 : disponible si exercice chargé et aide activée
-    hintBtn1.disabled = !currentExercice || !hasStatutAide || !hintState.indices?.niv1;
-    hintBtn1.title = !currentExercice ? "Choisis un exercice d'abord." : (!hasStatutAide ? "L'aide est désactivée." : "Indice théorique");
+    // Boutons de la barre latérale / drawer code
+    if (hintBtn1) {
+        hintBtn1.disabled = !currentExercice || !hasStatutAide || !hintState.indices?.niv1;
+        hintBtn1.title = !currentExercice ? "Choisis un exercice d'abord." : (!hasStatutAide ? "L'aide est désactivée." : "Indice théorique");
+    }
+    if (hintBtn2) {
+        hintBtn2.disabled = !hintState.niv1Used || !hintState.indices?.niv2;
+        hintBtn2.title = hintState.niv1Used ? "Analyser mon code" : "🔒 Consulte le Niveau 1 d'abord";
+    }
+    if (hintBtn3) {
+        hintBtn3.disabled = !hintState.niv2Used || !hintState.indices?.niv3;
+        hintBtn3.title = hintState.niv2Used ? "Obtenir la structure" : "🔒 Consulte le Niveau 2 d'abord";
+    }
 
-    // N2 : débloqué après N1
-    hintBtn2.disabled = !hintState.niv1Used || !hintState.indices?.niv2;
-    hintBtn2.title = hintState.niv1Used ? "Analyser mon code" : "🔒 Consulte le Niveau 1 d'abord";
+    // Boutons du panneau Bureautique / Dactylographie
+    const officeHintBtn1 = document.getElementById('officeHintBtn1');
+    const officeHintBtn2 = document.getElementById('officeHintBtn2');
+    const officeHintBtn3 = document.getElementById('officeHintBtn3');
 
-    // N3 : débloqué après N2
-    hintBtn3.disabled = !hintState.niv2Used || !hintState.indices?.niv3;
-    hintBtn3.title = hintState.niv2Used ? "Obtenir la structure" : "🔒 Consulte le Niveau 2 d'abord";
+    if (officeHintBtn1) {
+        officeHintBtn1.disabled = !currentExercice || !hasStatutAide || !hintState.indices?.niv1;
+        officeHintBtn1.title = !currentExercice ? "Choisis un exercice d'abord." : (!hasStatutAide ? "L'aide est désactivée." : "Indice théorique");
+    }
+    if (officeHintBtn2) {
+        officeHintBtn2.disabled = !hintState.niv1Used || !hintState.indices?.niv2;
+        officeHintBtn2.title = hintState.niv1Used ? "Indice guidé" : "🔒 Consulte le Niveau 1 d'abord";
+    }
+    if (officeHintBtn3) {
+        officeHintBtn3.disabled = !hintState.niv2Used || !hintState.indices?.niv3;
+        officeHintBtn3.title = hintState.niv2Used ? "Structure & solution" : "🔒 Consulte le Niveau 2 d'abord";
+    }
 }
 
 /**
@@ -1812,7 +1895,12 @@ function updateHintButtons() {
  */
 async function showDynamicHintNiveau2() {
     if (!currentExercice) return;
-    if (!htmlEditor || !cssEditor || !jsEditor) return;
+
+    // Si on est en bureautique ou sans éditeur Monaco disponible, basculer sur l'indice statique si présent
+    if (!htmlEditor || !cssEditor || !jsEditor) {
+        showStaticHint(2);
+        return;
+    }
 
     openDrawer();
 
@@ -1877,7 +1965,11 @@ function showStaticHint(niveau) {
     const indice = hintState.indices?.[`niv${niveau}`];
     if (!indice) return;
 
-    openDrawer();
+    const selectedCourse = courseManager.getSelectedCourse();
+    const isOffice = selectedCourse && (selectedCourse.workspaceType === 'office' || selectedCourse.workspaceType === 'bureautique');
+    if (!isOffice) {
+        openDrawer();
+    }
     appendMessage(indice, 'assistant', `Tuteur — Indice Niveau ${niveau}`);
 
     if (niveau === 1) hintState.niv1Used = true;
@@ -1902,10 +1994,16 @@ if (hintBtn3) hintBtn3.addEventListener('click', () => showStaticHint(3));
 // 11. QUESTIONS LIBRES (5 maxi)
 // ============================================================
 function updateQuestionCounter() {
-    if (!questionCounter) return;
     const left = hintState.questionsLeft;
-    questionCounter.textContent = `${left} restante${left > 1 ? 's' : ''}`;
-    questionCounter.classList.toggle('exhausted', left === 0);
+    if (questionCounter) {
+        questionCounter.textContent = `${left} restante${left > 1 ? 's' : ''}`;
+        questionCounter.classList.toggle('exhausted', left === 0);
+    }
+    const officeQuestionCounter = document.getElementById('officeQuestionCounter');
+    if (officeQuestionCounter) {
+        officeQuestionCounter.textContent = `${left} restante${left > 1 ? 's' : ''}`;
+        officeQuestionCounter.classList.toggle('exhausted', left === 0);
+    }
 }
 
 if (freeQuestionToggle) {
@@ -3183,15 +3281,46 @@ function initOfficeWorkspace(exData, latestSub = null) {
         officeMissionInstructions.innerHTML = window.marked.parse(exData.enonce_md || exData.consigne || 'Consultez les objectifs du cours.');
     }
 
-    // Masquer l'aide-mémoire Google Docs dans les cours de dactylographie (gain d'espace vertical immédiat)
+    // --- AIDE-MÉMOIRE & RAPPELS EN CARROUSEL INTERACTIF ---
     const officeMemoCard = document.getElementById('officeMemoCard');
+    const memoPrevBtn = document.getElementById('memoPrevBtn');
+    const memoNextBtn = document.getElementById('memoNextBtn');
+    const memoPageIndicator = document.getElementById('memoPageIndicator');
+    const memoSlide1 = document.getElementById('memoSlide1');
+    const memoSlide2 = document.getElementById('memoSlide2');
+    const memoSlide3 = document.getElementById('memoSlide3');
+    const memoReminderContent = document.getElementById('memoReminderContent');
+
     if (officeMemoCard) {
-        if (isDactylo) {
-            officeMemoCard.classList.add('hidden');
-        } else {
-            officeMemoCard.classList.remove('hidden');
+        officeMemoCard.classList.remove('hidden');
+    }
+
+    // Injecter le rappel de cours dans la slide 2
+    if (memoReminderContent && typeof window.marked !== 'undefined') {
+        const theorieMD = exData.theorie_md || exData.rappel_cours || "Révise les notions clés du chapitre pour réussir cette séance !";
+        memoReminderContent.innerHTML = window.marked.parse(theorieMD);
+    }
+
+    let currentMemoSlide = 1;
+    const totalMemoSlides = 3;
+
+    function setMemoSlide(n) {
+        if (n < 1) n = totalMemoSlides;
+        if (n > totalMemoSlides) n = 1;
+        currentMemoSlide = n;
+
+        if (memoSlide1) memoSlide1.classList.toggle('active', currentMemoSlide === 1);
+        if (memoSlide2) memoSlide2.classList.toggle('active', currentMemoSlide === 2);
+        if (memoSlide3) memoSlide3.classList.toggle('active', currentMemoSlide === 3);
+
+        if (memoPageIndicator) {
+            memoPageIndicator.textContent = `${currentMemoSlide} / ${totalMemoSlides}`;
         }
     }
+
+    if (memoPrevBtn) memoPrevBtn.onclick = () => setMemoSlide(currentMemoSlide - 1);
+    if (memoNextBtn) memoNextBtn.onclick = () => setMemoSlide(currentMemoSlide + 1);
+    setMemoSlide(1);
 
     // Adaptations des labels et boutons selon le type d'exercice
     if (officeDocUrlInput) {
@@ -3224,28 +3353,58 @@ function initOfficeWorkspace(exData, latestSub = null) {
             : "Soumettre mon document 🚀";
     }
 
-    // Outils recommandés dynamiques
+    // Outils recommandés dynamiques & accès direct à la leçon de cours
     if (officeToolsList) {
+        const selectedCourse = courseManager.getSelectedCourse();
+        const matchedCh = selectedCourse ? courseManager.findChapterByDbLabel(selectedCourse, exData.chapitre) : null;
+
+        let lessonBtnHtml = '';
+        if (matchedCh && matchedCh.file) {
+            lessonBtnHtml = `<button type="button" id="officeOpenLessonBtn" class="office-tool-link-btn" style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;font-weight:600;cursor:pointer;">📖 Leçon du cours ↗</button>`;
+        }
+
+        let toolsHtml = '';
         if (exData.external_tools && exData.external_tools.length > 0) {
-            officeToolsList.innerHTML = exData.external_tools.map(tool => `
+            toolsHtml = exData.external_tools.map(tool => `
                 <a href="${tool.url}" target="_blank" rel="noopener noreferrer" class="office-tool-link-btn">
                     🚀 ${tool.name} ↗
                 </a>
             `).join('');
         } else if (isDactylo) {
-            officeToolsList.innerHTML = `
+            toolsHtml = `
                 <a href="https://agilefingers.com/fr" target="_blank" rel="noopener noreferrer" class="office-tool-link-btn">
                     ⌨️ AgileFingers (Entraînement) ↗
                 </a>
             `;
         } else {
-            officeToolsList.innerHTML = `
+            toolsHtml = `
                 <a href="https://docs.google.com" target="_blank" rel="noopener noreferrer" class="office-tool-link-btn">📄 Google Docs ↗</a>
                 <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer" class="office-tool-link-btn">📁 Google Drive ↗</a>
                 <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer" class="office-tool-link-btn">✉️ Gmail ↗</a>
             `;
         }
+
+        officeToolsList.innerHTML = lessonBtnHtml + toolsHtml;
+
+        const officeOpenLessonBtn = document.getElementById('officeOpenLessonBtn');
+        if (officeOpenLessonBtn && matchedCh) {
+            officeOpenLessonBtn.addEventListener('click', () => {
+                openCourseReader(matchedCh);
+            });
+        }
     }
+
+    // Indices progressifs du Tuteur IA unifié
+    const officeHintBtn1 = document.getElementById('officeHintBtn1');
+    const officeHintBtn2 = document.getElementById('officeHintBtn2');
+    const officeHintBtn3 = document.getElementById('officeHintBtn3');
+
+    if (officeHintBtn1) officeHintBtn1.onclick = () => showStaticHint(1);
+    if (officeHintBtn2) officeHintBtn2.onclick = () => showDynamicHintNiveau2();
+    if (officeHintBtn3) officeHintBtn3.onclick = () => showStaticHint(3);
+
+    updateHintButtons();
+    updateQuestionCounter();
 
     // Récupération des données soumises ou brouillon
     let savedUrl = '';
@@ -3292,29 +3451,12 @@ function initOfficeWorkspace(exData, latestSub = null) {
     if (officeNotesInput) officeNotesInput.oninput = saveOfficeDraft;
 }
 
-// Fonction d'ajout de bulle de chat bureautique
-function appendOfficeMessage(text, role = 'assistant') {
-    const messagesEl = document.getElementById('officeChatMessages');
-    if (!messagesEl) return;
-
-    const bubble = document.createElement('div');
-    bubble.className = `chat-bubble ${role}`;
-    
-    const content = document.createElement('div');
-    content.className = 'chat-bubble-content';
-
-    if (typeof window.marked !== 'undefined') {
-        content.innerHTML = window.marked.parse(text);
-    } else {
-        content.textContent = text;
-    }
-
-    bubble.appendChild(content);
-    messagesEl.appendChild(bubble);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+// Fonction d'ajout de bulle de chat bureautique (utilise appendMessage unifié)
+function appendOfficeMessage(text, role = 'assistant', senderName = null) {
+    appendMessage(text, role, senderName || (role === 'assistant' ? 'Tuteur IA' : 'Vous'));
 }
 
-// Envoi d'une question au tuteur bureautique
+// Envoi d'une question au tuteur bureautique unifié avec quota de 5 questions
 async function sendOfficeChatMessage(customQuestion = null) {
     const inputEl = document.getElementById('officeChatInput');
     const sendBtn = document.getElementById('officeChatSendBtn');
@@ -3322,12 +3464,25 @@ async function sendOfficeChatMessage(customQuestion = null) {
 
     if (!question) return;
 
+    if (hintState.questionsLeft <= 0) {
+        appendMessage("Tu as utilisé tes 5 questions libres pour cet exercice ! Découvre les indices progressifs pour t'aider.", 'assistant', 'Tuteur IA');
+        return;
+    }
+
     if (inputEl && !customQuestion) {
         inputEl.value = '';
     }
 
-    // Afficher la bulle utilisateur
-    appendOfficeMessage(question, 'user');
+    // Afficher la bulle utilisateur et décompter le quota
+    appendMessage(question, 'user', 'Vous');
+    hintState.questionsLeft--;
+    updateQuestionCounter();
+
+    if (hintState.currentDocId) {
+        updateDoc(doc(db, "submissions", hintState.currentDocId), {
+            questions_libres: MAX_QUESTIONS - hintState.questionsLeft
+        }).catch(() => { });
+    }
 
     if (sendBtn) sendBtn.disabled = true;
 
@@ -3339,9 +3494,6 @@ async function sendOfficeChatMessage(customQuestion = null) {
         if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
-    // Historique conversationnel
-    officeChatHistory.push({ role: 'user', parts: [{ text: question }] });
-
     const selectedCourse = courseManager.getSelectedCourse();
     const systemPromptCustom = selectedCourse ? selectedCourse.systemPrompt : null;
 
@@ -3349,18 +3501,17 @@ async function sendOfficeChatMessage(customQuestion = null) {
         const tuteurFn = httpsCallable(functions, 'interrogerTuteur');
         const res = await tuteurFn({
             question: question,
-            historique: officeChatHistory.slice(-8), // 8 derniers messages
+            historique: chatHistory,
             id_exercice: currentExercice ? currentExercice.id : 'general',
             system_prompt_custom: systemPromptCustom
         });
 
         const reply = res.data?.reponse || "Je suis à ton écoute pour toute question sur la bureautique ou la dactylographie.";
-        officeChatHistory.push({ role: 'model', parts: [{ text: reply }] });
-        appendOfficeMessage(reply, 'assistant');
+        appendMessage(reply, 'assistant', 'Tuteur IA');
 
     } catch (err) {
         console.error('[Office Chat] Erreur:', err);
-        appendOfficeMessage("Désolé, je rencontre une petite difficulté de connexion. Réessaie dans un instant !", 'assistant');
+        appendMessage("Désolé, je rencontre une petite difficulté de connexion. Réessaie dans un instant !", 'assistant', 'Tuteur IA');
     } finally {
         if (typingIndicator) typingIndicator.classList.add('hidden');
         if (sendBtn) sendBtn.disabled = false;
@@ -3398,7 +3549,7 @@ if (officeClearChatBtn) {
                 </div>
             `;
         }
-        officeChatHistory = [];
+        chatHistory = [];
     });
 }
 
@@ -3455,10 +3606,10 @@ if (officeValidateBtn) {
                 code_css: '',
                 code_js: '',
                 autonomie: {
-                    indices_niv1: 0,
-                    indices_niv2: 0,
-                    indices_niv3: 0,
-                    questions_ia: officeChatHistory.length,
+                    indices_niv1: hintState.niv1Used ? 1 : 0,
+                    indices_niv2: hintState.niv2Used ? 1 : 0,
+                    indices_niv3: hintState.niv3Used ? 1 : 0,
+                    questions_ia: MAX_QUESTIONS - hintState.questionsLeft,
                     copie_colle_ops: 0,
                     copie_colle_caracteres: 0,
                     sorties_page: 0,
@@ -3475,12 +3626,13 @@ if (officeValidateBtn) {
             triggerGamificationCelebration("🎉 Travail transmis !", "Ton devoir a été enregistré avec succès pour le professeur.", "🚀");
 
             if (evalIA?.feedback_eleve) {
-                appendOfficeMessage(
+                appendMessage(
                     `✨ **Retour de ton Tuteur**\n\n${evalIA.feedback_eleve}\n\n_Ton travail a été enregistré pour le professeur._`,
-                    'assistant'
+                    'assistant',
+                    'Tuteur IA'
                 );
             } else {
-                appendOfficeMessage("📬 Ton travail a bien été enregistré pour le professeur !", 'assistant');
+                appendMessage("📬 Ton travail a bien été enregistré pour le professeur !", 'assistant', 'Tuteur IA');
             }
 
         } catch (error) {
@@ -3489,7 +3641,7 @@ if (officeValidateBtn) {
                 feedbackEl.textContent = "❌ Erreur lors de l'envoi";
                 feedbackEl.style.color = "#ef4444";
             }
-            appendOfficeMessage("❌ Erreur lors de l'envoi. Vérifie ta connexion et réessaie.", 'assistant');
+            appendMessage("❌ Erreur lors de l'envoi. Vérifie ta connexion et réessaie.", 'assistant', 'Tuteur IA');
         } finally {
             officeValidateBtn.disabled = false;
             officeValidateBtn.innerHTML = prevBtnHtml;
