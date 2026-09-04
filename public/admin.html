@@ -40,11 +40,7 @@
                 <h2>📥 Flux des Copies & Évaluations</h2>
                 <p class="subtitle">Gérez et validez les devoirs de vos différentes classes</p>
             </div>
-            <!-- Boutons de DEV -->
-            <div style="display:flex;gap:8px;">
-                <button id="generateMockBtn" class="btn-secondary mock-btn">🧪 Générer copies</button>
-                <button id="generateCoursesBtn" class="btn-secondary mock-btn">📚 Initialiser Cours</button>
-            </div>
+            <!-- Zone d'action simplifiée et épurée -->
         </div>
 
         <!-- Barre de Filtres Multi-Classes & Multi-Cours -->
@@ -58,8 +54,9 @@
                     <option value="bureautique-3e">📄 Bureautique & Google Workspace (3e)</option>
                     <option value="dactylo-3e">⌨️ Dactylographie (3e)</option>
                     <option value="creation-site-web">🌐 Création Web HTML/CSS</option>
-                    <option value="js-uaa5-classic">💛 Algorithmique JS</option>
-                    <option value="studio-creatif">🎬 Studio Créatif</option>
+                    <option value="js-uaa5-classic">⚡ Programmation JS (UAA5)</option>
+                    <option value="studio-creatif">🎨 Studio Créatif</option>
+                    <option value="rap-academy-workspace">🎤 Rap Star Academy</option>
                 </select>
             </div>
             <div style="flex: 1; min-width: 150px;">
@@ -73,14 +70,6 @@
             <button id="refreshSubmissionsBtn" class="btn-secondary" style="padding: 10px 16px; font-size: 13px;">🔄 Rafraîchir</button>
         </div>
 
-        <!-- Widget : Météo de la classe (Insights) -->
-        <div class="md-card mt-16" style="background-color: var(--md-sys-color-primary-container);">
-            <h3 style="margin-top:0; color: var(--md-sys-color-on-primary-container); font-size: 15px;">🌥️ Météo de la Classe (Top Difficultés)</h3>
-            <div id="insightsContainer" style="display:flex; gap:12px; flex-wrap:wrap; margin-top:10px;">
-                <span class="badge" style="background-color: rgba(0,0,0,0.1); color: inherit;">Chargement des statistiques...</span>
-            </div>
-        </div>
-        
         <div class="md-card mt-16 p-0">
             <table class="md-table">
                 <thead>

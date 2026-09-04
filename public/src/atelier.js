@@ -873,6 +873,11 @@ async function openExercise(exerciceId) {
             if (officeSection) officeSection.classList.remove('hidden');
             if (submitBtn) submitBtn.classList.add('hidden');
             
+            // Replier la sidebar gauche par défaut en bureautique pour libérer tout l'espace
+            if (resourcesSidebar && !resourcesSidebar.classList.contains('collapsed')) {
+                resourcesSidebar.classList.add('collapsed');
+            }
+            
             initOfficeWorkspace(exData, latestSub);
 
             // Mettre à jour l'affichage du bouton de validation bureautique
@@ -1630,7 +1635,8 @@ if (officeColRight && officeResizeHandle) {
         const container = document.getElementById('officeContainer');
         const containerRect = container?.getBoundingClientRect();
         if (!containerRect) return;
-        const newWidth = Math.max(260, Math.min(750, containerRect.right - e.clientX));
+        const maxAllowed = Math.min(750, Math.round(containerRect.width * 0.65));
+        const newWidth = Math.max(220, Math.min(maxAllowed, containerRect.right - e.clientX));
         officeColRight.style.width = `${newWidth}px`;
         lastOfficeTuteurWidth = `${newWidth}px`;
         localStorage.setItem('last_office_tuteur_width', lastOfficeTuteurWidth);

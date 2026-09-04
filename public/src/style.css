@@ -25,41 +25,46 @@
   margin: 0;
   padding: 0;
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-color: #94a3b8 #f1f5f9;
 }
 
-/* Universal sleek scrollbars (Webkit / Chromium / Safari) */
+/* Universal high-contrast visible scrollbars (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f1f5f9;
+  border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
-  border-radius: 8px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
+  background-color: #94a3b8;
+  border-radius: 6px;
+  border: 2px solid #f1f5f9;
   transition: background-color 0.2s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8;
+  background-color: #64748b;
 }
 
-/* Scrollbars pour surfaces sombres */
+/* Scrollbars pour surfaces sombres / Monaco */
+.dark-theme ::-webkit-scrollbar-track,
+.console-output::-webkit-scrollbar-track,
+.admin-editor-wrapper::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
 .dark-theme ::-webkit-scrollbar-thumb,
-.dark-card ::-webkit-scrollbar-thumb,
 .console-output::-webkit-scrollbar-thumb,
 .admin-editor-wrapper::-webkit-scrollbar-thumb {
   background-color: #475569;
+  border-color: #1e293b;
 }
 
 .dark-theme ::-webkit-scrollbar-thumb:hover,
-.dark-card ::-webkit-scrollbar-thumb:hover,
 .console-output::-webkit-scrollbar-thumb:hover,
 .admin-editor-wrapper::-webkit-scrollbar-thumb:hover {
   background-color: #64748b;
