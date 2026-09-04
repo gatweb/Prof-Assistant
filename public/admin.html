@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ProfAssistant - Dashboard Professeur</title>
     <!-- Styles globaux et locaux -->
-    <link rel="stylesheet" href="./src/style.css">
-    <link rel="stylesheet" href="./src/admin.css">
-    <link rel="stylesheet" href="./src/progression.css">
+    <link rel="stylesheet" href="./src/style.css?v=1788509000">
+    <link rel="stylesheet" href="./src/admin.css?v=1788509000">
+    <link rel="stylesheet" href="./src/progression.css?v=1788509000">
 </head>
 <body>
     <header class="app-header">
@@ -96,39 +96,50 @@
                 <h2>📊 Suivi Global des Classes & Progression</h2>
                 <p class="subtitle">Vue matricielle par cours et suivi individualisé des élèves</p>
             </div>
-            <div class="filter-actions">
-                <button id="filterToGradeBtn" class="btn-secondary">🔍 Copies à corriger</button>
+            <div class="filter-actions" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <!-- Commutateur de Mode : Synthétique / Détaillé -->
+                <div class="progression-mode-toggle">
+                    <button id="viewSummaryBtn" class="mode-toggle-btn active" title="Vue condensée par module avec moyennes et taux de complétion">📊 Synthétique</button>
+                    <button id="viewDetailedBtn" class="mode-toggle-btn" title="Vue exhaustive avec chaque exercice individuel">📑 Détaillée</button>
+                </div>
                 <button id="exportCsvBtn" class="btn-secondary">📥 Exporter CSV</button>
                 <button id="refreshProgressionBtn" class="btn-icon" title="Rafraîchir">🔄</button>
             </div>
         </div>
 
-        <!-- Filtres Progression (Cours + Classe + Recherche Élève) -->
-        <div class="md-card mt-16 p-16" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: #ffffff; border-radius: 12px;">
-            <div style="flex: 1.5; min-width: 180px;">
-                <select id="progressionCourseSelect" class="md-input" style="padding: 10px 14px; font-size: 13px; cursor: pointer;">
-                    <option value="dactylo-3e" selected>⌨️ Dactylographie (3e)</option>
-                    <option value="bureautique-3e">📄 Bureautique & Workspace (3e)</option>
-                    <option value="creation-site-web">🌐 Création Web HTML/CSS</option>
-                    <option value="js-uaa5-classic">💛 Algorithmique JS</option>
-                    <option value="studio-creatif">🎬 Studio Créatif</option>
-                    <option value="all">📚 Tous les cours (Vue d'ensemble)</option>
-                </select>
+        <!-- Filtres Progression (Cours + Classe + Recherche Élève + Filtres Pédagogiques Rapides) -->
+        <div class="md-card mt-16 p-16" style="background: #ffffff; border-radius: 12px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                <div style="flex: 1.5; min-width: 180px;">
+                    <select id="progressionCourseSelect" class="md-input" style="padding: 10px 14px; font-size: 13px; cursor: pointer;">
+                        <option value="dactylo-3e" selected>⌨️ Dactylographie (3e)</option>
+                        <option value="bureautique-3e">📄 Bureautique & Workspace (3e)</option>
+                        <option value="creation-site-web">🌐 Création Web HTML/CSS</option>
+                        <option value="js-uaa5-classic">💛 Algorithmique JS</option>
+                        <option value="studio-creatif">🎬 Studio Créatif</option>
+                        <option value="all">📚 Tous les cours (Vue d'ensemble)</option>
+                    </select>
+                </div>
+                <div style="flex: 1; min-width: 140px;">
+                    <select id="progressionClassSelect" class="md-input" style="padding: 10px 14px; font-size: 13px; cursor: pointer;">
+                        <option value="all">🏫 Toutes classes</option>
+                        <option value="unassigned">⚠️ Non assignés</option>
+                    </select>
+                </div>
+                <div style="flex: 2; min-width: 200px;">
+                    <input type="text" id="progressionSearchInput" class="md-input" placeholder="🔍 Filtrer par élève (nom ou email)..." style="padding: 10px 14px; font-size: 13px;">
+                </div>
+                <div id="progressionStatsSummary" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <!-- Statistiques dynamiques (Nombre d'élèves, moyenne, en attente) -->
+                </div>
             </div>
-            <div style="flex: 1; min-width: 140px;">
-                <select id="progressionClassSelect" class="md-input" style="padding: 10px 14px; font-size: 13px; cursor: pointer;">
-                    <option value="all">🏫 Toutes classes</option>
-                    <option value="3G1">Classe 3G1</option>
-                    <option value="3G2">Classe 3G2</option>
-                    <option value="3TT">Classe 3TT</option>
-                    <option value="unassigned">⚠️ Non assignés</option>
-                </select>
-            </div>
-            <div style="flex: 2; min-width: 200px;">
-                <input type="text" id="progressionSearchInput" class="md-input" placeholder="🔍 Filtrer par élève (nom ou email)..." style="padding: 10px 14px; font-size: 13px;">
-            </div>
-            <div id="progressionStatsSummary" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                <!-- Statistiques dynamiques (Nombre d'élèves, complétion) -->
+
+            <!-- Filtres rapides d'alerte pédagogique (Pilules) -->
+            <div class="quick-filter-pills" id="progressionQuickFilters">
+                <button type="button" class="filter-pill active" data-filter="all">👥 Tous (<span id="countPillAll">0</span>)</button>
+                <button type="button" class="filter-pill pill-help" data-filter="help">🆘 En difficulté (<span id="countPillHelp">0</span>)</button>
+                <button type="button" class="filter-pill pill-awaiting" data-filter="awaiting">⏳ À valider (<span id="countPillAwaiting">0</span>)</button>
+                <button type="button" class="filter-pill pill-inactive" data-filter="inactive">💤 Non démarrés (<span id="countPillInactive">0</span>)</button>
             </div>
         </div>
 
@@ -475,7 +486,7 @@
     </script>
     
     <!-- Contrôleur JS -->
-    <script type="module" src="./src/admin.js"></script>
-    <script type="module" src="./src/progression.js"></script>
+    <script type="module" src="./src/admin.js?v=1788509000"></script>
+    <script type="module" src="./src/progression.js?v=1788509000"></script>
 </body>
 </html>

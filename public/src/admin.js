@@ -1,5 +1,5 @@
 import { listenToAuthStatus, logoutUser } from './firebase/auth.js';
-import { getSubmissionsToGrade, updateSubmissionStatus, generateMockSubmissions, generateMockCourses, db } from './firebase/db.js';
+import { getSubmissionsToGrade, updateSubmissionStatus, db } from './firebase/db.js';
 import { functions } from './firebase/config.js';
 import { httpsCallable } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-functions.js";
 import { formatDate } from './utils.js';
@@ -327,91 +327,6 @@ if(backBtn) {
     });
 }
 
-// ============================================
-// 3. Outil de Génération de Tests (DEV ONLY)
-// ============================================
-const generateMockBtn = document.getElementById('generateMockBtn');
-if(generateMockBtn) {
-    generateMockBtn.addEventListener('click', async () => {
-        const confirmMsg = "Générer 3 fausses copies dans Firebase pour tester le tableau de bord ?";
-        if (confirm(confirmMsg)) {
-            generateMockBtn.disabled = true;
-            generateMockBtn.textContent = "Génération en cours...";
-            try {
-                await generateMockSubmissions();
-                alert("✅ 3 copies ont été générées avec succès !");
-                loadSubmissionsList();
-            } catch (e) {
-                console.error("Erreur mock", e);
-                alert("❌ Impossible de générer. La base de données Firestore est-elle bien initialisée en mode Test ?");
-            } finally {
-                generateMockBtn.textContent = "🧪 Générer copies de test";
-                generateMockBtn.disabled = false;
-            }
-        }
-    });
-}
-
-const generateCoursesBtn = document.getElementById('generateCoursesBtn');
-if(generateCoursesBtn) {
-    generateCoursesBtn.addEventListener('click', async () => {
-        if(confirm("Créer les cours par défaut (html_css, javascript) dans la base ?")) {
-            generateCoursesBtn.disabled = true;
-            generateCoursesBtn.textContent = "En cours...";
-            try {
-                await generateMockCourses();
-                alert("📚 Cours générés avec succès ! Le Tuteur IA a maintenant une base de théorie.");
-            } catch(e) {
-                console.error(e);
-                alert("Erreur création cours");
-            } finally {
-                generateCoursesBtn.textContent = "📚 Initialiser Cours";
-                generateCoursesBtn.disabled = false;
-            }
-        }
-    });
-}
-
-// ============================================
-// 3.5 Météo de la classe (Insights)
-// ============================================
-const insightsContainer = document.getElementById('insightsContainer');
-if (insightsContainer) {
-    onSnapshot(doc(db, "statistiques_classe", "tags"), (snapshot) => {
-        if (snapshot.exists()) {
-            const data = snapshot.data();
-            insightsContainer.innerHTML = ''; // Clear
-            
-            // Transformer en tableau pour trier par difficulté
-            const tags = Object.entries(data).sort((a,b) => b[1] - a[1]);
-            
-            if (tags.length === 0) {
-                insightsContainer.innerHTML = '<span class="badge" style="background-color: rgba(0,0,0,0.1); color: inherit;">Aucune question posée pour le moment.</span>';
-                return;
-            }
-
-            tags.forEach(([tag, count]) => {
-                const el = document.createElement('span');
-                el.className = 'badge';
-                // Code couleur
-                if (count >= 5) {
-                    el.style.backgroundColor = 'var(--md-sys-color-error)';
-                    el.style.color = 'var(--md-sys-color-on-error)';
-                } else if (count >= 2) {
-                    el.style.backgroundColor = 'orange';
-                    el.style.color = 'white';
-                } else {
-                    el.style.backgroundColor = 'var(--md-sys-color-secondary)';
-                    el.style.color = 'var(--md-sys-color-on-secondary)';
-                }
-                el.textContent = `${tag} (${count})`;
-                insightsContainer.appendChild(el);
-            });
-        } else {
-            insightsContainer.innerHTML = '<span class="badge" style="background-color: rgba(0,0,0,0.1); color: inherit;">Aucune donnée. Les élèves sont sages !</span>';
-        }
-    });
-}
 
 // ============================================
 // 4. Éditeur Monaco (Configuration Read-Only)

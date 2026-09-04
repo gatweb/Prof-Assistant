@@ -14,6 +14,9 @@ class ProgressionManager {
         this.students = []; // { email, nom, submissions: { exId: sub } }
         this.chapters = {}; // { name: [exIds] }
         this.isFilterActive = false;
+        this.viewMode = 'summary'; // 'summary' | 'detailed'
+        this.expandedChapters = new Set();
+        this.quickFilter = 'all'; // 'all' | 'help' | 'awaiting' | 'inactive'
 
         this.initUI();
     }
@@ -30,13 +33,44 @@ class ProgressionManager {
         this.modal = document.getElementById('chapterModal');
         this.closeModalBtn = this.modal?.querySelector('.close-modal');
 
+        this.viewSummaryBtn = document.getElementById('viewSummaryBtn');
+        this.viewDetailedBtn = document.getElementById('viewDetailedBtn');
+
         this.initTabs();
+
+        if (this.viewSummaryBtn && this.viewDetailedBtn) {
+            this.viewSummaryBtn.addEventListener('click', () => {
+                this.viewMode = 'summary';
+                this.viewSummaryBtn.classList.add('active');
+                this.viewDetailedBtn.classList.remove('active');
+                this.expandedChapters.clear();
+                this.renderMatrix();
+            });
+            this.viewDetailedBtn.addEventListener('click', () => {
+                this.viewMode = 'detailed';
+                this.viewDetailedBtn.classList.add('active');
+                this.viewSummaryBtn.classList.remove('active');
+                this.renderMatrix();
+            });
+        }
+
+        const pillButtons = document.querySelectorAll('#progressionQuickFilters .filter-pill');
+        pillButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                pillButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.quickFilter = btn.dataset.filter || 'all';
+                this.renderMatrix();
+            });
+        });
 
         if (this.filterBtn) {
             this.filterBtn.addEventListener('click', () => {
                 this.isFilterActive = !this.isFilterActive;
                 this.filterBtn.classList.toggle('active', this.isFilterActive);
                 this.filterBtn.style.backgroundColor = this.isFilterActive ? 'var(--md-sys-color-primary-container)' : '';
+                this.quickFilter = this.isFilterActive ? 'awaiting' : 'all';
+                pillButtons.forEach(b => b.classList.toggle('active', b.dataset.filter === this.quickFilter));
                 this.renderMatrix();
             });
         }
@@ -258,6 +292,7 @@ class ProgressionManager {
         }
 
         this.students = Object.values(studentMap).sort((a,b) => a.nom.localeCompare(b.nom));
+        this.updateClassSelect();
     }
 
     calculateScore(sub) {
@@ -274,11 +309,83 @@ class ProgressionManager {
         return Math.max(0, score); // Pas de score négatif
     }
 
+    updateClassSelect() {
+        if (!this.classSelect) return;
+        const currentVal = this.classSelect.value || "all";
+        const classes = new Set();
+        this.students.forEach(s => {
+            if (s.classe && s.classe.trim()) {
+                classes.add(s.classe.trim());
+            }
+        });
+        const sortedClasses = Array.from(classes).sort();
+
+        this.classSelect.innerHTML = `
+            <option value="all">🏫 Toutes classes</option>
+            ${sortedClasses.map(c => `<option value="${c}">Classe ${c}</option>`).join('')}
+            <option value="unassigned">⚠️ Non assignés</option>
+        `;
+        if (currentVal === 'all' || currentVal === 'unassigned' || sortedClasses.includes(currentVal)) {
+            this.classSelect.value = currentVal;
+        } else {
+            this.classSelect.value = 'all';
+        }
+    }
+
+    toggleChapter(chapterName) {
+        if (this.viewMode === 'detailed') {
+            this.viewMode = 'summary';
+            if (this.viewSummaryBtn) this.viewSummaryBtn.classList.add('active');
+            if (this.viewDetailedBtn) this.viewDetailedBtn.classList.remove('active');
+            this.expandedChapters = new Set(Object.keys(this.chapters).filter(ch => ch !== chapterName));
+        } else {
+            if (this.expandedChapters.has(chapterName)) {
+                this.expandedChapters.delete(chapterName);
+            } else {
+                this.expandedChapters.add(chapterName);
+            }
+        }
+        this.renderMatrix();
+    }
+
     renderMatrix() {
         let displayStudents = this.students;
 
         // Exclure les élèves archivés de la matrice active
         displayStudents = displayStudents.filter(s => s.status !== 'archive');
+
+        // Pré-calculer les métriques individuelles pour chaque élève
+        displayStudents.forEach(student => {
+            let needsHelp = false;
+            let helpReason = "";
+            let awaitingCount = 0;
+            let startedCount = 0;
+
+            for (const exercises of Object.values(this.chapters)) {
+                exercises.forEach(ex => {
+                    const sub = student.submissions[ex.id];
+                    if (sub) {
+                        startedCount++;
+                        const score = this.calculateScore(sub);
+                        if (sub.status === 'a_valider') awaitingCount++;
+                        if (sub.status === 'a_refaire') {
+                            needsHelp = true;
+                            helpReason = "Exercice à refaire";
+                        } else if ((sub.status === 'valide' || sub.status === 'publie') && score !== null && score < 50) {
+                            needsHelp = true;
+                            helpReason = "Note < 50%";
+                        }
+                    }
+                });
+            }
+
+            student.needsHelp = needsHelp;
+            student.helpReason = helpReason;
+            student.awaitingCount = awaitingCount;
+            student.hasAwaiting = awaitingCount > 0;
+            student.startedCount = startedCount;
+            student.isInactive = startedCount === 0;
+        });
 
         // Filtre par classe
         const selectedClass = this.classSelect?.value || "all";
@@ -300,20 +407,39 @@ class ProgressionManager {
             );
         }
 
-        // Filtre des copies en attente
-        if (this.isFilterActive) {
+        // Mettre à jour les compteurs des badges de filtres rapides (sur l'ensemble filtré par classe/recherche)
+        const countAll = displayStudents.length;
+        const countHelp = displayStudents.filter(s => s.needsHelp).length;
+        const countAwaiting = displayStudents.filter(s => s.hasAwaiting).length;
+        const countInactive = displayStudents.filter(s => s.isInactive).length;
+
+        const pillAll = document.getElementById('countPillAll');
+        const pillHelp = document.getElementById('countPillHelp');
+        const pillAwaiting = document.getElementById('countPillAwaiting');
+        const pillInactive = document.getElementById('countPillInactive');
+        if (pillAll) pillAll.textContent = countAll;
+        if (pillHelp) pillHelp.textContent = countHelp;
+        if (pillAwaiting) pillAwaiting.textContent = countAwaiting;
+        if (pillInactive) pillInactive.textContent = countInactive;
+
+        // Filtre rapide actif
+        if (this.quickFilter === 'help') {
+            displayStudents = displayStudents.filter(s => s.needsHelp);
+        } else if (this.quickFilter === 'awaiting') {
             displayStudents = displayStudents.filter(s => s.hasAwaiting);
+        } else if (this.quickFilter === 'inactive') {
+            displayStudents = displayStudents.filter(s => s.isInactive);
         }
 
         // Calcul des statistiques globales pour le bandeau
         let totalValidatedScores = 0;
         let countValidated = 0;
-        let awaitingCount = 0;
+        let awaitingCountTotal = 0;
 
         displayStudents.forEach(s => {
-            if (s.hasAwaiting) awaitingCount++;
+            if (s.hasAwaiting) awaitingCountTotal += s.awaitingCount;
             Object.values(s.submissions).forEach(sub => {
-                if (sub.status === 'valide' && sub.note_suggeree !== undefined) {
+                if ((sub.status === 'valide' || sub.status === 'publie') && sub.note_suggeree !== undefined) {
                     totalValidatedScores += Number(sub.note_suggeree);
                     countValidated++;
                 }
@@ -326,7 +452,7 @@ class ProgressionManager {
             this.statsSummary.innerHTML = `
                 <span class="badge" style="background:#e0f2fe;color:#0369a1;font-size:12px;padding:4px 10px;">👥 ${displayStudents.length} Élève${displayStudents.length > 1 ? 's' : ''}</span>
                 <span class="badge" style="background:#dcfce7;color:#15803d;font-size:12px;padding:4px 10px;">📊 Moyenne : ${overallAvg}${overallAvg !== '--' ? '%' : ''}</span>
-                <span class="badge" style="background:#fef3c7;color:#b45309;font-size:12px;padding:4px 10px;">⏳ ${awaitingCount} en attente</span>
+                <span class="badge" style="background:#fef3c7;color:#b45309;font-size:12px;padding:4px 10px;">⏳ ${awaitingCountTotal} en attente</span>
             `;
         }
 
@@ -337,83 +463,136 @@ class ProgressionManager {
             return;
         }
 
+        if (displayStudents.length === 0) {
+            this.matrixContainer.innerHTML = '<div class="loader-placeholder">Aucun élève ne correspond aux filtres sélectionnés.</div>';
+            return;
+        }
+
         const table = document.createElement('table');
         table.className = 'progression-table';
 
-        // --- THEAD : Chapitres ---
+        // --- THEAD ---
         const head = document.createElement('thead');
-        const rowChapters = document.createElement('tr');
-        
-        // Header vide (coin haut gauche)
+        const rowTop = document.createElement('tr');
+        const rowSub = document.createElement('tr');
+        let hasSubHeaders = false;
+
+        // Sticky Corner Header: Élèves
         const cornerHeader = document.createElement('th');
         cornerHeader.className = 'sticky-col';
-        cornerHeader.rowSpan = 2;
         cornerHeader.textContent = "Élèves";
-        rowChapters.appendChild(cornerHeader);
+        rowTop.appendChild(cornerHeader);
 
         // Header Moyenne
         const avgHead = document.createElement('th');
-        avgHead.rowSpan = 2;
         avgHead.className = 'avg-col';
         avgHead.textContent = "Moyenne";
-        rowChapters.appendChild(avgHead);
+        rowTop.appendChild(avgHead);
 
         // Header Examen
         const examHead = document.createElement('th');
-        examHead.rowSpan = 2;
         examHead.className = 'exam-col-header';
         examHead.textContent = "Examen (Quiz)";
-        rowChapters.appendChild(examHead);
+        rowTop.appendChild(examHead);
 
+        // Traiter chaque chapitre
         for (const [chapterName, exercises] of Object.entries(this.chapters)) {
-            const th = document.createElement('th');
-            th.className = 'chapter-header';
-            th.textContent = chapterName;
-            th.colSpan = exercises.length;
-            th.addEventListener('click', () => this.showChapterStats(chapterName, exercises));
-            rowChapters.appendChild(th);
-        }
-        head.appendChild(rowChapters);
+            const isExpanded = this.viewMode === 'detailed' || this.expandedChapters.has(chapterName);
 
-        // --- THEAD : Exercices ---
-        const rowExs = document.createElement('tr');
-        for (const exercises of Object.values(this.chapters)) {
-            exercises.forEach(ex => {
-                const th = document.createElement('th');
-                th.textContent = ex.titre;
-                th.title = ex.titre;
-                rowExs.appendChild(th);
+            // Calculer taux de complétion de la classe sur ce chapitre
+            let chCompletedTotal = 0;
+            const chPossible = displayStudents.length * exercises.length;
+            displayStudents.forEach(st => {
+                exercises.forEach(ex => {
+                    const sub = st.submissions[ex.id];
+                    if (sub && (sub.status === 'valide' || sub.status === 'publie')) {
+                        chCompletedTotal++;
+                    }
+                });
             });
+            const chClassPct = chPossible > 0 ? Math.round((chCompletedTotal / chPossible) * 100) : 0;
+
+            if (isExpanded) {
+                hasSubHeaders = true;
+                const th = document.createElement('th');
+                th.className = 'chapter-header';
+                th.colSpan = exercises.length;
+                th.innerHTML = `
+                    <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <span>${chapterName}</span>
+                        ${this.viewMode === 'summary' ? `<button type="button" class="chapter-expand-btn is-expanded" title="Replier ce module">▲ Replier</button>` : ''}
+                    </div>
+                `;
+                const btn = th.querySelector('.chapter-expand-btn');
+                if (btn) {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.toggleChapter(chapterName);
+                    });
+                }
+                th.addEventListener('click', () => this.showChapterStats(chapterName, exercises));
+                rowTop.appendChild(th);
+
+                exercises.forEach(ex => {
+                    const subTh = document.createElement('th');
+                    subTh.textContent = ex.titre;
+                    subTh.title = ex.titre;
+                    rowSub.appendChild(subTh);
+                });
+            } else {
+                const th = document.createElement('th');
+                th.className = 'summary-chapter-header';
+                th.innerHTML = `
+                    <div class="summary-header-content">
+                        <span class="summary-header-title" title="${chapterName}">${chapterName}</span>
+                        <div class="summary-header-meta">
+                            <span>${exercises.length} ex.</span> • <span title="Complétion de la classe">${chClassPct}%</span>
+                        </div>
+                        <button type="button" class="chapter-expand-btn" title="Déplier les exercices de ce module">▼ Déplier</button>
+                    </div>
+                `;
+                const btn = th.querySelector('.chapter-expand-btn');
+                if (btn) {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.toggleChapter(chapterName);
+                    });
+                }
+                th.addEventListener('click', () => this.toggleChapter(chapterName));
+                rowTop.appendChild(th);
+            }
         }
-        head.appendChild(rowExs);
+
+        // Ajuster rowSpan si rowSub a des enfants
+        if (hasSubHeaders) {
+            cornerHeader.rowSpan = 2;
+            avgHead.rowSpan = 2;
+            examHead.rowSpan = 2;
+            Array.from(rowTop.children).forEach(child => {
+                if (child.classList.contains('summary-chapter-header')) {
+                    child.rowSpan = 2;
+                }
+            });
+            head.appendChild(rowTop);
+            head.appendChild(rowSub);
+        } else {
+            head.appendChild(rowTop);
+        }
         table.appendChild(head);
 
-        // --- TBODY : Élèves ---
+        // --- TBODY ---
         const body = document.createElement('tbody');
         displayStudents.forEach(student => {
             const tr = document.createElement('tr');
             tr.className = 'student-row';
 
-            // Détection difficulté (SOS)
-            let needsHelp = false;
-            let helpReason = "";
-            Object.values(student.submissions || {}).forEach(sub => {
-                if (sub.status === 'a_refaire') {
-                    needsHelp = true;
-                    helpReason = "Exercice à corriger";
-                } else if (sub.status === 'valide' && sub.note_suggeree !== undefined && Number(sub.note_suggeree) < 50) {
-                    needsHelp = true;
-                    helpReason = "Note inférieure à 50%";
-                }
-            });
-
-            // Nom de l'élève (Sticky) avec badge de classe
+            // Nom de l'élève (Sticky) avec badge SOS éventuel
             const tdName = document.createElement('td');
             tdName.className = 'sticky-col';
             tdName.innerHTML = `
                 <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
                     <div style="display:flex; align-items:center; gap:6px;">
-                        ${needsHelp ? `<span title="${helpReason} : cet élève a besoin d'accompagnement" style="background:#fee2e2; color:#b91c1c; font-size:10px; font-weight:700; padding:2px 6px; border-radius:6px; cursor:help;">🆘 Aide</span>` : ''}
+                        ${student.needsHelp ? `<span title="${student.helpReason} : cet élève a besoin d'aide" style="background:#fee2e2; color:#b91c1c; font-size:10px; font-weight:700; padding:2px 6px; border-radius:6px; cursor:help;">🆘 Aide</span>` : ''}
                         <strong>${student.nom}</strong>
                     </div>
                     ${student.classe ? `<span class="class-badge-pill" style="background:#e2e8f0; color:#334155;">${student.classe}</span>` : ''}
@@ -422,53 +601,30 @@ class ProgressionManager {
             `;
             tr.appendChild(tdName);
 
-            // Calcul de la moyenne globale pour cet élève
+            // Calcul moyenne globale
             let totalScore = 0;
             let countScores = 0;
-            const scoreCells = [];
 
-            // Cellules d'exercices
             for (const exercises of Object.values(this.chapters)) {
                 exercises.forEach(ex => {
                     const sub = student.submissions[ex.id];
-                    const td = document.createElement('td');
-                    
                     if (sub) {
                         const score = this.calculateScore(sub);
                         const status = sub.status || 'brouillon';
-                        
-                        td.innerHTML = `
-                            <div class="status-cell" style="cursor: pointer;" title="Cliquer pour voir le détail de l'exercice">
-                                <div class="status-dot ${status}">
-                                    ${this.getStatusIcon(status)}
-                                </div>
-                                <span class="note-badge">${score}/100</span>
-                            </div>
-                        `;
-                        td.addEventListener('click', () => {
-                            if (window.openDetailViewFromMatrix) {
-                                window.openDetailViewFromMatrix(sub);
-                            }
-                        });
-
                         if (status === 'valide' || status === 'publie') {
                             totalScore += score;
                             countScores++;
                         }
-                    } else {
-                        td.innerHTML = '<span style="color:#ccc">--</span>';
                     }
-                    scoreCells.push(td);
                 });
             }
 
-            // Moyenne Globale
+            // Cellule Moyenne
             const tdAvg = document.createElement('td');
             tdAvg.className = 'avg-col';
             if (countScores > 0) {
                 const avg = Math.round(totalScore / countScores);
                 tdAvg.textContent = `${avg}%`;
-                // Coloration selon réussite
                 if (avg >= 80) tdAvg.style.color = '#2e7d32';
                 else if (avg < 50) tdAvg.style.color = '#c62828';
             } else {
@@ -487,7 +643,6 @@ class ProgressionManager {
                         <span class="exam-pct-badge" style="font-size:10px;color:#64748b;display:block;">${examRes.pct}%</span>
                     </div>
                 `;
-                // Coloration
                 if (examRes.pct >= 80) tdExam.style.color = '#2e7d32';
                 else if (examRes.pct < 50) tdExam.style.color = '#c62828';
             } else {
@@ -495,9 +650,99 @@ class ProgressionManager {
             }
             tr.appendChild(tdExam);
 
-            // Ajouter les cellules d'exercices après la moyenne et l'examen
-            scoreCells.forEach(c => tr.appendChild(c));
-            
+            // Cellules de chapitres
+            for (const [chapterName, exercises] of Object.entries(this.chapters)) {
+                const isExpanded = this.viewMode === 'detailed' || this.expandedChapters.has(chapterName);
+
+                if (isExpanded) {
+                    exercises.forEach(ex => {
+                        const sub = student.submissions[ex.id];
+                        const td = document.createElement('td');
+                        if (sub) {
+                            const score = this.calculateScore(sub);
+                            const status = sub.status || 'brouillon';
+                            td.innerHTML = `
+                                <div class="status-cell" style="cursor: pointer;" title="Cliquer pour voir le détail de l'exercice">
+                                    <div class="status-dot ${status}">
+                                        ${this.getStatusIcon(status)}
+                                    </div>
+                                    <span class="note-badge">${score}/100</span>
+                                </div>
+                            `;
+                            td.addEventListener('click', () => {
+                                if (window.openDetailViewFromMatrix) {
+                                    window.openDetailViewFromMatrix(sub);
+                                }
+                            });
+                        } else {
+                            td.innerHTML = '<span style="color:#ccc">--</span>';
+                        }
+                        tr.appendChild(td);
+                    });
+                } else {
+                    const tdSummary = document.createElement('td');
+                    tdSummary.className = 'summary-cell';
+                    tdSummary.title = "Cliquer pour déplier les exercices de ce module";
+
+                    let completedInCh = 0;
+                    let awaitingInCh = 0;
+                    let hasHelpInCh = false;
+                    let chScores = [];
+
+                    exercises.forEach(ex => {
+                        const sub = student.submissions[ex.id];
+                        if (sub) {
+                            const score = this.calculateScore(sub);
+                            if (sub.status === 'valide' || sub.status === 'publie') {
+                                completedInCh++;
+                                if (score !== null) chScores.push(score);
+                            }
+                            if (sub.status === 'a_valider') awaitingInCh++;
+                            if (sub.status === 'a_refaire' || ((sub.status === 'valide' || sub.status === 'publie') && score !== null && score < 50)) {
+                                hasHelpInCh = true;
+                            }
+                        }
+                    });
+
+                    const totalInCh = exercises.length;
+                    const pctInCh = totalInCh > 0 ? Math.round((completedInCh / totalInCh) * 100) : 0;
+                    const chAvg = chScores.length > 0 ? Math.round(chScores.reduce((a,b)=>a+b,0) / chScores.length) : null;
+
+                    let avgClass = 'summary-avg-none';
+                    let avgLabel = '--';
+                    if (chAvg !== null) {
+                        avgLabel = `${chAvg}%`;
+                        if (chAvg >= 80) avgClass = 'summary-avg-good';
+                        else if (chAvg >= 50) avgClass = 'summary-avg-mid';
+                        else avgClass = 'summary-avg-low';
+                    }
+
+                    const fillColor = pctInCh === 100 ? '#16a34a' : (pctInCh > 0 ? '#2563eb' : '#cbd5e1');
+
+                    tdSummary.innerHTML = `
+                        <div class="summary-cell-content">
+                            <div class="summary-progress-wrapper">
+                                <span class="mini-progress-track">
+                                    <span class="mini-progress-fill" style="width:${pctInCh}%; background:${fillColor};"></span>
+                                </span>
+                                <span class="summary-counts">${completedInCh}/${totalInCh}</span>
+                            </div>
+                            <div class="summary-badges-row">
+                                <span class="summary-avg-badge ${avgClass}">${avgLabel}</span>
+                                ${hasHelpInCh ? '<span class="summary-status-pill" title="Exercice en difficulté" style="color:#dc2626;">🆘</span>' : ''}
+                                ${awaitingInCh > 0 ? `<span class="summary-status-pill" title="${awaitingInCh} copie(s) à valider" style="color:#d97706;">⏳</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+
+                    tdSummary.addEventListener('click', () => {
+                        this.toggleChapter(chapterName);
+                    });
+
+                    tr.appendChild(tdSummary);
+                }
+            }
+
             body.appendChild(tr);
         });
 
