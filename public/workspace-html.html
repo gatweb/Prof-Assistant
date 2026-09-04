@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ProfAssistant — Atelier HTML/CSS/JS</title>
     <meta name="description" content="Éditeur en direct HTML, CSS & JavaScript avec aperçu instantané.">
-    <link rel="stylesheet" href="./src/style.css">
-    <link rel="stylesheet" href="./src/workspace-html.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./src/style.css?v=1788501000">
+    <link rel="stylesheet" href="./src/workspace-html.css?v=1788501000">
 </head>
 <body>
 
@@ -32,6 +35,10 @@
         </div>
 
         <div class="header-right">
+            <span id="sessionStreakBadge" class="session-streak-badge hidden" title="Exercices validés dans cette session">🔥 <span id="sessionStreakCount">0</span> validé(s)</span>
+            <button id="dyslexiaToggleBtn" class="btn-dyslexia" title="Activer / Désactiver le confort de lecture adapté à la dyslexie">
+                📖 Dyslexie
+            </button>
             <button id="exportCodeBtn" class="btn-icon-header" title="Exporter mon code (HTML/CSS/JS)">
                 💾 Exporter
             </button>
@@ -555,7 +562,7 @@
         </div>
     </div>
 
-    <script type="module" src="./src/atelier.js?v=1779002273"></script>
+    <script type="module" src="./src/atelier.js?v=1788501000"></script>
 
 </body>
 </html>

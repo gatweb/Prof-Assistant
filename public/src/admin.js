@@ -493,8 +493,26 @@ if (detailReadOnlyPanel && detailResizeHandle) {
 }
 
 // ============================================
-// 5. Actions Métier (Boutons Validation)
+// 5. Actions Métier (Boutons Validation & Feedback)
 // ============================================
+const suggestBtn = document.getElementById('suggestProfFeedbackBtn');
+if (suggestBtn) {
+    suggestBtn.addEventListener('click', () => {
+        const scoreVal = parseInt(document.getElementById('scoreInput')?.value || '100', 10);
+        const msgInput = document.getElementById('profMessageInput');
+        if (!msgInput) return;
+
+        if (scoreVal >= 85) {
+            msgInput.value = "Excellent travail ! Tout est parfaitement exécuté et les consignes sont maîtrisées. Félicitations ! 🌟";
+        } else if (scoreVal >= 60) {
+            msgInput.value = "Bon travail dans l'ensemble ! Prends bien le temps de vérifier la mise en forme et les derniers détails, tu es sur la bonne voie. 💪";
+        } else {
+            msgInput.value = "Tu as fait de bons efforts, mais certains points bloquent encore. Regarde bien les conseils du Tuteur IA et pose-lui des questions pour t'aider à corriger pas à pas ! 🚀";
+        }
+        msgInput.focus();
+    });
+}
+
 document.getElementById('approveBtn').addEventListener('click', async () => {
     await processAction("valide");
 });

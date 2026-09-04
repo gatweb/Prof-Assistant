@@ -874,8 +874,10 @@ async function openExercise(exerciceId) {
             if (submitBtn) submitBtn.classList.add('hidden');
             
             // Replier la sidebar gauche par défaut en bureautique pour libérer tout l'espace
-            if (resourcesSidebar && !resourcesSidebar.classList.contains('collapsed')) {
+            if (resourcesSidebar) {
                 resourcesSidebar.classList.add('collapsed');
+                resourcesSidebar.style.width = '';
+                if (toggleSidebarBtn) toggleSidebarBtn.textContent = '▶';
             }
             
             initOfficeWorkspace(exData, latestSub);
@@ -1145,6 +1147,67 @@ if (toggleSidebarBtn && resourcesSidebar) {
         }, 350);
     });
 }
+
+// ============================================================
+// MODE FOCUS DYSLEXIE (Confort de lecture & Accessibilité)
+// ============================================================
+const dyslexiaToggleBtn = document.getElementById('dyslexiaToggleBtn');
+if (dyslexiaToggleBtn) {
+    if (localStorage.getItem('profassistant_dyslexia_mode') === 'true') {
+        document.body.classList.add('dyslexia-mode');
+        dyslexiaToggleBtn.classList.add('active');
+    }
+    dyslexiaToggleBtn.addEventListener('click', () => {
+        const isDys = document.body.classList.toggle('dyslexia-mode');
+        dyslexiaToggleBtn.classList.toggle('active', isDys);
+        localStorage.setItem('profassistant_dyslexia_mode', isDys ? 'true' : 'false');
+    });
+}
+
+// ============================================================
+// LUDIFICATION & ÉMULATION POSITIVE (Gamification)
+// ============================================================
+function updateSessionStreakUI() {
+    const count = parseInt(localStorage.getItem('profassistant_session_streak') || '0', 10);
+    const badge = document.getElementById('sessionStreakBadge');
+    const countEl = document.getElementById('sessionStreakCount');
+    if (badge && countEl) {
+        if (count > 0) {
+            countEl.textContent = count;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+}
+updateSessionStreakUI();
+
+function triggerGamificationCelebration(title, subtitle, badgeIcon = '🎉') {
+    // Incrémenter le streak de session
+    const current = parseInt(localStorage.getItem('profassistant_session_streak') || '0', 10) + 1;
+    localStorage.setItem('profassistant_session_streak', current.toString());
+    updateSessionStreakUI();
+
+    // Afficher le toast de célébration
+    const toast = document.createElement('div');
+    toast.className = 'gamification-toast';
+    toast.innerHTML = `
+        <div class="gamification-badge-icon">${badgeIcon}</div>
+        <div class="gamification-body">
+            <div class="gamification-title">${title}</div>
+            <div class="gamification-subtitle">${subtitle}</div>
+        </div>
+    `;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        setTimeout(() => toast.remove(), 450);
+    }, 4000);
+}
+
 
 // Workspace Sidebar Tabs switching logic
 function switchSidebarTab(tab) {
@@ -2007,6 +2070,7 @@ function listenForProfFeedback(docId) {
         if (isValidated || isRevision) {
             // Enregistrer la progression si l'exercice est validé
             if (isValidated && currentUser && currentExercice) {
+                triggerGamificationCelebration("🎉 Exercice validé !", `Félicitations ! Note : ${data.note_suggeree || 100}/100 🏆`, "🌟");
                 const selectedCourse = courseManager.getSelectedCourse();
                 if (selectedCourse) {
                     progressManager.trackExerciseAttempt(
@@ -3398,6 +3462,7 @@ if (officeValidateBtn) {
                 feedbackEl.textContent = "✅ Travail enregistré avec succès !";
                 feedbackEl.style.color = "#16a34a";
             }
+            triggerGamificationCelebration("🎉 Travail transmis !", "Ton devoir a été enregistré avec succès pour le professeur.", "🚀");
 
             if (evalIA?.feedback_eleve) {
                 appendOfficeMessage(

@@ -394,12 +394,28 @@ class ProgressionManager {
             const tr = document.createElement('tr');
             tr.className = 'student-row';
 
+            // Détection difficulté (SOS)
+            let needsHelp = false;
+            let helpReason = "";
+            Object.values(student.submissions || {}).forEach(sub => {
+                if (sub.status === 'a_refaire') {
+                    needsHelp = true;
+                    helpReason = "Exercice à corriger";
+                } else if (sub.status === 'valide' && sub.note_suggeree !== undefined && Number(sub.note_suggeree) < 50) {
+                    needsHelp = true;
+                    helpReason = "Note inférieure à 50%";
+                }
+            });
+
             // Nom de l'élève (Sticky) avec badge de classe
             const tdName = document.createElement('td');
             tdName.className = 'sticky-col';
             tdName.innerHTML = `
                 <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
-                    <strong>${student.nom}</strong>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        ${needsHelp ? `<span title="${helpReason} : cet élève a besoin d'accompagnement" style="background:#fee2e2; color:#b91c1c; font-size:10px; font-weight:700; padding:2px 6px; border-radius:6px; cursor:help;">🆘 Aide</span>` : ''}
+                        <strong>${student.nom}</strong>
+                    </div>
                     ${student.classe ? `<span class="class-badge-pill" style="background:#e2e8f0; color:#334155;">${student.classe}</span>` : ''}
                 </div>
                 <small style="color:#64748b; font-size:11px;">${student.email}</small>

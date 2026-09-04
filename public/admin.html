@@ -443,7 +443,12 @@
 
                 <!-- Message du professeur (envoyé à l'élève dans le chat) -->
                 <div class="form-group mt-24">
-                    <label for="profMessageInput">Message personnalisé pour l'élève (optionnel) :</label>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label for="profMessageInput" style="margin-bottom: 0;">Message personnalisé pour l'élève (optionnel) :</label>
+                        <button id="suggestProfFeedbackBtn" type="button" class="btn-secondary" style="font-size: 11px; padding: 4px 10px; border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; background: #e0f2fe; color: #0369a1; border-color: #bae6fd;" title="Insérer un encouragement bienveillant adapté à la note et au devoir">
+                            ✨ Feedback bienveillant 1-clic
+                        </button>
+                    </div>
                     <textarea id="profMessageInput" class="md-textarea" rows="3" placeholder="Ex: Bravo ! Attention à l'indentation..."></textarea>
                 </div>
 
