@@ -1,0 +1,70 @@
+{
+  "titre": "Escape Numérique — Les 5 dossiers disparus",
+  "contexte": "Le serveur de votre classe a été endommagé. Cinq dossiers essentiels ont été verrouillés. Votre mission : décoder, enquêter et manipuler pour déverrouiller les 5 chapitres de l'année !",
+  "dossiers": [
+    {
+      "id": 1,
+      "chapitre": "COMMUNICATION",
+      "icone": "💬",
+      "titre": "Le signal morse et le message codé",
+      "guide": "Un mot de passe en 2 parties a été dispersé. La 1re partie est dans le message de chat ('COMM'), la 2e partie doit être décodée depuis le signal radio en Morse !",
+      "indice_texte": "La radio transmet 'U-N-I-Q-U-E-R'. Assemble les 2 moitiés sans espace.",
+      "reponse_attendue": "COMMUNIQUER",
+      "morse": [
+        {"lettre": "U", "code": "··−"},
+        {"lettre": "N", "code": "−·"},
+        {"lettre": "I", "code": "··"},
+        {"lettre": "Q", "code": "−−·−"},
+        {"lettre": "U", "code": "··−"},
+        {"lettre": "E", "code": "·"},
+        {"lettre": "R", "code": "·−·"}
+      ]
+    },
+    {
+      "id": 2,
+      "chapitre": "SÉCURITÉ",
+      "icone": "🛡️",
+      "titre": "Le mail piégé (Phishing)",
+      "guide": "Un message suspect a déclenché l'alarme. Trouve les 4 anomalies cachées dans le courriel pour obtenir le code à 4 chiffres.",
+      "expediteur": "support@ecole-securite.verify-login.ru",
+      "urgence": "dans 10 minutes",
+      "demande": "envoyez-nous votre mot de passe",
+      "lien": "RÉACTIVER MON COMPTE",
+      "code_anomalies": "7319"
+    },
+    {
+      "id": 3,
+      "chapitre": "INTELLIGENCE ARTIFICIELLE",
+      "icone": "🤖",
+      "titre": "L'hallucination de l'Atomium",
+      "guide": "L'IA affirme des faits sur l'Atomium de Bruxelles, mais l'une de ses affirmations est fausse ! Compare avec les archives officielles de 1958.",
+      "affirmations": [
+        {"texte": "L'Atomium a été construit pour l'Exposition universelle de Bruxelles en 1958.", "vrai": true},
+        {"texte": "La structure représente un cristal de cuivre agrandi 50 millions de fois.", "vrai": false, "correction": "Faux ! C'est un cristal de fer agrandi 165 milliards de fois !"},
+        {"texte": "L'Atomium est constitué de 9 sphères reliées par des tubes.", "vrai": true}
+      ],
+      "code_reponse": "FER"
+    },
+    {
+      "id": 4,
+      "chapitre": "INFORMATIONS & DONNÉES",
+      "icone": "📊",
+      "titre": "Le fichier fantôme",
+      "guide": "Retrouve le fichier recherché : c'est une IMAGE appartenant à Sam, modifiée le 12/09 et qui pèse plus de 5 Mo.",
+      "fichier_correct": "aurore.png"
+    },
+    {
+      "id": 5,
+      "chapitre": "CRÉATION DE CONTENU",
+      "icone": "🎨",
+      "titre": "L'atelier réparé",
+      "guide": "Associe chaque extension de fichier au bon outil numérique pour terminer la mission !",
+      "associations": [
+        {"fichier": "histoire.docx", "app": "Traitement de texte"},
+        {"fichier": "paysage.png", "app": "Éditeur d'image"},
+        {"fichier": "jingle.mp3", "app": "Lecteur audio"},
+        {"fichier": "expose.pptx", "app": "Logiciel de présentation"}
+      ]
+    }
+  ]
+}

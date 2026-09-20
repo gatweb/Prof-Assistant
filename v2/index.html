@@ -27,7 +27,7 @@
             <h1 class="font-extrabold text-lg tracking-tight text-slate-900">ProfAssistant</h1>
             <span class="text-xs font-semibold px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full">FMTTN 1re</span>
           </div>
-          <p class="text-xs text-slate-500 font-medium">Programme FWB • Manuel @lt_X</p>
+          <p class="text-xs text-slate-500 font-medium">Programme FWB • Manuel & Écosystème @lt_X</p>
         </div>
       </div>
 
@@ -59,7 +59,7 @@
               <div class="text-slate-500 font-medium flex items-center gap-1">
                 <span>Classe <strong x-text="user.classe">1C2</strong></span>
                 <span>•</span>
-                <span class="text-amber-600 font-bold" x-text="user.xp + ' XP'">140 XP</span>
+                <span class="text-amber-600 font-bold" x-text="user.xp + ' XP'">180 XP</span>
               </div>
             </div>
           </div>
@@ -73,32 +73,36 @@
   <div class="bg-slate-900 text-white border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       
-      <!-- Sélecteur de Chapitre / Module -->
+      <!-- Sélecteur de Module -->
       <div class="flex items-center gap-2 mb-3 overflow-x-auto pb-1">
         <button 
           @click="selectedModuleId = 'module-0'"
-          :class="selectedModuleId === 'module-0' ? 'bg-blue-600 text-white border-blue-500' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
-          class="px-3 py-1 rounded-lg text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0">
-          <span>🚀</span> Module 0 : Bienvenue & Charte (Semaines 1-2)
+          :class="selectedModuleId === 'module-0' ? 'bg-blue-600 text-white border-blue-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
+          class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0">
+          <span>🚀</span> Module 0 : Bienvenue & Charte
+        </button>
+        <button 
+          @click="selectedModuleId = 'escape-game'"
+          :class="selectedModuleId === 'escape-game' ? 'bg-purple-600 text-white border-purple-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
+          class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0">
+          <span>🎮</span> Escape Game : Les 5 Dossiers Perdus
         </button>
         <button 
           @click="selectedModuleId = 'ch1-communication'"
-          :class="selectedModuleId === 'ch1-communication' ? 'bg-blue-600 text-white border-blue-500' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
-          class="px-3 py-1 rounded-lg text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0">
-          <span>💬</span> Chapitre 1 : Communication & E-mail (Semaine 3+)
+          :class="selectedModuleId === 'ch1-communication' ? 'bg-blue-600 text-white border-blue-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
+          class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0">
+          <span>💬</span> Chapitre 1 : Communication & E-mail
         </button>
-        <span class="px-2 py-1 text-xs text-slate-500 font-semibold shrink-0">🔒 Ch. 2 : Sécurité</span>
-        <span class="px-2 py-1 text-xs text-slate-500 font-semibold shrink-0">🔒 Ch. 3 : IA</span>
       </div>
 
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 class="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
-            <span x-text="selectedModuleId === 'module-0' ? '🚀' : '💬'"></span>
-            <span x-text="selectedModuleId === 'module-0' ? module0.titre : chapter.titre"></span>
+            <span x-text="selectedModuleId === 'module-0' ? '🚀' : (selectedModuleId === 'escape-game' ? '🎮' : '💬')"></span>
+            <span x-text="selectedModuleId === 'module-0' ? module0.titre : (selectedModuleId === 'escape-game' ? escapeGame.titre : chapter.titre)"></span>
           </h2>
           <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl" 
-             x-text="selectedModuleId === 'module-0' ? module0.sous_titre : chapter.introduction"></p>
+             x-text="selectedModuleId === 'module-0' ? module0.sous_titre : (selectedModuleId === 'escape-game' ? escapeGame.contexte : chapter.introduction)"></p>
         </div>
 
         <!-- Onglets du cycle (Si Chapitre 1 et mode élève) -->
@@ -138,7 +142,7 @@
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     <!-- ======================================================= -->
-    <!-- MODULE 0 : INTRODUCTION & CHARTE DE RENTRÉE (Semaines 1-2) -->
+    <!-- MODULE 0 : INTRODUCTION & CHARTE DE RENTRÉE             -->
     <!-- ======================================================= -->
     <div x-show="activeTab !== 'prof' && selectedModuleId === 'module-0'" class="space-y-8">
       
@@ -146,11 +150,11 @@
       <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
         <div>
           <span class="px-3 py-1 bg-white/20 text-blue-100 rounded-full text-xs font-extrabold uppercase tracking-wider">
-            Bienvenue en 1re Secondaire !
+            Semaines 1 & 2 • Manuel @lt_X
           </span>
           <h3 class="text-2xl font-black mt-2">Démarrons l'année du bon pied</h3>
           <p class="text-xs sm:text-sm text-blue-100 mt-2 max-w-xl leading-relaxed">
-            En FMTTN, nous allons apprendre à dompter l'ordinateur, naviguer en sécurité et créer des choses formidables. Pour commencer, découvrons les règles d'or de la salle informatique !
+            Pour bien commencer en salle informatique : validez la charte, apprenez à choisir un bon mot de passe et mémorisez la règle d'or de déconnexion.
           </p>
         </div>
         <div class="w-20 h-20 bg-white/10 rounded-3xl flex items-center justify-center text-4xl shadow-inner border border-white/20 animate-pulse">
@@ -158,21 +162,20 @@
         </div>
       </div>
 
-      <!-- Grille des 3 Ateliers d'Introduction -->
+      <!-- Grille Ateliers -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
-        <!-- Atelier 1 : Jeu Interactif de la Charte (Ok ou Pas OK ?) -->
+        <!-- Jeu de la Charte Informatique -->
         <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between pb-4 border-b border-slate-100">
               <div class="flex items-center gap-2">
                 <span class="p-2 rounded-xl bg-amber-100 text-amber-800 font-black text-xs">⚖️ Charte</span>
-                <h4 class="font-black text-base text-slate-900">Jeu : OK ou PAS OK ?</h4>
+                <h4 class="font-black text-base text-slate-900">Jeu : OK ou PAS OK ? (p. 10)</h4>
               </div>
               <span class="text-xs font-extrabold text-slate-400" x-text="'Situation ' + (charteState.currentIndex + 1) + '/6'"></span>
             </div>
 
-            <!-- Écran de jeu -->
             <template x-if="!charteState.finished">
               <div class="py-6">
                 <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Comportement en classe :</div>
@@ -180,49 +183,35 @@
                      x-text="getCurrentCharteSituation().scenario">
                 </div>
 
-                <!-- Boutons Choix OK / PAS OK -->
                 <div class="grid grid-cols-2 gap-4 mt-6">
                   <button 
                     @click="repondreCharte(true)"
                     :disabled="charteState.hasAnswered"
-                    :class="{
-                      'bg-emerald-600 text-white font-black shadow-sm': charteState.userChoice === true,
-                      'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-2 border-emerald-200': charteState.userChoice !== true
-                    }"
+                    :class="charteState.userChoice === true ? 'bg-emerald-600 text-white font-black' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-2 border-emerald-200'"
                     class="py-3 rounded-2xl font-extrabold text-sm transition flex items-center justify-center gap-2">
                     <span>👍</span> C'est OK
                   </button>
                   <button 
                     @click="repondreCharte(false)"
                     :disabled="charteState.hasAnswered"
-                    :class="{
-                      'bg-rose-600 text-white font-black shadow-sm': charteState.userChoice === false,
-                      'bg-rose-50 hover:bg-rose-100 text-rose-800 border-2 border-rose-200': charteState.userChoice !== false
-                    }"
+                    :class="charteState.userChoice === false ? 'bg-rose-600 text-white font-black' : 'bg-rose-50 hover:bg-rose-100 text-rose-800 border-2 border-rose-200'"
                     class="py-3 rounded-2xl font-extrabold text-sm transition flex items-center justify-center gap-2">
                     <span>🚫</span> PAS OK !
                   </button>
                 </div>
 
-                <!-- Explication immédiate -->
                 <div x-show="charteState.hasAnswered" class="mt-6 p-4 rounded-2xl text-xs leading-relaxed"
                      :class="charteState.userChoice === getCurrentCharteSituation().est_ok ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-rose-50 border border-rose-200 text-rose-900'">
-                  <div class="font-black text-sm flex items-center gap-1.5 mb-1">
-                    <span x-text="charteState.userChoice === getCurrentCharteSituation().est_ok ? '✓ Bien vu !' : '✕ Erreur !'"></span>
-                  </div>
+                  <div class="font-black text-sm mb-1" x-text="charteState.userChoice === getCurrentCharteSituation().est_ok ? '✓ Bien vu !' : '✕ Erreur !'"></div>
                   <p x-text="getCurrentCharteSituation().explication"></p>
                 </div>
               </div>
             </template>
 
-            <!-- Écran de fin de charte -->
             <template x-if="charteState.finished">
               <div class="py-8 text-center space-y-4">
                 <div class="text-4xl">🎉</div>
-                <h4 class="font-black text-lg text-slate-900">Bravo ! Tu as validé la Charte !</h4>
-                <p class="text-xs text-slate-600 max-w-sm mx-auto">
-                  Tu connais maintenant les règles indispensables pour protéger ton travail, respecter le matériel et tes camarades.
-                </p>
+                <h4 class="font-black text-lg text-slate-900">Charte validée avec succès !</h4>
                 <div class="font-extrabold text-sm text-emerald-700 bg-emerald-50 py-2 px-4 rounded-xl inline-block">
                   Score : <span x-text="charteState.score"></span> / 60 points
                 </div>
@@ -230,7 +219,6 @@
             </template>
           </div>
 
-          <!-- Bouton suivant / recommencer -->
           <div class="pt-4 border-t border-slate-100 flex justify-end">
             <button 
               x-show="charteState.hasAnswered && !charteState.finished"
@@ -242,28 +230,22 @@
               x-show="charteState.finished"
               @click="reinitialiserCharte()"
               class="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 transition">
-              Recommencer le jeu ↻
+              Recommencer ↻
             </button>
           </div>
         </div>
 
-        <!-- Atelier 2 : Disparaître de l'ordinateur & Mot de Passe Solide -->
+        <!-- Mots de Passe & Déconnexion -->
         <div class="space-y-6">
-          
-          <!-- Carte Déconnexion : Écran fermé != Déconnecté -->
           <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs">
             <div class="flex items-center gap-3 mb-3">
               <div class="p-2 rounded-xl bg-rose-100 text-rose-700 font-bold text-sm">🔒</div>
               <div>
-                <h4 class="font-extrabold text-sm text-slate-900">Règle d'or : Disparaître du PC</h4>
+                <h4 class="font-extrabold text-sm text-slate-900">Règle d'or : Disparaître du PC (p. 16)</h4>
                 <p class="text-xs text-rose-600 font-bold">Fermer l'écran ≠ Se déconnecter !</p>
               </div>
             </div>
-            <p class="text-xs text-slate-600 leading-relaxed mb-4">
-              Si tu te contentes de fermer l'écran sans te déconnecter, n'importe qui peut rouvrir l'ordinateur et lire tes messages ou envoyer un faux devoir à ta place !
-            </p>
-            <div class="space-y-2 bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-xs">
-              <div class="font-extrabold text-slate-800 mb-1">Les 4 étapes avant de quitter la salle :</div>
+            <div class="space-y-2 bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-xs mt-3">
               <template x-for="step in module0.parties[3].etapes_deconnexion" :key="step.ordre">
                 <div class="flex items-center gap-2">
                   <span class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0" x-text="step.ordre"></span>
@@ -273,18 +255,16 @@
             </div>
           </div>
 
-          <!-- Carte Mots de Passe Solides -->
           <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs">
             <div class="flex items-center gap-3 mb-3">
               <div class="p-2 rounded-xl bg-emerald-100 text-emerald-700 font-bold text-sm">🔑</div>
               <div>
-                <h4 class="font-extrabold text-sm text-slate-900">Choisir un mot de passe blindé</h4>
-                <p class="text-xs text-slate-500 font-medium">Page 12 du manuel @lt_X</p>
+                <h4 class="font-extrabold text-sm text-slate-900">Choisir un mot de passe blindé (p. 12)</h4>
               </div>
             </div>
             <div class="grid grid-cols-2 gap-3 mt-3 text-xs">
               <div class="p-3 rounded-xl bg-rose-50 border border-rose-100">
-                <span class="font-bold text-rose-700">🚫 Mauvais mots de passe</span>
+                <span class="font-bold text-rose-700">🚫 Mauvais</span>
                 <ul class="mt-1 space-y-1 text-slate-600 font-mono text-xs">
                   <li>123456789</li>
                   <li>azerty</li>
@@ -292,7 +272,7 @@
                 </ul>
               </div>
               <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
-                <span class="font-bold text-emerald-700">✓ Bons mots de passe</span>
+                <span class="font-bold text-emerald-700">✓ Bons</span>
                 <ul class="mt-1 space-y-1 text-slate-600 font-mono text-xs">
                   <li>MonCh4tNoir!</li>
                   <li>!M0nCh4tN0ir6</li>
@@ -301,7 +281,6 @@
               </div>
             </div>
           </div>
-
         </div>
 
       </div>
@@ -309,239 +288,462 @@
     </div>
 
     <!-- ======================================================= -->
-    <!-- CHAPITRE 1 : COMMUNICATION & COLLABORATION (Semaine 3+) -->
+    <!-- ESCAPE GAME : LES 5 DOSSIERS PERDUS                     -->
+    <!-- ======================================================= -->
+    <div x-show="activeTab !== 'prof' && selectedModuleId === 'escape-game'" class="space-y-8">
+      
+      <!-- Bandeau Équipe & Timer -->
+      <div class="bg-gradient-to-r from-purple-900 to-indigo-900 rounded-3xl p-6 text-white shadow-md flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-3xl">🧩</span>
+          <div>
+            <div class="text-xs font-bold text-purple-300 uppercase tracking-wider">Mission Spéciale de Rentrée</div>
+            <h3 class="text-lg font-black" x-text="egState.teamName"></h3>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="bg-purple-800/60 border border-purple-700 px-4 py-1.5 rounded-xl text-xs font-mono font-bold">
+            ⏱ <span x-text="egState.timer"></span>
+          </div>
+          <div class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-xl text-xs font-bold">
+            Dossiers restaurés : <span x-text="egState.dossierUnlocked.length"></span>/5
+          </div>
+        </div>
+      </div>
+
+      <!-- Strip des 5 Dossiers -->
+      <div class="grid grid-cols-5 gap-2 sm:gap-3">
+        <template x-for="d in escapeGame.dossiers" :key="d.id">
+          <button 
+            @click="if(egState.dossierUnlocked.includes(d.id)) egState.activeDossier = d.id"
+            :class="{
+              'border-purple-600 bg-purple-50 text-purple-900 font-black shadow-xs': egState.activeDossier === d.id,
+              'border-emerald-300 bg-white text-slate-700': egState.dossierUnlocked.includes(d.id) && egState.activeDossier !== d.id,
+              'border-slate-200 bg-slate-100 text-slate-400 opacity-60 cursor-not-allowed': !egState.dossierUnlocked.includes(d.id)
+            }"
+            class="p-3 rounded-2xl border-2 text-center transition flex flex-col items-center gap-1">
+            <span class="text-xl" x-text="d.icone"></span>
+            <span class="text-xs font-extrabold hidden sm:inline" x-text="d.chapitre"></span>
+            <span class="text-xs font-bold sm:hidden" x-text="'Dossier ' + d.id"></span>
+          </button>
+        </template>
+      </div>
+
+      <!-- Écran du Dossier Actif -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+        
+        <!-- En-tête Dossier -->
+        <div class="pb-4 border-b border-slate-100 flex items-center justify-between">
+          <div>
+            <span class="text-xs font-extrabold uppercase tracking-wider text-purple-600" x-text="'Dossier ' + egState.activeDossier + ' sur 5'"></span>
+            <h3 class="text-xl font-black text-slate-900 mt-1" x-text="escapeGame.dossiers[egState.activeDossier - 1].titre"></h3>
+          </div>
+          <span class="text-2xl" x-text="escapeGame.dossiers[egState.activeDossier - 1].icone"></span>
+        </div>
+
+        <p class="text-xs sm:text-sm text-slate-600 my-4" x-text="escapeGame.dossiers[egState.activeDossier - 1].guide"></p>
+
+        <!-- DOSSIER 1 : Morse & Chat -->
+        <div x-show="egState.activeDossier === 1" class="space-y-4 my-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-xs">
+              <div class="font-black text-blue-900 mb-2">💬 Extrait de discussion :</div>
+              <p class="p-2 bg-white rounded-xl text-slate-700">"J'ai découpé le mot de passe en 2. La première moitié est <strong>COMM</strong>. La 2e partie est transmise par radio en Morse !"</p>
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-900 text-white font-mono text-xs">
+              <div class="font-bold text-amber-400 mb-2">📻 Signal Radio Intercepté (Morse) :</div>
+              <div class="grid grid-cols-7 gap-1 text-center font-black text-sm">
+                <template x-for="m in escapeGame.dossiers[0].morse" :key="m.lettre">
+                  <div class="p-1 bg-slate-800 rounded border border-slate-700">
+                    <div class="text-amber-300" x-text="m.code"></div>
+                    <div class="text-white text-xs mt-1" x-text="m.lettre"></div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DOSSIER 2 : Mail Phishing -->
+        <div x-show="egState.activeDossier === 2" class="space-y-4 my-6">
+          <div class="p-5 rounded-2xl bg-amber-50 border border-amber-200 text-xs">
+            <div class="font-black text-slate-900 mb-2 flex items-center justify-between">
+              <span>✉️ Courriel Suspect — Clique sur les 4 éléments bizarres :</span>
+              <span class="font-mono text-amber-700 font-extrabold" x-text="'Code déduit : ' + egState.phishDigits.join(' ')"></span>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2 text-slate-800">
+              <p>De : <span @click="clickPhishSusp('sender', '7')" class="cursor-pointer px-1.5 py-0.5 rounded bg-slate-100 hover:bg-amber-200 font-mono">support@ecole-securite.verify-login.ru</span></p>
+              <p>Bonjour, votre compte sera supprimé <span @click="clickPhishSusp('urgent', '3')" class="cursor-pointer px-1.5 py-0.5 rounded bg-slate-100 hover:bg-amber-200 font-bold">dans 10 minutes</span>.</p>
+              <p>Pour l'éviter, <span @click="clickPhishSusp('password', '1')" class="cursor-pointer px-1.5 py-0.5 rounded bg-slate-100 hover:bg-amber-200 font-bold text-rose-600">envoyez-nous votre mot de passe</span> puis cliquez ici :</p>
+              <button @click="clickPhishSusp('link', '9')" class="px-3 py-1 bg-blue-600 text-white font-bold rounded-lg text-xs hover:bg-blue-700">RÉACTIVER MON COMPTE</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DOSSIER 3 : Atomium Hallucination -->
+        <div x-show="egState.activeDossier === 3" class="space-y-4 my-6">
+          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-3">
+            <div class="font-black text-slate-900">🏛️ L'IA affirme : "L'Atomium de Bruxelles (1958) représente un cristal de cuivre agrandi..."</div>
+            <p class="text-slate-600">L'une des affirmations est une hallucination d'IA ! Tape le vrai nom du métal :</p>
+            <div class="grid grid-cols-3 gap-2">
+              <button @click="egState.inputCode = 'FER'; validerCodeDossier()" class="p-3 bg-white border border-slate-200 rounded-xl font-bold hover:border-purple-400">Cristal de Fer</button>
+              <button @click="egState.inputCode = 'CUIVRE'; validerCodeDossier()" class="p-3 bg-white border border-slate-200 rounded-xl font-bold hover:border-purple-400">Cristal de Cuivre</button>
+              <button @click="egState.inputCode = 'OR'; validerCodeDossier()" class="p-3 bg-white border border-slate-200 rounded-xl font-bold hover:border-purple-400">Cristal d'Or</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zone Saisie du Code -->
+        <div x-show="egState.activeDossier <= 2 || egState.activeDossier === 4" class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-3">
+          <input 
+            type="text" 
+            x-model="egState.inputCode" 
+            @keydown.enter="validerCodeDossier()"
+            placeholder="Entre le mot de passe ou code trouvé..."
+            class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-purple-600 uppercase font-mono" />
+          <button 
+            @click="validerCodeDossier()"
+            class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-purple-600 text-white font-extrabold text-xs hover:bg-purple-700 transition">
+            Déverrouiller le dossier 🔓
+          </button>
+        </div>
+
+        <!-- Feedback Escape Game -->
+        <div x-show="egState.feedback" class="mt-4 p-3 rounded-xl text-xs font-bold"
+             :class="egState.isSuccess ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'"
+             x-text="egState.feedback">
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- CHAPITRE 1 : COMMUNICATION & COLLABORATION              -->
     <!-- ======================================================= -->
     <div x-show="activeTab !== 'prof' && selectedModuleId === 'ch1-communication'" class="space-y-8">
       
-      <!-- SECTION : JE DÉCOUVRE (Chapitre 1) -->
-      <div x-show="activeTab === 'decouvre'" class="space-y-8">
+      <!-- ==================== 1. JE DÉCOUVRE ==================== -->
+      <div x-show="activeTab === 'decouvre'" class="space-y-6">
         
-        <!-- Grille Vocabulaire & Notions -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          <!-- Colonne Gauche : Vocabulaire Clé du Courriel -->
-          <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
-                <span class="p-1.5 rounded-lg bg-blue-100 text-blue-700 text-sm">✉️</span>
-                Vocabulaire du courriel
-              </h3>
-              <span class="text-xs font-bold px-2 py-0.5 bg-slate-100 text-slate-600 rounded">NUM-1.D5</span>
-            </div>
-            <div class="space-y-2.5 max-h-96 overflow-y-auto pr-1">
-              <template x-for="item in chapter.je_decouvre.parties[2].vocabulaire" :key="item.terme">
-                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-200 transition">
-                  <div class="font-bold text-xs text-blue-700" x-text="item.terme"></div>
-                  <div class="text-xs text-slate-600 mt-0.5" x-text="item.definition"></div>
-                </div>
-              </template>
-            </div>
-          </div>
-
-          <!-- Colonne Centre : Éthique & Droits -->
-          <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
-                <span class="p-1.5 rounded-lg bg-emerald-100 text-emerald-700 text-sm">⚖️</span>
-                Éthique & Droits en ligne
-              </h3>
-              <span class="text-xs font-bold px-2 py-0.5 bg-slate-100 text-slate-600 rounded">NUM-1.D6</span>
-            </div>
-            <div class="space-y-2.5 max-h-96 overflow-y-auto pr-1">
-              <template x-for="item in chapter.je_decouvre.parties[3].notions" :key="item.notion">
-                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 hover:border-emerald-200 transition">
-                  <div class="font-bold text-xs text-emerald-700" x-text="item.notion"></div>
-                  <div class="text-xs text-slate-600 mt-0.5" x-text="item.definition"></div>
-                </div>
-              </template>
-            </div>
-          </div>
-
-          <!-- Colonne Droite : Le Robot Mascotte & Défi Quiz -->
-          <div class="bg-gradient-to-b from-blue-50 to-indigo-50/50 rounded-2xl p-6 border border-blue-100 flex flex-col justify-between">
-            <div>
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-2xl shadow-md">
-                  🤖
-                </div>
-                <div>
-                  <h4 class="font-extrabold text-slate-900">Le savais-tu ?</h4>
-                  <p class="text-xs text-blue-700 font-semibold">Conseil @lt_X</p>
-                </div>
-              </div>
-              <p class="text-xs text-slate-700 leading-relaxed bg-white/80 p-3.5 rounded-xl border border-blue-200/60 shadow-xs mb-4">
-                "Dans un e-mail, la fonction <strong>Cci</strong> (Copie Conforme Invisible) protège la vie privée de tes correspondants. En Belgique et en Europe (RGPD), diffuser l'adresse d'un camarade sans son accord est interdit !"
-              </p>
-            </div>
-
-            <div class="bg-white p-4 rounded-xl border border-blue-200/80 shadow-xs text-center">
-              <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Prêt pour le test ?</div>
-              <div class="font-extrabold text-sm text-slate-900 mb-3">Mini-Quiz : Reconnais la bonne règle éthique</div>
-              <button 
-                @click="document.getElementById('quiz-section').scrollIntoView({ behavior: 'smooth' })"
-                class="w-full py-2 px-4 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition shadow-sm">
-                Commencer le Quiz 👇
-              </button>
-            </div>
-          </div>
-
+        <!-- Sélecteur de sous-thèmes officiels d'@lt_X -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <button 
+            @click="changeSubtheme('reseaux')"
+            :class="activeSubthemeKey === 'reseaux' ? 'bg-blue-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-blue-300'"
+            class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2">
+            <span>📱</span> Réseaux (21 Q)
+          </button>
+          <button 
+            @click="changeSubtheme('messagerie')"
+            :class="activeSubthemeKey === 'messagerie' ? 'bg-blue-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-blue-300'"
+            class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2">
+            <span>✉️</span> Messagerie (20 Q)
+          </button>
+          <button 
+            @click="changeSubtheme('ethique')"
+            :class="activeSubthemeKey === 'ethique' ? 'bg-blue-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-blue-300'"
+            class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2">
+            <span>⚖️</span> Éthique (20 Q)
+          </button>
+          <button 
+            @click="changeSubtheme('collaboration')"
+            :class="activeSubthemeKey === 'collaboration' ? 'bg-blue-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-blue-300'"
+            class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2">
+            <span>🤝</span> Outils (20 Q)
+          </button>
         </div>
 
-        <!-- Section Quiz Interactif avec Détection d'Erreurs -->
-        <section id="quiz-section" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md bg-blue-100 text-blue-800">
-                  Question <span x-text="quizState.currentQuestionIndex + 1">1</span> sur 5
-                </span>
-                <span class="text-xs font-bold text-slate-400">•</span>
-                <span class="text-xs font-bold text-emerald-600">Compétence cible : NUM-1.D6</span>
-              </div>
-              <h3 class="text-lg font-black text-slate-900 mt-2" x-text="getCurrentQuiz().titre"></h3>
+          <!-- Colonne Gauche : Synthèse Théorique Officielle du Livre -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs lg:col-span-1">
+            <div class="flex items-center gap-2 pb-3 border-b border-slate-100 mb-4">
+              <span class="text-xl" x-text="getActiveSubtheme().icon"></span>
+              <h4 class="font-black text-sm text-slate-900" x-text="getActiveSubtheme().label"></h4>
             </div>
-            <div class="flex items-center gap-2 text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl">
-              <span>Score actuel :</span>
-              <span class="text-blue-600 font-extrabold" x-text="quizState.score + ' pts'">0 pts</span>
+            <div class="text-xs text-slate-600 leading-relaxed space-y-2 whitespace-pre-line max-h-[420px] overflow-y-auto pr-2"
+                 x-text="getActiveSubtheme().lecon">
             </div>
           </div>
 
-          <!-- Corps de la Question -->
-          <div class="py-6">
-            <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Situation concrète :</div>
-            <p class="text-base sm:text-lg font-bold text-slate-800 bg-slate-50 p-4 rounded-2xl border border-slate-200/70" x-text="getCurrentQuestion().scenario"></p>
+          <!-- Colonne Droite : Entraînement Interactif issu de la Banque de Questions (81 Questions) -->
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs lg:col-span-2 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-1 rounded-lg bg-blue-100 text-blue-800 text-xs font-extrabold" 
+                        x-text="'Question ' + (bankQuestionIndex + 1) + ' / ' + getActiveSubtheme().questions.length"></span>
+                  <span class="text-xs font-bold text-slate-400">•</span>
+                  <span class="text-xs font-bold text-slate-500">Banque officielle @lt_X</span>
+                </div>
+                <div class="text-xs font-extrabold text-blue-600 bg-blue-50 px-3 py-1 rounded-xl">
+                  Score : <span x-text="bankScore"></span> pts
+                </div>
+              </div>
 
-            <!-- Liste des Choix -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
-              <template x-for="(option, idx) in getCurrentQuestion().options" :key="idx">
-                <button 
-                  @click="selectOption(idx)"
-                  :disabled="quizState.hasSubmitted"
-                  :class="{
-                    'border-blue-600 bg-blue-50/70 text-blue-900 font-bold shadow-xs': quizState.selectedOption === idx && !quizState.hasSubmitted,
-                    'border-slate-200 hover:border-blue-300 bg-white text-slate-700': quizState.selectedOption !== idx && !quizState.hasSubmitted,
-                    'border-emerald-500 bg-emerald-50 text-emerald-900 font-bold': quizState.hasSubmitted && idx === getCurrentQuestion().reponse_correcte,
-                    'border-rose-300 bg-rose-50 text-rose-800': quizState.hasSubmitted && quizState.selectedOption === idx && !quizState.isCorrect
-                  }"
-                  class="p-4 rounded-2xl border-2 text-left text-sm font-semibold transition-all flex items-center justify-between">
-                  <span x-text="option"></span>
-                  <span x-show="quizState.selectedOption === idx && !quizState.hasSubmitted" class="text-blue-600 font-black">●</span>
-                  <span x-show="quizState.hasSubmitted && idx === getCurrentQuestion().reponse_correcte" class="text-emerald-600 font-black">✓</span>
-                  <span x-show="quizState.hasSubmitted && quizState.selectedOption === idx && !quizState.isCorrect" class="text-rose-600 font-black">✕</span>
-                </button>
-              </template>
-            </div>
+              <div class="py-6">
+                <h3 class="text-base sm:text-lg font-black text-slate-900" x-text="getCurrentBankQuestion().q"></h3>
 
-            <!-- Zone de Feedback & Intervention Tuteur Socratique -->
-            <div x-show="quizState.hasSubmitted" class="mt-6 p-4 rounded-2xl transition"
-                 :class="quizState.isCorrect ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-amber-50 border border-amber-200 text-amber-900'">
-              <div class="flex items-start gap-3">
-                <div class="text-2xl" x-text="quizState.isCorrect ? '🎉' : '💡'"></div>
-                <div class="text-xs sm:text-sm">
-                  <div class="font-extrabold" x-text="quizState.isCorrect ? 'Bravo ! Excellente réponse.' : 'Attention au piège conceptuel !'"></div>
-                  <p class="mt-1 font-medium" x-text="quizState.feedbackMessage"></p>
-                  
-                  <template x-if="!quizState.isCorrect && quizState.errorPattern">
-                    <div class="mt-3 p-3 bg-white/90 rounded-xl border border-amber-300/80 text-xs">
-                      <span class="font-bold text-amber-800" x-text="quizState.errorPattern.titre"></span>
-                      <p class="mt-0.5 text-slate-700" x-text="quizState.errorPattern.explication"></p>
-                    </div>
+                <div class="grid grid-cols-1 gap-2.5 mt-6">
+                  <template x-for="(choice, idx) in getCurrentBankQuestion().choices" :key="idx">
+                    <button 
+                      @click="selectBankChoice(choice)"
+                      :disabled="bankSubmitted"
+                      :class="{
+                        'border-blue-600 bg-blue-50/70 text-blue-900 font-bold': bankUserSelection === choice && !bankSubmitted,
+                        'border-slate-200 hover:border-blue-300 bg-white text-slate-700': bankUserSelection !== choice && !bankSubmitted,
+                        'border-emerald-500 bg-emerald-50 text-emerald-900 font-bold': bankSubmitted && choice === getCurrentBankQuestion().rep,
+                        'border-rose-300 bg-rose-50 text-rose-800': bankSubmitted && bankUserSelection === choice && !bankIsCorrect
+                      }"
+                      class="p-3.5 rounded-2xl border-2 text-left text-xs sm:text-sm font-semibold transition-all flex items-center justify-between">
+                      <span x-text="choice"></span>
+                      <span x-show="bankUserSelection === choice && !bankSubmitted" class="text-blue-600 font-black">●</span>
+                      <span x-show="bankSubmitted && choice === getCurrentBankQuestion().rep" class="text-emerald-600 font-black">✓ Bonne réponse</span>
+                      <span x-show="bankSubmitted && bankUserSelection === choice && !bankIsCorrect" class="text-rose-600 font-black">✕</span>
+                    </button>
                   </template>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Actions Quiz -->
-          <div class="flex items-center justify-between pt-6 border-t border-slate-100">
-            <button 
-              @click="tutorOpen = true"
-              class="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1.5">
-              <span>🤖</span> Demander un indice au tuteur
-            </button>
-
-            <div>
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
               <button 
-                x-show="!quizState.hasSubmitted"
-                @click="validerReponse()"
-                :disabled="quizState.selectedOption === null"
-                :class="quizState.selectedOption !== null ? 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer' : 'bg-slate-200 text-slate-400 cursor-not-allowed'"
-                class="px-6 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">
-                Valider ma réponse
+                @click="tutorOpen = true"
+                class="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1.5">
+                <span>🤖</span> Un conseil du robot ?
               </button>
-              <button 
-                x-show="quizState.hasSubmitted"
-                @click="questionSuivante()"
-                class="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-sm flex items-center gap-2">
-                <span>Question suivante</span>
-                <span>→</span>
-              </button>
-            </div>
-          </div>
 
-        </section>
-
-      </div>
-
-      <!-- SECTION : JE PRATIQUE -->
-      <div x-show="activeTab === 'pratique'" class="space-y-6">
-        <div class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-black">⚙️</div>
-            <div>
-              <h3 class="font-extrabold text-lg text-slate-900">Je pratique : Ateliers en situation</h3>
-              <p class="text-xs text-slate-500 font-medium">Missions concrètes issues du manuel @lt_X (Pages 60 à 83)</p>
-            </div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-blue-400 transition">
-              <span class="text-xs font-bold px-2 py-0.5 bg-blue-100 text-blue-800 rounded">Partie 2 (p. 64)</span>
-              <h4 class="font-bold text-sm text-slate-900 mt-2">Rédiger un courriel scolaire modèle</h4>
-              <p class="text-xs text-slate-600 mt-1">Écrire au secrétariat avec formule de politesse, objet clair et adresse en Cci.</p>
-              <div class="mt-4 flex items-center justify-between">
-                <span class="text-xs font-semibold text-slate-400">Compétence NUM-1.P2</span>
-                <button class="px-3 py-1 bg-white text-blue-600 border border-blue-200 text-xs font-bold rounded-lg hover:bg-blue-50">Ouvrir l'atelier</button>
+              <div>
+                <button 
+                  x-show="!bankSubmitted"
+                  @click="validerBankReponse()"
+                  :disabled="!bankUserSelection"
+                  :class="bankUserSelection ? 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer' : 'bg-slate-200 text-slate-400 cursor-not-allowed'"
+                  class="px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">
+                  Valider ma réponse
+                </button>
+                <button 
+                  x-show="bankSubmitted"
+                  @click="bankQuestionSuivante()"
+                  class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-2">
+                  <span>Question suivante</span>
+                  <span>➔</span>
+                </button>
               </div>
             </div>
-            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-blue-400 transition">
-              <span class="text-xs font-bold px-2 py-0.5 bg-purple-100 text-purple-800 rounded">Partie 4 (p. 74)</span>
-              <h4 class="font-bold text-sm text-slate-900 mt-2">Appliquer la Nétiquette de groupe</h4>
-              <p class="text-xs text-slate-600 mt-1">Identifier les comportements bienveillants dans une conversation de classe.</p>
-              <div class="mt-4 flex items-center justify-between">
-                <span class="text-xs font-semibold text-slate-400">Compétence NUM-1.P6</span>
-                <button class="px-3 py-1 bg-white text-purple-600 border border-purple-200 text-xs font-bold rounded-lg hover:bg-purple-50">Ouvrir l'atelier</button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ==================== 2. JE PRATIQUE ==================== -->
+      <div x-show="activeTab === 'pratique'" class="space-y-8">
+        
+        <!-- ATELIER 1 : Simulateur de Courriel Professionnel (@lt_X page 64) -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+            <div class="flex items-center gap-3">
+              <div class="p-2.5 rounded-2xl bg-blue-100 text-blue-700 text-lg font-black">✉️</div>
+              <div>
+                <h3 class="font-black text-base text-slate-900">Atelier Pratique : Rédiger un e-mail officiel (p. 64)</h3>
+                <p class="text-xs text-slate-500 font-medium">Respecte la checklist des 16 critères officiels du manuel</p>
               </div>
             </div>
+            <span class="text-xs font-extrabold px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full">Compétence NUM-1.P2</span>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Formulaire Client Mail -->
+            <div class="lg:col-span-2 space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200 text-xs">
+              <div class="flex items-center gap-2">
+                <span class="w-16 font-bold text-slate-500">Pour (À) :</span>
+                <input type="text" x-model="emailSim.destinataire" class="flex-1 bg-white px-3 py-1.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500">
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-16 font-bold text-slate-500">Cci :</span>
+                <input type="text" x-model="emailSim.cci" placeholder="Adresses invisibles pour protéger la vie privée (RGPD)..." class="flex-1 bg-white px-3 py-1.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500">
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-16 font-bold text-slate-500">Objet :</span>
+                <input type="text" x-model="emailSim.objet" placeholder="Titre clair et court..." class="flex-1 bg-white px-3 py-1.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500">
+              </div>
+              <div>
+                <span class="font-bold text-slate-500 block mb-1">Message :</span>
+                <textarea rows="6" x-model="emailSim.corps" class="w-full bg-white p-3 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 font-sans"></textarea>
+              </div>
+
+              <div class="flex justify-end pt-2">
+                <button 
+                  @click="analyserEmailSimule()"
+                  class="px-5 py-2.5 bg-blue-600 text-white font-extrabold rounded-xl hover:bg-blue-700 transition flex items-center gap-2 shadow-sm">
+                  <span>🔍</span> Analyser mon e-mail avec la grille @lt_X
+                </button>
+              </div>
+            </div>
+
+            <!-- Grille de Validation en Direct -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 flex flex-col justify-between text-xs">
+              <div>
+                <h4 class="font-black text-slate-900 mb-3 flex items-center gap-2">
+                  <span>📋</span> Checklist @lt_X (p. 64)
+                </h4>
+                
+                <template x-if="emailSim.validationResults">
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between p-2 rounded-lg" :class="emailSim.validationResults.objetOk ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800'">
+                      <span>Objet court et précis</span>
+                      <span class="font-black" x-text="emailSim.validationResults.objetOk ? '✓' : '✕'"></span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 rounded-lg" :class="emailSim.validationResults.politesseDebut ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800'">
+                      <span>Formule de politesse début</span>
+                      <span class="font-black" x-text="emailSim.validationResults.politesseDebut ? '✓' : '✕'"></span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 rounded-lg" :class="emailSim.validationResults.politesseFin ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800'">
+                      <span>Formule de fin (Cordialement)</span>
+                      <span class="font-black" x-text="emailSim.validationResults.politesseFin ? '✓' : '✕'"></span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 rounded-lg" :class="emailSim.validationResults.signature ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800'">
+                      <span>Signature (Nom, Prénom, Classe)</span>
+                      <span class="font-black" x-text="emailSim.validationResults.signature ? '✓' : '✕'"></span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 rounded-lg" :class="emailSim.validationResults.cciProtege ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'">
+                      <span>Usage Cci (protection données)</span>
+                      <span class="font-black" x-text="emailSim.validationResults.cciProtege ? '✓' : '—'"></span>
+                    </div>
+                  </div>
+                </template>
+
+                <template x-if="!emailSim.validationResults">
+                  <p class="text-slate-400 italic">Rédige ton courriel et clique sur "Analyser" pour vérifier chaque critère !</p>
+                </template>
+              </div>
+
+              <template x-if="emailSim.validationResults">
+                <div class="mt-4 pt-3 border-t border-slate-100 text-center font-extrabold"
+                     :class="emailSim.validationResults.scoreGlobal >= 5 ? 'text-emerald-700' : 'text-amber-700'">
+                  Score de rédaction : <span x-text="emailSim.validationResults.scoreGlobal"></span> / 6 critères respectés
+                </div>
+              </template>
+            </div>
+
           </div>
         </div>
+
+        <!-- ATELIER 2 : Bilan Personnel d'Auto-Évaluation (@lt_X page 83) -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+          <div class="pb-4 border-b border-slate-100 mb-6">
+            <h3 class="font-black text-base text-slate-900 flex items-center gap-2">
+              <span>🎯</span> Bilan personnel : Sais-tu appliquer ces compétences ? (p. 83)
+            </h3>
+            <p class="text-xs text-slate-500 mt-1">Coche l'émoji qui correspond le mieux à ton ressenti :</p>
+          </div>
+
+          <div class="space-y-3">
+            <template x-for="comp in competences.je_pratique" :key="comp.id">
+              <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div class="flex items-start gap-3">
+                  <span class="font-black px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700" x-text="comp.code"></span>
+                  <span class="font-semibold text-slate-800" x-text="comp.intitule"></span>
+                </div>
+                <div class="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                  <button 
+                    @click="bilanPersonnel[comp.code] = 'bien'"
+                    :class="bilanPersonnel[comp.code] === 'bien' ? 'bg-emerald-500 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100'"
+                    class="px-2.5 py-1 rounded-xl text-base transition">🙂</button>
+                  <button 
+                    @click="bilanPersonnel[comp.code] = 'moyen'"
+                    :class="bilanPersonnel[comp.code] === 'moyen' ? 'bg-amber-500 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100'"
+                    class="px-2.5 py-1 rounded-xl text-base transition">😐</button>
+                  <button 
+                    @click="bilanPersonnel[comp.code] = 'difficile'"
+                    :class="bilanPersonnel[comp.code] === 'difficile' ? 'bg-rose-500 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100'"
+                    class="px-2.5 py-1 rounded-xl text-base transition">🙁</button>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+
       </div>
 
-      <!-- SECTION : JE MAÎTRISE -->
-      <div x-show="activeTab === 'maitrise'" class="space-y-6">
-        <div class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-black">🎯</div>
+      <!-- ==================== 3. JE MAÎTRISE ==================== -->
+      <div x-show="activeTab === 'maitrise'" class="space-y-8">
+        
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+          <div class="pb-4 border-b border-slate-100 mb-6 flex items-center justify-between">
             <div>
-              <h3 class="font-extrabold text-lg text-slate-900">Je maîtrise : Mission de Consolidation</h3>
-              <p class="text-xs text-slate-500 font-medium">Projet synthèse (Page 84 du manuel)</p>
+              <span class="text-xs font-extrabold uppercase tracking-wider text-purple-600">Projet Synthèse • Page 84</span>
+              <h3 class="font-black text-xl text-slate-900 mt-1">Sois créatif : Invente ton application !</h3>
             </div>
+            <span class="text-xs font-extrabold px-3 py-1 bg-purple-100 text-purple-800 rounded-full">Compétence NUM-1.M1</span>
           </div>
-          <div class="p-6 rounded-2xl bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100">
-            <h4 class="font-black text-sm text-purple-950">Mission : Communiquer et interagir grâce aux outils adaptés</h4>
-            <p class="text-xs text-purple-900 mt-2 leading-relaxed">
-              Tu organises une collecte solidaire pour l'école. En utilisant les compétences du chapitre, choisis les 2 meilleurs outils pour :
-              1. Sonder les élèves sur les dates.
-              2. Transmettre les affiches aux professeurs sans divulguer les adresses privées.
-            </p>
-            <div class="mt-4 flex items-center gap-2">
-              <button class="px-4 py-2 rounded-xl bg-purple-700 text-white font-bold text-xs hover:bg-purple-800 transition">Rédiger ma réponse</button>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 text-xs">
+            <div class="space-y-4">
+              <div>
+                <label class="font-extrabold text-slate-800 block mb-1">1. Donne un nom à ton outil (original, facile à retenir) :</label>
+                <input type="text" x-model="missionApp.nom" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-purple-600 font-bold">
+              </div>
+              <div>
+                <label class="font-extrabold text-slate-800 block mb-1">2. Présente ton outil (à qui il sert, dans quelles situations) :</label>
+                <textarea rows="3" x-model="missionApp.cible" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-purple-600"></textarea>
+              </div>
+              <div>
+                <label class="font-extrabold text-slate-800 block mb-1">3. Imagine une fonction unique (ex: mode travail anti-distraction) :</label>
+                <textarea rows="3" x-model="missionApp.fonctionUnique" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-purple-600"></textarea>
+              </div>
+              <div>
+                <label class="font-extrabold text-slate-800 block mb-1">4. Propose 3 règles de bon usage (respect, vie privée, nétiquette) :</label>
+                <textarea rows="3" x-model="missionApp.reglesUsage" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-purple-600"></textarea>
+              </div>
+
+              <button 
+                @click="soumettreMissionApp()"
+                class="px-6 py-3 rounded-xl bg-purple-600 text-white font-extrabold text-xs hover:bg-purple-700 transition shadow-sm flex items-center gap-2">
+                <span>🚀</span> Soumettre à mon professeur & au Tuteur IA
+              </button>
             </div>
+
+            <!-- Retour du Tuteur Socratique IA -->
+            <div class="bg-purple-50/50 p-6 rounded-3xl border border-purple-100 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center gap-3 mb-4">
+                  <div class="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-xl">🤖</div>
+                  <div>
+                    <h4 class="font-black text-purple-950">Avis du Tuteur IA</h4>
+                    <p class="text-xs text-purple-700">Évaluation selon les critères @lt_X</p>
+                  </div>
+                </div>
+
+                <template x-if="missionApp.isSubmitted">
+                  <div class="p-4 bg-white rounded-2xl border border-purple-200 text-slate-700 leading-relaxed space-y-2">
+                    <div class="font-bold text-emerald-700">✓ Projet bien structuré et transmis !</div>
+                    <p x-text="missionApp.aiFeedback"></p>
+                  </div>
+                </template>
+
+                <template x-if="!missionApp.isSubmitted">
+                  <p class="text-slate-500 leading-relaxed italic">
+                    Complète les 4 volets de ton projet et soumets-le pour recevoir l'avis socratique du tuteur et valider la compétence NUM-1.M1 !
+                  </p>
+                </template>
+              </div>
+
+              <div class="mt-6 pt-4 border-t border-purple-100 text-xs text-purple-800 font-semibold">
+                Grille d'observables : clarté de l'usage, prise en compte de la vie privée et créativité.
+              </div>
+            </div>
+
           </div>
         </div>
+
       </div>
 
-      <!-- SECTION : MES COMPÉTENCES -->
+      <!-- ==================== 4. MES COMPÉTENCES ==================== -->
       <div x-show="activeTab === 'competences'" class="space-y-6">
         <div class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs">
           <div class="flex items-center justify-between mb-6">
@@ -562,18 +764,9 @@
                   <p class="text-xs text-slate-800 font-medium" x-text="comp.intitule"></p>
                 </div>
                 <div>
-                  <span x-show="eleveCompetences[comp.code] === 'acquis'" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1">
-                    ✓ Acquis
-                  </span>
-                  <span x-show="eleveCompetences[comp.code] === 'en_cours'" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 flex items-center gap-1">
-                    ⏳ En cours
-                  </span>
-                  <span x-show="eleveCompetences[comp.code] === 'a_renforcer'" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800 flex items-center gap-1">
-                    ⚠️ À renforcer
-                  </span>
-                  <span x-show="!eleveCompetences[comp.code]" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-400">
-                    Non vu
-                  </span>
+                  <span x-show="eleveCompetences[comp.code] === 'acquis'" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1">✓ Acquis</span>
+                  <span x-show="eleveCompetences[comp.code] === 'en_cours'" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 flex items-center gap-1">⏳ En cours</span>
+                  <span x-show="eleveCompetences[comp.code] === 'a_renforcer'" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800 flex items-center gap-1">⚠️ À renforcer</span>
                 </div>
               </div>
             </template>
@@ -583,9 +776,9 @@
 
     </div>
 
-    <!-- ========================================== -->
-    <!-- VUE ENSEIGNANT (Matrice ed.ai)             -->
-    <!-- ========================================== -->
+    <!-- ======================================================= -->
+    <!-- VUE ENSEIGNANT : MATRICE ED.AI                          -->
+    <!-- ======================================================= -->
     <div x-show="activeTab === 'prof'" class="space-y-8">
       
       <!-- En-tête Professeur -->
@@ -597,7 +790,7 @@
             </div>
             <h2 class="text-2xl font-black tracking-tight">Météo des Compétences : Classe 1C2</h2>
             <p class="text-xs sm:text-sm text-slate-300 mt-1">
-              Vue en temps réel des acquis du Tronc Commun FMTTN (Inspirée du modèle ed.ai).
+              Suivi unifié : Escape Game de rentrée, Charte informatique, Quiz @lt_X et Rédaction de courriel.
             </p>
           </div>
 
@@ -611,88 +804,77 @@
         </div>
       </div>
 
-      <!-- Métriques Globales & Diagnostic des Faux Représentations (Error Patterns) -->
+      <!-- Métriques Globales -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <!-- Bloc 1 : Taux de Maîtrise -->
         <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-          <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Maîtrise Semaines 1 à 3</div>
-          <div class="text-3xl font-black text-slate-900 mt-2">78%</div>
-          <p class="text-xs text-slate-500 mt-1">Charte informatique acquise par 100% des élèves.</p>
+          <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Progression Globale Classe</div>
+          <div class="text-3xl font-black text-slate-900 mt-2">81%</div>
+          <p class="text-xs text-slate-500 mt-1">5 élèves sur 6 ont terminé l'Escape Game.</p>
           <div class="w-full bg-slate-100 h-2 rounded-full mt-4 overflow-hidden">
-            <div class="bg-emerald-500 h-full rounded-full" style="width: 78%"></div>
+            <div class="bg-emerald-500 h-full rounded-full" style="width: 81%"></div>
           </div>
         </div>
 
-        <!-- Bloc 2 : Point d'alerte n°1 -->
         <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
           <div class="text-xs font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5">
-            <span>⚠️</span> Alerte Déconnexion
+            <span>⚠️</span> Point d'attention : E-mail
           </div>
-          <div class="text-sm font-extrabold text-slate-900 mt-2">Fermer l'écran ≠ Déconnecter</div>
+          <div class="text-sm font-extrabold text-slate-900 mt-2">Oubli du champ Cci</div>
           <p class="text-xs text-slate-600 mt-1">
-            <strong>33%</strong> des élèves pensent qu'éteindre l'écran suffit pour fermer sa session.
+            <strong>38%</strong> des élèves oublient de masquer les adresses lors d'un envoi à plusieurs destinataires.
           </p>
-          <div class="mt-3 text-xs text-blue-600 font-bold">Rappel physique en fin de séance prévu.</div>
         </div>
 
-        <!-- Bloc 3 : Point d'alerte n°2 -->
         <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-          <div class="text-xs font-bold uppercase tracking-wider text-rose-600 flex items-center gap-1.5">
-            <span>⚠️</span> Erreur E-mail (Ch. 1)
+          <div class="text-xs font-bold uppercase tracking-wider text-emerald-600 flex items-center gap-1.5">
+            <span>✓</span> Point fort collectif
           </div>
-          <div class="text-sm font-extrabold text-slate-900 mt-2">Usage du champ Cci</div>
+          <div class="text-sm font-extrabold text-slate-900 mt-2">Charte & Déconnexion</div>
           <p class="text-xs text-slate-600 mt-1">
-            <strong>40%</strong> mettent les adresses en Cc au lieu de Cci lors d'un envoi groupé.
+            <strong>100%</strong> de réussite sur la règle "Écran fermé ≠ Déconnecté".
           </p>
-          <div class="mt-3 text-xs text-blue-600 font-bold">Rappel RGPD et vie privée conseillé.</div>
         </div>
-
       </div>
 
-      <!-- La Matrice de Compétences (Heatmap) -->
+      <!-- Tableau Heatmap Matrice de la Classe -->
       <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs overflow-x-auto">
-        <h3 class="font-extrabold text-base text-slate-900 mb-4">Matrice de la Classe (Standards Mastery Grid)</h3>
+        <h3 class="font-extrabold text-base text-slate-900 mb-4">Matrice de Maîtrise des Acquis (Vue ed.ai)</h3>
         
-        <table class="w-full text-left text-xs border-collapse min-w-[650px]">
+        <table class="w-full text-left text-xs border-collapse min-w-[700px]">
           <thead>
             <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
               <th class="py-3 px-4">Élève</th>
-              <th class="py-3 px-4">Charte & Déconnexion</th>
-              <th class="py-3 px-4">NUM-1.D5 (Vocabulaire Courriel)</th>
-              <th class="py-3 px-4">NUM-1.D6 (Éthique & Droits)</th>
-              <th class="py-3 px-4">NUM-1.P2 (Cc / Cci)</th>
-              <th class="py-3 px-4 text-right">Score Global</th>
+              <th class="py-3 px-4">Escape Game</th>
+              <th class="py-3 px-4">Charte p.10</th>
+              <th class="py-3 px-4">Réseaux NUM-1.D1</th>
+              <th class="py-3 px-4">Courriel NUM-1.D5</th>
+              <th class="py-3 px-4">Éthique NUM-1.D6</th>
+              <th class="py-3 px-4">Simulateur NUM-1.P2</th>
+              <th class="py-3 px-4 text-right">Score</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
             <template x-for="eleve in classeEleves" :key="eleve.id">
               <tr class="hover:bg-slate-50/70 transition">
                 <td class="py-3.5 px-4 font-extrabold text-slate-900" x-text="eleve.nom"></td>
+                <td class="py-3.5 px-4 font-bold text-purple-700" x-text="eleve.eg"></td>
                 <td class="py-3.5 px-4">
-                  <span :class="eleve.charte === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
-                        class="px-2.5 py-0.5 rounded-full font-bold text-xs" x-text="eleve.charte === 'acquis' ? 'Acquis' : 'En cours'"></span>
+                  <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">Acquis</span>
                 </td>
                 <td class="py-3.5 px-4">
-                  <span :class="{
-                    'bg-emerald-100 text-emerald-800': eleve.d5 === 'acquis',
-                    'bg-amber-100 text-amber-800': eleve.d5 === 'en_cours',
-                    'bg-rose-100 text-rose-800': eleve.d5 === 'a_renforcer'
-                  }" class="px-2.5 py-0.5 rounded-full font-bold text-xs" x-text="eleve.d5"></span>
+                  <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">Acquis</span>
                 </td>
                 <td class="py-3.5 px-4">
-                  <span :class="{
-                    'bg-emerald-100 text-emerald-800': eleve.d6 === 'acquis',
-                    'bg-amber-100 text-amber-800': eleve.d6 === 'en_cours',
-                    'bg-rose-100 text-rose-800': eleve.d6 === 'a_renforcer'
-                  }" class="px-2.5 py-0.5 rounded-full font-bold text-xs" x-text="eleve.d6"></span>
+                  <span :class="eleve.d5 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                        class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.d5"></span>
                 </td>
                 <td class="py-3.5 px-4">
-                  <span :class="{
-                    'bg-emerald-100 text-emerald-800': eleve.p2 === 'acquis',
-                    'bg-amber-100 text-amber-800': eleve.p2 === 'en_cours',
-                    'bg-rose-100 text-rose-800': eleve.p2 === 'a_renforcer'
-                  }" class="px-2.5 py-0.5 rounded-full font-bold text-xs" x-text="eleve.p2"></span>
+                  <span :class="eleve.d6 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+                        class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.d6"></span>
+                </td>
+                <td class="py-3.5 px-4">
+                  <span :class="eleve.p2 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+                        class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.p2"></span>
                 </td>
                 <td class="py-3.5 px-4 text-right font-black" :class="eleve.score >= 80 ? 'text-emerald-600' : 'text-amber-600'" x-text="eleve.score + '%'"></td>
               </tr>
@@ -701,23 +883,23 @@
         </table>
       </div>
 
-      <!-- Résultat de la Remédiation Générée en 1 Clic -->
+      <!-- Fiche de Remédiation en 1 Clic -->
       <div x-show="remediationGenerated" class="bg-indigo-50 border border-indigo-200 rounded-3xl p-6 sm:p-8 animate-fadeIn">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-3">
             <span class="text-2xl">✨</span>
             <div>
               <h4 class="font-black text-indigo-950 text-base">Fiche de Remédiation Ciblée Générée</h4>
-              <p class="text-xs text-indigo-700">Créée automatiquement pour Camille D. et Lucas M. sur la compétence NUM-1.D6 et Déconnexion</p>
+              <p class="text-xs text-indigo-700">Créée automatiquement pour Camille D. et Lucas M. sur la compétence NUM-1.P2 (Courriel & Cci)</p>
             </div>
           </div>
           <button class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-xs hover:bg-indigo-700">Imprimer / Partager</button>
         </div>
         <div class="bg-white p-4 rounded-2xl border border-indigo-100 text-xs text-slate-700 space-y-2">
-          <p><strong>Exercice de renfort : « Censure ou Modération ? »</strong></p>
-          <p>1. Un utilisateur insulte violemment un joueur sur un forum. Le responsable supprime le message. ➔ [ ] Censure &nbsp;&nbsp; [✓] Modération</p>
-          <p>2. Un blogueur donne une critique argumentée d'un jeu vidéo sans insultes. Le fabricant du jeu fait supprimer l'article. ➔ [✓] Censure &nbsp;&nbsp; [ ] Modération</p>
-          <p class="text-slate-400 italic">Rappel : La modération protège la loi et les personnes ; la censure étouffe une opinion libre.</p>
+          <p><strong>Exercice de renfort : « Où mettre chaque adresse ? »</strong></p>
+          <p>1. Tu écris au professeur pour lui poser une question sur le cours. ➔ <strong>Champ [ À ]</strong></p>
+          <p>2. Tu envoies les photos de la sortie scolaire à 28 élèves de la classe. ➔ <strong>Champ [ Cci ]</strong> (pour protéger leur vie privée)</p>
+          <p>3. Tu envoies un document à ton binôme et tu veux que ton professeur le voie aussi sans être le destinataire direct. ➔ <strong>Champ [ Cc ]</strong></p>
         </div>
       </div>
 
@@ -746,7 +928,6 @@
     class="fixed bottom-24 right-6 w-96 max-w-[calc(100vw-3rem)] bg-white rounded-3xl shadow-2xl border border-slate-200 z-50 flex flex-col overflow-hidden"
     style="height: 480px;">
     
-    <!-- En-tête Tuteur -->
     <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-xl">
@@ -763,7 +944,6 @@
       <button @click="tutorOpen = false" class="text-white/80 hover:text-white text-lg font-bold">✕</button>
     </div>
 
-    <!-- Corps des Messages -->
     <div class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 text-xs">
       <template x-for="(msg, idx) in tutorHistory" :key="idx">
         <div :class="msg.sender === 'bot' ? 'flex items-start gap-2.5' : 'flex items-start justify-end gap-2.5'">
@@ -778,7 +958,6 @@
         </div>
       </template>
 
-      <!-- Indicateur de réflexion IA -->
       <div x-show="tutorLoading" class="flex items-center gap-2 text-slate-400 text-xs font-semibold pl-2">
         <span class="animate-bounce">●</span>
         <span class="animate-bounce delay-100">●</span>
@@ -787,7 +966,6 @@
       </div>
     </div>
 
-    <!-- Saisie Élève -->
     <div class="p-3 bg-white border-t border-slate-100 flex items-center gap-2">
       <input 
         type="text" 

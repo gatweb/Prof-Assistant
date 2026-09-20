@@ -1,0 +1,1879 @@
+{
+  "comm": {
+    "reseaux": {
+      "label": "Réseaux socio-numériques",
+      "icon": "📱",
+      "lecon": "**Qu'est-ce qu'un réseau socio-numérique ?**\n\nUn réseau socio-numérique (RSN) est une plateforme en ligne qui permet à des personnes de se connecter, d'échanger et de partager des contenus.\n\n**Ce qu'on y fait :**\n→ Publier (textes, photos, vidéos)\n→ Commenter et réagir (likes, partages)\n→ Suivre d'autres utilisateurs\n→ Créer des groupes ou communautés\n\n**Exemples de réseaux socio-numériques :**\n→ Instagram : photos et vidéos courtes, stories\n→ TikTok : vidéos courtes, tendances\n→ YouTube : vidéos longues\n→ Snapchat : contenus éphémères\n→ Facebook : posts, groupes, events\n→ LinkedIn : réseau professionnel\n→ X (Twitter) / Mastodon : microblogging\n→ Pinterest : inspirations visuelles\n→ Reddit : forums thématiques\n\n**Réseau éthique vs non éthique :**\n→ Non éthique : cherche à maximiser le profit via la publicité, exploite les données personnelles\n→ Éthique : respecte la vie privée, sans publicité intrusive, ouvert (open source)\n\n**Le système de récompense :**\nLes likes et commentaires activent la dopamine dans le cerveau → crée une envie de revenir (comme l'expérience de Skinner)\n\n**Âge minimum légal :** 13 ans sur la plupart des plateformes (selon la loi COPPA/RGPD)\n\n**Microblogging :** forme de blog en version courte (ex: X/Twitter — messages courts)",
+      "questions": [
+        {
+          "q": "Qu'est-ce qu'un réseau socio-numérique ?",
+          "rep": "Une plateforme pour se connecter, échanger et partager des contenus",
+          "choices": [
+            "Une plateforme pour se connecter, échanger et partager des contenus",
+            "Un logiciel pour écrire des textes",
+            "Un moteur de recherche",
+            "Une application de jeux vidéo"
+          ]
+        },
+        {
+          "q": "Quel réseau social est spécialisé dans les vidéos courtes et les tendances ?",
+          "rep": "TikTok",
+          "choices": [
+            "TikTok",
+            "LinkedIn",
+            "Pinterest",
+            "Reddit"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que le microblogging ?",
+          "rep": "Une forme de blog en version courte (messages courts)",
+          "choices": [
+            "Une forme de blog en version courte (messages courts)",
+            "Un long article de blog",
+            "Un réseau professionnel",
+            "Un système de messagerie"
+          ]
+        },
+        {
+          "q": "Pourquoi les réseaux sociaux créent-ils une envie de revenir ?",
+          "rep": "Ils activent la dopamine dans le cerveau via un système de récompense (likes, commentaires)",
+          "choices": [
+            "Ils activent la dopamine dans le cerveau via un système de récompense (likes, commentaires)",
+            "Ils sont très utiles pour les devoirs",
+            "Ils sont gratuits et disponibles partout",
+            "Ils permettent de regarder des films"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un réseau social 'éthique' ?",
+          "rep": "Un réseau qui respecte la vie privée, sans publicité intrusive, souvent open source",
+          "choices": [
+            "Un réseau qui respecte la vie privée, sans publicité intrusive, souvent open source",
+            "Un réseau très populaire avec beaucoup d'utilisateurs",
+            "Un réseau qui gagne beaucoup d'argent",
+            "Un réseau qui propose des jeux"
+          ]
+        },
+        {
+          "q": "Quel est l'âge minimum légal sur la plupart des réseaux sociaux ?",
+          "rep": "13 ans",
+          "choices": [
+            "13 ans",
+            "10 ans",
+            "16 ans",
+            "18 ans"
+          ]
+        },
+        {
+          "q": "LinkedIn est principalement un réseau...",
+          "rep": "professionnel",
+          "choices": [
+            "professionnel",
+            "de photos",
+            "de jeux",
+            "de musique"
+          ]
+        },
+        {
+          "q": "Snapchat est connu pour ses contenus...",
+          "rep": "éphémères (qui disparaissent)",
+          "choices": [
+            "éphémères (qui disparaissent)",
+            "permanents",
+            "professionnels",
+            "musicaux"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un réseau non éthique cherche principalement ?",
+          "rep": "Maximiser le profit via la publicité en exploitant les données personnelles",
+          "choices": [
+            "Maximiser le profit via la publicité en exploitant les données personnelles",
+            "Protéger la vie privée des utilisateurs",
+            "Offrir un service gratuit sans conditions",
+            "Permettre de travailler en équipe"
+          ]
+        },
+        {
+          "q": "Sur Instagram, on partage principalement...",
+          "rep": "Des photos et vidéos courtes, des stories",
+          "choices": [
+            "Des photos et vidéos courtes, des stories",
+            "Des articles de blog longs",
+            "Des offres d'emploi",
+            "Des recettes de cuisine uniquement"
+          ]
+        },
+        {
+          "q": "X (Twitter) et Mastodon sont des exemples de...",
+          "rep": "Microblogging",
+          "choices": [
+            "Microblogging",
+            "Réseau professionnel",
+            "Réseau de photos",
+            "Réseau de vidéos longues"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un 'like' déclenche dans le cerveau ?",
+          "rep": "Une libération de dopamine (sentiment de plaisir)",
+          "choices": [
+            "Une libération de dopamine (sentiment de plaisir)",
+            "Une libération d'adrénaline",
+            "Un stress",
+            "Rien du tout"
+          ]
+        },
+        {
+          "q": "Pinterest est un réseau centré sur...",
+          "rep": "Les inspirations visuelles (images, idées)",
+          "choices": [
+            "Les inspirations visuelles (images, idées)",
+            "Les vidéos musicales",
+            "Les offres d'emploi",
+            "Les nouvelles politiques"
+          ]
+        },
+        {
+          "q": "Reddit est organisé en...",
+          "rep": "Forums thématiques (subreddits)",
+          "choices": [
+            "Forums thématiques (subreddits)",
+            "Stories éphémères",
+            "Vidéos courtes",
+            "Profils professionnels"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un contenu 'éphémère' ?",
+          "rep": "Un contenu qui disparaît après un certain temps",
+          "choices": [
+            "Un contenu qui disparaît après un certain temps",
+            "Un contenu qui dure indéfiniment",
+            "Un contenu professionnel",
+            "Un contenu en haute définition"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que RGPD ?",
+          "rep": "Règlement Général sur la Protection des Données (loi européenne sur la vie privée)",
+          "choices": [
+            "Règlement Général sur la Protection des Données (loi européenne sur la vie privée)",
+            "Un réseau social européen",
+            "Un système de notation des jeux",
+            "Un moteur de recherche"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un réseau open source ?",
+          "rep": "Un réseau dont le code est ouvert et accessible à tous",
+          "choices": [
+            "Un réseau dont le code est ouvert et accessible à tous",
+            "Un réseau payant",
+            "Un réseau réservé aux professionnels",
+            "Un réseau sans utilisateurs"
+          ]
+        },
+        {
+          "q": "Quel réseau est le plus adapté pour trouver un emploi ?",
+          "rep": "LinkedIn",
+          "choices": [
+            "LinkedIn",
+            "TikTok",
+            "Snapchat",
+            "Pinterest"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que l'algorithme d'un réseau social fait ?",
+          "rep": "Il sélectionne et ordonne les contenus montrés à chaque utilisateur selon ses préférences",
+          "choices": [
+            "Il sélectionne et ordonne les contenus montrés à chaque utilisateur selon ses préférences",
+            "Il supprime les mauvais contenus uniquement",
+            "Il traduit les contenus en plusieurs langues",
+            "Il crée automatiquement des posts"
+          ]
+        },
+        {
+          "q": "Que signifie 'partager' un contenu sur un réseau social ?",
+          "rep": "Diffuser le contenu de quelqu'un d'autre à sa propre communauté",
+          "choices": [
+            "Diffuser le contenu de quelqu'un d'autre à sa propre communauté",
+            "Supprimer un contenu",
+            "Signaler un contenu inapproprié",
+            "Créer un nouveau contenu original"
+          ]
+        },
+        {
+          "q": "YouTube est principalement un réseau de...",
+          "rep": "Vidéos longues",
+          "choices": [
+            "Vidéos longues",
+            "Photos",
+            "Messages textes",
+            "Offres d'emploi"
+          ]
+        }
+      ]
+    },
+    "messagerie": {
+      "label": "Messagerie & Communication",
+      "icon": "📧",
+      "lecon": "**Les outils de communication numérique**\n\n**Messagerie instantanée (chat) :**\n→ Échanges rapides, en temps réel\n→ Exemples : WhatsApp, Messenger, Telegram, Signal\n→ Idéale pour : conversations rapides, groupes d'amis\n→ Messages souvent éphémères ou non formels\n\n**Courriel / E-mail :**\n→ Plus formel, avec structure claire\n→ Exemples : Gmail, Outlook, Proton Mail, Yahoo Mail\n→ Idéal pour : démarches officielles, pièces jointes importantes\n\n**Vocabulaire essentiel de la messagerie :**\n→ **Expéditeur** : personne qui envoie le message\n→ **Destinataire** : personne qui reçoit le message\n→ **Objet** : titre du message (sujet)\n→ **Corps du message** : contenu du message\n→ **Pièce jointe** : fichier attaché au message\n→ **Boîte de réception** : dossier où arrivent les nouveaux messages\n→ **Boîte d'envoi** : dossier des messages en attente d'envoi\n→ **Éléments envoyés** : messages déjà envoyés\n→ **Brouillon** : message commencé mais pas encore envoyé\n→ **Spam / Courrier indésirable** : message non souhaité ou dangereux\n→ **Message lu / non lu** : indiqué par une icône ou un texte en gras\n→ **Cc (Copie carbone)** : envoyer une copie à quelqu'un d'autre (tout le monde voit qui est en copie)\n→ **Cci (Copie carbone invisible)** : copie cachée (le destinataire ne sait pas qui est en copie)\n\n**Choisir le bon outil :**\n→ Message urgent et informel → messagerie instantanée\n→ Demande officielle (école, employeur) → e-mail\n→ Partager un document important → e-mail avec pièce jointe\n→ Discussion de groupe entre amis → messagerie instantanée",
+      "questions": [
+        {
+          "q": "Qu'est-ce qu'un expéditeur ?",
+          "rep": "La personne qui envoie le message",
+          "choices": [
+            "La personne qui envoie le message",
+            "La personne qui reçoit le message",
+            "Le titre du message",
+            "Le fichier attaché"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un brouillon ?",
+          "rep": "Un message commencé mais pas encore envoyé",
+          "choices": [
+            "Un message commencé mais pas encore envoyé",
+            "Un message envoyé par erreur",
+            "Un message reçu et lu",
+            "Un message indésirable"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que le Spam ?",
+          "rep": "Un message non souhaité ou dangereux (courrier indésirable)",
+          "choices": [
+            "Un message non souhaité ou dangereux (courrier indésirable)",
+            "Un message important de l'école",
+            "Un message avec une pièce jointe",
+            "Un brouillon non envoyé"
+          ]
+        },
+        {
+          "q": "WhatsApp est une application de...",
+          "rep": "Messagerie instantanée",
+          "choices": [
+            "Messagerie instantanée",
+            "Courriel",
+            "Réseau professionnel",
+            "Partage de photos"
+          ]
+        },
+        {
+          "q": "Gmail est une application de...",
+          "rep": "Courriel (e-mail)",
+          "choices": [
+            "Courriel (e-mail)",
+            "Messagerie instantanée",
+            "Réseau social",
+            "Stockage de fichiers"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que la Cci (Copie carbone invisible) ?",
+          "rep": "Une copie envoyée à quelqu'un sans que les autres destinataires le sachent",
+          "choices": [
+            "Une copie envoyée à quelqu'un sans que les autres destinataires le sachent",
+            "Une copie visible de tous",
+            "Un message transféré",
+            "Un message supprimé"
+          ]
+        },
+        {
+          "q": "Dans quel dossier arrivent les nouveaux messages ?",
+          "rep": "La boîte de réception",
+          "choices": [
+            "La boîte de réception",
+            "Les éléments envoyés",
+            "Le brouillon",
+            "La boîte d'envoi"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'une pièce jointe ?",
+          "rep": "Un fichier attaché au message (document, photo, vidéo...)",
+          "choices": [
+            "Un fichier attaché au message (document, photo, vidéo...)",
+            "Le titre du message",
+            "L'adresse e-mail du destinataire",
+            "Le contenu principal du message"
+          ]
+        },
+        {
+          "q": "Pour quelle situation choisit-on de préférence un e-mail ?",
+          "rep": "Une demande officielle (école, employeur, administration)",
+          "choices": [
+            "Une demande officielle (école, employeur, administration)",
+            "Un message rapide à un ami",
+            "Une blague entre copains",
+            "Un jeu en ligne"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que l'objet d'un e-mail ?",
+          "rep": "Le titre du message qui résume son sujet",
+          "choices": [
+            "Le titre du message qui résume son sujet",
+            "L'adresse de l'expéditeur",
+            "Le contenu principal",
+            "La pièce jointe"
+          ]
+        },
+        {
+          "q": "Proton Mail se distingue des autres services d'e-mail par...",
+          "rep": "Sa sécurité renforcée et le respect de la vie privée",
+          "choices": [
+            "Sa sécurité renforcée et le respect de la vie privée",
+            "Sa rapidité de livraison",
+            "Ses nombreuses publicités",
+            "Son grand nombre d'utilisateurs"
+          ]
+        },
+        {
+          "q": "La Cc (Copie carbone) permet de...",
+          "rep": "Envoyer une copie à quelqu'un d'autre, visible par tous les destinataires",
+          "choices": [
+            "Envoyer une copie à quelqu'un d'autre, visible par tous les destinataires",
+            "Cacher une copie à quelqu'un",
+            "Supprimer un message",
+            "Transférer un e-mail"
+          ]
+        },
+        {
+          "q": "'Transférer' un e-mail signifie...",
+          "rep": "Renvoyer l'e-mail reçu à une autre personne",
+          "choices": [
+            "Renvoyer l'e-mail reçu à une autre personne",
+            "Répondre à l'expéditeur uniquement",
+            "Supprimer l'e-mail",
+            "Archiver l'e-mail"
+          ]
+        },
+        {
+          "q": "Un message en gras dans la boîte de réception indique...",
+          "rep": "Un message non lu",
+          "choices": [
+            "Un message non lu",
+            "Un message important",
+            "Un message avec pièce jointe",
+            "Un spam"
+          ]
+        },
+        {
+          "q": "Signal et Telegram sont des exemples de...",
+          "rep": "Applications de messagerie instantanée",
+          "choices": [
+            "Applications de messagerie instantanée",
+            "Services d'e-mail",
+            "Réseaux sociaux professionnels",
+            "Moteurs de recherche"
+          ]
+        },
+        {
+          "q": "Quel dossier contient les messages en attente d'envoi ?",
+          "rep": "La boîte d'envoi",
+          "choices": [
+            "La boîte d'envoi",
+            "La boîte de réception",
+            "Les éléments envoyés",
+            "Le brouillon"
+          ]
+        },
+        {
+          "q": "Pour une conversation de groupe entre amis, quel outil est le plus adapté ?",
+          "rep": "La messagerie instantanée (WhatsApp, Messenger...)",
+          "choices": [
+            "La messagerie instantanée (WhatsApp, Messenger...)",
+            "L'e-mail",
+            "Le courrier postal",
+            "Un réseau professionnel"
+          ]
+        },
+        {
+          "q": "Quel dossier contient les messages que tu as effacés ?",
+          "rep": "Les éléments supprimés / Corbeille",
+          "choices": [
+            "Les éléments supprimés / Corbeille",
+            "Le brouillon",
+            "La boîte d'envoi",
+            "Le spam"
+          ]
+        },
+        {
+          "q": "'Écran fermé ≠ déconnecté' signifie que...",
+          "rep": "Fermer l'écran ne signifie pas que tu t'es déconnecté de tes comptes",
+          "choices": [
+            "Fermer l'écran ne signifie pas que tu t'es déconnecté de tes comptes",
+            "Ton ordinateur est éteint",
+            "Tes données sont effacées",
+            "Ta session est terminée"
+          ]
+        },
+        {
+          "q": "Pourquoi est-il important d'écrire un objet clair dans un e-mail ?",
+          "rep": "Pour que le destinataire comprenne de quoi parle le message avant de l'ouvrir",
+          "choices": [
+            "Pour que le destinataire comprenne de quoi parle le message avant de l'ouvrir",
+            "Pour que le message arrive plus vite",
+            "Pour économiser de l'espace",
+            "Parce que c'est obligatoire techniquement"
+          ]
+        }
+      ]
+    },
+    "ethique": {
+      "label": "Éthique & Droits numériques",
+      "icon": "⚖️",
+      "lecon": "**L'éthique des médias numériques**\n\n**Principaux droits numériques :**\n→ **Droit à la vie privée** : choisir ce qu'on partage sur soi\n→ **Droit à l'oubli** : demander la suppression de données personnelles\n→ **Droit de retrait** : retirer son consentement à l'utilisation de ses données\n→ **Liberté d'expression** : pouvoir s'exprimer librement dans les limites de la loi\n→ **Droit à l'image** : contrôler l'utilisation de ses photos/vidéos\n\n**Censure vs Modération :**\n→ **Censure** : suppression arbitraire de contenus (sans justification légale)\n→ **Modération** : contrôle des contenus pour respecter des règles (légale)\n\n**Licences open source :**\n→ Permettent d'utiliser, modifier et redistribuer librement un logiciel\n→ Ex : Linux, LibreOffice, Firefox\n\n**La nétiquette (netiquette) :**\n→ Règles de politesse sur Internet\n→ Ne pas écrire EN MAJUSCULES (= crier)\n→ Respecter les autres, ne pas insulter\n→ Ne pas partager des informations privées sans permission\n→ Vérifier les informations avant de les partager\n→ Respecter la vie privée de chacun\n\n**Droits de propriété intellectuelle :**\n→ Les œuvres (textes, images, musiques, vidéos) sont protégées par le droit d'auteur\n→ Copier sans autorisation = violation du droit d'auteur\n→ Pour utiliser légalement : demander l'autorisation, citer la source, utiliser des contenus sous licence Creative Commons\n\n**Confidentialité et anonymat :**\n→ Anonymat : cacher son identité réelle\n→ Pseudonyme : utiliser un nom fictif\n→ Avatar : image qui représente un utilisateur en ligne",
+      "questions": [
+        {
+          "q": "Qu'est-ce que le droit à l'oubli ?",
+          "rep": "Le droit de demander la suppression de ses données personnelles d'une plateforme",
+          "choices": [
+            "Le droit de demander la suppression de ses données personnelles d'une plateforme",
+            "Le droit d'oublier ses mots de passe",
+            "Le droit de ne pas utiliser Internet",
+            "Le droit d'effacer ses messages privés"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que la nétiquette ?",
+          "rep": "Les règles de politesse et de bon comportement sur Internet",
+          "choices": [
+            "Les règles de politesse et de bon comportement sur Internet",
+            "Un logiciel de sécurité",
+            "Un type de réseau social",
+            "Un langage de programmation"
+          ]
+        },
+        {
+          "q": "Écrire EN MAJUSCULES dans un message signifie...",
+          "rep": "Crier (considéré comme impoli en ligne)",
+          "choices": [
+            "Crier (considéré comme impoli en ligne)",
+            "Que le message est important",
+            "Que tu parles à quelqu'un de sourd",
+            "Un style particulier"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que la licence open source ?",
+          "rep": "Une licence qui permet d'utiliser, modifier et redistribuer librement un logiciel",
+          "choices": [
+            "Une licence qui permet d'utiliser, modifier et redistribuer librement un logiciel",
+            "Une licence payante pour les entreprises",
+            "Un brevet protégeant un logiciel",
+            "Une règle interdisant la copie"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que le droit à la vie privée numérique ?",
+          "rep": "Le droit de choisir ce qu'on partage sur soi et de garder des informations pour soi",
+          "choices": [
+            "Le droit de choisir ce qu'on partage sur soi et de garder des informations pour soi",
+            "L'obligation de tout partager",
+            "L'interdiction d'utiliser Internet",
+            "Le droit à une connexion gratuite"
+          ]
+        },
+        {
+          "q": "Quelle est la différence entre censure et modération ?",
+          "rep": "La censure est arbitraire et injuste ; la modération applique des règles légales",
+          "choices": [
+            "La censure est arbitraire et injuste ; la modération applique des règles légales",
+            "Ce sont deux mots synonymes",
+            "La modération est illégale ; la censure est légale",
+            "Aucune différence"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un avatar en ligne ?",
+          "rep": "Une image ou un personnage qui représente un utilisateur sur Internet",
+          "choices": [
+            "Une image ou un personnage qui représente un utilisateur sur Internet",
+            "Un vrai portrait photo",
+            "Un logiciel de sécurité",
+            "Un type de virus informatique"
+          ]
+        },
+        {
+          "q": "Le droit d'auteur protège...",
+          "rep": "Les œuvres créatives (textes, musiques, images, vidéos)",
+          "choices": [
+            "Les œuvres créatives (textes, musiques, images, vidéos)",
+            "Les mots de passe uniquement",
+            "Les données personnelles uniquement",
+            "Les logiciels open source uniquement"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que Creative Commons ?",
+          "rep": "Un système de licences permettant de partager des œuvres avec certaines conditions définies par l'auteur",
+          "choices": [
+            "Un système de licences permettant de partager des œuvres avec certaines conditions définies par l'auteur",
+            "Un réseau social pour artistes",
+            "Un logiciel de retouche photo",
+            "Une loi gouvernementale"
+          ]
+        },
+        {
+          "q": "Utiliser une photo trouvée sur Internet sans autorisation est...",
+          "rep": "Une violation du droit d'auteur",
+          "choices": [
+            "Une violation du droit d'auteur",
+            "Tout à fait légal si c'est pour un usage personnel",
+            "Légal si la photo est gratuite",
+            "Légal si on cite le site"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que l'anonymat sur Internet ?",
+          "rep": "Cacher son identité réelle pour interagir sans être identifié",
+          "choices": [
+            "Cacher son identité réelle pour interagir sans être identifié",
+            "Utiliser son vrai nom sur tous les sites",
+            "Partager toutes ses informations personnelles",
+            "Bloquer tous les sites web"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un pseudonyme ?",
+          "rep": "Un nom fictif utilisé à la place de son vrai nom",
+          "choices": [
+            "Un nom fictif utilisé à la place de son vrai nom",
+            "Son vrai prénom seulement",
+            "Un nom de domaine",
+            "Un identifiant chiffré"
+          ]
+        },
+        {
+          "q": "Que faut-il faire avant de partager une information trouvée en ligne ?",
+          "rep": "Vérifier que l'information est fiable et vraie",
+          "choices": [
+            "Vérifier que l'information est fiable et vraie",
+            "La partager le plus vite possible",
+            "La traduire dans une autre langue",
+            "L'imprimer d'abord"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que le droit à l'image ?",
+          "rep": "Le droit de contrôler l'utilisation de ses propres photos et vidéos",
+          "choices": [
+            "Le droit de contrôler l'utilisation de ses propres photos et vidéos",
+            "Le droit de regarder des films gratuitement",
+            "L'obligation de mettre sa photo sur les réseaux",
+            "Le droit de prendre des photos partout"
+          ]
+        },
+        {
+          "q": "Éthique signifie...",
+          "rep": "Réfléchir à ce qui est bien ou mal, et agir de façon juste et responsable envers les autres",
+          "choices": [
+            "Réfléchir à ce qui est bien ou mal, et agir de façon juste et responsable envers les autres",
+            "Suivre la loi uniquement",
+            "Faire ce que tout le monde fait",
+            "Protéger uniquement ses propres intérêts"
+          ]
+        },
+        {
+          "q": "Linux, LibreOffice et Firefox sont des exemples de logiciels...",
+          "rep": "Open source (code ouvert, librement modifiable)",
+          "choices": [
+            "Open source (code ouvert, librement modifiable)",
+            "Payants et propriétaires",
+            "Créés par des gouvernements",
+            "Illégaux"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que le droit de retrait ?",
+          "rep": "Le droit de retirer son consentement à l'utilisation de ses données personnelles",
+          "choices": [
+            "Le droit de retirer son consentement à l'utilisation de ses données personnelles",
+            "Le droit de retirer de l'argent en ligne",
+            "Le droit de quitter un réseau social",
+            "Le droit de supprimer tous ses messages"
+          ]
+        },
+        {
+          "q": "Peut-on partager une photo d'un(e) ami(e) sans sa permission ?",
+          "rep": "Non, c'est une violation de son droit à l'image",
+          "choices": [
+            "Non, c'est une violation de son droit à l'image",
+            "Oui, si la photo est belle",
+            "Oui, si on est amis sur le réseau",
+            "Oui, si c'est une blague"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que la 'liberté d'expression' sur Internet ?",
+          "rep": "Le droit de s'exprimer librement, dans les limites de la loi (pas d'insultes, de menaces, de discrimination)",
+          "choices": [
+            "Le droit de s'exprimer librement, dans les limites de la loi (pas d'insultes, de menaces, de discrimination)",
+            "Le droit de dire absolument n'importe quoi",
+            "L'obligation de s'exprimer en public",
+            "Le droit de copier les œuvres des autres"
+          ]
+        },
+        {
+          "q": "Comment doit-on citer une source trouvée sur Internet ?",
+          "rep": "Indiquer l'auteur, le titre, le site et la date de consultation",
+          "choices": [
+            "Indiquer l'auteur, le titre, le site et la date de consultation",
+            "Copier-coller sans rien indiquer",
+            "Mettre juste l'URL",
+            "Mettre juste le nom du site"
+          ]
+        }
+      ]
+    },
+    "collaboration": {
+      "label": "Outils de collaboration",
+      "icon": "🤝",
+      "lecon": "**Les outils numériques pour créer, collaborer et partager**\n\n**Suites bureautiques en ligne (gratuites) :**\n→ **Google Workspace** : Docs, Sheets, Slides, Drive (Google)\n→ **Microsoft 365** : Word, Excel, PowerPoint, OneDrive\n→ **LibreOffice** : alternative open source locale\n→ **Framasoft** : outils libres et éthiques (Framapad, Framadate...)\n\n**Plateformes de collaboration scolaire :**\n→ **Google Classroom** : devoirs, cours, échanges avec les profs\n→ **Microsoft Teams** : visioconférence, travail en équipe\n→ **Moodle** : plateforme d'apprentissage en ligne (open source)\n→ **ENT (Espace Numérique de Travail)** : portail scolaire\n\n**Outils de communication en ligne :**\n→ Visioconférence : Google Meet, Zoom, Teams, Jitsi Meet\n→ Messagerie d'équipe : Slack, Teams, Discord\n→ Partage de fichiers : Google Drive, OneDrive, Nextcloud\n\n**Avantages de la collaboration numérique :**\n→ Travailler ensemble sans être au même endroit\n→ Modifier un document en temps réel à plusieurs\n→ Historique des modifications (on peut revenir en arrière)\n→ Accès depuis n'importe quel appareil\n\n**Bonnes pratiques :**\n→ Toujours nommer clairement ses fichiers\n→ Organiser ses documents dans des dossiers\n→ Faire des sauvegardes régulières\n→ Partager uniquement avec les personnes concernées",
+      "questions": [
+        {
+          "q": "Google Docs, Sheets et Slides font partie de...",
+          "rep": "Google Workspace",
+          "choices": [
+            "Google Workspace",
+            "Microsoft 365",
+            "LibreOffice",
+            "Framasoft"
+          ]
+        },
+        {
+          "q": "Quel outil est open source et gratuit, alternatif à Microsoft Office ?",
+          "rep": "LibreOffice",
+          "choices": [
+            "LibreOffice",
+            "Google Docs",
+            "Microsoft Word",
+            "Pages (Apple)"
+          ]
+        },
+        {
+          "q": "Google Classroom est principalement utilisé pour...",
+          "rep": "Gérer les devoirs, cours et échanges entre élèves et professeurs",
+          "choices": [
+            "Gérer les devoirs, cours et échanges entre élèves et professeurs",
+            "Regarder des vidéos éducatives",
+            "Jouer à des jeux éducatifs",
+            "Stocker des photos"
+          ]
+        },
+        {
+          "q": "Un ENT (Espace Numérique de Travail) est...",
+          "rep": "Un portail numérique de l'école qui centralise les ressources et communications",
+          "choices": [
+            "Un portail numérique de l'école qui centralise les ressources et communications",
+            "Un réseau social pour élèves",
+            "Un logiciel de dessin",
+            "Une application de géographie"
+          ]
+        },
+        {
+          "q": "Quel avantage principal offre la collaboration en ligne sur un document partagé ?",
+          "rep": "Plusieurs personnes peuvent modifier le document en même temps",
+          "choices": [
+            "Plusieurs personnes peuvent modifier le document en même temps",
+            "Le document s'écrit tout seul",
+            "Le document est automatiquement traduit",
+            "Le document ne peut jamais être supprimé"
+          ]
+        },
+        {
+          "q": "Jitsi Meet est un outil de...",
+          "rep": "Visioconférence open source et gratuit",
+          "choices": [
+            "Visioconférence open source et gratuit",
+            "Messagerie instantanée uniquement",
+            "Partage de photos",
+            "Réseau social"
+          ]
+        },
+        {
+          "q": "Discord est principalement utilisé pour...",
+          "rep": "La messagerie vocale et textuelle, populaire chez les gamers et communautés",
+          "choices": [
+            "La messagerie vocale et textuelle, populaire chez les gamers et communautés",
+            "Les devoirs scolaires",
+            "Les e-mails professionnels",
+            "Le partage de documents"
+          ]
+        },
+        {
+          "q": "Nextcloud est un outil de...",
+          "rep": "Stockage et partage de fichiers (alternative open source à Google Drive)",
+          "choices": [
+            "Stockage et partage de fichiers (alternative open source à Google Drive)",
+            "Réseau social",
+            "Messagerie instantanée",
+            "Création de sites web"
+          ]
+        },
+        {
+          "q": "Framasoft propose des outils...",
+          "rep": "Libres et éthiques, respectueux de la vie privée",
+          "choices": [
+            "Libres et éthiques, respectueux de la vie privée",
+            "Payants et professionnels",
+            "Créés par Google",
+            "Pour la sécurité informatique"
+          ]
+        },
+        {
+          "q": "Quelle bonne pratique s'applique à la gestion de ses fichiers numériques ?",
+          "rep": "Nommer clairement ses fichiers et les organiser dans des dossiers",
+          "choices": [
+            "Nommer clairement ses fichiers et les organiser dans des dossiers",
+            "Mettre tous les fichiers sur le bureau",
+            "Ne jamais supprimer de fichiers",
+            "Toujours travailler sans sauvegarder"
+          ]
+        },
+        {
+          "q": "OneDrive est le service de stockage en ligne de...",
+          "rep": "Microsoft",
+          "choices": [
+            "Microsoft",
+            "Google",
+            "Apple",
+            "Amazon"
+          ]
+        },
+        {
+          "q": "Moodle est une plateforme d'apprentissage...",
+          "rep": "Open source utilisée dans beaucoup d'écoles et universités",
+          "choices": [
+            "Open source utilisée dans beaucoup d'écoles et universités",
+            "Payante créée par Google",
+            "Réservée aux entreprises",
+            "Uniquement pour la visioconférence"
+          ]
+        },
+        {
+          "q": "Quel outil permet de faire une visioconférence avec plusieurs personnes ?",
+          "rep": "Google Meet, Zoom, Teams ou Jitsi Meet",
+          "choices": [
+            "Google Meet, Zoom, Teams ou Jitsi Meet",
+            "Gmail uniquement",
+            "WhatsApp uniquement",
+            "LinkedIn"
+          ]
+        },
+        {
+          "q": "Slack est un outil de...",
+          "rep": "Messagerie d'équipe professionnelle",
+          "choices": [
+            "Messagerie d'équipe professionnelle",
+            "Réseau social grand public",
+            "Visioconférence uniquement",
+            "Gestion de fichiers"
+          ]
+        },
+        {
+          "q": "Pourquoi est-il important de faire des sauvegardes régulières ?",
+          "rep": "Pour ne pas perdre son travail en cas de panne ou d'erreur",
+          "choices": [
+            "Pour ne pas perdre son travail en cas de panne ou d'erreur",
+            "Pour libérer de l'espace disque",
+            "Pour partager son travail automatiquement",
+            "Parce que la loi l'oblige"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un historique des modifications ?",
+          "rep": "Un enregistrement de toutes les versions précédentes d'un document",
+          "choices": [
+            "Un enregistrement de toutes les versions précédentes d'un document",
+            "Un résumé automatique du document",
+            "Une liste des personnes ayant lu le document",
+            "Un système de traduction"
+          ]
+        },
+        {
+          "q": "Avec qui partager un document de travail en ligne ?",
+          "rep": "Uniquement avec les personnes concernées par le projet",
+          "choices": [
+            "Uniquement avec les personnes concernées par le projet",
+            "Avec tous ses contacts",
+            "Avec tout Internet (lien public)",
+            "Avec personne pour plus de sécurité"
+          ]
+        },
+        {
+          "q": "Microsoft Teams combine...",
+          "rep": "Visioconférence, messagerie et partage de documents",
+          "choices": [
+            "Visioconférence, messagerie et partage de documents",
+            "Uniquement la messagerie",
+            "Uniquement le partage de fichiers",
+            "Uniquement les e-mails"
+          ]
+        },
+        {
+          "q": "Framapad est un outil pour...",
+          "rep": "Écrire un document texte collaboratif en ligne (alternative éthique à Google Docs)",
+          "choices": [
+            "Écrire un document texte collaboratif en ligne (alternative éthique à Google Docs)",
+            "Créer des présentations",
+            "Gérer ses e-mails",
+            "Faire de la visioconférence"
+          ]
+        },
+        {
+          "q": "Google Drive est un service de...",
+          "rep": "Stockage en ligne et partage de fichiers",
+          "choices": [
+            "Stockage en ligne et partage de fichiers",
+            "Messagerie instantanée",
+            "Réseau social",
+            "Création de sites web"
+          ]
+        }
+      ]
+    }
+  },
+  "secu": {
+    "profil": {
+      "label": "Profil & Vie privée",
+      "icon": "👤",
+      "lecon": "**Profil numérique et protection de la vie privée**\n\n**Qu'est-ce qu'un profil ?**\n→ Un profil est un ensemble d'informations qui te représentent sur une plateforme\n→ Il peut être : public (visible par tous) ou privé (visible uniquement par tes contacts)\n\n**Informations personnelles à protéger :**\n→ Nom complet, prénom\n→ Date de naissance\n→ Adresse (domicile, école)\n→ Numéro de téléphone\n→ Mot de passe\n→ Localisation en temps réel\n→ Photos personnelles\n\n**Données personnelles (RGPD) :**\n→ Toute information permettant d'identifier une personne\n→ Droit à la protection, à l'accès, à la rectification et à l'effacement\n\n**Créer un bon mot de passe :**\n→ Au moins 12 caractères\n→ Mélange : majuscules, minuscules, chiffres, caractères spéciaux (!@#$...)\n→ Ne pas utiliser : prénom, date de naissance, \"123456\", \"password\"\n→ Un mot de passe différent par compte\n→ Utiliser un gestionnaire de mots de passe\n\n**Compte public vs privé :**\n→ Public : tout le monde peut voir tes publications et informations\n→ Privé : seuls tes abonnés approuvés peuvent voir ton contenu\n\n**Trace numérique :**\n→ Chaque action en ligne laisse une trace (clics, recherches, localisation)\n→ Ces traces peuvent persister longtemps\n→ Sur un ordinateur partagé : toujours fermer sa session et effacer l'historique",
+      "questions": [
+        {
+          "q": "Qu'est-ce qu'un profil numérique ?",
+          "rep": "Un ensemble d'informations qui te représentent sur une plateforme",
+          "choices": [
+            "Un ensemble d'informations qui te représentent sur une plateforme",
+            "Ton vrai passeport numérique",
+            "Ton relevé bancaire",
+            "Une photo de profil uniquement"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un compte 'privé' sur un réseau social ?",
+          "rep": "Un compte visible uniquement par les abonnés que tu as approuvés",
+          "choices": [
+            "Un compte visible uniquement par les abonnés que tu as approuvés",
+            "Un compte visible par tout le monde",
+            "Un compte payant",
+            "Un compte sans photo"
+          ]
+        },
+        {
+          "q": "Quelle est la longueur minimale recommandée pour un bon mot de passe ?",
+          "rep": "12 caractères minimum",
+          "choices": [
+            "12 caractères minimum",
+            "4 caractères",
+            "6 caractères",
+            "8 caractères"
+          ]
+        },
+        {
+          "q": "Lequel de ces mots de passe est le plus sécurisé ?",
+          "rep": "Tr0ub4dor&3!",
+          "choices": [
+            "Tr0ub4dor&3!",
+            "123456",
+            "motdepasse",
+            "prénom2005"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'une trace numérique ?",
+          "rep": "Toute donnée laissée par tes actions en ligne (clics, recherches, localisation...)",
+          "choices": [
+            "Toute donnée laissée par tes actions en ligne (clics, recherches, localisation...)",
+            "Un tatouage digital",
+            "Une empreinte digitale physique",
+            "Un document imprimé"
+          ]
+        },
+        {
+          "q": "Sur un ordinateur partagé (école, bibliothèque), que faut-il faire en partant ?",
+          "rep": "Fermer sa session et effacer l'historique de navigation",
+          "choices": [
+            "Fermer sa session et effacer l'historique de navigation",
+            "Éteindre juste l'écran",
+            "Ne rien faire, c'est automatique",
+            "Seulement supprimer ses fichiers"
+          ]
+        },
+        {
+          "q": "Quelles informations sont considérées comme 'personnelles' et à protéger ?",
+          "rep": "Nom, adresse, date de naissance, numéro de téléphone, localisation",
+          "choices": [
+            "Nom, adresse, date de naissance, numéro de téléphone, localisation",
+            "Couleur préférée, genre musical aimé",
+            "Nom d'un personnage fictif",
+            "Le titre d'un film regardé"
+          ]
+        },
+        {
+          "q": "Que signifie RGPD ?",
+          "rep": "Règlement Général sur la Protection des Données",
+          "choices": [
+            "Règlement Général sur la Protection des Données",
+            "Réseau Global de Protection Digitale",
+            "Règles Générales de Partage de Données",
+            "Réseau Général pour la Prévention des Dangers"
+          ]
+        },
+        {
+          "q": "Pourquoi faut-il un mot de passe différent pour chaque compte ?",
+          "rep": "Si un compte est piraté, les autres restent protégés",
+          "choices": [
+            "Si un compte est piraté, les autres restent protégés",
+            "Pour s'en souvenir plus facilement",
+            "Parce que la loi l'oblige",
+            "Pour avoir plus de stockage"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un gestionnaire de mots de passe ?",
+          "rep": "Un logiciel qui stocke et génère des mots de passe sécurisés",
+          "choices": [
+            "Un logiciel qui stocke et génère des mots de passe sécurisés",
+            "Un carnet papier pour noter ses mots de passe",
+            "Un ami de confiance",
+            "Un service en ligne gratuit toujours sécurisé"
+          ]
+        },
+        {
+          "q": "Quelle information NE doit-on PAS partager publiquement en ligne ?",
+          "rep": "Son adresse personnelle",
+          "choices": [
+            "Son adresse personnelle",
+            "Sa couleur préférée",
+            "Son film favori",
+            "Son animal de compagnie"
+          ]
+        },
+        {
+          "q": "Les données personnelles incluent...",
+          "rep": "Toute information permettant d'identifier une personne",
+          "choices": [
+            "Toute information permettant d'identifier une personne",
+            "Uniquement le nom et prénom",
+            "Uniquement les photos",
+            "Uniquement les mots de passe"
+          ]
+        },
+        {
+          "q": "Pourquoi est-il risqué d'utiliser '123456' comme mot de passe ?",
+          "rep": "C'est trop simple et les hackers le testent en premier",
+          "choices": [
+            "C'est trop simple et les hackers le testent en premier",
+            "Il contient des chiffres interdits",
+            "Il est trop long",
+            "Il n'est pas en français"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que le droit à la rectification (RGPD) ?",
+          "rep": "Le droit de corriger des informations incorrectes te concernant",
+          "choices": [
+            "Le droit de corriger des informations incorrectes te concernant",
+            "Le droit d'utiliser Internet",
+            "Le droit de changer de nom",
+            "Le droit de copier des données"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que le phishing (hameçonnage) ?",
+          "rep": "Une tentative de voler tes données personnelles via un faux message ou site",
+          "choices": [
+            "Une tentative de voler tes données personnelles via un faux message ou site",
+            "Un type de jeu vidéo",
+            "Un virus informatique",
+            "Un réseau social"
+          ]
+        },
+        {
+          "q": "Un compte public sur un réseau social signifie que...",
+          "rep": "N'importe qui sur Internet peut voir tes publications",
+          "choices": [
+            "N'importe qui sur Internet peut voir tes publications",
+            "Seuls tes amis peuvent te voir",
+            "Seule ta famille peut te voir",
+            "Personne ne peut te voir"
+          ]
+        },
+        {
+          "q": "Pourquoi ne faut-il pas utiliser son prénom et sa date de naissance dans un mot de passe ?",
+          "rep": "Ces informations sont facilement trouvables par d'autres (réseaux sociaux, etc.)",
+          "choices": [
+            "Ces informations sont facilement trouvables par d'autres (réseaux sociaux, etc.)",
+            "Parce que ça fait un mot de passe trop long",
+            "Parce que les accents posent problème",
+            "Parce que c'est interdit par la loi"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que la 'localisation en temps réel' peut révéler ?",
+          "rep": "Où tu es à chaque instant (domicile, école, trajets habituels)",
+          "choices": [
+            "Où tu es à chaque instant (domicile, école, trajets habituels)",
+            "Ton adresse e-mail uniquement",
+            "Tes préférences musicales",
+            "Tes contacts"
+          ]
+        },
+        {
+          "q": "Comment effacer ses traces sur un navigateur partagé ?",
+          "rep": "Supprimer l'historique, les cookies et les données de navigation",
+          "choices": [
+            "Supprimer l'historique, les cookies et les données de navigation",
+            "Éteindre juste l'ordinateur",
+            "Changer la langue du navigateur",
+            "Supprimer le bureau"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un cookie dans un navigateur web ?",
+          "rep": "Un petit fichier qui enregistre des informations sur ta navigation (préférences, connexion...)",
+          "choices": [
+            "Un petit fichier qui enregistre des informations sur ta navigation (préférences, connexion...)",
+            "Un gâteau numérique",
+            "Un virus",
+            "Un type de mot de passe"
+          ]
+        }
+      ]
+    },
+    "signaletique": {
+      "label": "Signalétique & PEGI",
+      "icon": "🎮",
+      "lecon": "**La signalétique numérique — décoder les symboles**\n\n**Qu'est-ce qu'une signalétique ?**\n→ Un système de symboles et d'icônes pour informer rapidement\n→ Permet de comprendre les caractéristiques d'un produit sans lire tout le texte\n\n**PEGI (Pan European Game Information) :**\n→ Classification européenne des jeux vidéo\n→ Indique l'âge minimum recommandé : PEGI 3, 7, 12, 16, 18\n→ PEGI 3 : pour tous | PEGI 7 : peut faire peur à très jeunes | PEGI 12 : violence légère | PEGI 16 : violence, thèmes adultes | PEGI 18 : adultes uniquement\n→ Des pictogrammes indiquent aussi le type de contenu : violence, langage grossier, peur, jeux de hasard, contenu en ligne, drogue, discrimination, sexe\n\n**Recommandations temps d'écran :**\n→ Avant 3 ans : proscrit\n→ 3 à 6 ans : déconseillé, exceptionnel\n→ 6 à 9 ans : limité et encadré\n→ 9 à 12 ans : modéré et encadré\n→ 12 à 15 ans : autonomie avec contrôle parental\n→ 15 à 18 ans : vers l'autonomie complète\n\n**Le cerveau et les jeux vidéo :**\n→ Activent des zones liées à l'attention, réaction, prise de décision\n→ Les victoires libèrent de la dopamine (plaisir, motivation)\n→ Ce mécanisme peut pousser à jouer plus (risque de dépendance)\n→ Les jeux d'action peuvent améliorer rapidité de réaction\n\n**Signalétique web — HTTP vs HTTPS :**\n→ HTTP : protocole non sécurisé\n→ HTTPS : protocole sécurisé (données chiffrées) — icône cadenas dans le navigateur",
+      "questions": [
+        {
+          "q": "Que signifie PEGI ?",
+          "rep": "Pan European Game Information (classification européenne des jeux vidéo)",
+          "choices": [
+            "Pan European Game Information (classification européenne des jeux vidéo)",
+            "Protection Européenne des Gamers Intelligents",
+            "Programme Européen de Gestion Informatique",
+            "Portail Européen de Gestion d'Internet"
+          ]
+        },
+        {
+          "q": "Un jeu classé PEGI 18 est destiné à...",
+          "rep": "Les adultes uniquement (18 ans et plus)",
+          "choices": [
+            "Les adultes uniquement (18 ans et plus)",
+            "Les enfants de 18 mois",
+            "Tout le monde dès 8 ans",
+            "Les adolescents de 13 ans"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'une signalétique ?",
+          "rep": "Un système de symboles pour informer rapidement sur les caractéristiques d'un produit",
+          "choices": [
+            "Un système de symboles pour informer rapidement sur les caractéristiques d'un produit",
+            "Un texte explicatif détaillé",
+            "Un logo de marque",
+            "Une publicité"
+          ]
+        },
+        {
+          "q": "PEGI 3 signifie que le jeu est...",
+          "rep": "Adapté à tous les âges à partir de 3 ans",
+          "choices": [
+            "Adapté à tous les âges à partir de 3 ans",
+            "Interdit aux moins de 3 ans",
+            "Réservé aux adultes",
+            "Pour les 3-7 ans uniquement"
+          ]
+        },
+        {
+          "q": "Selon les recommandations, un enfant de 4 ans doit avoir une utilisation des écrans...",
+          "rep": "Déconseillée et exceptionnelle",
+          "choices": [
+            "Déconseillée et exceptionnelle",
+            "Libre et sans limite",
+            "Limitée à 8h par jour",
+            "Totalement proscrite"
+          ]
+        },
+        {
+          "q": "Pourquoi les jeux vidéo peuvent-ils créer une dépendance ?",
+          "rep": "Parce qu'ils libèrent de la dopamine (plaisir) lors des victoires, créant l'envie de rejouer",
+          "choices": [
+            "Parce qu'ils libèrent de la dopamine (plaisir) lors des victoires, créant l'envie de rejouer",
+            "Parce qu'ils sont gratuits",
+            "Parce qu'ils se jouent seul",
+            "Parce qu'ils sont interdits"
+          ]
+        },
+        {
+          "q": "L'icône cadenas dans la barre d'adresse d'un navigateur indique...",
+          "rep": "Que la connexion est sécurisée (HTTPS)",
+          "choices": [
+            "Que la connexion est sécurisée (HTTPS)",
+            "Que le site est interdit",
+            "Que le site est payant",
+            "Que le site est hors ligne"
+          ]
+        },
+        {
+          "q": "Quelle est la différence entre HTTP et HTTPS ?",
+          "rep": "HTTPS chiffre les données échangées, HTTP non (non sécurisé)",
+          "choices": [
+            "HTTPS chiffre les données échangées, HTTP non (non sécurisé)",
+            "HTTPS est plus lent que HTTP",
+            "HTTP est plus sécurisé",
+            "Aucune différence pratique"
+          ]
+        },
+        {
+          "q": "Un jeu PEGI 12 peut contenir...",
+          "rep": "Violence légère, thèmes légèrement effrayants",
+          "choices": [
+            "Violence légère, thèmes légèrement effrayants",
+            "Du contenu pour adultes uniquement",
+            "Aucun contenu problématique",
+            "Des drogues et violence extrême"
+          ]
+        },
+        {
+          "q": "Selon les recommandations, à partir de quel âge l'enfant peut-il avoir une autonomie complète avec les écrans ?",
+          "rep": "15 à 18 ans (avec un accompagnement progressif)",
+          "choices": [
+            "15 à 18 ans (avec un accompagnement progressif)",
+            "À partir de 5 ans",
+            "À partir de 10 ans",
+            "Jamais, il faut toujours contrôler"
+          ]
+        },
+        {
+          "q": "Que libère le cerveau lors d'une victoire dans un jeu vidéo ?",
+          "rep": "De la dopamine (substance liée au plaisir et à la motivation)",
+          "choices": [
+            "De la dopamine (substance liée au plaisir et à la motivation)",
+            "De l'adrénaline uniquement",
+            "Du cortisol (stress)",
+            "Rien de particulier"
+          ]
+        },
+        {
+          "q": "Les pictogrammes PEGI indiquent...",
+          "rep": "Le type de contenu (violence, langage grossier, peur, jeux de hasard...)",
+          "choices": [
+            "Le type de contenu (violence, langage grossier, peur, jeux de hasard...)",
+            "Le prix du jeu",
+            "La durée du jeu",
+            "Le nombre de joueurs"
+          ]
+        },
+        {
+          "q": "Un jeu PEGI 16 peut contenir...",
+          "rep": "Violence importante, thèmes adultes, langage grossier",
+          "choices": [
+            "Violence importante, thèmes adultes, langage grossier",
+            "Contenu pour tous les âges",
+            "Uniquement des jeux de hasard",
+            "Contenu éducatif uniquement"
+          ]
+        },
+        {
+          "q": "Pourquoi est-il conseillé d'encadrer l'usage des écrans pour les enfants ?",
+          "rep": "Un usage excessif peut nuire à la santé physique, mentale, à la concentration et aux relations",
+          "choices": [
+            "Un usage excessif peut nuire à la santé physique, mentale, à la concentration et aux relations",
+            "Parce que les écrans consomment trop d'électricité",
+            "Parce que c'est trop cher",
+            "Parce que les écrans cassent facilement"
+          ]
+        },
+        {
+          "q": "Comment reconnaît-on qu'un site web est sécurisé ?",
+          "rep": "L'URL commence par 'https://' et il y a un cadenas dans la barre d'adresse",
+          "choices": [
+            "L'URL commence par 'https://' et il y a un cadenas dans la barre d'adresse",
+            "Le site est en couleur",
+            "Le site charge rapidement",
+            "Le site est gratuit"
+          ]
+        },
+        {
+          "q": "Les jeux d'action peuvent améliorer...",
+          "rep": "La rapidité de réaction et la coordination œil-main",
+          "choices": [
+            "La rapidité de réaction et la coordination œil-main",
+            "Les résultats scolaires dans toutes les matières",
+            "La mémoire à long terme uniquement",
+            "La santé physique comme le sport"
+          ]
+        },
+        {
+          "q": "Avant 3 ans, l'usage des écrans est...",
+          "rep": "Totalement proscrit (fortement déconseillé par les experts)",
+          "choices": [
+            "Totalement proscrit (fortement déconseillé par les experts)",
+            "Recommandé pour apprendre à parler",
+            "Limité à 1h par jour",
+            "Autorisé avec un adulte"
+          ]
+        },
+        {
+          "q": "PEGI 7 est recommandé pour...",
+          "rep": "Les enfants à partir de 7 ans (peut légèrement faire peur aux très jeunes)",
+          "choices": [
+            "Les enfants à partir de 7 ans (peut légèrement faire peur aux très jeunes)",
+            "Les adultes de 7 ans d'expérience",
+            "Les tout-petits uniquement",
+            "Les adolescents de 7ème année"
+          ]
+        },
+        {
+          "q": "Pourquoi faut-il faire attention à la signalétique PEGI ?",
+          "rep": "Pour choisir des jeux adaptés à son âge et éviter des contenus inappropriés",
+          "choices": [
+            "Pour choisir des jeux adaptés à son âge et éviter des contenus inappropriés",
+            "Pour payer le bon prix",
+            "Pour télécharger plus vite",
+            "Pour avoir de meilleures performances"
+          ]
+        },
+        {
+          "q": "Entre 12 et 15 ans, l'usage des écrans doit être...",
+          "rep": "Autonome mais avec un contrôle parental",
+          "choices": [
+            "Autonome mais avec un contrôle parental",
+            "Totalement interdit",
+            "Sans aucune limite",
+            "Identique à celui des adultes"
+          ]
+        }
+      ]
+    },
+    "cyber": {
+      "label": "Cybersécurité & Cyberrisques",
+      "icon": "🛡️",
+      "lecon": "**Les risques numériques et comment s'en protéger**\n\n**Cyberharcèlement :**\n→ Harcèlement qui se passe en ligne (insultes, menaces, exclusion, partage de photos humiliantes)\n→ Peut être anonyme mais les auteurs peuvent être identifiés\n→ Que faire : ne pas répondre, faire des captures d'écran, bloquer, signaler, en parler à un adulte\n→ En Belgique : numéro d'aide → Child Focus, police, école\n\n**Cyberattaque :**\n→ Virus : programme malveillant qui infecte un ordinateur\n→ Ransomware : bloque l'ordinateur et demande une rançon\n→ Phishing (hameçonnage) : faux site ou message pour voler des données\n→ Spyware : logiciel espion qui surveille ton activité\n\n**Cybermanipulation :**\n→ Fake news : fausses informations diffusées volontairement\n→ Deepfake : vidéo ou image truquée de façon réaliste\n→ Grooming : manipulation d'un enfant par un adulte malveillant en ligne\n\n**Cyberdépendance :**\n→ Usage excessif et incontrôlable d'Internet, jeux vidéo, réseaux sociaux\n→ Symptômes : irritabilité quand déconnecté, négliger les activités réelles, mentir sur le temps passé\n→ Se protéger : fixer des limites de temps, modes hors-ligne, activités alternatives\n\n**Se protéger :**\n→ Mettre à jour régulièrement son système et ses applications\n→ Utiliser un antivirus\n→ Ne jamais cliquer sur des liens suspects\n→ Ne jamais partager son mot de passe\n→ Activer la double authentification (2FA)\n→ Signaler tout contenu ou comportement suspect\n\n**Identité numérique :**\n→ Ce que les autres voient de toi en ligne (profils, publications, commentaires)\n→ Peut influencer ta réputation scolaire et professionnelle future",
+      "questions": [
+        {
+          "q": "Qu'est-ce que le cyberharcèlement ?",
+          "rep": "Du harcèlement qui se passe en ligne (insultes, menaces, exclusion, photos humiliantes...)",
+          "choices": [
+            "Du harcèlement qui se passe en ligne (insultes, menaces, exclusion, photos humiliantes...)",
+            "Un jeu vidéo agressif",
+            "Une cyberattaque contre des entreprises",
+            "Un virus informatique"
+          ]
+        },
+        {
+          "q": "Que faire si on est victime de cyberharcèlement ?",
+          "rep": "Ne pas répondre, faire des captures d'écran, bloquer, signaler et en parler à un adulte",
+          "choices": [
+            "Ne pas répondre, faire des captures d'écran, bloquer, signaler et en parler à un adulte",
+            "Répondre avec des insultes",
+            "Supprimer son compte immédiatement",
+            "Ne rien faire et ignorer"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un ransomware ?",
+          "rep": "Un logiciel malveillant qui bloque l'ordinateur et demande une rançon pour le débloquer",
+          "choices": [
+            "Un logiciel malveillant qui bloque l'ordinateur et demande une rançon pour le débloquer",
+            "Un virus qui efface les fichiers",
+            "Un logiciel espion",
+            "Une fausse mise à jour"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que le phishing (hameçonnage) ?",
+          "rep": "Une tentative de voler tes données via un faux site ou message semblant officiel",
+          "choices": [
+            "Une tentative de voler tes données via un faux site ou message semblant officiel",
+            "Un type de jeu de pêche en ligne",
+            "Un virus qui détruit l'ordinateur",
+            "Un réseau social dangereux"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'une fake news ?",
+          "rep": "Une fausse information diffusée volontairement pour tromper",
+          "choices": [
+            "Une fausse information diffusée volontairement pour tromper",
+            "Une nouvelle internationale",
+            "Un article de journal",
+            "Une information ancienne"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un deepfake ?",
+          "rep": "Une vidéo ou image truquée de façon très réaliste grâce à l'IA",
+          "choices": [
+            "Une vidéo ou image truquée de façon très réaliste grâce à l'IA",
+            "Un faux profil sur les réseaux",
+            "Un virus informatique",
+            "Un email de spam"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que la double authentification (2FA) ?",
+          "rep": "Un système qui demande une deuxième vérification en plus du mot de passe (ex: code SMS)",
+          "choices": [
+            "Un système qui demande une deuxième vérification en plus du mot de passe (ex: code SMS)",
+            "Avoir deux mots de passe différents",
+            "Se connecter depuis deux appareils",
+            "Un antivirus double"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un spyware ?",
+          "rep": "Un logiciel espion qui surveille et collecte ton activité en ligne sans que tu le saches",
+          "choices": [
+            "Un logiciel espion qui surveille et collecte ton activité en ligne sans que tu le saches",
+            "Un jeu d'espionnage",
+            "Un service de surveillance légal",
+            "Un antivirus"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que le grooming ?",
+          "rep": "La manipulation en ligne d'un enfant par un adulte malveillant pour l'exploiter",
+          "choices": [
+            "La manipulation en ligne d'un enfant par un adulte malveillant pour l'exploiter",
+            "Un jeu de rôle en ligne",
+            "Un type de cyberharcèlement entre pairs",
+            "Un réseau de partage de musique"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que la cyberdépendance ?",
+          "rep": "Un usage excessif et incontrôlable d'Internet, jeux ou réseaux sociaux",
+          "choices": [
+            "Un usage excessif et incontrôlable d'Internet, jeux ou réseaux sociaux",
+            "Une allergie aux écrans",
+            "Un manque d'accès à Internet",
+            "Un problème de connexion"
+          ]
+        },
+        {
+          "q": "Comment reconnaître un lien suspect dans un e-mail ?",
+          "rep": "URL étrange, fautes d'orthographe, demande d'informations personnelles, expéditeur inconnu",
+          "choices": [
+            "URL étrange, fautes d'orthographe, demande d'informations personnelles, expéditeur inconnu",
+            "Le lien est en rouge",
+            "Le message est trop long",
+            "Le message est en anglais"
+          ]
+        },
+        {
+          "q": "Pourquoi faut-il mettre à jour régulièrement son système et ses applications ?",
+          "rep": "Pour corriger les failles de sécurité que les pirates pourraient exploiter",
+          "choices": [
+            "Pour corriger les failles de sécurité que les pirates pourraient exploiter",
+            "Pour avoir de nouvelles fonctionnalités uniquement",
+            "Pour libérer de l'espace disque",
+            "Pour changer l'interface"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que l'identité numérique ?",
+          "rep": "L'ensemble de ce que les autres voient de toi en ligne (profils, posts, commentaires...)",
+          "choices": [
+            "L'ensemble de ce que les autres voient de toi en ligne (profils, posts, commentaires...)",
+            "Ton vrai passeport",
+            "Ton identifiant bancaire",
+            "Ton numéro de téléphone uniquement"
+          ]
+        },
+        {
+          "q": "Un antivirus sert à...",
+          "rep": "Détecter et supprimer les logiciels malveillants (virus, malwares...)",
+          "choices": [
+            "Détecter et supprimer les logiciels malveillants (virus, malwares...)",
+            "Accélérer l'ordinateur",
+            "Créer des mots de passe",
+            "Filtrer les e-mails uniquement"
+          ]
+        },
+        {
+          "q": "Si tu reçois un message suspect d'un inconnu en ligne, que fais-tu ?",
+          "rep": "Tu ne réponds pas, tu bloques l'expéditeur et tu en parles à un adulte de confiance",
+          "choices": [
+            "Tu ne réponds pas, tu bloques l'expéditeur et tu en parles à un adulte de confiance",
+            "Tu réponds pour avoir plus d'informations",
+            "Tu partages le message avec tes amis",
+            "Tu cliques sur les liens pour vérifier"
+          ]
+        },
+        {
+          "q": "Ton identité numérique peut influencer...",
+          "rep": "Ta réputation scolaire et professionnelle future",
+          "choices": [
+            "Ta réputation scolaire et professionnelle future",
+            "Uniquement tes amis en ligne",
+            "Rien dans la vraie vie",
+            "Seulement tes résultats scolaires actuels"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un virus informatique ?",
+          "rep": "Un programme malveillant qui infecte un ordinateur et peut se propager",
+          "choices": [
+            "Un programme malveillant qui infecte un ordinateur et peut se propager",
+            "Une maladie qui touche les utilisateurs d'ordinateur",
+            "Un bug normal du système",
+            "Un e-mail non voulu"
+          ]
+        },
+        {
+          "q": "Un signe de cyberdépendance est...",
+          "rep": "Être très irritable quand on est déconnecté et négliger les activités réelles",
+          "choices": [
+            "Être très irritable quand on est déconnecté et négliger les activités réelles",
+            "Passer 30 minutes par jour en ligne",
+            "Utiliser Internet pour faire ses devoirs",
+            "Avoir plusieurs comptes sur des réseaux différents"
+          ]
+        },
+        {
+          "q": "Pourquoi ne faut-il JAMAIS partager son mot de passe ?",
+          "rep": "Même une personne de confiance pourrait l'utiliser à mauvais escient ou se le faire voler",
+          "choices": [
+            "Même une personne de confiance pourrait l'utiliser à mauvais escient ou se le faire voler",
+            "Parce que les mots de passe sont secrets par définition légale",
+            "Parce que ça ralentit la connexion",
+            "Parce que c'est difficile à taper"
+          ]
+        },
+        {
+          "q": "En cas de cyberharcèlement, à qui peut-on s'adresser en Belgique ?",
+          "rep": "Child Focus, la police, l'école, un adulte de confiance",
+          "choices": [
+            "Child Focus, la police, l'école, un adulte de confiance",
+            "Uniquement à ses amis en ligne",
+            "Aux créateurs du réseau social uniquement",
+            "À personne, on gère seul"
+          ]
+        }
+      ]
+    },
+    "confidentialite": {
+      "label": "Confidentialité & Paramètres",
+      "icon": "⚙️",
+      "lecon": "**Gérer sa confidentialité et ses paramètres en ligne**\n\n**Paramètres de confidentialité :**\n→ Accessible dans les réglages de chaque application/réseau social\n→ Permettent de contrôler qui voit quoi\n→ À vérifier régulièrement (les plateformes changent leurs paramètres)\n\n**Ce qu'on peut contrôler :**\n→ Visibilité du profil (public/privé)\n→ Qui peut te contacter (tout le monde, abonnés, personne)\n→ Géolocalisation (activer/désactiver le partage de localisation)\n→ Accès aux contacts, micro, caméra (pour chaque app)\n→ Notifications (quand et comment être notifié)\n→ Historique et données collectées\n\n**Effacer ses traces :**\n→ Supprimer l'historique de navigation\n→ Supprimer les cookies et données du site\n→ Se déconnecter de tous les comptes\n→ Désactiver la synchronisation automatique\n→ Utiliser la navigation privée (ne sauvegarde pas l'historique localement)\n\n**Navigation privée ≠ anonymat total :**\n→ La navigation privée n'empêche pas les sites, ton fournisseur d'accès ou ton école de voir tes activités\n→ Elle empêche juste que l'historique soit sauvegardé sur l'appareil\n\n**Droits RGPD sur ses données :**\n→ Droit d'accès : voir quelles données sont collectées\n→ Droit de rectification : corriger des informations incorrectes\n→ Droit à l'effacement (oubli) : demander la suppression\n→ Droit d'opposition : s'opposer à l'utilisation de ses données\n→ Droit à la portabilité : récupérer ses données dans un format utilisable",
+      "questions": [
+        {
+          "q": "Où trouve-t-on les paramètres de confidentialité sur un réseau social ?",
+          "rep": "Dans les réglages ou paramètres de l'application/site",
+          "choices": [
+            "Dans les réglages ou paramètres de l'application/site",
+            "Dans les messages privés",
+            "Dans le profil public",
+            "Dans les publicités"
+          ]
+        },
+        {
+          "q": "Que permet la navigation privée (mode incognito) ?",
+          "rep": "Ne pas sauvegarder l'historique sur l'appareil utilisé",
+          "choices": [
+            "Ne pas sauvegarder l'historique sur l'appareil utilisé",
+            "Être complètement anonyme sur Internet",
+            "Accéder à des sites bloqués",
+            "Être protégé des virus"
+          ]
+        },
+        {
+          "q": "La navigation privée rend-elle totalement anonyme ?",
+          "rep": "Non, les sites, ton fournisseur d'accès et l'école peuvent toujours voir tes activités",
+          "choices": [
+            "Non, les sites, ton fournisseur d'accès et l'école peuvent toujours voir tes activités",
+            "Oui, personne ne peut te voir",
+            "Oui, si tu utilises un VPN en plus",
+            "Oui, uniquement sur les réseaux sociaux"
+          ]
+        },
+        {
+          "q": "Le droit à l'effacement (RGPD) permet de...",
+          "rep": "Demander à une plateforme de supprimer tes données personnelles",
+          "choices": [
+            "Demander à une plateforme de supprimer tes données personnelles",
+            "Effacer tous tes messages",
+            "Supprimer ton compte sans conditions",
+            "Corriger des informations incorrectes"
+          ]
+        },
+        {
+          "q": "Pourquoi faut-il vérifier régulièrement ses paramètres de confidentialité ?",
+          "rep": "Les plateformes modifient parfois leurs paramètres par défaut, ce qui peut réduire ta confidentialité",
+          "choices": [
+            "Les plateformes modifient parfois leurs paramètres par défaut, ce qui peut réduire ta confidentialité",
+            "Pour trouver de nouvelles fonctionnalités",
+            "Parce que les paramètres changent seuls",
+            "Pour améliorer les performances de l'app"
+          ]
+        },
+        {
+          "q": "Que signifie désactiver la géolocalisation d'une application ?",
+          "rep": "Empêcher l'application d'accéder à ta position géographique",
+          "choices": [
+            "Empêcher l'application d'accéder à ta position géographique",
+            "Éteindre le GPS de l'appareil",
+            "Supprimer l'application",
+            "Désactiver Internet"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que le droit d'accès (RGPD) ?",
+          "rep": "Le droit de savoir quelles données sont collectées par une plateforme à ton sujet",
+          "choices": [
+            "Le droit de savoir quelles données sont collectées par une plateforme à ton sujet",
+            "Le droit d'accéder à Internet",
+            "Le droit de corriger ses données",
+            "Le droit de supprimer ses données"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que le droit à la portabilité (RGPD) ?",
+          "rep": "Le droit de récupérer ses données dans un format réutilisable pour les transférer",
+          "choices": [
+            "Le droit de récupérer ses données dans un format réutilisable pour les transférer",
+            "Le droit de se déplacer librement avec ses données",
+            "Le droit de copier les données des autres",
+            "Le droit d'utiliser Internet partout"
+          ]
+        },
+        {
+          "q": "Sur un ordinateur partagé, que faut-il faire après avoir utilisé un compte en ligne ?",
+          "rep": "Se déconnecter et effacer l'historique de navigation",
+          "choices": [
+            "Se déconnecter et effacer l'historique de navigation",
+            "Seulement fermer l'onglet",
+            "Éteindre l'ordinateur",
+            "Changer le mot de passe"
+          ]
+        },
+        {
+          "q": "Pourquoi limiter l'accès d'une application à tes contacts ?",
+          "rep": "Pour ne pas partager les données de tes contacts sans leur consentement",
+          "choices": [
+            "Pour ne pas partager les données de tes contacts sans leur consentement",
+            "Pour économiser la batterie",
+            "Pour aller plus vite sur Internet",
+            "Pour recevoir moins de notifications"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un cookie (dans un navigateur web) ?",
+          "rep": "Un fichier stocké sur l'appareil qui mémorise des informations sur ta navigation",
+          "choices": [
+            "Un fichier stocké sur l'appareil qui mémorise des informations sur ta navigation",
+            "Un virus malveillant",
+            "Un système de publicité interactif",
+            "Un type de mot de passe"
+          ]
+        },
+        {
+          "q": "La synchronisation automatique d'un compte signifie que...",
+          "rep": "Tes données sont automatiquement sauvegardées et partagées sur tous tes appareils",
+          "choices": [
+            "Tes données sont automatiquement sauvegardées et partagées sur tous tes appareils",
+            "Ton compte se connecte automatiquement",
+            "Tes messages s'envoient automatiquement",
+            "Ton appareil se met à jour seul"
+          ]
+        },
+        {
+          "q": "Quel droit RGPD permet de corriger une information incorrecte sur soi ?",
+          "rep": "Le droit de rectification",
+          "choices": [
+            "Le droit de rectification",
+            "Le droit d'accès",
+            "Le droit à l'effacement",
+            "Le droit de portabilité"
+          ]
+        },
+        {
+          "q": "Supprimer les cookies sur un navigateur permet de...",
+          "rep": "Effacer les informations sauvegardées par les sites sur ton appareil",
+          "choices": [
+            "Effacer les informations sauvegardées par les sites sur ton appareil",
+            "Supprimer tes fichiers personnels",
+            "Désinstaller le navigateur",
+            "Changer ton adresse IP"
+          ]
+        },
+        {
+          "q": "Pourquoi est-il important de contrôler qui peut te contacter en ligne ?",
+          "rep": "Pour éviter les contacts indésirables, le harcèlement ou la manipulation",
+          "choices": [
+            "Pour éviter les contacts indésirables, le harcèlement ou la manipulation",
+            "Pour avoir moins de messages à lire",
+            "Pour économiser de l'espace de stockage",
+            "Pour améliorer la qualité de la connexion"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que le droit d'opposition (RGPD) ?",
+          "rep": "Le droit de s'opposer à l'utilisation de ses données personnelles à des fins commerciales",
+          "choices": [
+            "Le droit de s'opposer à l'utilisation de ses données personnelles à des fins commerciales",
+            "Le droit de refuser les lois",
+            "Le droit de bloquer des utilisateurs",
+            "Le droit de ne pas avoir de compte en ligne"
+          ]
+        },
+        {
+          "q": "Un profil mis en 'privé' sur Instagram signifie que...",
+          "rep": "Seuls les abonnés que tu as approuvés peuvent voir tes publications",
+          "choices": [
+            "Seuls les abonnés que tu as approuvés peuvent voir tes publications",
+            "Ton profil est totalement invisible",
+            "Seuls tes amis Facebook peuvent te voir",
+            "Personne ne peut te retrouver dans les recherches"
+          ]
+        },
+        {
+          "q": "Pourquoi limiter les notifications d'une application ?",
+          "rep": "Pour ne pas être constamment interrompu et mieux contrôler son temps d'écran",
+          "choices": [
+            "Pour ne pas être constamment interrompu et mieux contrôler son temps d'écran",
+            "Pour économiser la batterie uniquement",
+            "Pour cacher son activité",
+            "Pour recevoir plus de messages"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que la collecte de données par une application ?",
+          "rep": "Le fait de rassembler des informations sur tes usages, préférences et comportements",
+          "choices": [
+            "Le fait de rassembler des informations sur tes usages, préférences et comportements",
+            "Le fait de télécharger des fichiers",
+            "Le fait de créer un profil utilisateur",
+            "Le fait de mettre à jour l'application"
+          ]
+        },
+        {
+          "q": "Si une application demande accès à ta caméra pour une fonction qui n'en a pas besoin, tu devrais...",
+          "rep": "Refuser l'accès et signaler le problème",
+          "choices": [
+            "Refuser l'accès et signaler le problème",
+            "Accepter pour que l'app fonctionne mieux",
+            "Désinstaller l'app immédiatement",
+            "Ne rien faire"
+          ]
+        }
+      ]
+    },
+    "identite": {
+      "label": "Identité numérique & Traces",
+      "icon": "🌐",
+      "lecon": "**Gérer son identité numérique de façon responsable**\n\n**Qu'est-ce que l'identité numérique ?**\n→ L'ensemble de ce qui te représente en ligne\n→ Profils sur les réseaux, pseudonymes, avatars, publications, commentaires, photos\n→ Ce que les moteurs de recherche trouvent sur toi\n\n**Les traces numériques :**\n→ Toute action laisse une trace : clics, recherches, achats, localisation, messages\n→ Ces traces peuvent rester des années\n→ Elles peuvent être utilisées par les entreprises, les recruteurs, les administrations\n\n**Impact de l'identité numérique :**\n→ Peut influencer ton accès à l'université ou à un emploi\n→ Un employeur peut chercher un candidat sur Google\n→ Des publications inappropriées peuvent nuire à ta réputation des années plus tard\n\n**Gérer son image en ligne :**\n→ Googler son propre nom régulièrement\n→ Paramétrer ses comptes en privé\n→ Réfléchir avant de publier : \"Est-ce que je voudrais que mon prof / mes parents / un futur employeur voie ça ?\"\n→ Signaler des contenus inappropriés te concernant\n\n**Effacer ses traces :**\n→ Demander la suppression de contenus (droit à l'oubli)\n→ Désactiver les comptes inutilisés\n→ Vérifier les autorisations accordées aux applications\n→ Supprimer l'historique régulièrement\n\n**Cyberdépendance — reconnaître et agir :**\n→ Difficile de décrocher, irritabilité, mensonges sur le temps passé\n→ Négliger amis, famille, école\n→ Solution : fixer des règles claires, activités alternatives, désactiver les notifications",
+      "questions": [
+        {
+          "q": "Qu'est-ce que l'identité numérique ?",
+          "rep": "L'ensemble de ce qui te représente en ligne (profils, publications, commentaires, photos...)",
+          "choices": [
+            "L'ensemble de ce qui te représente en ligne (profils, publications, commentaires, photos...)",
+            "Ton numéro de carte d'identité",
+            "Ton adresse e-mail uniquement",
+            "Ton pseudo sur un seul réseau"
+          ]
+        },
+        {
+          "q": "Combien de temps peut rester une trace numérique ?",
+          "rep": "Des années, parfois indéfiniment si elle n'est pas supprimée",
+          "choices": [
+            "Des années, parfois indéfiniment si elle n'est pas supprimée",
+            "24 heures maximum",
+            "Une semaine",
+            "Jusqu'à la fermeture du compte"
+          ]
+        },
+        {
+          "q": "Un futur employeur peut-il voir tes publications sur les réseaux sociaux ?",
+          "rep": "Oui, si tes comptes sont publics ou si les publications sont partagées",
+          "choices": [
+            "Oui, si tes comptes sont publics ou si les publications sont partagées",
+            "Non, c'est illégal",
+            "Non, jamais",
+            "Seulement si tu le lui envoies"
+          ]
+        },
+        {
+          "q": "Avant de publier quelque chose en ligne, quelle question faut-il se poser ?",
+          "rep": "Est-ce que je voudrais que mes parents, mon prof ou un futur employeur voie ça ?",
+          "choices": [
+            "Est-ce que je voudrais que mes parents, mon prof ou un futur employeur voie ça ?",
+            "Est-ce que j'ai suffisamment de batterie ?",
+            "Est-ce que j'ai assez d'abonnés ?",
+            "Est-ce que le contenu est en haute définition ?"
+          ]
+        },
+        {
+          "q": "Comment vérifier ce que les autres trouvent sur toi en ligne ?",
+          "rep": "Googler son propre nom et prénom",
+          "choices": [
+            "Googler son propre nom et prénom",
+            "Vérifier uniquement ses DM",
+            "Consulter son historique de navigation",
+            "Compter ses followers"
+          ]
+        },
+        {
+          "q": "Le droit à l'oubli permet de...",
+          "rep": "Demander la suppression de contenus ou données te concernant sur une plateforme",
+          "choices": [
+            "Demander la suppression de contenus ou données te concernant sur une plateforme",
+            "Oublier légalement ses actes passés",
+            "Changer son identité légale",
+            "Supprimer l'historique de son navigateur"
+          ]
+        },
+        {
+          "q": "Quelle action contribue à gérer son identité numérique ?",
+          "rep": "Paramétrer ses comptes en privé et réfléchir avant de publier",
+          "choices": [
+            "Paramétrer ses comptes en privé et réfléchir avant de publier",
+            "Publier le plus souvent possible",
+            "Avoir le plus d'abonnés possible",
+            "Utiliser toujours son vrai nom"
+          ]
+        },
+        {
+          "q": "Pourquoi désactiver les comptes inutilisés est-il une bonne pratique ?",
+          "rep": "Cela réduit l'exposition de tes données personnelles et les risques de piratage",
+          "choices": [
+            "Cela réduit l'exposition de tes données personnelles et les risques de piratage",
+            "Pour libérer de l'espace sur le téléphone",
+            "Pour avoir un meilleur débit Internet",
+            "Pour respecter les conditions d'utilisation"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que la cyberdépendance ?",
+          "rep": "Une difficulté à contrôler son usage d'Internet, jeux ou réseaux sociaux, avec des conséquences négatives",
+          "choices": [
+            "Une difficulté à contrôler son usage d'Internet, jeux ou réseaux sociaux, avec des conséquences négatives",
+            "Une passion normale pour le numérique",
+            "Un métier lié au numérique",
+            "Une allergie aux écrans"
+          ]
+        },
+        {
+          "q": "Quel comportement peut indiquer une cyberdépendance ?",
+          "rep": "Mentir sur le temps passé en ligne et négliger ses amis, famille et école",
+          "choices": [
+            "Mentir sur le temps passé en ligne et négliger ses amis, famille et école",
+            "Utiliser Internet pour faire ses devoirs",
+            "Regarder une vidéo après les cours",
+            "Envoyer des messages à ses amis"
+          ]
+        },
+        {
+          "q": "Pourquoi vérifier les autorisations accordées aux applications ?",
+          "rep": "Certaines applications accèdent à plus de données que nécessaire (micro, contacts, localisation...)",
+          "choices": [
+            "Certaines applications accèdent à plus de données que nécessaire (micro, contacts, localisation...)",
+            "Pour améliorer les performances",
+            "Pour avoir plus de fonctionnalités",
+            "Parce que la loi l'impose"
+          ]
+        },
+        {
+          "q": "Les traces numériques peuvent être utilisées par...",
+          "rep": "Les entreprises, les recruteurs, les administrations et même les pirates informatiques",
+          "choices": [
+            "Les entreprises, les recruteurs, les administrations et même les pirates informatiques",
+            "Uniquement tes amis proches",
+            "Uniquement les gouvernements",
+            "Personne, elles sont protégées automatiquement"
+          ]
+        },
+        {
+          "q": "Quelle est la meilleure solution contre la cyberdépendance ?",
+          "rep": "Fixer des règles claires, désactiver les notifications, pratiquer des activités alternatives",
+          "choices": [
+            "Fixer des règles claires, désactiver les notifications, pratiquer des activités alternatives",
+            "S'arrêter totalement d'utiliser Internet",
+            "Acheter un nouvel appareil",
+            "Changer de réseau social"
+          ]
+        },
+        {
+          "q": "Peut-on demander à Google de supprimer des résultats de recherche te concernant ?",
+          "rep": "Oui, via le formulaire de droit à l'oubli (RGPD en Europe)",
+          "choices": [
+            "Oui, via le formulaire de droit à l'oubli (RGPD en Europe)",
+            "Non, c'est impossible",
+            "Oui, mais seulement si tu paies",
+            "Non, car Google n'est pas soumis au RGPD"
+          ]
+        },
+        {
+          "q": "Une publication inappropriée publiée aujourd'hui peut-elle affecter ton futur ?",
+          "rep": "Oui, elle peut nuire à ta réputation scolaire et professionnelle des années plus tard",
+          "choices": [
+            "Oui, elle peut nuire à ta réputation scolaire et professionnelle des années plus tard",
+            "Non, Internet oublie tout en 24h",
+            "Non, les recruteurs ne regardent pas les réseaux",
+            "Seulement si tu as beaucoup de followers"
+          ]
+        },
+        {
+          "q": "Qu'est-ce qu'un pseudonyme et quand l'utiliser ?",
+          "rep": "Un nom fictif pour protéger sa vraie identité sur certaines plateformes",
+          "choices": [
+            "Un nom fictif pour protéger sa vraie identité sur certaines plateformes",
+            "Son vrai prénom en abrégé",
+            "Un surnom donné par ses amis",
+            "Un nom de marque"
+          ]
+        },
+        {
+          "q": "Signaler un contenu te concernant que tu n'as pas approuvé est un acte de...",
+          "rep": "Gestion responsable de son identité numérique",
+          "choices": [
+            "Gestion responsable de son identité numérique",
+            "Censure illégale",
+            "Harcèlement",
+            "Violation de la liberté d'expression"
+          ]
+        },
+        {
+          "q": "Quels risques présente le fait de partager sa localisation en temps réel sur les réseaux ?",
+          "rep": "Permettre à n'importe qui de savoir où tu es (risque pour ta sécurité physique)",
+          "choices": [
+            "Permettre à n'importe qui de savoir où tu es (risque pour ta sécurité physique)",
+            "Consommer plus de batterie",
+            "Ralentir ta connexion",
+            "Perdre des abonnés"
+          ]
+        },
+        {
+          "q": "Qu'est-ce que le 'doxing' ?",
+          "rep": "La publication en ligne d'informations personnelles sur quelqu'un sans son consentement",
+          "choices": [
+            "La publication en ligne d'informations personnelles sur quelqu'un sans son consentement",
+            "Un type de virus informatique",
+            "Une technique de protection de données",
+            "Un réseau social"
+          ]
+        },
+        {
+          "q": "Comment le cyberharcèlement se différencie-t-il du harcèlement classique ?",
+          "rep": "Il peut être anonyme, disponible 24h/24 et se diffuse rapidement à grande échelle",
+          "choices": [
+            "Il peut être anonyme, disponible 24h/24 et se diffuse rapidement à grande échelle",
+            "Il est toujours moins grave",
+            "Il est toujours physique aussi",
+            "Il ne peut viser que les adultes"
+          ]
+        }
+      ]
+    }
+  }
+}
