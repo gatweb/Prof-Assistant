@@ -21,16 +21,19 @@
   3. `publie` : Professeur a validé, visible par l'élève en temps réel.
 * **Collection `cours` :** Documents de référence pour le RAG (Chatbot).
 
-## 📍 4. Phase Actuelle : Intégration RAG & Notebook [EN COURS 🏗️]
-*   **Backend RAG :** `interrogerTuteur` est désormais capable d'injecter le contenu d'un cours Firestore dans le contexte de Gemini.
-*   **Interface Notebook :** Panneau de ressources (Sidebar) ajouté au workspace avec support Markdown.
-*   **Déploiement Global :** [OK] Les fonctions et le hosting sont synchronisés.
+## 📍 4. Phase Actuelle : Lancement V2 FMTTN (1re secondaire) & Approche ed.ai [EN COURS 🏗️]
+* **Cible :** 1re secondaire FWB (Tronc commun, 2 périodes/semaine), basé sur le manuel *@lt_X* (Lacroix & Ouanassi).
+* **Architecture V2 :** Nouveau frontend ultra-léger dans `/v2` (Vite + Tailwind CSS + Alpine.js) connecté au backend Firebase/Gemini existant.
+* **Philosophie ed.ai :** Évaluation par compétences (standards-aligned), détection des conceptions erronées (*error patterns*), et remédiation différenciée en un clic.
+* **Documentation :** Cahier des charges complet rédigé dans `DOCS_V2_FMTTN.md`.
 
-## 🔮 5. Prochaines Étapes (Backlog)
-- [x] **Déploiement Global :** Déployer les fonctions ET le hosting pour valider en ligne.
-- [/] **Chat Tuteur (RAG) :** Intégration d'un panneau de ressources (Style NotebookLM) utilisant le cours du professeur comme contexte.
-- [ ] **Export Email :** Finaliser le déclencheur (Trigger) pour l'envoi réel des emails.
-- [ ] **Analytics Professeur :** Widget de "Météo de la classe" analysant les concepts les plus problématiques.
+## 🔮 5. Prochaines Étapes (Backlog V2)
+- [x] **Documentation & Cadrage V2 :** Rédaction de `DOCS_V2_FMTTN.md` et analyse des scans @lt_X.
+- [/] **Initialisation Frontend V2 :** Setup Vite + Tailwind CSS + Alpine.js dans `v2/`.
+- [ ] **Modélisation Chapitre 1 :** Fichier JSON structuré du Chapitre 1 (*Communication et collaboration*) avec compétences, termes clés et mini-quiz.
+- [ ] **Mascotte & Tuteur Socratique V2 :** Intégration du persona robot bleu d'@lt_X avec Gemini.
+- [ ] **Dashboard Professeur V2 :** Matrice de maîtrise des compétences FMTTN par classe et par élève (façon ed.ai).
+- [ ] **Générateur de Remédiation :** Micro-activités de renfort automatisées pour les erreurs récurrentes.
 
 ---
 ### ⚠️ INSTRUCTION POUR L'AGENT DE DÉVELOPPEMENT :

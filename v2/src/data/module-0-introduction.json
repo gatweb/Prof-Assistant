@@ -1,0 +1,104 @@
+{
+  "id": "module-0-introduction",
+  "numero": 0,
+  "titre": "Bienvenue & Prise en main de l'ordinateur",
+  "tome": "1a",
+  "sous_titre": "Introduction : Mon rapport au numérique, la charte et la sécurité en classe",
+  "parties": [
+    {
+      "id": "partie-0-1",
+      "titre": "1. Mon point de départ",
+      "description": "Faisons le point sur tes habitudes et ce que tu sais déjà faire avec un ordinateur.",
+      "questions_diagnostic": [
+        {
+          "id": "diag_1",
+          "titre": "Mon équipement à la maison",
+          "options": ["J'ai un ordinateur à moi", "J'utilise l'ordinateur de la famille", "J'utilise surtout une tablette ou un smartphone", "Je n'ai pas d'ordinateur à la maison"]
+        },
+        {
+          "id": "diag_2",
+          "titre": "Ce que je sais déjà faire",
+          "multi": true,
+          "options": [
+            "Allumer et éteindre correctement un PC",
+            "Créer un dossier et ranger mes fichiers",
+            "Télécharger une image ou un PDF",
+            "Envoyer un e-mail avec une pièce jointe",
+            "Faire une capture d'écran",
+            "Créer un mot de passe sécurisé"
+          ]
+        },
+        {
+          "id": "diag_3",
+          "titre": "Mon ressenti avec l'informatique",
+          "options": ["Très à l'aise (j'adore ça)", "Plutôt à l'aise", "Un peu inquiet ou hésitant", "Je débute totalement"]
+        }
+      ]
+    },
+    {
+      "id": "partie-0-2",
+      "titre": "2. La Charte de la Salle Informatique",
+      "description": "En classe, nous partageons le matériel. Pour chaque situation, dis si le comportement est OK ou PAS OK !",
+      "situations": [
+        {
+          "id": "charte_1",
+          "scenario": "Théo termine son travail, se déconnecte de sa session et éteint l'écran de l'ordinateur.",
+          "est_ok": true,
+          "explication": "Bravo ! Théo respecte le matériel et protège ses données personnelles en fermant sa session."
+        },
+        {
+          "id": "charte_2",
+          "scenario": "Inès télécharge et installe un petit jeu 'parce que ça ne prend pas de place'.",
+          "est_ok": false,
+          "explication": "Interdit ! On ne doit jamais installer de jeu ou logiciel sur les ordinateurs de l'école sans l'accord du professeur."
+        },
+        {
+          "id": "charte_3",
+          "scenario": "Sami ouvre le dossier personnel d'un camarade sur le réseau pour voir son travail.",
+          "est_ok": false,
+          "explication": "Pas OK ! Ouvrir les fichiers d'un camarade sans son accord viole sa vie privée et son travail."
+        },
+        {
+          "id": "charte_4",
+          "scenario": "Jade change le fond d'écran de l'ordinateur et modifie la langue du clavier.",
+          "est_ok": false,
+          "explication": "Pas OK ! Le matériel est partagé. Si tu modifies les réglages, l'élève suivant ne pourra plus travailler correctement."
+        },
+        {
+          "id": "charte_5",
+          "scenario": "Sarah prend discrètement une photo d'un élève avec sa webcam dès que le professeur a le dos tourné.",
+          "est_ok": false,
+          "explication": "Pas OK ! Prendre une photo sans autorisation viole le droit à l'image et la vie privée."
+        },
+        {
+          "id": "charte_6",
+          "scenario": "Clara demande le mot de passe de son ami 'pour rendre un devoir à sa place'.",
+          "est_ok": false,
+          "explication": "Jamais ! Un mot de passe est strictement personnel et secret. Ne le donne jamais, même à ton meilleur ami."
+        }
+      ]
+    },
+    {
+      "id": "partie-0-3",
+      "titre": "3. Choisir un mot de passe solide",
+      "regles": [
+        "Au moins 10 caractères avec majuscules, minuscules, chiffres et caractères spéciaux (!, ?, @, #).",
+        "Ne JAMAIS utiliser : ton prénom, ta date de naissance, '123456' ou 'azerty'.",
+        "Astuce de la phrase secrète : invente une phrase facile à retenir pour toi et prends les premières lettres !"
+      ],
+      "exemples_mauvais": ["123456789", "azerty", "iloveyou", "motdepasse123"],
+      "exemples_bons": ["MonCh4tNoir!", "!M0nCh4tN0ir6", "J'ad0reLeCh0c0lat#12"]
+    },
+    {
+      "id": "partie-0-4",
+      "titre": "4. Disparaître d'un ordinateur partagé",
+      "regle_or": "Fermer l'écran ≠ Se déconnecter !",
+      "etapes_deconnexion": [
+        { "ordre": 1, "action": "Je me déconnecte de tous mes comptes (Google, école, e-mail)." },
+        { "ordre": 2, "action": "Je clique sur 'Ne pas enregistrer' si le navigateur me propose de retenir mon mot de passe." },
+        { "ordre": 3, "action": "Je ferme toutes les fenêtres et onglets ouverts." },
+        { "ordre": 4, "action": "Je ferme ma session ou j'éteins l'ordinateur proprement." }
+      ]
+    }
+  ]
+}

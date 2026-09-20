@@ -1,0 +1,130 @@
+{
+  "curriculum": "FMTTN - Tronc Commun Fédération Wallonie-Bruxelles",
+  "niveau": "1re Secondaire",
+  "source": "@lt_X : Comprendre le numérique, se questionner & agir",
+  "chapitres": [
+    {
+      "id": "ch1",
+      "numero": 1,
+      "titre": "Communication et collaboration",
+      "tome": "1a",
+      "couleur": "indigo",
+      "competences": {
+        "je_decouvre": [
+          {
+            "id": "NUM-1.D1",
+            "code": "NUM-1.D1",
+            "intitule": "J'explicite des spécificités de différents réseaux socio-numériques.",
+            "mots_cles": ["réseau social", "profil", "partage", "abonnés", "flux"]
+          },
+          {
+            "id": "NUM-1.D2",
+            "code": "NUM-1.D2",
+            "intitule": "Je cite deux applications de messagerie instantanée, une de gestion de courriel et deux de récolte de données (sondage/quiz).",
+            "mots_cles": ["messagerie", "courriel", "sondage", "quiz", "formulaires"]
+          },
+          {
+            "id": "NUM-1.D3",
+            "code": "NUM-1.D3",
+            "intitule": "Je cite un outil de partage en fonction de l'usage déterminé.",
+            "mots_cles": ["partage", "cloud", "lien", "dépôt"]
+          },
+          {
+            "id": "NUM-1.D4",
+            "code": "NUM-1.D4",
+            "intitule": "J'identifie la présence, les fonctions, les bénéfices et les limites de l'IA dans des outils de collaboration numériques.",
+            "mots_cles": ["intelligence artificielle", "collaboration", "automatisation", "limites"]
+          },
+          {
+            "id": "NUM-1.D5",
+            "code": "NUM-1.D5",
+            "intitule": "J'utilise, en contexte, les termes de la messagerie : e-mail, expéditeur, destinataire, objet, pièce jointe, corps, boîte de réception/envoi, brouillon, dossier, spam.",
+            "mots_cles": ["expéditeur", "destinataire", "objet", "pièce jointe", "brouillon", "spam", "inbox"]
+          },
+          {
+            "id": "NUM-1.D6",
+            "code": "NUM-1.D6",
+            "intitule": "J'utilise, en contexte, les notions éthiques : vie privée, droit à l'oubli, droit de retrait, liberté d'expression, censure, modération, open source, droit d'auteur.",
+            "mots_cles": ["vie privée", "droit à l'oubli", "droit de retrait", "liberté d'expression", "censure", "modération", "open source"]
+          },
+          {
+            "id": "NUM-1.D7",
+            "code": "NUM-1.D7",
+            "intitule": "Je cite des arguments en faveur d'une mention indiquant qu'un contenu a été généré par une IA.",
+            "mots_cles": ["transparence", "génération IA", "authenticité", "honnêteté"]
+          },
+          {
+            "id": "NUM-1.D8",
+            "code": "NUM-1.D8",
+            "intitule": "J'identifie des exemples d'enjeux éthiques et juridiques liés aux contenus permettant l'entraînement de l'IA.",
+            "mots_cles": ["entraînement IA", "données personnelles", "droits d'auteur"]
+          }
+        ],
+        "je_pratique": [
+          {
+            "id": "NUM-1.P1",
+            "code": "NUM-1.P1",
+            "intitule": "Je sélectionne un outil d'interaction adapté selon le ou les interlocuteurs.",
+            "mots_cles": ["contexte", "choix outil", "formel", "informel"]
+          },
+          {
+            "id": "NUM-1.P2",
+            "code": "NUM-1.P2",
+            "intitule": "Je crée une adresse e-mail et j'utilise les fonctions Cc et Cci, « répondre, répondre à tous, transférer ».",
+            "mots_cles": ["Cc", "Cci", "répondre", "répondre à tous", "transférer", "copie cachée"]
+          },
+          {
+            "id": "NUM-1.P3",
+            "code": "NUM-1.P3",
+            "intitule": "J'utilise les fonctions de la messagerie instantanée, y compris les conversations de groupe.",
+            "mots_cles": ["chat", "groupe", "règles de groupe", "réactivité"]
+          },
+          {
+            "id": "NUM-1.P4",
+            "code": "NUM-1.P4",
+            "intitule": "J'utilise un outil de collecte de données (sondage/quiz) et j'en traite simplement les résultats dans le respect de la protection des données.",
+            "mots_cles": ["sondage", "quiz", "collecte", "anonymat", "données"]
+          },
+          {
+            "id": "NUM-1.P5",
+            "code": "NUM-1.P5",
+            "intitule": "Je respecte les droits de propriété dans mes communications, y compris avec une IA.",
+            "mots_cles": ["source", "crédits", "citation", "propriété"]
+          },
+          {
+            "id": "NUM-1.P6",
+            "code": "NUM-1.P6",
+            "intitule": "Je respecte une nétiquette définie dans un environnement numérique d'interaction et de communication.",
+            "mots_cles": ["nétiquette", "politesse", "majuscules", "bienveillance"]
+          },
+          {
+            "id": "NUM-1.P7",
+            "code": "NUM-1.P7",
+            "intitule": "Je préserve la confidentialité ou l'anonymat lors du partage de contenus, y compris avec une IA.",
+            "mots_cles": ["confidentialité", "anonymat", "données sensibles", "floutage"]
+          },
+          {
+            "id": "NUM-1.P8",
+            "code": "NUM-1.P8",
+            "intitule": "Je respecte le droit à l'image et à la voix dans des situations de communication et de collaboration.",
+            "mots_cles": ["droit à l'image", "voix", "consentement", "autorisation"]
+          },
+          {
+            "id": "NUM-1.P9",
+            "code": "NUM-1.P9",
+            "intitule": "Je téléverse un contenu dans un environnement numérique.",
+            "mots_cles": ["téléverser", "upload", "pièce jointe", "dépôt"]
+          }
+        ],
+        "je_maitrise": [
+          {
+            "id": "NUM-1.M1",
+            "code": "NUM-1.M1",
+            "intitule": "J'interagis et je communique à l'oral et à l'écrit en sélectionnant et en utilisant des outils numériques adaptés.",
+            "mots_cles": ["synthèse", "projet", "autonomie", "communication adaptée"]
+          }
+        ]
+      }
+    }
+  ]
+}

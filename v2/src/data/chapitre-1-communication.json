@@ -1,0 +1,144 @@
+{
+  "id": "ch1-communication",
+  "numero": 1,
+  "titre": "Communication et collaboration",
+  "tome": "1a",
+  "introduction": "Apprends à communiquer efficacement, utiliser le courriel comme un pro et respecter les règles d'éthique sur Internet.",
+  "je_decouvre": {
+    "titre": "Je découvre les bases",
+    "parties": [
+      {
+        "id": "partie-1",
+        "titre": "1. Réseaux socio-numériques",
+        "resume": "Un réseau socio-numérique permet d'échanger des messages, partager des photos ou vidéos et suivre des personnes."
+      },
+      {
+        "id": "partie-2",
+        "titre": "2. Outils pour créer, collaborer et partager",
+        "resume": "Messagerie instantanée (pour l'immédiat), courriel (pour les échanges formels) et espaces partagés (pour travailler ensemble)."
+      },
+      {
+        "id": "partie-3",
+        "titre": "3. Vocabulaire du courriel",
+        "vocabulaire": [
+          { "terme": "Expéditeur", "definition": "La personne qui envoie le message." },
+          { "terme": "Destinataire", "definition": "La personne à qui le message est adressé directement." },
+          { "terme": "Objet", "definition": "Le titre court qui résume le sujet du message (ne pas y écrire tout le texte !)." },
+          { "terme": "Pièce jointe", "definition": "Un fichier (photo, PDF, document) attaché au message." },
+          { "terme": "Cc (Copie conforme)", "definition": "Personnes mises en copie pour information. Tout le monde voit leurs adresses." },
+          { "terme": "Cci (Copie conforme invisible)", "definition": "Personnes en copie invisible. Leurs adresses restent masquées pour protéger leur vie privée." },
+          { "terme": "Spam / Courrier indésirable", "definition": "Messages publicitaires ou malveillants non sollicités." }
+        ]
+      },
+      {
+        "id": "partie-4",
+        "titre": "4. Éthique des médias numériques",
+        "notions": [
+          { "notion": "Vie privée", "definition": "Le droit de garder des infos pour soi et de choisir ce que l'on partage." },
+          { "notion": "Droit de retrait", "definition": "Le droit de supprimer soi-même quelque chose qu'on regrette d'avoir posté." },
+          { "notion": "Droit à l'oubli", "definition": "Le pouvoir de demander le retrait ou le déréférencement d'anciennes infos en ligne." },
+          { "notion": "Liberté d'expression", "definition": "Le droit de donner son avis, dans le respect de la loi et des autres." },
+          { "notion": "Modération", "definition": "Le fait d'enlever les messages méchants, insultants ou dangereux." },
+          { "notion": "Censure", "definition": "Le blocage arbitraire d'un sujet sans motif de sécurité ou de loi." },
+          { "notion": "Open source", "definition": "Un programme que tout le monde peut utiliser, étudier et modifier légalement." }
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "id": "q1-ethique-situations",
+        "titre": "Identifie la bonne notion éthique",
+        "consigne": "Associe chaque situation réelle à la règle éthique correspondante.",
+        "competence_id": "NUM-1.D6",
+        "questions": [
+          {
+            "id": "q1_1",
+            "scenario": "J'efface une photo de mon profil parce que je regrette de l'avoir publiée.",
+            "options": ["Censure", "Droit de retrait", "Open source", "Modération"],
+            "reponse_correcte": 1,
+            "feedback_reussite": "Bravo ! Quand tu supprimes toi-même un contenu que tu as publié, tu exerces ton droit de retrait.",
+            "error_pattern_key": "retrait_vs_oubli"
+          },
+          {
+            "id": "q1_2",
+            "scenario": "Un administrateur supprime un commentaire insultant et haineux sous une vidéo.",
+            "options": ["Censure", "Modération", "Vie privée", "Droit à l'oubli"],
+            "reponse_correcte": 1,
+            "feedback_reussite": "Exact ! C'est de la modération : supprimer un message qui enfreint les règles ou blesse autrui.",
+            "error_pattern_key": "censure_vs_moderation"
+          },
+          {
+            "id": "q1_3",
+            "scenario": "Un site web bloque totalement les critiques constructives sur un produit sans aucune insulte.",
+            "options": ["Modération", "Censure", "Open source", "Liberté d'expression"],
+            "reponse_correcte": 1,
+            "feedback_reussite": "Bien vu ! Bloquer une opinion légitime sans raison légale ou de sécurité, c'est de la censure.",
+            "error_pattern_key": "censure_vs_moderation"
+          },
+          {
+            "id": "q1_4",
+            "scenario": "Avant de publier une photo de groupe prise à la récréation, je demande l'accord de mes camarades.",
+            "options": ["Droit à l'oubli", "Respect de la vie privée", "Open source", "Censure"],
+            "reponse_correcte": 1,
+            "feedback_reussite": "Excellent réflexe ! L'image de quelqu'un lui appartient : demander son accord respecte sa vie privée.",
+            "error_pattern_key": "vie_privee_image"
+          },
+          {
+            "id": "q1_5",
+            "scenario": "Un développeur met son code informatique à disposition de tous pour qu'on puisse l'améliorer.",
+            "options": ["Licence open source", "Droit à l'oubli", "Nétiquette", "Modération"],
+            "reponse_correcte": 0,
+            "feedback_reussite": "Parfait ! Une licence open source permet le partage et la modification libre et légale.",
+            "error_pattern_key": "logiciel_libre"
+          }
+        ]
+      },
+      {
+        "id": "q2-courriel-champs",
+        "titre": "Les champs d'un courriel",
+        "consigne": "Choisis le champ approprié pour chaque situation d'envoi.",
+        "competence_id": "NUM-1.D5",
+        "questions": [
+          {
+            "id": "q2_1",
+            "scenario": "Tu dois envoyer une convocation aux parents de 25 élèves. Où mets-tu leurs adresses pour qu'ils ne voient pas les adresses des autres ?",
+            "options": ["À (Destinataire)", "Cc (Copie conforme)", "Cci (Copie conforme invisible)", "Objet"],
+            "reponse_correcte": 2,
+            "feedback_reussite": "Exactement ! Le champ Cci masque les adresses des autres destinataires pour protéger leur vie privée (RGPD).",
+            "error_pattern_key": "cc_vs_cci"
+          },
+          {
+            "id": "q2_2",
+            "scenario": "Tu rédiges un email pour ton professeur. Où résumes-tu en quelques mots le sujet de ton message ?",
+            "options": ["Dans la pièce jointe", "Dans l'Objet", "Dans la signature", "Dans le champ Cc"],
+            "reponse_correcte": 1,
+            "feedback_reussite": "Bravo ! L'Objet donne le titre et permet au destinataire de savoir tout de suite de quoi parle le mail.",
+            "error_pattern_key": "objet_vs_corps"
+          }
+        ]
+      }
+    ]
+  },
+  "error_patterns": {
+    "censure_vs_moderation": {
+      "titre": "Confusion entre Censure et Modération",
+      "explication": "La modération protège la communauté en retirant les insultes ou menaces interdites. La censure bloque une opinion ou un sujet sans justification de sécurité.",
+      "conseil_tuteur": "Pose-toi la question : ce message était-il méchant/illégal (modération), ou était-ce juste un avis qui dérange (censure) ?"
+    },
+    "retrait_vs_oubli": {
+      "titre": "Confusion entre Droit de retrait et Droit à l'oubli",
+      "explication": "Le droit de retrait, c'est quand tu supprimes toi-même immédiatement quelque chose que TU as posté. Le droit à l'oubli, c'est demander à Google ou un site d'effacer une ancienne trace sur toi.",
+      "conseil_tuteur": "Si c'est toi qui appuies sur 'Supprimer', c'est du retrait !"
+    },
+    "cc_vs_cci": {
+      "titre": "Confusion entre Cc et Cci",
+      "explication": "Cc = Copie visible. Tout le monde voit les adresses. Cci = Copie Invisible. Les adresses sont cachées pour protéger la vie privée.",
+      "conseil_tuteur": "Pense au 'i' de Cci comme 'Invisible' ou 'Intimité' !"
+    },
+    "objet_vs_corps": {
+      "titre": "Confusion entre Objet et Corps du message",
+      "explication": "L'objet est un titre court de 3 à 6 mots (ex: 'Absence mardi - Thomas 1C2'). Le corps contient le message complet avec politesse.",
+      "conseil_tuteur": "N'écris jamais tout ton message dans la ligne Objet !"
+    }
+  }
+}

@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProfAssistant FMTTN - 1re Secondaire</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>body{font-family:Plus Jakarta Sans,sans-serif}</style>
+  <script type="module" crossorigin src="./assets/index-8SsyKNRD.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-B37M00dl.css">
+</head>
+<body class="h-full flex flex-col bg-slate-50 text-slate-800" x-data="profAssistantApp()">
+
+  <!-- 🧭 Barre de Navigation Supérieure -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Logo & Titre -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-black text-xl shadow-sm">
+          @
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-lg tracking-tight text-slate-900">ProfAssistant</h1>
+            <span class="text-xs font-semibold px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full">FMTTN 1re</span>
+          </div>
+          <p class="text-xs text-slate-500 font-medium">Programme FWB • Manuel @lt_X</p>
+        </div>
+      </div>
+
+      <!-- Sélecteur de Mode (Élève vs Enseignant ed.ai) -->
+      <div class="flex items-center gap-3">
+        <div class="bg-slate-100 p-1 rounded-xl flex items-center gap-1 text-xs font-bold">
+          <button 
+            @click="activeTab = 'decouvre'"
+            :class="activeTab !== 'prof' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+            class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+            <span>🎒</span> Espace Élève
+          </button>
+          <button 
+            @click="activeTab = 'prof'"
+            :class="activeTab === 'prof' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+            class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+            <span>✨</span> Matrice ed.ai (Prof)
+          </button>
+        </div>
+
+        <!-- Profil Élève -->
+        <template x-if="activeTab !== 'prof'">
+          <div class="hidden sm:flex items-center gap-2.5 pl-3 border-l border-slate-200">
+            <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
+              LM
+            </div>
+            <div class="text-xs">
+              <div class="font-bold text-slate-800" x-text="user.nom">Lucas M.</div>
+              <div class="text-slate-500 font-medium flex items-center gap-1">
+                <span>Classe <strong x-text="user.classe">1C2</strong></span>
+                <span>•</span>
+                <span class="text-amber-600 font-bold" x-text="user.xp + ' XP'">140 XP</span>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- 📖 Bandeau Module & Navigation -->
+  <div class="bg-slate-900 text-white border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      
+      <!-- Sélecteur de Chapitre / Module -->
+      <div class="flex items-center gap-2 mb-3 overflow-x-auto pb-1">
+        <button 
+          @click="selectedModuleId = 'module-0'"
+          :class="selectedModuleId === 'module-0' ? 'bg-blue-600 text-white border-blue-500' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
+          class="px-3 py-1 rounded-lg text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0">
+          <span>🚀</span> Module 0 : Bienvenue & Charte (Semaines 1-2)
+        </button>
+        <button 
+          @click="selectedModuleId = 'ch1-communication'"
+          :class="selectedModuleId === 'ch1-communication' ? 'bg-blue-600 text-white border-blue-500' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
+          class="px-3 py-1 rounded-lg text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0">
+          <span>💬</span> Chapitre 1 : Communication & E-mail (Semaine 3+)
+        </button>
+        <span class="px-2 py-1 text-xs text-slate-500 font-semibold shrink-0">🔒 Ch. 2 : Sécurité</span>
+        <span class="px-2 py-1 text-xs text-slate-500 font-semibold shrink-0">🔒 Ch. 3 : IA</span>
+      </div>
+
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
+            <span x-text="selectedModuleId === 'module-0' ? '🚀' : '💬'"></span>
+            <span x-text="selectedModuleId === 'module-0' ? module0.titre : chapter.titre"></span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl" 
+             x-text="selectedModuleId === 'module-0' ? module0.sous_titre : chapter.introduction"></p>
+        </div>
+
+        <!-- Onglets du cycle (Si Chapitre 1 et mode élève) -->
+        <template x-if="activeTab !== 'prof' && selectedModuleId === 'ch1-communication'">
+          <nav class="flex bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 self-start md:self-auto">
+            <button 
+              @click="activeTab = 'decouvre'"
+              :class="activeTab === 'decouvre' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+              <span>🔍</span> Je découvre
+            </button>
+            <button 
+              @click="activeTab = 'pratique'"
+              :class="activeTab === 'pratique' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+              <span>⚙️</span> Je pratique
+            </button>
+            <button 
+              @click="activeTab = 'maitrise'"
+              :class="activeTab === 'maitrise' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+              <span>🎯</span> Je maîtrise
+            </button>
+            <button 
+              @click="activeTab = 'competences'"
+              :class="activeTab === 'competences' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+              <span>📊</span> Compétences
+            </button>
+          </nav>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🌟 Contenu Principal -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- ======================================================= -->
+    <!-- MODULE 0 : INTRODUCTION & CHARTE DE RENTRÉE (Semaines 1-2) -->
+    <!-- ======================================================= -->
+    <div x-show="activeTab !== 'prof' && selectedModuleId === 'module-0'" class="space-y-8">
+      
+      <!-- Bandeau Bienvenue & Mascotte -->
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
+        <div>
+          <span class="px-3 py-1 bg-white/20 text-blue-100 rounded-full text-xs font-extrabold uppercase tracking-wider">
+            Bienvenue en 1re Secondaire !
+          </span>
+          <h3 class="text-2xl font-black mt-2">Démarrons l'année du bon pied</h3>
+          <p class="text-xs sm:text-sm text-blue-100 mt-2 max-w-xl leading-relaxed">
+            En FMTTN, nous allons apprendre à dompter l'ordinateur, naviguer en sécurité et créer des choses formidables. Pour commencer, découvrons les règles d'or de la salle informatique !
+          </p>
+        </div>
+        <div class="w-20 h-20 bg-white/10 rounded-3xl flex items-center justify-center text-4xl shadow-inner border border-white/20 animate-pulse">
+          🤖
+        </div>
+      </div>
+
+      <!-- Grille des 3 Ateliers d'Introduction -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Atelier 1 : Jeu Interactif de la Charte (Ok ou Pas OK ?) -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div class="flex items-center gap-2">
+                <span class="p-2 rounded-xl bg-amber-100 text-amber-800 font-black text-xs">⚖️ Charte</span>
+                <h4 class="font-black text-base text-slate-900">Jeu : OK ou PAS OK ?</h4>
+              </div>
+              <span class="text-xs font-extrabold text-slate-400" x-text="'Situation ' + (charteState.currentIndex + 1) + '/6'"></span>
+            </div>
+
+            <!-- Écran de jeu -->
+            <template x-if="!charteState.finished">
+              <div class="py-6">
+                <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Comportement en classe :</div>
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-bold text-slate-800 leading-relaxed"
+                     x-text="getCurrentCharteSituation().scenario">
+                </div>
+
+                <!-- Boutons Choix OK / PAS OK -->
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                  <button 
+                    @click="repondreCharte(true)"
+                    :disabled="charteState.hasAnswered"
+                    :class="{
+                      'bg-emerald-600 text-white font-black shadow-sm': charteState.userChoice === true,
+                      'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-2 border-emerald-200': charteState.userChoice !== true
+                    }"
+                    class="py-3 rounded-2xl font-extrabold text-sm transition flex items-center justify-center gap-2">
+                    <span>👍</span> C'est OK
+                  </button>
+                  <button 
+                    @click="repondreCharte(false)"
+                    :disabled="charteState.hasAnswered"
+                    :class="{
+                      'bg-rose-600 text-white font-black shadow-sm': charteState.userChoice === false,
+                      'bg-rose-50 hover:bg-rose-100 text-rose-800 border-2 border-rose-200': charteState.userChoice !== false
+                    }"
+                    class="py-3 rounded-2xl font-extrabold text-sm transition flex items-center justify-center gap-2">
+                    <span>🚫</span> PAS OK !
+                  </button>
+                </div>
+
+                <!-- Explication immédiate -->
+                <div x-show="charteState.hasAnswered" class="mt-6 p-4 rounded-2xl text-xs leading-relaxed"
+                     :class="charteState.userChoice === getCurrentCharteSituation().est_ok ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-rose-50 border border-rose-200 text-rose-900'">
+                  <div class="font-black text-sm flex items-center gap-1.5 mb-1">
+                    <span x-text="charteState.userChoice === getCurrentCharteSituation().est_ok ? '✓ Bien vu !' : '✕ Erreur !'"></span>
+                  </div>
+                  <p x-text="getCurrentCharteSituation().explication"></p>
+                </div>
+              </div>
+            </template>
+
+            <!-- Écran de fin de charte -->
+            <template x-if="charteState.finished">
+              <div class="py-8 text-center space-y-4">
+                <div class="text-4xl">🎉</div>
+                <h4 class="font-black text-lg text-slate-900">Bravo ! Tu as validé la Charte !</h4>
+                <p class="text-xs text-slate-600 max-w-sm mx-auto">
+                  Tu connais maintenant les règles indispensables pour protéger ton travail, respecter le matériel et tes camarades.
+                </p>
+                <div class="font-extrabold text-sm text-emerald-700 bg-emerald-50 py-2 px-4 rounded-xl inline-block">
+                  Score : <span x-text="charteState.score"></span> / 60 points
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- Bouton suivant / recommencer -->
+          <div class="pt-4 border-t border-slate-100 flex justify-end">
+            <button 
+              x-show="charteState.hasAnswered && !charteState.finished"
+              @click="situationCharteSuivante()"
+              class="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition">
+              Situation suivante ➔
+            </button>
+            <button 
+              x-show="charteState.finished"
+              @click="reinitialiserCharte()"
+              class="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 transition">
+              Recommencer le jeu ↻
+            </button>
+          </div>
+        </div>
+
+        <!-- Atelier 2 : Disparaître de l'ordinateur & Mot de Passe Solide -->
+        <div class="space-y-6">
+          
+          <!-- Carte Déconnexion : Écran fermé != Déconnecté -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="p-2 rounded-xl bg-rose-100 text-rose-700 font-bold text-sm">🔒</div>
+              <div>
+                <h4 class="font-extrabold text-sm text-slate-900">Règle d'or : Disparaître du PC</h4>
+                <p class="text-xs text-rose-600 font-bold">Fermer l'écran ≠ Se déconnecter !</p>
+              </div>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed mb-4">
+              Si tu te contentes de fermer l'écran sans te déconnecter, n'importe qui peut rouvrir l'ordinateur et lire tes messages ou envoyer un faux devoir à ta place !
+            </p>
+            <div class="space-y-2 bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-xs">
+              <div class="font-extrabold text-slate-800 mb-1">Les 4 étapes avant de quitter la salle :</div>
+              <template x-for="step in module0.parties[3].etapes_deconnexion" :key="step.ordre">
+                <div class="flex items-center gap-2">
+                  <span class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0" x-text="step.ordre"></span>
+                  <span class="text-slate-700 font-medium" x-text="step.action"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Carte Mots de Passe Solides -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="p-2 rounded-xl bg-emerald-100 text-emerald-700 font-bold text-sm">🔑</div>
+              <div>
+                <h4 class="font-extrabold text-sm text-slate-900">Choisir un mot de passe blindé</h4>
+                <p class="text-xs text-slate-500 font-medium">Page 12 du manuel @lt_X</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mt-3 text-xs">
+              <div class="p-3 rounded-xl bg-rose-50 border border-rose-100">
+                <span class="font-bold text-rose-700">🚫 Mauvais mots de passe</span>
+                <ul class="mt-1 space-y-1 text-slate-600 font-mono text-xs">
+                  <li>123456789</li>
+                  <li>azerty</li>
+                  <li>motdepasse123</li>
+                </ul>
+              </div>
+              <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
+                <span class="font-bold text-emerald-700">✓ Bons mots de passe</span>
+                <ul class="mt-1 space-y-1 text-slate-600 font-mono text-xs">
+                  <li>MonCh4tNoir!</li>
+                  <li>!M0nCh4tN0ir6</li>
+                  <li>Ch0c0lat#1C2</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- CHAPITRE 1 : COMMUNICATION & COLLABORATION (Semaine 3+) -->
+    <!-- ======================================================= -->
+    <div x-show="activeTab !== 'prof' && selectedModuleId === 'ch1-communication'" class="space-y-8">
+      
+      <!-- SECTION : JE DÉCOUVRE (Chapitre 1) -->
+      <div x-show="activeTab === 'decouvre'" class="space-y-8">
+        
+        <!-- Grille Vocabulaire & Notions -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Colonne Gauche : Vocabulaire Clé du Courriel -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
+                <span class="p-1.5 rounded-lg bg-blue-100 text-blue-700 text-sm">✉️</span>
+                Vocabulaire du courriel
+              </h3>
+              <span class="text-xs font-bold px-2 py-0.5 bg-slate-100 text-slate-600 rounded">NUM-1.D5</span>
+            </div>
+            <div class="space-y-2.5 max-h-96 overflow-y-auto pr-1">
+              <template x-for="item in chapter.je_decouvre.parties[2].vocabulaire" :key="item.terme">
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-200 transition">
+                  <div class="font-bold text-xs text-blue-700" x-text="item.terme"></div>
+                  <div class="text-xs text-slate-600 mt-0.5" x-text="item.definition"></div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Colonne Centre : Éthique & Droits -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
+                <span class="p-1.5 rounded-lg bg-emerald-100 text-emerald-700 text-sm">⚖️</span>
+                Éthique & Droits en ligne
+              </h3>
+              <span class="text-xs font-bold px-2 py-0.5 bg-slate-100 text-slate-600 rounded">NUM-1.D6</span>
+            </div>
+            <div class="space-y-2.5 max-h-96 overflow-y-auto pr-1">
+              <template x-for="item in chapter.je_decouvre.parties[3].notions" :key="item.notion">
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 hover:border-emerald-200 transition">
+                  <div class="font-bold text-xs text-emerald-700" x-text="item.notion"></div>
+                  <div class="text-xs text-slate-600 mt-0.5" x-text="item.definition"></div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Colonne Droite : Le Robot Mascotte & Défi Quiz -->
+          <div class="bg-gradient-to-b from-blue-50 to-indigo-50/50 rounded-2xl p-6 border border-blue-100 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-2xl shadow-md">
+                  🤖
+                </div>
+                <div>
+                  <h4 class="font-extrabold text-slate-900">Le savais-tu ?</h4>
+                  <p class="text-xs text-blue-700 font-semibold">Conseil @lt_X</p>
+                </div>
+              </div>
+              <p class="text-xs text-slate-700 leading-relaxed bg-white/80 p-3.5 rounded-xl border border-blue-200/60 shadow-xs mb-4">
+                "Dans un e-mail, la fonction <strong>Cci</strong> (Copie Conforme Invisible) protège la vie privée de tes correspondants. En Belgique et en Europe (RGPD), diffuser l'adresse d'un camarade sans son accord est interdit !"
+              </p>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl border border-blue-200/80 shadow-xs text-center">
+              <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Prêt pour le test ?</div>
+              <div class="font-extrabold text-sm text-slate-900 mb-3">Mini-Quiz : Reconnais la bonne règle éthique</div>
+              <button 
+                @click="document.getElementById('quiz-section').scrollIntoView({ behavior: 'smooth' })"
+                class="w-full py-2 px-4 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition shadow-sm">
+                Commencer le Quiz 👇
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Section Quiz Interactif avec Détection d'Erreurs -->
+        <section id="quiz-section" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md bg-blue-100 text-blue-800">
+                  Question <span x-text="quizState.currentQuestionIndex + 1">1</span> sur 5
+                </span>
+                <span class="text-xs font-bold text-slate-400">•</span>
+                <span class="text-xs font-bold text-emerald-600">Compétence cible : NUM-1.D6</span>
+              </div>
+              <h3 class="text-lg font-black text-slate-900 mt-2" x-text="getCurrentQuiz().titre"></h3>
+            </div>
+            <div class="flex items-center gap-2 text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl">
+              <span>Score actuel :</span>
+              <span class="text-blue-600 font-extrabold" x-text="quizState.score + ' pts'">0 pts</span>
+            </div>
+          </div>
+
+          <!-- Corps de la Question -->
+          <div class="py-6">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Situation concrète :</div>
+            <p class="text-base sm:text-lg font-bold text-slate-800 bg-slate-50 p-4 rounded-2xl border border-slate-200/70" x-text="getCurrentQuestion().scenario"></p>
+
+            <!-- Liste des Choix -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
+              <template x-for="(option, idx) in getCurrentQuestion().options" :key="idx">
+                <button 
+                  @click="selectOption(idx)"
+                  :disabled="quizState.hasSubmitted"
+                  :class="{
+                    'border-blue-600 bg-blue-50/70 text-blue-900 font-bold shadow-xs': quizState.selectedOption === idx && !quizState.hasSubmitted,
+                    'border-slate-200 hover:border-blue-300 bg-white text-slate-700': quizState.selectedOption !== idx && !quizState.hasSubmitted,
+                    'border-emerald-500 bg-emerald-50 text-emerald-900 font-bold': quizState.hasSubmitted && idx === getCurrentQuestion().reponse_correcte,
+                    'border-rose-300 bg-rose-50 text-rose-800': quizState.hasSubmitted && quizState.selectedOption === idx && !quizState.isCorrect
+                  }"
+                  class="p-4 rounded-2xl border-2 text-left text-sm font-semibold transition-all flex items-center justify-between">
+                  <span x-text="option"></span>
+                  <span x-show="quizState.selectedOption === idx && !quizState.hasSubmitted" class="text-blue-600 font-black">●</span>
+                  <span x-show="quizState.hasSubmitted && idx === getCurrentQuestion().reponse_correcte" class="text-emerald-600 font-black">✓</span>
+                  <span x-show="quizState.hasSubmitted && quizState.selectedOption === idx && !quizState.isCorrect" class="text-rose-600 font-black">✕</span>
+                </button>
+              </template>
+            </div>
+
+            <!-- Zone de Feedback & Intervention Tuteur Socratique -->
+            <div x-show="quizState.hasSubmitted" class="mt-6 p-4 rounded-2xl transition"
+                 :class="quizState.isCorrect ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-amber-50 border border-amber-200 text-amber-900'">
+              <div class="flex items-start gap-3">
+                <div class="text-2xl" x-text="quizState.isCorrect ? '🎉' : '💡'"></div>
+                <div class="text-xs sm:text-sm">
+                  <div class="font-extrabold" x-text="quizState.isCorrect ? 'Bravo ! Excellente réponse.' : 'Attention au piège conceptuel !'"></div>
+                  <p class="mt-1 font-medium" x-text="quizState.feedbackMessage"></p>
+                  
+                  <template x-if="!quizState.isCorrect && quizState.errorPattern">
+                    <div class="mt-3 p-3 bg-white/90 rounded-xl border border-amber-300/80 text-xs">
+                      <span class="font-bold text-amber-800" x-text="quizState.errorPattern.titre"></span>
+                      <p class="mt-0.5 text-slate-700" x-text="quizState.errorPattern.explication"></p>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions Quiz -->
+          <div class="flex items-center justify-between pt-6 border-t border-slate-100">
+            <button 
+              @click="tutorOpen = true"
+              class="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1.5">
+              <span>🤖</span> Demander un indice au tuteur
+            </button>
+
+            <div>
+              <button 
+                x-show="!quizState.hasSubmitted"
+                @click="validerReponse()"
+                :disabled="quizState.selectedOption === null"
+                :class="quizState.selectedOption !== null ? 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer' : 'bg-slate-200 text-slate-400 cursor-not-allowed'"
+                class="px-6 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">
+                Valider ma réponse
+              </button>
+              <button 
+                x-show="quizState.hasSubmitted"
+                @click="questionSuivante()"
+                class="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-sm flex items-center gap-2">
+                <span>Question suivante</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+
+      <!-- SECTION : JE PRATIQUE -->
+      <div x-show="activeTab === 'pratique'" class="space-y-6">
+        <div class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-black">⚙️</div>
+            <div>
+              <h3 class="font-extrabold text-lg text-slate-900">Je pratique : Ateliers en situation</h3>
+              <p class="text-xs text-slate-500 font-medium">Missions concrètes issues du manuel @lt_X (Pages 60 à 83)</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-blue-400 transition">
+              <span class="text-xs font-bold px-2 py-0.5 bg-blue-100 text-blue-800 rounded">Partie 2 (p. 64)</span>
+              <h4 class="font-bold text-sm text-slate-900 mt-2">Rédiger un courriel scolaire modèle</h4>
+              <p class="text-xs text-slate-600 mt-1">Écrire au secrétariat avec formule de politesse, objet clair et adresse en Cci.</p>
+              <div class="mt-4 flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-400">Compétence NUM-1.P2</span>
+                <button class="px-3 py-1 bg-white text-blue-600 border border-blue-200 text-xs font-bold rounded-lg hover:bg-blue-50">Ouvrir l'atelier</button>
+              </div>
+            </div>
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-blue-400 transition">
+              <span class="text-xs font-bold px-2 py-0.5 bg-purple-100 text-purple-800 rounded">Partie 4 (p. 74)</span>
+              <h4 class="font-bold text-sm text-slate-900 mt-2">Appliquer la Nétiquette de groupe</h4>
+              <p class="text-xs text-slate-600 mt-1">Identifier les comportements bienveillants dans une conversation de classe.</p>
+              <div class="mt-4 flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-400">Compétence NUM-1.P6</span>
+                <button class="px-3 py-1 bg-white text-purple-600 border border-purple-200 text-xs font-bold rounded-lg hover:bg-purple-50">Ouvrir l'atelier</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION : JE MAÎTRISE -->
+      <div x-show="activeTab === 'maitrise'" class="space-y-6">
+        <div class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-black">🎯</div>
+            <div>
+              <h3 class="font-extrabold text-lg text-slate-900">Je maîtrise : Mission de Consolidation</h3>
+              <p class="text-xs text-slate-500 font-medium">Projet synthèse (Page 84 du manuel)</p>
+            </div>
+          </div>
+          <div class="p-6 rounded-2xl bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100">
+            <h4 class="font-black text-sm text-purple-950">Mission : Communiquer et interagir grâce aux outils adaptés</h4>
+            <p class="text-xs text-purple-900 mt-2 leading-relaxed">
+              Tu organises une collecte solidaire pour l'école. En utilisant les compétences du chapitre, choisis les 2 meilleurs outils pour :
+              1. Sonder les élèves sur les dates.
+              2. Transmettre les affiches aux professeurs sans divulguer les adresses privées.
+            </p>
+            <div class="mt-4 flex items-center gap-2">
+              <button class="px-4 py-2 rounded-xl bg-purple-700 text-white font-bold text-xs hover:bg-purple-800 transition">Rédiger ma réponse</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION : MES COMPÉTENCES -->
+      <div x-show="activeTab === 'competences'" class="space-y-6">
+        <div class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h3 class="font-black text-lg text-slate-900">Mon Tableau de Compétences FMTTN</h3>
+              <p class="text-xs text-slate-500 font-medium">Basé sur la grille officielle @lt_X (page 21)</p>
+            </div>
+            <div class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg">
+              Chapitre 1 : Communication & Collaboration
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <template x-for="comp in competences.je_decouvre" :key="comp.id">
+              <div class="p-3.5 rounded-xl border border-slate-200 flex items-center justify-between gap-4">
+                <div class="flex items-start gap-3">
+                  <span class="font-black text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700" x-text="comp.code"></span>
+                  <p class="text-xs text-slate-800 font-medium" x-text="comp.intitule"></p>
+                </div>
+                <div>
+                  <span x-show="eleveCompetences[comp.code] === 'acquis'" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                    ✓ Acquis
+                  </span>
+                  <span x-show="eleveCompetences[comp.code] === 'en_cours'" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 flex items-center gap-1">
+                    ⏳ En cours
+                  </span>
+                  <span x-show="eleveCompetences[comp.code] === 'a_renforcer'" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800 flex items-center gap-1">
+                    ⚠️ À renforcer
+                  </span>
+                  <span x-show="!eleveCompetences[comp.code]" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-400">
+                    Non vu
+                  </span>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VUE ENSEIGNANT (Matrice ed.ai)             -->
+    <!-- ========================================== -->
+    <div x-show="activeTab === 'prof'" class="space-y-8">
+      
+      <!-- En-tête Professeur -->
+      <div class="bg-gradient-to-r from-slate-900 to-indigo-950 rounded-3xl p-8 text-white shadow-md">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/30 text-indigo-300 text-xs font-extrabold mb-2">
+              <span>✨</span> Mode Enseignant • Matrice Standards-Aligned
+            </div>
+            <h2 class="text-2xl font-black tracking-tight">Météo des Compétences : Classe 1C2</h2>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1">
+              Vue en temps réel des acquis du Tronc Commun FMTTN (Inspirée du modèle ed.ai).
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button 
+              @click="genererRemediationProf()"
+              class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs transition shadow-sm flex items-center gap-2">
+              <span>⚡</span> Générer la remédiation ciblée (1 clic)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Métriques Globales & Diagnostic des Faux Représentations (Error Patterns) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Bloc 1 : Taux de Maîtrise -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+          <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Maîtrise Semaines 1 à 3</div>
+          <div class="text-3xl font-black text-slate-900 mt-2">78%</div>
+          <p class="text-xs text-slate-500 mt-1">Charte informatique acquise par 100% des élèves.</p>
+          <div class="w-full bg-slate-100 h-2 rounded-full mt-4 overflow-hidden">
+            <div class="bg-emerald-500 h-full rounded-full" style="width: 78%"></div>
+          </div>
+        </div>
+
+        <!-- Bloc 2 : Point d'alerte n°1 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+          <div class="text-xs font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5">
+            <span>⚠️</span> Alerte Déconnexion
+          </div>
+          <div class="text-sm font-extrabold text-slate-900 mt-2">Fermer l'écran ≠ Déconnecter</div>
+          <p class="text-xs text-slate-600 mt-1">
+            <strong>33%</strong> des élèves pensent qu'éteindre l'écran suffit pour fermer sa session.
+          </p>
+          <div class="mt-3 text-xs text-blue-600 font-bold">Rappel physique en fin de séance prévu.</div>
+        </div>
+
+        <!-- Bloc 3 : Point d'alerte n°2 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+          <div class="text-xs font-bold uppercase tracking-wider text-rose-600 flex items-center gap-1.5">
+            <span>⚠️</span> Erreur E-mail (Ch. 1)
+          </div>
+          <div class="text-sm font-extrabold text-slate-900 mt-2">Usage du champ Cci</div>
+          <p class="text-xs text-slate-600 mt-1">
+            <strong>40%</strong> mettent les adresses en Cc au lieu de Cci lors d'un envoi groupé.
+          </p>
+          <div class="mt-3 text-xs text-blue-600 font-bold">Rappel RGPD et vie privée conseillé.</div>
+        </div>
+
+      </div>
+
+      <!-- La Matrice de Compétences (Heatmap) -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs overflow-x-auto">
+        <h3 class="font-extrabold text-base text-slate-900 mb-4">Matrice de la Classe (Standards Mastery Grid)</h3>
+        
+        <table class="w-full text-left text-xs border-collapse min-w-[650px]">
+          <thead>
+            <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
+              <th class="py-3 px-4">Élève</th>
+              <th class="py-3 px-4">Charte & Déconnexion</th>
+              <th class="py-3 px-4">NUM-1.D5 (Vocabulaire Courriel)</th>
+              <th class="py-3 px-4">NUM-1.D6 (Éthique & Droits)</th>
+              <th class="py-3 px-4">NUM-1.P2 (Cc / Cci)</th>
+              <th class="py-3 px-4 text-right">Score Global</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <template x-for="eleve in classeEleves" :key="eleve.id">
+              <tr class="hover:bg-slate-50/70 transition">
+                <td class="py-3.5 px-4 font-extrabold text-slate-900" x-text="eleve.nom"></td>
+                <td class="py-3.5 px-4">
+                  <span :class="eleve.charte === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                        class="px-2.5 py-0.5 rounded-full font-bold text-xs" x-text="eleve.charte === 'acquis' ? 'Acquis' : 'En cours'"></span>
+                </td>
+                <td class="py-3.5 px-4">
+                  <span :class="{
+                    'bg-emerald-100 text-emerald-800': eleve.d5 === 'acquis',
+                    'bg-amber-100 text-amber-800': eleve.d5 === 'en_cours',
+                    'bg-rose-100 text-rose-800': eleve.d5 === 'a_renforcer'
+                  }" class="px-2.5 py-0.5 rounded-full font-bold text-xs" x-text="eleve.d5"></span>
+                </td>
+                <td class="py-3.5 px-4">
+                  <span :class="{
+                    'bg-emerald-100 text-emerald-800': eleve.d6 === 'acquis',
+                    'bg-amber-100 text-amber-800': eleve.d6 === 'en_cours',
+                    'bg-rose-100 text-rose-800': eleve.d6 === 'a_renforcer'
+                  }" class="px-2.5 py-0.5 rounded-full font-bold text-xs" x-text="eleve.d6"></span>
+                </td>
+                <td class="py-3.5 px-4">
+                  <span :class="{
+                    'bg-emerald-100 text-emerald-800': eleve.p2 === 'acquis',
+                    'bg-amber-100 text-amber-800': eleve.p2 === 'en_cours',
+                    'bg-rose-100 text-rose-800': eleve.p2 === 'a_renforcer'
+                  }" class="px-2.5 py-0.5 rounded-full font-bold text-xs" x-text="eleve.p2"></span>
+                </td>
+                <td class="py-3.5 px-4 text-right font-black" :class="eleve.score >= 80 ? 'text-emerald-600' : 'text-amber-600'" x-text="eleve.score + '%'"></td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Résultat de la Remédiation Générée en 1 Clic -->
+      <div x-show="remediationGenerated" class="bg-indigo-50 border border-indigo-200 rounded-3xl p-6 sm:p-8 animate-fadeIn">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">✨</span>
+            <div>
+              <h4 class="font-black text-indigo-950 text-base">Fiche de Remédiation Ciblée Générée</h4>
+              <p class="text-xs text-indigo-700">Créée automatiquement pour Camille D. et Lucas M. sur la compétence NUM-1.D6 et Déconnexion</p>
+            </div>
+          </div>
+          <button class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-xs hover:bg-indigo-700">Imprimer / Partager</button>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-indigo-100 text-xs text-slate-700 space-y-2">
+          <p><strong>Exercice de renfort : « Censure ou Modération ? »</strong></p>
+          <p>1. Un utilisateur insulte violemment un joueur sur un forum. Le responsable supprime le message. ➔ [ ] Censure &nbsp;&nbsp; [✓] Modération</p>
+          <p>2. Un blogueur donne une critique argumentée d'un jeu vidéo sans insultes. Le fabricant du jeu fait supprimer l'article. ➔ [✓] Censure &nbsp;&nbsp; [ ] Modération</p>
+          <p class="text-slate-400 italic">Rappel : La modération protège la loi et les personnes ; la censure étouffe une opinion libre.</p>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- 🤖 Tiroir Flottant : Tuteur Socratique IA (Mascotte @lt_X) -->
+  <div class="fixed bottom-6 right-6 z-50">
+    <button 
+      @click="tutorOpen = !tutorOpen"
+      class="w-14 h-14 rounded-2xl bg-blue-600 text-white shadow-xl hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all flex items-center justify-center text-3xl border-2 border-white">
+      🤖
+    </button>
+  </div>
+
+  <!-- Fenêtre de Discussion du Tuteur -->
+  <div 
+    x-show="tutorOpen" 
+    x-transition:enter="transition ease-out duration-200"
+    x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+    x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+    x-transition:leave="transition ease-in duration-150"
+    x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+    x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+    class="fixed bottom-24 right-6 w-96 max-w-[calc(100vw-3rem)] bg-white rounded-3xl shadow-2xl border border-slate-200 z-50 flex flex-col overflow-hidden"
+    style="height: 480px;">
+    
+    <!-- En-tête Tuteur -->
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-xl">
+          🤖
+        </div>
+        <div>
+          <div class="font-extrabold text-sm flex items-center gap-1.5">
+            <span>Tuteur FMTTN</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-400" :class="tutorLoading ? 'animate-ping' : 'animate-pulse'"></span>
+          </div>
+          <p class="text-xs text-blue-100 font-medium">Assistant socratique @lt_X</p>
+        </div>
+      </div>
+      <button @click="tutorOpen = false" class="text-white/80 hover:text-white text-lg font-bold">✕</button>
+    </div>
+
+    <!-- Corps des Messages -->
+    <div class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 text-xs">
+      <template x-for="(msg, idx) in tutorHistory" :key="idx">
+        <div :class="msg.sender === 'bot' ? 'flex items-start gap-2.5' : 'flex items-start justify-end gap-2.5'">
+          <div x-show="msg.sender === 'bot'" class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs shrink-0">
+            🤖
+          </div>
+          <div 
+            :class="msg.sender === 'bot' ? 'bg-white border border-slate-200 text-slate-800' : 'bg-blue-600 text-white font-medium'"
+            class="p-3 rounded-2xl max-w-[80%] shadow-xs leading-relaxed"
+            x-text="msg.text">
+          </div>
+        </div>
+      </template>
+
+      <!-- Indicateur de réflexion IA -->
+      <div x-show="tutorLoading" class="flex items-center gap-2 text-slate-400 text-xs font-semibold pl-2">
+        <span class="animate-bounce">●</span>
+        <span class="animate-bounce delay-100">●</span>
+        <span class="animate-bounce delay-200">●</span>
+        <span>Le tuteur réfléchit...</span>
+      </div>
+    </div>
+
+    <!-- Saisie Élève -->
+    <div class="p-3 bg-white border-t border-slate-100 flex items-center gap-2">
+      <input 
+        type="text" 
+        x-model="studentQuestion"
+        @keydown.enter="envoyerQuestionTuteur()"
+        :disabled="tutorLoading"
+        placeholder="Pose une question à ton tuteur..."
+        class="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-blue-600" />
+      <button 
+        @click="envoyerQuestionTuteur()"
+        :disabled="tutorLoading || !studentQuestion.trim()"
+        class="p-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50">
+        ➔
+      </button>
+    </div>
+
+  </div>
+
+</body>
+</html>
