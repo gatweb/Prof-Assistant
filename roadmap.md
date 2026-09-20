@@ -29,11 +29,12 @@
 
 ## 🔮 5. Prochaines Étapes (Backlog V2)
 - [x] **Documentation & Cadrage V2 :** Rédaction de `DOCS_V2_FMTTN.md` et analyse des scans @lt_X.
-- [/] **Initialisation Frontend V2 :** Setup Vite + Tailwind CSS + Alpine.js dans `v2/`.
-- [ ] **Modélisation Chapitre 1 :** Fichier JSON structuré du Chapitre 1 (*Communication et collaboration*) avec compétences, termes clés et mini-quiz.
-- [ ] **Mascotte & Tuteur Socratique V2 :** Intégration du persona robot bleu d'@lt_X avec Gemini.
-- [ ] **Dashboard Professeur V2 :** Matrice de maîtrise des compétences FMTTN par classe et par élève (façon ed.ai).
-- [ ] **Générateur de Remédiation :** Micro-activités de renfort automatisées pour les erreurs récurrentes.
+- [x] **Initialisation Frontend V2 :** Setup Vite + Tailwind CSS + Alpine.js dans `v2/`.
+- [x] **Intégration Contenus @lt_X Réels :** Extraction et intégration des 181 questions officielles, des synthèses théoriques et de l'Escape Game (5 dossiers).
+- [x] **Ateliers Pratiques Chapitre 1 :** Simulateur de courriel p.64 (validation des 16 critères) et bilan personnel d'auto-évaluation p.83.
+- [x] **Mascotte & Tuteur Socratique V2 :** Intégration du persona robot bleu d'@lt_X avec Gemini et repli socratique local.
+- [x] **Dashboard Professeur V2 :** Matrice de maîtrise des compétences FMTTN par classe et par élève (façon ed.ai).
+- [ ] **Persistance Firestore Élèves :** Enregistrement des soumissions et synchronisation en direct des bilans personnels.
 
 ---
 ### ⚠️ INSTRUCTION POUR L'AGENT DE DÉVELOPPEMENT :
