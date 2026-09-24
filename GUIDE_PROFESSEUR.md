@@ -89,9 +89,9 @@ Un outil dédié dans le **Dashboard Professeur** (`/admin.html` > Onglet *📝 
 
 ---
 
-## 🌟 4. ProfAssistant V2 : FMTTN 1re & Matrice ed.ai
+## 🌟 4. ProfAssistant V2 : FMTTN 1re & Matrice SeGEC
 
-La version 2 (`/v2/`) propose un environnement léger dédié au cours de **FMTTN 1re secondaire** basé sur le manuel officiel *@lt_X* et la pédagogie de maîtrise par compétences.
+La version 2 (`/v2/`) propose un environnement léger dédié au cours de **FMTTN 1re secondaire** aligné sur le programme officiel du **SeGEC** et basé sur le manuel *@lt_X*, avec intégration de vos diaporamas et synthèses NotebookLM.
 
 ### 4.1 Ajouter des collègues enseignants (Liste blanche)
 Pour autoriser vos collègues à accéder à l'espace enseignant lors de leur connexion Google :
@@ -105,10 +105,10 @@ Pour autoriser vos collègues à accéder à l'espace enseignant lors de leur co
    ```
 3. Recompilez le frontend : `npm --prefix v2 run build`.
 
-### 4.2 Utilisation de la Météo de Classe (Vue ed.ai)
-- **Changement de classe :** Utilisez le menu déroulant en haut de la matrice pour basculer entre `Classe 1A`, `Classe 1B`... Les données et métriques se mettent à jour automatiquement.
-- **Synchronisation en direct :** Un voyant vert *Firestore en direct* confirme la réception des résultats des élèves en temps réel.
-- **Mode Démonstration :** Le bouton `👥 Injecter démo` permet de charger immédiatement 6 élèves types dans une classe vide pour une présentation.
+### 4.2 Utilisation du Tableau de Bord Enseignant
+- **Matrice SeGEC :** Consultez la météo de classe par compétence (Réseaux NUM-1.D1, Courriel NUM-1.D5, Éthique NUM-1.D6, etc.).
+- **Gestion des Élèves Réels (Héritage V1) :** Inscrivez directement vos élèves réels, assignez leurs classes (1A, 1B, 1C...) et suivez leur XP.
+- **Intégration NotebookLM :** Dans l'onglet *Supports de Cours*, collez l'URL de votre carnet NotebookLM pour permettre aux élèves d'écouter les résumés audio et poser des questions.
 - **Remédiation en 1 clic :** Le bouton `⚡ Générer la remédiation ciblée` produit instantanément une micro-fiche personnalisée pour les élèves ayant des difficultés détectées (ex: confusion Cc/Cci).
 
 ---

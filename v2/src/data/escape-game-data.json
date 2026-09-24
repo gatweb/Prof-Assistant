@@ -50,21 +50,32 @@
       "chapitre": "INFORMATIONS & DONNÉES",
       "icone": "📊",
       "titre": "Le fichier fantôme",
-      "guide": "Retrouve le fichier recherché : c'est une IMAGE appartenant à Sam, modifiée le 12/09 et qui pèse plus de 5 Mo.",
-      "fichier_correct": "aurore.png"
+      "guide": "Retrouve le fichier recherché dans l'explorateur ci-dessous : c'est une IMAGE appartenant à Sam, modifiée le 12/09 et qui pèse plus de 5 Mo.",
+      "fichier_correct": "aurore.png",
+      "fichiers_serveur": [
+        { "nom": "rapport_rentree.docx", "type": "Document Word", "proprio": "Sam", "date": "12/09/2026", "taille": "1.2 Mo", "icone": "📄" },
+        { "nom": "photo_groupe.jpg", "type": "Image JPG", "proprio": "Léa", "date": "12/09/2026", "taille": "6.4 Mo", "icone": "🖼️" },
+        { "nom": "sauvegarde_cours.zip", "type": "Archive ZIP", "proprio": "Alex", "date": "10/09/2026", "taille": "18.2 Mo", "icone": "📦" },
+        { "nom": "notes_reunion.txt", "type": "Fichier texte", "proprio": "Sam", "date": "11/09/2026", "taille": "12 Ko", "icone": "📝" },
+        { "nom": "aurore.png", "type": "Image PNG", "proprio": "Sam", "date": "12/09/2026", "taille": "5.8 Mo", "icone": "🖼️", "est_cible": true },
+        { "nom": "devoir_francais.pdf", "type": "Document PDF", "proprio": "Tom", "date": "12/09/2026", "taille": "5.1 Mo", "icone": "📕" },
+        { "nom": "vacances_mer.png", "type": "Image PNG", "proprio": "Sam", "date": "15/08/2026", "taille": "4.1 Mo", "icone": "🖼️" },
+        { "nom": "schema_reseau.png", "type": "Image PNG", "proprio": "Alex", "date": "12/09/2026", "taille": "7.3 Mo", "icone": "🖼️" }
+      ]
     },
     {
       "id": 5,
       "chapitre": "CRÉATION DE CONTENU",
       "icone": "🎨",
       "titre": "L'atelier réparé",
-      "guide": "Associe chaque extension de fichier au bon outil numérique pour terminer la mission !",
+      "guide": "Associe chaque fichier au bon logiciel pour restaurer l'atelier et finaliser la mission !",
       "associations": [
-        {"fichier": "histoire.docx", "app": "Traitement de texte"},
-        {"fichier": "paysage.png", "app": "Éditeur d'image"},
-        {"fichier": "jingle.mp3", "app": "Lecteur audio"},
-        {"fichier": "expose.pptx", "app": "Logiciel de présentation"}
-      ]
+        {"fichier": "histoire.docx", "ext": ".docx", "app": "Traitement de texte", "icone": "📝"},
+        {"fichier": "paysage.png", "ext": ".png", "app": "Éditeur d'image", "icone": "🎨"},
+        {"fichier": "jingle.mp3", "ext": ".mp3", "app": "Lecteur audio", "icone": "🎵"},
+        {"fichier": "expose.pptx", "ext": ".pptx", "app": "Logiciel de présentation", "icone": "📽️"}
+      ],
+      "app_options": ["Traitement de texte", "Éditeur d'image", "Lecteur audio", "Logiciel de présentation", "Navigateur Web", "Feuille de calcul"]
     }
   ]
 }

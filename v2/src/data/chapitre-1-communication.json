@@ -140,5 +140,17 @@
       "explication": "L'objet est un titre court de 3 à 6 mots (ex: 'Absence mardi - Thomas 1C2'). Le corps contient le message complet avec politesse.",
       "conseil_tuteur": "N'écris jamais tout ton message dans la ligne Objet !"
     }
+  },
+  "support_cours": {
+    "titre": "Présentation & Support de cours : Communication & Courriel",
+    "description": "Diaporama du chapitre et synthèses interactives NotebookLM sur les RSN, le courriel et l'éthique en ligne.",
+    "slides_url": "",
+    "notebooklm_url": "https://notebooklm.google.com",
+    "slides": [
+      { "titre": "Les Réseaux Socio-Numériques (RSN)", "contenu": "Comprendre le fonctionnement des plateformes, le système de récompense (dopamine), et l'âge légal de 13 ans (RGPD)." },
+      { "titre": "Messagerie Instantanée vs Courriel", "contenu": "Quand utiliser l'un ou l'autre ? La messagerie pour l'immédiat et les amis, le courriel pour la communication formelle et officielle." },
+      { "titre": "Anatomie d'un Courriel Officiel", "contenu": "Les 6 critères essentiels : objet court, formule de politesse adaptée, corps aéré, signature complète et usage du champ Cci." },
+      { "titre": "Éthique, Droit & Nétiquette", "contenu": "Droit à l'image, respect de la vie privée, modération des contenus illégaux et différence capitale avec la censure arbitraire." }
+    ]
   }
 }

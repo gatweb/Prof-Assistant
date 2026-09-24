@@ -33,9 +33,9 @@ Chaque chapitre applique une progression rigoureuse en 3 étapes :
 
 ---
 
-## 💡 2. Principes Fondateurs Inspirés d'[ed.ai](https://ed.ai)
+## 💡 2. Pédagogie de la Maîtrise Alignée sur le Référentiel SeGEC
 
-L'inspiration majeure tirée de la plateforme [ed.ai](https://ed.ai) réside dans le passage d'une notation chiffrée classique à une **pédagogie de la maîtrise par compétences** :
+L'approche adoptée pour ProfAssistant V2 réside dans le passage d'une notation chiffrée classique à une **pédagogie de la maîtrise par compétences conforme au programme SeGEC** :
 
 1. **Standards-Aligned (Alignement Référentiel Strict) :**
    * Chaque exercice, quiz ou mission est indexé sur un code précis de compétence FMTTN (issu directement de la grille officielle de la p.21 du manuel @lt_X).
@@ -124,21 +124,22 @@ Pour garantir une expérience sans latence sur les PC scolaires tout en maintena
 
 ### Phase 1 : Socle V2 & Chapitre 1 (Validé ✅)
 - [x] Exploration et analyse des scans @lt_X 1a et 1b.
-- [x] Spécification du cahier des charges V2 et de la philosophie ed.ai.
+- [x] Spécification du cahier des charges V2 et alignement strict avec le programme SeGEC.
 - [x] Initialisation du projet Vite + Tailwind + Alpine.js dans `v2/`.
 - [x] Modélisation JSON du **Chapitre 1 : Communication et collaboration** (compétences, vocabulaire, 181 QCM de la banque officielle).
 - [x] Intégration de la mascotte robot bleue (@lt_X) pour le Tuteur Socratique (avec fallback local et Cloud Function).
 
 ### Phase 2 : Espace Élève V2 (Apprenant 1re secondaire - Validé ✅)
-- [x] Navigation par onglets ergonomique (Module 0, Escape Game, Chapitre 1).
-- [x] Module 0 : Charte informatique interactive et test de compréhension.
-- [x] Escape Game de rentrée : 5 dossiers à énigmes progressives (codes de déverrouillage, détection phishing).
+- [x] Navigation par onglets ergonomique (Module 0, Escape Game, Chapitre 1, Diaporamas NotebookLM).
+- [x] Module 0 : Charte informatique interactive et test de compréhension (OK / PAS OK).
+- [x] Escape Game de rentrée : 5 dossiers à énigmes progressives (codes de déverrouillage, détection phishing, explorateur Dossier 4, associations Dossier 5).
 - [x] Module "Je pratique" : Simulateur de courriel p.64 avec analyse multi-critères automatique.
 - [x] Module "Je maîtrise" : Mission créative d'invention d'application et auto-évaluation bilan personnel p.83.
 - [ ] *(En cours d'enrichissement)* : Finalisation des banques d'exercices interactifs pour les chapitres 2 à 5.
 
-### Phase 3 : Dashboard Enseignant V2 & ed.ai (Validé ✅)
-- [x] Matrice dynamique des compétences FMTTN par classe (Heatmap ed.ai en temps réel).
+### Phase 3 : Dashboard Enseignant V2 & Référentiel SeGEC (Validé ✅)
+- [x] Matrice dynamique des compétences FMTTN par classe (Heatmap SeGEC en temps réel).
+- [x] Gestion des élèves et classes réelles héritée de la V1 (collection Firestore `users`).
 - [x] Détection automatique des motifs d'erreurs fréquents (*Error Patterns*, ex: champ Cci).
 - [x] Générateur de remédiations différenciées en 1 clic.
 - [x] Synchronisation temps réel Firestore (`/progressions_v2`) avec session anonyme fluide pour les élèves.

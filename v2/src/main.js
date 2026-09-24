@@ -12,7 +12,10 @@ import {
   subscribeToAuthState, 
   saveEleveProgression, 
   listenToClasseProgressions, 
-  seedDemoClassData, 
+  getRealClassStudents,
+  addRealStudent,
+  updateStudentClassInDb,
+  savePresentationConfig,
   interrogerTuteurIA 
 } from './services/firebase.js';
 import { AVAILABLE_CLASSES, ALLOWED_TEACHERS } from './services/teachers-config.js';
@@ -22,17 +25,21 @@ window.Alpine = Alpine;
 Alpine.data('profAssistantApp', () => ({
   // Navigation
   selectedModuleId: 'module-0', // 'module-0' | 'escape-game' | 'ch1-communication'
-  activeTab: 'decouvre',        // 'decouvre' | 'pratique' | 'maitrise' | 'competences' | 'prof'
+  activeTab: 'decouvre',        // 'decouvre' | 'pratique' | 'maitrise' | 'cours' | 'prof'
   
-  // Classes disponibles (1A, 1B, 1C, 1D...)
+  // Classes disponibles (Programme SeGEC : 1A, 1B, 1C, 1D...)
   availableClasses: AVAILABLE_CLASSES,
 
-  // Données de cours FMTTN
+  // Données de cours FMTTN SeGEC
   module0: module0Data,
   chapter: chapterData,
   competences: competencesData.chapitres[0].competences,
   altxBank: altxBank,
   escapeGame: escapeGameData,
+
+  // Diaporama de cours & Présentation NotebookLM
+  activeSlideIndex: 0,
+  notebooklmUrl: 'https://notebooklm.google.com',
 
   // Sous-thème actif dans "Je découvre" (comm)
   activeSubthemeKey: 'reseaux', // 'reseaux' | 'messagerie' | 'ethique' | 'collaboration'
@@ -51,7 +58,7 @@ Alpine.data('profAssistantApp', () => ({
     avatar: 'robot'
   },
 
-  // Progression des compétences élève
+  // Progression des compétences élève (Référentiel SeGEC)
   eleveCompetences: {
     'NUM-1.D1': 'acquis',
     'NUM-1.D5': 'en_cours',
@@ -59,7 +66,7 @@ Alpine.data('profAssistantApp', () => ({
     'NUM-1.P2': 'a_renforcer'
   },
 
-  // Auto-évaluation p.83 (Bilan personnel)
+  // Auto-évaluation p.83 (Bilan personnel SeGEC)
   bilanPersonnel: {
     'NUM-1.D1': 'bien',
     'NUM-1.D5': 'moyen',
@@ -89,10 +96,20 @@ Alpine.data('profAssistantApp', () => ({
     finished: false,
     // Dossier 2 anomalies
     foundPhish: new Set(),
-    phishDigits: ['_', '_', '_', '_']
+    phishDigits: ['_', '_', '_', '_'],
+    // Dossier 4 explorateur
+    searchFile: '',
+    selectedFile: null,
+    // Dossier 5 associations
+    dossier5Selections: {
+      'histoire.docx': '',
+      'paysage.png': '',
+      'jingle.mp3': '',
+      'expose.pptx': ''
+    }
   },
 
-  // Atelier Pratique : Simulateur de Courriel (p. 64)
+  // Atelier Pratique : Simulateur de Courriel Professionnel (p. 64)
   emailSim: {
     destinataire: 'secretariat@ecole.be',
     cc: '',
@@ -113,7 +130,7 @@ Alpine.data('profAssistantApp', () => ({
     aiFeedback: ''
   },
 
-  // Tuteur Socratique IA
+  // Tuteur Socratique IA (@lt_X)
   tutorOpen: false,
   tutorLoading: false,
   tutorMood: 'happy',
@@ -124,7 +141,7 @@ Alpine.data('profAssistantApp', () => ({
   studentQuestion: '',
 
   // ==========================================
-  // ESPACE ENSEIGNANT (ed.ai) & AUTHENTIFICATION
+  // ESPACE ENSEIGNANT (PROGRAMME SEGEC)
   // ==========================================
   teacherAuth: {
     isTeacher: false,
@@ -134,26 +151,30 @@ Alpine.data('profAssistantApp', () => ({
     errorMsg: ''
   },
   modalLoginProfOpen: false,
+  activeProfSubTab: 'matrice', // 'matrice' | 'eleves' | 'notebooklm'
   selectedTeacherClass: '1A',
   unsubscribeTeacherListener: null,
   firestoreSynced: false,
   remediationGenerated: false,
 
-  // Données de classe affichées dans la heatmap ed.ai
-  classeEleves: [
-    { id: 1, nom: 'Lucas M.', eg: '5/5', charte: 'acquis', d5: 'en_cours', d6: 'en_cours', p2: 'a_renforcer', score: 75 },
-    { id: 2, nom: 'Emma B.', eg: '5/5', charte: 'acquis', d5: 'acquis', d6: 'acquis', p2: 'acquis', score: 98 },
-    { id: 3, nom: 'Youssef K.', eg: '4/5', charte: 'acquis', d5: 'acquis', d6: 'en_cours', p2: 'en_cours', score: 82 },
-    { id: 4, nom: 'Camille D.', eg: '3/5', charte: 'en_cours', d5: 'a_renforcer', d6: 'a_renforcer', p2: 'a_renforcer', score: 48 },
-    { id: 5, nom: 'Noah V.', eg: '5/5', charte: 'acquis', d5: 'acquis', d6: 'acquis', p2: 'en_cours', score: 88 },
-    { id: 6, nom: 'Léa S.', eg: '5/5', charte: 'acquis', d5: 'en_cours', d6: 'acquis', p2: 'acquis', score: 92 }
-  ],
+  // Gestion des élèves réels
+  allClassStudents: [],
+  searchStudentQuery: '',
+  modalAddStudentOpen: false,
+  newStudentData: {
+    nom: '',
+    classe: '1A',
+    email: ''
+  },
+
+  // Élèves affichés dans la Matrice SeGEC
+  classeEleves: [],
 
   // ==========================================
   // INITIALISATION
   // ==========================================
   async init() {
-    console.log('ProfAssistant V2 initialisé avec l\'écosystème complet @lt_X et ed.ai.');
+    console.log('ProfAssistant V2 initialisé — Aligné sur le programme SeGEC & FWB.');
 
     // 1. Récupération du profil élève en local
     const savedUser = localStorage.getItem('profassistant_student');
@@ -168,7 +189,7 @@ Alpine.data('profAssistantApp', () => ({
       }
     }
 
-    // 2. Initialisation silencieuse de la session élève (Firebase Auth Anonymous)
+    // 2. Initialisation silencieuse de la session élève
     await initStudentSession();
 
     // 3. Écoute de l'état d'authentification enseignant
@@ -179,11 +200,11 @@ Alpine.data('profAssistantApp', () => ({
 
       if (authStatus.isTeacher) {
         console.log(`[Prof] Bienvenue ${authStatus.profile?.nom || authStatus.user?.email}`);
-        // Synchronisation automatique de la classe active de l'enseignant
         if (authStatus.profile?.classes?.length) {
           this.selectedTeacherClass = authStatus.profile.classes[0];
         }
         this.activerEcouteClasse(this.selectedTeacherClass);
+        this.chargerElevesReels();
       } else {
         if (this.unsubscribeTeacherListener) {
           this.unsubscribeTeacherListener();
@@ -241,12 +262,13 @@ Alpine.data('profAssistantApp', () => ({
   },
 
   // ==========================================
-  // GESTION DU PROFESSEUR (AUTH & CLASSES)
+  // GESTION DU PROFESSEUR & DONNÉES RÉELLES
   // ==========================================
   ouvrirEspaceProf() {
     if (this.teacherAuth.isTeacher) {
       this.activeTab = 'prof';
       this.activerEcouteClasse(this.selectedTeacherClass);
+      this.chargerElevesReels();
     } else {
       this.modalLoginProfOpen = true;
       this.teacherAuth.errorMsg = '';
@@ -264,23 +286,12 @@ Alpine.data('profAssistantApp', () => ({
       this.modalLoginProfOpen = false;
       this.activeTab = 'prof';
       this.activerEcouteClasse(this.selectedTeacherClass);
+      this.chargerElevesReels();
     } else if (res.reason === 'not_whitelisted') {
       this.teacherAuth.errorMsg = `L'adresse Google "${res.email}" n'est pas encore inscrite sur la liste blanche des professeurs autorisés. Contactez l'administrateur.`;
     } else {
       this.teacherAuth.errorMsg = `Erreur de connexion : ${res.error || 'Veuillez réessayer'}`;
     }
-  },
-
-  activerModeDemoProf() {
-    // Mode secours présentation (déverrouille la vue ed.ai même sans compte Google)
-    this.teacherAuth.isTeacher = true;
-    this.teacherAuth.profile = {
-      nom: "Professeur Invité (Démo Samedi)",
-      classes: this.availableClasses,
-      role: "enseignant"
-    };
-    this.modalLoginProfOpen = false;
-    this.activeTab = 'prof';
   },
 
   async deconnexionProfesseur() {
@@ -294,6 +305,7 @@ Alpine.data('profAssistantApp', () => ({
   changerClasseEnseignant(newClass) {
     this.selectedTeacherClass = newClass;
     this.activerEcouteClasse(newClass);
+    this.chargerElevesReels();
   },
 
   activerEcouteClasse(classeId) {
@@ -303,22 +315,54 @@ Alpine.data('profAssistantApp', () => ({
 
     this.firestoreSynced = false;
     this.unsubscribeTeacherListener = listenToClasseProgressions(classeId, (eleves) => {
-      if (eleves && eleves.length > 0) {
+      if (eleves) {
         this.classeEleves = eleves;
         this.firestoreSynced = true;
-      } else {
-        // Si la classe est vide dans Firestore, conserver des élèves démo ou permettre de les injecter
-        this.firestoreSynced = false;
       }
     });
   },
 
-  async injecterDonneesDemoClasse() {
-    await seedDemoClassData(this.selectedTeacherClass);
-    alert(`6 élèves de démonstration avec progression réaliste ont été injectés dans la classe ${this.selectedTeacherClass} !`);
+  async chargerElevesReels() {
+    this.allClassStudents = await getRealClassStudents(this.selectedTeacherClass);
   },
 
-  // Métriques ed.ai calculées dynamiquement
+  async ajouterEleveManuel() {
+    if (!this.newStudentData.nom.trim()) return;
+
+    const res = await addRealStudent(
+      this.newStudentData.nom,
+      this.newStudentData.classe,
+      this.newStudentData.email
+    );
+
+    if (res.success) {
+      this.newStudentData.nom = '';
+      this.newStudentData.email = '';
+      this.modalAddStudentOpen = false;
+      await this.chargerElevesReels();
+      this.activerEcouteClasse(this.selectedTeacherClass);
+    } else {
+      alert(`Erreur lors de l'enregistrement de l'élève : ${res.error}`);
+    }
+  },
+
+  async changerClasseEleve(studentId, newClass) {
+    const ok = await updateStudentClassInDb(studentId, newClass, this.selectedTeacherClass);
+    if (ok) {
+      await this.chargerElevesReels();
+      this.activerEcouteClasse(this.selectedTeacherClass);
+    }
+  },
+
+  getElevesFiltresGestion() {
+    const q = this.searchStudentQuery.toLowerCase().trim();
+    if (!q) return this.allClassStudents;
+    return this.allClassStudents.filter(s => 
+      s.nom.toLowerCase().includes(q) || (s.email && s.email.toLowerCase().includes(q))
+    );
+  },
+
+  // Métriques de Maîtrise SeGEC
   getProgressionMoyenneClasse() {
     if (!this.classeEleves || this.classeEleves.length === 0) return 0;
     const total = this.classeEleves.reduce((acc, el) => acc + (el.score || 0), 0);
@@ -328,6 +372,174 @@ Alpine.data('profAssistantApp', () => ({
   getNbElevesTermineEG() {
     if (!this.classeEleves) return 0;
     return this.classeEleves.filter(el => el.eg === "5/5").length;
+  },
+
+  genererRemediationProf() {
+    this.remediationGenerated = true;
+  },
+
+  // ==========================================
+  // JEU DE LA CHARTE (MODULE 0 - CORRIGÉ)
+  // ==========================================
+  getCurrentCharteSituation() {
+    const situations = this.module0?.parties?.[1]?.situations || [];
+    return situations[this.charteState.currentIndex] || { 
+      id: "none", 
+      scenario: "Théo termine son travail, se déconnecte de sa session et éteint l'écran de l'ordinateur.", 
+      est_ok: true, 
+      explication: "Bravo ! Théo respecte le matériel et protège ses données personnelles en fermant sa session." 
+    };
+  },
+
+  repondreCharte(choice) {
+    if (this.charteState.hasAnswered) return;
+    const sit = this.getCurrentCharteSituation();
+    this.charteState.userChoice = choice;
+    this.charteState.hasAnswered = true;
+
+    if (choice === sit.est_ok) {
+      this.charteState.score += 10;
+      this.user.xp += 15;
+      this.tutorMood = 'happy';
+    } else {
+      this.tutorMood = 'thinking';
+    }
+
+    this.syncCurrentStudentProgress();
+  },
+
+  charteSuivante() {
+    const situations = this.module0?.parties?.[1]?.situations || [];
+    if (this.charteState.currentIndex < situations.length - 1) {
+      this.charteState.currentIndex++;
+      this.charteState.userChoice = null;
+      this.charteState.hasAnswered = false;
+    } else {
+      this.charteState.finished = true;
+      this.syncCurrentStudentProgress();
+    }
+  },
+
+  situationCharteSuivante() {
+    this.charteSuivante();
+  },
+
+  recommencerCharte() {
+    this.charteState.currentIndex = 0;
+    this.charteState.userChoice = null;
+    this.charteState.hasAnswered = false;
+    this.charteState.score = 0;
+    this.charteState.finished = false;
+  },
+
+  reinitialiserCharte() {
+    this.recommencerCharte();
+  },
+
+  // ==========================================
+  // ESCAPE GAME (5 DOSSIERS - COMPLETS)
+  // ==========================================
+  clickPhishSusp(key, digit) {
+    if (this.egState.foundPhish.has(key)) return;
+    this.egState.foundPhish.add(key);
+    const order = ['sender', 'urgent', 'password', 'link'];
+    const map = { sender: '7', urgent: '3', password: '1', link: '9' };
+    this.egState.phishDigits = order.map(k => this.egState.foundPhish.has(k) ? map[k] : '_');
+  },
+
+  // Dossier 4 : Explorateur de fichiers
+  getFichiersServeurFiltres() {
+    const list = this.escapeGame?.dossiers?.[3]?.fichiers_serveur || [];
+    const q = (this.egState.searchFile || '').toLowerCase().trim();
+    if (!q) return list;
+    return list.filter(f => 
+      f.nom.toLowerCase().includes(q) || 
+      f.proprio.toLowerCase().includes(q) || 
+      f.type.toLowerCase().includes(q)
+    );
+  },
+
+  selectionnerFichierDossier4(fichier) {
+    this.egState.selectedFile = fichier;
+    this.egState.inputCode = fichier.nom;
+  },
+
+  // Dossier 5 : Associations logiciels
+  validerDossier5() {
+    const sel = this.egState.dossier5Selections;
+    const correct = (
+      sel['histoire.docx'] === 'Traitement de texte' &&
+      sel['paysage.png'] === 'Éditeur d\'image' &&
+      sel['jingle.mp3'] === 'Lecteur audio' &&
+      sel['expose.pptx'] === 'Logiciel de présentation'
+    );
+
+    if (correct) {
+      this.egState.isSuccess = true;
+      this.egState.feedback = 'Bravo ! Tu as associé chaque extension au bon outil numérique ! Dossier 5 restauré 🎉';
+      this.egState.finished = true;
+      this.user.xp += 50;
+      this.syncCurrentStudentProgress();
+    } else {
+      this.egState.feedback = 'Certaines associations sont incorrectes. Vérifie : .docx pour le texte, .png pour l\'image, .mp3 pour le son et .pptx pour la présentation.';
+    }
+  },
+
+  validerCodeDossier() {
+    const code = this.egState.inputCode.trim().toUpperCase().replace(/\s/g, '');
+    const current = this.egState.activeDossier;
+
+    if (current === 1) {
+      if (code === 'COMMUNIQUER') {
+        this.egState.isSuccess = true;
+        this.egState.feedback = 'Bravo ! Le Dossier 1 (COMMUNICATION) est déverrouillé !';
+        this.user.xp += 25;
+        this.debloquerDossierSuivant(2);
+      } else {
+        this.egState.feedback = 'Code incorrect. Indice : assemble les 2 parties ("COMM" du chat + radio morse "UNIQUER").';
+      }
+    } else if (current === 2) {
+      if (code === '7319') {
+        this.egState.isSuccess = true;
+        this.egState.feedback = 'Alerte neutralisée ! Le Dossier 2 (SÉCURITÉ) est déverrouillé !';
+        this.user.xp += 25;
+        this.debloquerDossierSuivant(3);
+      } else {
+        this.egState.feedback = 'Code erroné. Repère les 4 indices suspects dans le mail de phishing.';
+      }
+    } else if (current === 3) {
+      if (code === 'FER') {
+        this.egState.isSuccess = true;
+        this.egState.feedback = 'Exact ! L\'Atomium est un cristal de fer, pas de cuivre ! Dossier 3 (IA) débloqué.';
+        this.user.xp += 25;
+        this.debloquerDossierSuivant(4);
+      } else {
+        this.egState.feedback = 'Indice : quel matériau compose réellement le cristal de l\'Atomium ?';
+      }
+    } else if (current === 4) {
+      if (code === 'AURORE.PNG' || code === 'AURORE') {
+        this.egState.isSuccess = true;
+        this.egState.feedback = 'Fichier fantôme identifié avec succès (aurore.png) ! Dossier 4 (DONNÉES) déverrouillé.';
+        this.user.xp += 25;
+        this.debloquerDossierSuivant(5);
+      } else {
+        this.egState.feedback = 'Vérifie dans l\'explorateur : Image de Sam du 12/09 pesant plus de 5 Mo.';
+      }
+    }
+  },
+
+  debloquerDossierSuivant(num) {
+    if (!this.egState.dossierUnlocked.includes(num)) {
+      this.egState.dossierUnlocked.push(num);
+    }
+    this.syncCurrentStudentProgress();
+
+    setTimeout(() => {
+      this.egState.activeDossier = num;
+      this.egState.inputCode = '';
+      this.egState.feedback = '';
+      this.egState.isSuccess = false;
+    }, 1500);
   },
 
   // ==========================================
@@ -388,116 +600,6 @@ Alpine.data('profAssistantApp', () => ({
   },
 
   // ==========================================
-  // JEU DE LA CHARTE (MODULE 0)
-  // ==========================================
-  repondreCharte(choice) {
-    if (this.charteState.hasAnswered) return;
-    this.charteState.userChoice = choice;
-    this.charteState.hasAnswered = true;
-    const item = this.module0.charte_interactif[this.charteState.currentIndex];
-    
-    if (choice === item.rep) {
-      this.charteState.score++;
-      this.user.xp += 15;
-    }
-
-    this.syncCurrentStudentProgress();
-  },
-
-  charteSuivante() {
-    if (this.charteState.currentIndex < this.module0.charte_interactif.length - 1) {
-      this.charteState.currentIndex++;
-      this.charteState.userChoice = null;
-      this.charteState.hasAnswered = false;
-    } else {
-      this.charteState.finished = true;
-      this.syncCurrentStudentProgress();
-    }
-  },
-
-  recommencerCharte() {
-    this.charteState.currentIndex = 0;
-    this.charteState.userChoice = null;
-    this.charteState.hasAnswered = false;
-    this.charteState.score = 0;
-    this.charteState.finished = false;
-  },
-
-  // ==========================================
-  // ESCAPE GAME (5 DOSSIERS)
-  // ==========================================
-  clickPhishSusp(key, digit) {
-    if (this.egState.foundPhish.has(key)) return;
-    this.egState.foundPhish.add(key);
-    const order = ['sender', 'urgent', 'password', 'link'];
-    const map = { sender: '7', urgent: '3', password: '1', link: '9' };
-    this.egState.phishDigits = order.map(k => this.egState.foundPhish.has(k) ? map[k] : '_');
-  },
-
-  validerCodeDossier() {
-    const code = this.egState.inputCode.trim().toUpperCase().replace(/\s/g, '');
-    const current = this.egState.activeDossier;
-
-    if (current === 1) {
-      if (code === 'COMMUNIQUER') {
-        this.egState.isSuccess = true;
-        this.egState.feedback = 'Bravo ! Le Dossier 1 (COMMUNICATION) est déverrouillé !';
-        this.user.xp += 25;
-        this.debloquerDossierSuivant(2);
-      } else {
-        this.egState.feedback = 'Code incorrect. Indice : assemble les 2 parties ("COMM" du chat + radio morse "UNIQUER").';
-      }
-    } else if (current === 2) {
-      if (code === '7319') {
-        this.egState.isSuccess = true;
-        this.egState.feedback = 'Alerte neutralisée ! Le Dossier 2 (SÉCURITÉ) est déverrouillé !';
-        this.user.xp += 25;
-        this.debloquerDossierSuivant(3);
-      } else {
-        this.egState.feedback = 'Code erroné. Repère les 4 indices suspects dans le mail de phishing.';
-      }
-    } else if (current === 3) {
-      if (code === 'FER') {
-        this.egState.isSuccess = true;
-        this.egState.feedback = 'Exact ! L\'Atomium est un cristal de fer, pas de cuivre ! Dossier 3 (IA) débloqué.';
-        this.user.xp += 25;
-        this.debloquerDossierSuivant(4);
-      } else {
-        this.egState.feedback = 'Indice : quel matériau compose réellement le cristal de l\'Atomium ?';
-      }
-    } else if (current === 4) {
-      if (code === 'AURORE.PNG' || code === 'AURORE') {
-        this.egState.isSuccess = true;
-        this.egState.feedback = 'Fichier fantôme identifié ! Dossier 4 (DONNÉES) déverrouillé.';
-        this.user.xp += 25;
-        this.debloquerDossierSuivant(5);
-      } else {
-        this.egState.feedback = 'Vérifie : Image de Sam du 12/09 de plus de 5 Mo.';
-      }
-    } else if (current === 5) {
-      this.egState.isSuccess = true;
-      this.egState.feedback = 'Félicitations ! Les 5 dossiers ont été restaurés avec succès ! 🎉';
-      this.egState.finished = true;
-      this.user.xp += 50;
-      this.syncCurrentStudentProgress();
-    }
-  },
-
-  debloquerDossierSuivant(num) {
-    if (!this.egState.dossierUnlocked.includes(num)) {
-      this.egState.dossierUnlocked.push(num);
-    }
-    this.syncCurrentStudentProgress();
-
-    setTimeout(() => {
-      this.egState.activeDossier = num;
-      this.egState.inputCode = '';
-      this.egState.feedback = '';
-      this.egState.isSuccess = false;
-    }, 1500);
-  },
-
-  // ==========================================
   // ATELIER SIMULATEUR DE COURRIEL (P. 64)
   // ==========================================
   analyserEmailSimule() {
@@ -546,6 +648,59 @@ Alpine.data('profAssistantApp', () => ({
   },
 
   // ==========================================
+  // DIAPORAMA DE COURS & NOTEBOOKLM
+  // ==========================================
+  getCurrentModuleSlides() {
+    if (this.selectedModuleId === 'module-0') {
+      return this.module0?.support_cours?.slides || [];
+    }
+    return this.chapter?.support_cours?.slides || [];
+  },
+
+  getCurrentSlide() {
+    const slides = this.getCurrentModuleSlides();
+    return slides[this.activeSlideIndex] || slides[0] || { titre: "Présentation", contenu: "Support en cours de préparation." };
+  },
+
+  nextSlide() {
+    const slides = this.getCurrentModuleSlides();
+    if (this.activeSlideIndex < slides.length - 1) {
+      this.activeSlideIndex++;
+    } else {
+      this.activeSlideIndex = 0;
+    }
+  },
+
+  prevSlide() {
+    const slides = this.getCurrentModuleSlides();
+    if (this.activeSlideIndex > 0) {
+      this.activeSlideIndex--;
+    } else {
+      this.activeSlideIndex = slides.length - 1;
+    }
+  },
+
+  getNotebookLMUrl() {
+    if (this.selectedModuleId === 'module-0') {
+      return this.module0?.support_cours?.notebooklm_url || 'https://notebooklm.google.com';
+    }
+    return this.chapter?.support_cours?.notebooklm_url || 'https://notebooklm.google.com';
+  },
+
+  async sauvegarderNotebookLMConfig(moduleId, newUrl) {
+    if (!newUrl) return;
+    if (moduleId === 'module-0') {
+      if (!this.module0.support_cours) this.module0.support_cours = {};
+      this.module0.support_cours.notebooklm_url = newUrl;
+    } else {
+      if (!this.chapter.support_cours) this.chapter.support_cours = {};
+      this.chapter.support_cours.notebooklm_url = newUrl;
+    }
+    await savePresentationConfig(moduleId, { notebooklm_url: newUrl });
+    alert('Lien NotebookLM enregistré avec succès dans Firestore !');
+  },
+
+  // ==========================================
   // TUTEUR SOCRATIQUE IA
   // ==========================================
   async envoyerQuestionTuteur() {
@@ -580,15 +735,13 @@ Alpine.data('profAssistantApp', () => ({
         reponse = "Pour le Dossier 1 de l'Escape Game : assemble 'COMM' (du chat) avec la traduction morse 'UNIQUER' !";
       } else if (lower.includes('atomium')) {
         reponse = "Vérifie les archives de l'Atomium : est-ce vraiment du cuivre ou du fer ?";
+      } else if (lower.includes('fantôme') || lower.includes('sam') || lower.includes('aurore')) {
+        reponse = "Regarde dans l'explorateur du Dossier 4 : quel fichier appartient à Sam, date du 12/09 et pèse plus de 5 Mo ?";
       }
       this.tutorHistory.push({ sender: 'bot', text: reponse });
       this.tutorMood = 'happy';
       this.tutorLoading = false;
     }, 500);
-  },
-
-  genererRemediationProf() {
-    this.remediationGenerated = true;
   }
 }));
 

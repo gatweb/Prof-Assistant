@@ -100,5 +100,17 @@
         { "ordre": 4, "action": "Je ferme ma session ou j'éteins l'ordinateur proprement." }
       ]
     }
-  ]
+  ],
+  "support_cours": {
+    "titre": "Présentation & Support de cours : Prise en main & Charte",
+    "description": "Diaporama de rentrée et synthèses NotebookLM sur la prise en main du PC et les règles d'or en classe.",
+    "slides_url": "",
+    "notebooklm_url": "https://notebooklm.google.com",
+    "slides": [
+      { "titre": "Bienvenue en FMTTN Numérique (SeGEC)", "contenu": "2 périodes par semaine pour devenir un citoyen numérique autonome et responsable." },
+      { "titre": "Le Matériel de la Salle Informatique", "contenu": "Matériel partagé : clavier AZERTY, souris, raccourcis essentiels et respect des équipements." },
+      { "titre": "La Charte de Bonne Conduite", "contenu": "Droits et devoirs de l'élève : respect de la vie privée, interdiction de modifier les réglages du poste." },
+      { "titre": "La Règle d'or de Déconnexion", "contenu": "Fermer l'écran ≠ Se déconnecter ! Toujours fermer ses sessions Google et déconnecter son compte école." }
+    ]
+  }
 }

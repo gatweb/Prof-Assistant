@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>body{font-family:Plus Jakarta Sans,sans-serif}</style>
-  <script type="module" crossorigin src="./assets/index-DTDJKAst.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-C8PHN6jJ.css">
+  <script type="module" crossorigin src="./assets/index-CAAGg-_S.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-u78gfjOa.css">
 </head>
 <body class="h-full flex flex-col bg-slate-50 text-slate-800" x-data="profAssistantApp()">
 
@@ -27,24 +27,24 @@
             <h1 class="font-extrabold text-lg tracking-tight text-slate-900">ProfAssistant</h1>
             <span class="text-xs font-semibold px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full">FMTTN 1re</span>
           </div>
-          <p class="text-xs text-slate-500 font-medium">Programme FWB • Manuel & Écosystème @lt_X</p>
+          <p class="text-xs text-slate-500 font-medium">Programme SeGEC (FWB) • Manuel & Écosystème @lt_X</p>
         </div>
       </div>
 
-      <!-- Sélecteur de Mode (Élève vs Enseignant ed.ai) -->
+      <!-- Sélecteur de Mode (Élève vs Enseignant SeGEC) -->
       <div class="flex items-center gap-3">
         <div class="bg-slate-100 p-1 rounded-xl flex items-center gap-1 text-xs font-bold">
           <button 
             @click="activeTab = 'decouvre'"
             :class="activeTab !== 'prof' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-            class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+            class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer">
             <span>🎒</span> Espace Élève
           </button>
           <button 
             @click="ouvrirEspaceProf()"
             :class="activeTab === 'prof' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-            class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
-            <span>✨</span> Matrice ed.ai (Prof)
+            class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer">
+            <span>✨</span> Matrice SeGEC (Prof)
             <span x-show="teacherAuth.isTeacher" class="w-2 h-2 rounded-full bg-emerald-400 inline-block" title="Enseignant connecté"></span>
           </button>
         </div>
@@ -137,32 +137,56 @@
              x-text="selectedModuleId === 'module-0' ? module0.sous_titre : (selectedModuleId === 'escape-game' ? escapeGame.contexte : chapter.introduction)"></p>
         </div>
 
-        <!-- Onglets du cycle (Si Chapitre 1 et mode élève) -->
-        <template x-if="activeTab !== 'prof' && selectedModuleId === 'ch1-communication'">
+        <!-- Onglets pour Module 0 (Ateliers vs Présentation NotebookLM) -->
+        <template x-if="activeTab !== 'prof' && selectedModuleId === 'module-0'">
           <nav class="flex bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 self-start md:self-auto">
             <button 
               @click="activeTab = 'decouvre'"
+              :class="activeTab !== 'cours' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+              <span>🚀</span> Ateliers & Charte
+            </button>
+            <button 
+              @click="activeTab = 'cours'"
+              :class="activeTab === 'cours' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+              <span>📽️</span> Diaporama & NotebookLM
+            </button>
+          </nav>
+        </template>
+
+        <!-- Onglets du cycle (Si Chapitre 1 et mode élève) -->
+        <template x-if="activeTab !== 'prof' && selectedModuleId === 'ch1-communication'">
+          <nav class="flex flex-wrap bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 self-start md:self-auto gap-1">
+            <button 
+              @click="activeTab = 'decouvre'"
               :class="activeTab === 'decouvre' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
               <span>🔍</span> Je découvre
             </button>
             <button 
               @click="activeTab = 'pratique'"
               :class="activeTab === 'pratique' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
               <span>⚙️</span> Je pratique
             </button>
             <button 
               @click="activeTab = 'maitrise'"
               :class="activeTab === 'maitrise' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
               <span>🎯</span> Je maîtrise
             </button>
             <button 
               @click="activeTab = 'competences'"
               :class="activeTab === 'competences' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
               <span>📊</span> Compétences
+            </button>
+            <button 
+              @click="activeTab = 'cours'"
+              :class="activeTab === 'cours' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+              <span>📽️</span> Diaporama & NotebookLM
             </button>
           </nav>
         </template>
@@ -176,7 +200,7 @@
     <!-- ======================================================= -->
     <!-- MODULE 0 : INTRODUCTION & CHARTE DE RENTRÉE             -->
     <!-- ======================================================= -->
-    <div x-show="activeTab !== 'prof' && selectedModuleId === 'module-0'" class="space-y-8">
+    <div x-show="activeTab !== 'prof' && activeTab !== 'cours' && selectedModuleId === 'module-0'" class="space-y-8">
       
       <!-- Bandeau Bienvenue & Mascotte -->
       <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
@@ -418,9 +442,125 @@
             <div class="font-black text-slate-900">🏛️ L'IA affirme : "L'Atomium de Bruxelles (1958) représente un cristal de cuivre agrandi..."</div>
             <p class="text-slate-600">L'une des affirmations est une hallucination d'IA ! Tape le vrai nom du métal :</p>
             <div class="grid grid-cols-3 gap-2">
-              <button @click="egState.inputCode = 'FER'; validerCodeDossier()" class="p-3 bg-white border border-slate-200 rounded-xl font-bold hover:border-purple-400">Cristal de Fer</button>
-              <button @click="egState.inputCode = 'CUIVRE'; validerCodeDossier()" class="p-3 bg-white border border-slate-200 rounded-xl font-bold hover:border-purple-400">Cristal de Cuivre</button>
-              <button @click="egState.inputCode = 'OR'; validerCodeDossier()" class="p-3 bg-white border border-slate-200 rounded-xl font-bold hover:border-purple-400">Cristal d'Or</button>
+              <button @click="egState.inputCode = 'FER'; validerCodeDossier()" class="p-3 bg-white border border-slate-200 rounded-xl font-bold hover:border-purple-400 cursor-pointer">Cristal de Fer</button>
+              <button @click="egState.inputCode = 'CUIVRE'; validerCodeDossier()" class="p-3 bg-white border border-slate-200 rounded-xl font-bold hover:border-purple-400 cursor-pointer">Cristal de Cuivre</button>
+              <button @click="egState.inputCode = 'OR'; validerCodeDossier()" class="p-3 bg-white border border-slate-200 rounded-xl font-bold hover:border-purple-400 cursor-pointer">Cristal d'Or</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DOSSIER 4 : Le Fichier Fantôme (Explorateur de Fichiers) -->
+        <div x-show="egState.activeDossier === 4" class="space-y-4 my-6">
+          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div>
+                <div class="font-black text-slate-900 flex items-center gap-2">
+                  <span>📁</span> Explorateur du Serveur Réseau (Archives du 12/09)
+                </div>
+                <p class="text-slate-500 mt-1">
+                  Indices : C'est une <strong>IMAGE</strong> • Propriétaire : <strong>Sam</strong> • Modifiée le <strong>12/09</strong> • Pèse <strong>plus de 5 Mo</strong>.
+                </p>
+              </div>
+              <div class="relative">
+                <input 
+                  type="text" 
+                  x-model="egState.searchFile" 
+                  placeholder="Filtrer les fichiers..." 
+                  class="px-3 py-1.5 pl-8 rounded-xl border border-slate-300 bg-white text-xs focus:outline-none focus:border-purple-600 w-full sm:w-48" />
+                <span class="absolute left-2.5 top-2 text-slate-400">🔍</span>
+              </div>
+            </div>
+
+            <!-- Tableau interactif des fichiers -->
+            <div class="bg-white rounded-xl border border-slate-200 overflow-x-auto shadow-xs">
+              <table class="w-full text-left text-xs border-collapse min-w-[550px]">
+                <thead class="bg-slate-100 text-slate-600 font-extrabold border-b border-slate-200">
+                  <tr>
+                    <th class="py-2.5 px-3">Nom du fichier</th>
+                    <th class="py-2.5 px-3">Type</th>
+                    <th class="py-2.5 px-3">Propriétaire</th>
+                    <th class="py-2.5 px-3">Date modif.</th>
+                    <th class="py-2.5 px-3 text-right">Taille</th>
+                    <th class="py-2.5 px-3 text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <template x-for="f in getFichiersServeurFiltres()" :key="f.nom">
+                    <tr 
+                      @click="selectionnerFichierDossier4(f)" 
+                      :class="egState.selectedFile?.nom === f.nom ? 'bg-purple-50 font-bold border-l-4 border-purple-600' : 'hover:bg-slate-50 cursor-pointer'"
+                      class="transition">
+                      <td class="py-2.5 px-3 flex items-center gap-2">
+                        <span x-text="f.icone"></span>
+                        <span class="font-mono text-slate-900" x-text="f.nom"></span>
+                      </td>
+                      <td class="py-2.5 px-3 text-slate-600" x-text="f.type"></td>
+                      <td class="py-2.5 px-3">
+                        <span :class="f.proprio === 'Sam' ? 'bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded' : 'text-slate-600'" x-text="f.proprio"></span>
+                      </td>
+                      <td class="py-2.5 px-3" :class="f.date.includes('12/09') ? 'font-bold text-slate-900' : 'text-slate-500'" x-text="f.date"></td>
+                      <td class="py-2.5 px-3 text-right font-mono" :class="f.taille.includes('Mo') && parseFloat(f.taille) > 5 ? 'text-purple-700 font-bold' : 'text-slate-600'" x-text="f.taille"></td>
+                      <td class="py-2.5 px-3 text-center">
+                        <button 
+                          @click.stop="selectionnerFichierDossier4(f); validerCodeDossier()"
+                          class="px-2.5 py-1 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-800 font-extrabold text-[11px] transition cursor-pointer">
+                          Sélectionner
+                        </button>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500">
+              <span>Clique sur la bonne ligne ou clique sur « Sélectionner » pour valider.</span>
+              <span class="font-bold" x-show="egState.selectedFile" x-text="'Fichier sélectionné : ' + egState.selectedFile?.nom"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DOSSIER 5 : L'Atelier Réparé (Associations Logiciels & Extensions) -->
+        <div x-show="egState.activeDossier === 5" class="space-y-4 my-6">
+          <div class="p-5 rounded-2xl bg-purple-50/60 border border-purple-200 text-xs">
+            <div class="font-black text-purple-950 mb-3 flex items-center justify-between">
+              <span class="text-sm">🎨 Relie chaque fichier au bon logiciel d'utilisation pour réparer l'atelier :</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-purple-200 text-purple-900 font-bold">Dernière étape</span>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <template x-for="item in escapeGame.dossiers[4].associations" :key="item.fichier">
+                <div class="p-3.5 bg-white rounded-xl border border-purple-100 shadow-2xs space-y-2">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <span class="text-xl" x-text="item.icone"></span>
+                      <div>
+                        <span class="font-mono font-bold text-slate-800" x-text="item.fichier"></span>
+                        <span class="text-[11px] font-extrabold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 ml-1" x-text="item.ext"></span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-500 mb-1">Logiciel associé :</label>
+                    <select 
+                      x-model="egState.dossier5Selections[item.fichier]"
+                      class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-600">
+                      <option value="">-- Choisir le bon logiciel --</option>
+                      <template x-for="opt in escapeGame.dossiers[4].app_options" :key="opt">
+                        <option :value="opt" x-text="opt"></option>
+                      </template>
+                    </select>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-purple-200 flex justify-end">
+              <button 
+                @click="validerDossier5()"
+                class="px-6 py-2.5 bg-purple-600 text-white font-extrabold rounded-xl text-xs hover:bg-purple-700 transition shadow-sm flex items-center gap-2 cursor-pointer">
+                <span>✓</span> Valider les associations du Dossier 5
+              </button>
             </div>
           </div>
         </div>
@@ -444,6 +584,15 @@
         <div x-show="egState.feedback" class="mt-4 p-3 rounded-xl text-xs font-bold"
              :class="egState.isSuccess ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'"
              x-text="egState.feedback">
+        </div>
+
+        <!-- Victoire Escape Game -->
+        <div x-show="egState.finished" class="mt-6 p-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white text-center space-y-3 shadow-md animate-fadeIn">
+          <div class="text-4xl">🎉🏆</div>
+          <h4 class="text-xl font-black">Mission Accomplie : Les 5 dossiers sont restaurés !</h4>
+          <p class="text-xs text-emerald-100 max-w-lg mx-auto">
+            Bravo à l'équipe <strong x-text="egState.teamName"></strong> ! Le serveur de classe est entièrement opérationnel et tous les chapitres de l'année sont déverrouillés. (+50 XP)
+          </p>
         </div>
 
       </div>
@@ -809,31 +958,128 @@
     </div>
 
     <!-- ======================================================= -->
-    <!-- VUE ENSEIGNANT : MATRICE ED.AI                          -->
+    <!-- DIAPORAMA DE COURS & NOTEBOOKLM (MODULE 0 & CHAPITRE 1) -->
+    <!-- ======================================================= -->
+    <div x-show="activeTab !== 'prof' && activeTab === 'cours'" class="space-y-8">
+      
+      <!-- Bandeau Diaporama -->
+      <div class="bg-gradient-to-r from-indigo-900 via-blue-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <span class="px-3 py-1 bg-white/10 text-indigo-200 rounded-full text-xs font-extrabold uppercase tracking-wider">
+            Support de Cours • Programme SeGEC FMTTN
+          </span>
+          <h3 class="text-2xl font-black mt-2" x-text="selectedModuleId === 'module-0' ? module0.support_cours?.titre : chapter.support_cours?.titre"></h3>
+          <p class="text-xs sm:text-sm text-indigo-100 mt-2 max-w-xl leading-relaxed" 
+             x-text="selectedModuleId === 'module-0' ? module0.support_cours?.description : chapter.support_cours?.description">
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          <a 
+            :href="getNotebookLMUrl()" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="px-5 py-3 rounded-2xl bg-white text-indigo-950 font-black text-xs hover:bg-indigo-50 transition shadow-sm flex items-center gap-2 cursor-pointer">
+            <span>📓</span> Ouvrir sur NotebookLM ↗
+          </a>
+        </div>
+      </div>
+
+      <!-- Lecteur de Diapositives Interactif -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+          <div class="flex items-center gap-2">
+            <span class="p-2 rounded-xl bg-indigo-100 text-indigo-700 text-xs font-black">📽️ Diapo</span>
+            <span class="text-xs font-extrabold text-slate-400" x-text="'Diapositive ' + (activeSlideIndex + 1) + ' sur ' + getCurrentModuleSlides().length"></span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <template x-for="(s, idx) in getCurrentModuleSlides()" :key="idx">
+              <button 
+                @click="activeSlideIndex = idx"
+                :class="activeSlideIndex === idx ? 'w-6 bg-indigo-600' : 'w-2 bg-slate-200 hover:bg-slate-300'"
+                class="h-2 rounded-full transition-all cursor-pointer"></button>
+            </template>
+          </div>
+        </div>
+
+        <!-- Contenu de la diapo active -->
+        <div class="min-h-[220px] flex flex-col justify-center py-6 px-4 sm:px-8 bg-slate-50/70 rounded-2xl border border-slate-100">
+          <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2">Notion clé SeGEC</span>
+          <h4 class="text-xl sm:text-2xl font-black text-slate-900 leading-snug" x-text="getCurrentSlide().titre"></h4>
+          <p class="text-sm sm:text-base text-slate-700 font-medium mt-3 leading-relaxed max-w-3xl" x-text="getCurrentSlide().contenu"></p>
+        </div>
+
+        <!-- Commandes de navigation diaporama -->
+        <div class="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
+          <button 
+            @click="prevSlide()"
+            class="px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs transition flex items-center gap-2 cursor-pointer">
+            <span>←</span> Précédent
+          </button>
+          
+          <div class="flex items-center gap-3">
+            <button 
+              @click="tutorOpen = true"
+              class="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1.5 cursor-pointer">
+              <span>🤖</span> Poser une question sur cette diapo
+            </button>
+            <button 
+              @click="nextSlide()"
+              class="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-extrabold text-xs hover:bg-indigo-700 transition flex items-center gap-2 cursor-pointer shadow-xs">
+              <span>Suivant</span> <span>→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloc NotebookLM Dédié avec conseils d'utilisation -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-gradient-to-tr from-amber-500/10 to-orange-500/10 border border-amber-200/80 rounded-3xl p-6 text-slate-800 space-y-2">
+          <div class="text-2xl">🎧</div>
+          <h5 class="font-extrabold text-sm text-amber-950">Podcasts & Résumés Audio</h5>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Écoutez la discussion audio générée par NotebookLM sur ce chapitre pour réviser le cours en autonomie.
+          </p>
+        </div>
+        <div class="bg-gradient-to-tr from-blue-500/10 to-indigo-500/10 border border-blue-200/80 rounded-3xl p-6 text-slate-800 space-y-2">
+          <div class="text-2xl">💬</div>
+          <h5 class="font-extrabold text-sm text-blue-950">Interroger la Synthèse</h5>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Posez toutes vos questions à NotebookLM : chaque réponse cite précisément le cours et le manuel @lt_X.
+          </p>
+        </div>
+        <div class="bg-gradient-to-tr from-emerald-500/10 to-teal-500/10 border border-emerald-200/80 rounded-3xl p-6 text-slate-800 space-y-2">
+          <div class="text-2xl">📋</div>
+          <h5 class="font-extrabold text-sm text-emerald-950">Fiches de Révision</h5>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Générez des guides d'étude, des fiches réflexes et des glossaires alignés sur le référentiel SeGEC.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- ESPACE ENSEIGNANT : PROGRAMME SEGEC & GESTION RÉELLE   -->
     <!-- ======================================================= -->
     <div x-show="activeTab === 'prof'" class="space-y-8">
       
-      <!-- En-tête Professeur -->
-      <!-- En-tête Professeur -->
+      <!-- En-tête Enseignant -->
       <div class="bg-gradient-to-r from-slate-900 to-indigo-950 rounded-3xl p-8 text-white shadow-md">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div class="flex items-center gap-2 mb-2 flex-wrap">
               <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/30 text-indigo-300 text-xs font-extrabold">
-                <span>✨</span> Mode Enseignant • Matrice Standards-Aligned
+                <span>✨</span> Espace Enseignant • Référentiel SeGEC FMTTN 1re
               </span>
               <span x-show="firestoreSynced" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Firestore en direct
-              </span>
-              <span x-show="!firestoreSynced" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[11px] font-bold">
-                <span>⚡</span> Données de simulation
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Firestore synchronisé en direct
               </span>
             </div>
 
             <div class="flex items-center gap-3 flex-wrap">
-              <h2 class="text-2xl font-black tracking-tight">Météo des Compétences :</h2>
+              <h2 class="text-2xl font-black tracking-tight">Tableau de Bord :</h2>
               <div class="inline-flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-xl border border-white/20">
-                <span class="text-xs text-indigo-200 font-semibold">Classe active :</span>
+                <span class="text-xs text-indigo-200 font-semibold">Classe suivie :</span>
                 <select 
                   x-model="selectedTeacherClass" 
                   @change="changerClasseEnseignant($event.target.value)"
@@ -846,127 +1092,377 @@
             </div>
 
             <p class="text-xs sm:text-sm text-slate-300 mt-2">
-              Suivi unifié : Escape Game de rentrée, Charte informatique, Quiz @lt_X et Rédaction de courriel.
+              Données réelles des élèves : Escape Game de rentrée, Charte informatique, Quiz de diagnostic et Simulateur d'e-mail.
             </p>
           </div>
 
           <div class="flex items-center gap-2 flex-wrap">
             <button 
-              @click="injecterDonneesDemoClasse()"
-              title="Ajouter 6 élèves types dans cette classe"
-              class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition border border-white/20 flex items-center gap-1.5">
-              <span>👥</span> Injecter démo
+              @click="modalAddStudentOpen = true"
+              class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition border border-white/20 flex items-center gap-1.5 cursor-pointer">
+              <span>➕</span> Inscrire un élève
             </button>
             <button 
               @click="genererRemediationProf()"
-              class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs transition shadow-sm flex items-center gap-2">
-              <span>⚡</span> Générer la remédiation ciblée (1 clic)
+              class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs transition shadow-sm flex items-center gap-2 cursor-pointer">
+              <span>⚡</span> Générer remédiation ciblée (1 clic)
             </button>
           </div>
         </div>
-      </div>
 
-      <!-- Métriques Globales -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-          <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Progression Globale Classe</div>
-          <div class="text-3xl font-black text-slate-900 mt-2" x-text="getProgressionMoyenneClasse() + '%'">81%</div>
-          <p class="text-xs text-slate-500 mt-1">
-            <span class="font-bold" x-text="getNbElevesTermineEG()">5</span> élèves sur <span class="font-bold" x-text="classeEleves.length">6</span> ont terminé l'Escape Game.
-          </p>
-          <div class="w-full bg-slate-100 h-2 rounded-full mt-4 overflow-hidden">
-            <div class="bg-emerald-500 h-full rounded-full transition-all duration-500" :style="'width: ' + getProgressionMoyenneClasse() + '%'"></div>
-          </div>
-        </div>
-
-        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-          <div class="text-xs font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5">
-            <span>⚠️</span> Point d'attention : E-mail
-          </div>
-          <div class="text-sm font-extrabold text-slate-900 mt-2">Oubli du champ Cci</div>
-          <p class="text-xs text-slate-600 mt-1">
-            <strong>38%</strong> des élèves oublient de masquer les adresses lors d'un envoi à plusieurs destinataires.
-          </p>
-        </div>
-
-        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-          <div class="text-xs font-bold uppercase tracking-wider text-emerald-600 flex items-center gap-1.5">
-            <span>✓</span> Point fort collectif
-          </div>
-          <div class="text-sm font-extrabold text-slate-900 mt-2">Charte & Déconnexion</div>
-          <p class="text-xs text-slate-600 mt-1">
-            <strong>100%</strong> de réussite sur la règle "Écran fermé ≠ Déconnecté".
-          </p>
+        <!-- Sous-onglets de navigation Enseignant -->
+        <div class="mt-6 pt-4 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto">
+          <button 
+            @click="activeProfSubTab = 'matrice'"
+            :class="activeProfSubTab === 'matrice' ? 'bg-indigo-600 text-white font-extrabold' : 'bg-slate-800/80 text-slate-400 hover:text-white'"
+            class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
+            <span>📊</span> Matrice des Compétences SeGEC
+          </button>
+          <button 
+            @click="activeProfSubTab = 'eleves'"
+            :class="activeProfSubTab === 'eleves' ? 'bg-indigo-600 text-white font-extrabold' : 'bg-slate-800/80 text-slate-400 hover:text-white'"
+            class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
+            <span>👥</span> Gestion des Élèves & Classes (V1)
+          </button>
+          <button 
+            @click="activeProfSubTab = 'notebooklm'"
+            :class="activeProfSubTab === 'notebooklm' ? 'bg-indigo-600 text-white font-extrabold' : 'bg-slate-800/80 text-slate-400 hover:text-white'"
+            class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
+            <span>📽️</span> Supports de Cours & NotebookLM
+          </button>
         </div>
       </div>
 
-      <!-- Tableau Heatmap Matrice de la Classe -->
-      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs overflow-x-auto">
-        <h3 class="font-extrabold text-base text-slate-900 mb-4">Matrice de Maîtrise des Acquis (Vue ed.ai)</h3>
+      <!-- ============================================== -->
+      <!-- SOUS-ONGLET 1 : MATRICE DES COMPÉTENCES SEGEC  -->
+      <!-- ============================================== -->
+      <div x-show="activeProfSubTab === 'matrice'" class="space-y-6">
         
-        <table class="w-full text-left text-xs border-collapse min-w-[700px]">
-          <thead>
-            <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
-              <th class="py-3 px-4">Élève</th>
-              <th class="py-3 px-4">Escape Game</th>
-              <th class="py-3 px-4">Charte p.10</th>
-              <th class="py-3 px-4">Réseaux NUM-1.D1</th>
-              <th class="py-3 px-4">Courriel NUM-1.D5</th>
-              <th class="py-3 px-4">Éthique NUM-1.D6</th>
-              <th class="py-3 px-4">Simulateur NUM-1.P2</th>
-              <th class="py-3 px-4 text-right">Score</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            <template x-for="eleve in classeEleves" :key="eleve.id">
-              <tr class="hover:bg-slate-50/70 transition">
-                <td class="py-3.5 px-4 font-extrabold text-slate-900" x-text="eleve.nom"></td>
-                <td class="py-3.5 px-4 font-bold text-purple-700" x-text="eleve.eg"></td>
-                <td class="py-3.5 px-4">
-                  <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">Acquis</span>
-                </td>
-                <td class="py-3.5 px-4">
-                  <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">Acquis</span>
-                </td>
-                <td class="py-3.5 px-4">
-                  <span :class="eleve.d5 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
-                        class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.d5"></span>
-                </td>
-                <td class="py-3.5 px-4">
-                  <span :class="eleve.d6 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
-                        class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.d6"></span>
-                </td>
-                <td class="py-3.5 px-4">
-                  <span :class="eleve.p2 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
-                        class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.p2"></span>
-                </td>
-                <td class="py-3.5 px-4 text-right font-black" :class="eleve.score >= 80 ? 'text-emerald-600' : 'text-amber-600'" x-text="eleve.score + '%'"></td>
-              </tr>
-            </template>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Fiche de Remédiation en 1 Clic -->
-      <div x-show="remediationGenerated" class="bg-indigo-50 border border-indigo-200 rounded-3xl p-6 sm:p-8 animate-fadeIn">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">✨</span>
-            <div>
-              <h4 class="font-black text-indigo-950 text-base">Fiche de Remédiation Ciblée Générée</h4>
-              <p class="text-xs text-indigo-700">Créée automatiquement pour Camille D. et Lucas M. sur la compétence NUM-1.P2 (Courriel & Cci)</p>
+        <!-- Métriques Globales -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Progression Globale Classe</div>
+            <div class="text-3xl font-black text-slate-900 mt-2" x-text="getProgressionMoyenneClasse() + '%'">0%</div>
+            <p class="text-xs text-slate-500 mt-1">
+              <span class="font-bold" x-text="getNbElevesTermineEG()">0</span> élèves sur <span class="font-bold" x-text="classeEleves.length">0</span> ont terminé l'Escape Game.
+            </p>
+            <div class="w-full bg-slate-100 h-2 rounded-full mt-4 overflow-hidden">
+              <div class="bg-emerald-500 h-full rounded-full transition-all duration-500" :style="'width: ' + getProgressionMoyenneClasse() + '%'"></div>
             </div>
           </div>
-          <button class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-xs hover:bg-indigo-700">Imprimer / Partager</button>
+
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+            <div class="text-xs font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5">
+              <span>⚠️</span> Point d'attention : E-mail & RGPD
+            </div>
+            <div class="text-sm font-extrabold text-slate-900 mt-2">Usage du champ Cci</div>
+            <p class="text-xs text-slate-600 mt-1">
+              Difficulté récurrente : masquer les adresses de contacts multiples pour respecter la vie privée.
+            </p>
+          </div>
+
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+            <div class="text-xs font-bold uppercase tracking-wider text-emerald-600 flex items-center gap-1.5">
+              <span>✓</span> Point fort collectif
+            </div>
+            <div class="text-sm font-extrabold text-slate-900 mt-2">Charte & Sécurité du poste</div>
+            <p class="text-xs text-slate-600 mt-1">
+              Excellente assimilation de la règle d'or « Écran fermé ≠ Déconnecté ».
+            </p>
+          </div>
         </div>
-        <div class="bg-white p-4 rounded-2xl border border-indigo-100 text-xs text-slate-700 space-y-2">
-          <p><strong>Exercice de renfort : « Où mettre chaque adresse ? »</strong></p>
-          <p>1. Tu écris au professeur pour lui poser une question sur le cours. ➔ <strong>Champ [ À ]</strong></p>
-          <p>2. Tu envoies les photos de la sortie scolaire à 28 élèves de la classe. ➔ <strong>Champ [ Cci ]</strong> (pour protéger leur vie privée)</p>
-          <p>3. Tu envoies un document à ton binôme et tu veux que ton professeur le voie aussi sans être le destinataire direct. ➔ <strong>Champ [ Cc ]</strong></p>
+
+        <!-- Tableau Heatmap Matrice de la Classe -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs overflow-x-auto">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-extrabold text-base text-slate-900">Matrice de Maîtrise des Acquis (Référentiel SeGEC FMTTN)</h3>
+            <span class="text-xs text-slate-400 font-bold" x-text="classeEleves.length + ' élève(s) actif(s)'"></span>
+          </div>
+          
+          <table class="w-full text-left text-xs border-collapse min-w-[700px]">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
+                <th class="py-3 px-4">Élève</th>
+                <th class="py-3 px-4">Escape Game</th>
+                <th class="py-3 px-4">Charte p.10</th>
+                <th class="py-3 px-4">Réseaux NUM-1.D1</th>
+                <th class="py-3 px-4">Courriel NUM-1.D5</th>
+                <th class="py-3 px-4">Éthique NUM-1.D6</th>
+                <th class="py-3 px-4">Simulateur NUM-1.P2</th>
+                <th class="py-3 px-4 text-right">Score</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <template x-for="eleve in classeEleves" :key="eleve.id">
+                <tr class="hover:bg-slate-50/70 transition">
+                  <td class="py-3.5 px-4 font-extrabold text-slate-900" x-text="eleve.nom"></td>
+                  <td class="py-3.5 px-4 font-bold text-purple-700" x-text="eleve.eg"></td>
+                  <td class="py-3.5 px-4">
+                    <span :class="eleve.charte === 'acquis' ? 'bg-emerald-100 text-emerald-800' : (eleve.charte === 'en_cours' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')"
+                          class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.charte"></span>
+                  </td>
+                  <td class="py-3.5 px-4">
+                    <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">Acquis</span>
+                  </td>
+                  <td class="py-3.5 px-4">
+                    <span :class="eleve.d5 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                          class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.d5"></span>
+                  </td>
+                  <td class="py-3.5 px-4">
+                    <span :class="eleve.d6 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+                          class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.d6"></span>
+                  </td>
+                  <td class="py-3.5 px-4">
+                    <span :class="eleve.p2 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+                          class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.p2"></span>
+                  </td>
+                  <td class="py-3.5 px-4 text-right font-black" :class="eleve.score >= 80 ? 'text-emerald-600' : 'text-amber-600'" x-text="eleve.score + '%'"></td>
+                </tr>
+              </template>
+              <tr x-show="classeEleves.length === 0">
+                <td colspan="8" class="py-8 text-center text-slate-400 font-medium">
+                  Aucun élève n'a encore enregistré de progression dans la classe <strong x-text="selectedTeacherClass"></strong>.<br>
+                  Basculez sur l'onglet <strong>« Gestion des Élèves & Classes »</strong> ci-dessus pour inscrire vos élèves.
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+
+        <!-- Fiche de Remédiation en 1 Clic -->
+        <div x-show="remediationGenerated" class="bg-indigo-50 border border-indigo-200 rounded-3xl p-6 sm:p-8 animate-fadeIn">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">✨</span>
+              <div>
+                <h4 class="font-black text-indigo-950 text-base">Fiche de Remédiation Ciblée Générée</h4>
+                <p class="text-xs text-indigo-700">Générée pour les élèves en difficulté sur la compétence NUM-1.P2 (Courriel & Cci)</p>
+              </div>
+            </div>
+            <button onclick="window.print()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-xs hover:bg-indigo-700 cursor-pointer">Imprimer / PDF</button>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-indigo-100 text-xs text-slate-700 space-y-2">
+            <p><strong>Exercice de renfort : « Où placer chaque adresse ? »</strong></p>
+            <p>1. Tu écris au professeur pour lui poser une question sur le cours. ➔ <strong>Champ [ À ]</strong></p>
+            <p>2. Tu envoies les photos de la sortie scolaire à 28 élèves de la classe. ➔ <strong>Champ [ Cci ]</strong> (pour protéger leur vie privée / RGPD)</p>
+            <p>3. Tu envoies un document à ton binôme et tu veux que ton professeur le voie aussi sans être le destinataire direct. ➔ <strong>Champ [ Cc ]</strong></p>
+          </div>
+        </div>
+
       </div>
 
+      <!-- ============================================== -->
+      <!-- SOUS-ONGLET 2 : GESTION DES ÉLÈVES & CLASSES   -->
+      <!-- ============================================== -->
+      <div x-show="activeProfSubTab === 'eleves'" class="space-y-6">
+        
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 mb-6">
+            <div>
+              <h3 class="font-black text-base text-slate-900">Gestion des Élèves Réels (Système V1)</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Retrouvez la liste complète des élèves, assignez leurs classes et suivez leur statut.</p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <input 
+                  type="text" 
+                  x-model="searchStudentQuery" 
+                  placeholder="Rechercher un élève..." 
+                  class="px-3 py-2 pl-8 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-600 w-full sm:w-56" />
+                <span class="absolute left-2.5 top-2.5 text-slate-400">🔍</span>
+              </div>
+              <button 
+                @click="modalAddStudentOpen = true"
+                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer">
+                <span>➕</span> Inscrire un élève
+              </button>
+            </div>
+          </div>
+
+          <!-- Table des Élèves -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse min-w-[600px]">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
+                  <th class="py-3 px-4">Élève</th>
+                  <th class="py-3 px-4">Classe</th>
+                  <th class="py-3 px-4">Points XP</th>
+                  <th class="py-3 px-4">Statut</th>
+                  <th class="py-3 px-4 text-center">Changer de classe</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <template x-for="student in getElevesFiltresGestion()" :key="student.id">
+                  <tr class="hover:bg-slate-50/70 transition">
+                    <td class="py-3.5 px-4 font-bold text-slate-900 flex items-center gap-2.5">
+                      <span class="w-7 h-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-black">
+                        👤
+                      </span>
+                      <div>
+                        <div x-text="student.nom"></div>
+                        <div class="text-[11px] text-slate-400 font-normal" x-text="student.email || 'Pas d\'e-mail requis'"></div>
+                      </div>
+                    </td>
+                    <td class="py-3.5 px-4 font-extrabold text-indigo-700" x-text="student.classe"></td>
+                    <td class="py-3.5 px-4 font-mono font-bold text-amber-600" x-text="(student.xp || 0) + ' XP'"></td>
+                    <td class="py-3.5 px-4">
+                      <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800 text-[11px]">Actif</span>
+                    </td>
+                    <td class="py-3.5 px-4 text-center">
+                      <select 
+                        @change="changerClasseEleve(student.id, $event.target.value)"
+                        class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-slate-700 cursor-pointer focus:outline-none focus:border-indigo-600">
+                        <template x-for="cl in availableClasses" :key="cl">
+                          <option :value="cl" x-text="'Vers ' + cl" :selected="cl === student.classe"></option>
+                        </template>
+                      </select>
+                    </td>
+                  </tr>
+                </template>
+                <tr x-show="allClassStudents.length === 0">
+                  <td colspan="5" class="py-8 text-center text-slate-400 font-medium">
+                    Aucun élève trouvé dans la base pour la classe <strong x-text="selectedTeacherClass"></strong>.<br>
+                    Cliquez sur le bouton <strong>« Inscrire un élève »</strong> pour débuter l'année avec votre vraie liste de classe !
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ============================================== -->
+      <!-- SOUS-ONGLET 3 : CONFIGURATION NOTEBOOKLM       -->
+      <!-- ============================================== -->
+      <div x-show="activeProfSubTab === 'notebooklm'" class="space-y-6">
+        
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+          <div class="pb-4 border-b border-slate-100 mb-6">
+            <h3 class="font-black text-base text-slate-900">Intégration de vos Diaporamas & Carnets NotebookLM</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Associez vos liens de carnets de notes NotebookLM ou vos présentations Google Slides à chaque chapitre.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Module 0 Config -->
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-extrabold text-sm text-slate-900">Module 0 : Bienvenue & Charte</span>
+                <span class="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold">Introduction</span>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Lien de votre carnet NotebookLM :</label>
+                <input 
+                  type="url" 
+                  x-model="module0.support_cours.notebooklm_url" 
+                  placeholder="https://notebooklm.google.com/notebook/..." 
+                  class="w-full bg-white px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-600 font-mono" />
+              </div>
+              <button 
+                @click="sauvegarderNotebookLMConfig('module-0', module0.support_cours.notebooklm_url)"
+                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition cursor-pointer">
+                Enregistrer pour le Module 0
+              </button>
+            </div>
+
+            <!-- Chapitre 1 Config -->
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-extrabold text-sm text-slate-900">Chapitre 1 : Communication & E-mail</span>
+                <span class="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold">FMTTN 1re</span>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Lien de votre carnet NotebookLM :</label>
+                <input 
+                  type="url" 
+                  x-model="chapter.support_cours.notebooklm_url" 
+                  placeholder="https://notebooklm.google.com/notebook/..." 
+                  class="w-full bg-white px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-600 font-mono" />
+              </div>
+              <button 
+                @click="sauvegarderNotebookLMConfig('ch1-communication', chapter.support_cours.notebooklm_url)"
+                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition cursor-pointer">
+                Enregistrer pour le Chapitre 1
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ➕ MODALE INSCRIRE UN ÉLÈVE (SYSTÈME V1) -->
+    <div 
+      x-show="modalAddStudentOpen" 
+      x-transition.opacity 
+      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
+      style="display: none;">
+      <div 
+        @click.away="modalAddStudentOpen = false"
+        class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative animate-scaleUp">
+        
+        <button 
+          @click="modalAddStudentOpen = false" 
+          class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold p-1 cursor-pointer">
+          &times;
+        </button>
+
+        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mb-4">
+          👤
+        </div>
+
+        <h3 class="text-lg font-black text-slate-900">Inscrire un Élève</h3>
+        <p class="text-xs text-slate-500 mt-1 mb-5">Ajoutez un élève à la base réelle de votre école (Firestore).</p>
+
+        <form @submit.prevent="ajouterEleveManuel()" class="space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Nom et Prénom :</label>
+            <input 
+              type="text" 
+              x-model="newStudentData.nom" 
+              required
+              placeholder="Ex: Lucas Moreau" 
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600 text-xs font-semibold" />
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Classe de rattachement :</label>
+            <select 
+              x-model="newStudentData.classe"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600 text-xs font-bold">
+              <template x-for="c in availableClasses" :key="c">
+                <option :value="c" x-text="'Classe ' + c"></option>
+              </template>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Adresse e-mail (facultative) :</label>
+            <input 
+              type="email" 
+              x-model="newStudentData.email" 
+              placeholder="Ex: lucas.moreau@ecole.be" 
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600 text-xs" />
+          </div>
+
+          <div class="pt-2 flex justify-end gap-2">
+            <button 
+              type="button"
+              @click="modalAddStudentOpen = false" 
+              class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 cursor-pointer">
+              Annuler
+            </button>
+            <button 
+              type="submit" 
+              class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold transition shadow-xs cursor-pointer">
+              Enregistrer l'élève
+            </button>
+          </div>
+        </form>
+
+      </div>
     </div>
 
   </main>
@@ -1071,7 +1567,7 @@
 
       <h3 class="text-xl font-black text-slate-900">Espace Enseignant FMTTN</h3>
       <p class="text-xs text-slate-500 mt-1 mb-6">
-        Accédez à la matrice des compétences <strong>ed.ai</strong>, visualisez la météo de vos classes et générez des remédiations en 1 clic.
+        Accédez à la matrice des compétences <strong>SeGEC FMTTN</strong>, visualisez les acquis de vos classes et générez des remédiations ciblées.
       </p>
 
       <!-- Erreur éventuelle -->
@@ -1093,16 +1589,10 @@
         <span x-text="teacherAuth.loading ? 'Connexion en cours...' : 'Se connecter avec Google'">Se connecter avec Google</span>
       </button>
 
-      <div class="mt-4 pt-4 border-t border-slate-100 flex flex-col gap-2">
+      <div class="mt-4 pt-4 border-t border-slate-100 text-center">
         <p class="text-[11px] text-slate-400">
-          Comptes pré-autorisés : enseignants partenaires FMTTN (Pacte d'Excellence).
+          Comptes enseignants autorisés : liste blanche Sécurité FMTTN (Pacte d'Excellence SeGEC).
         </p>
-        <!-- Mode secours présentation -->
-        <button 
-          @click="activerModeDemoProf()" 
-          class="text-xs text-indigo-600 hover:text-indigo-800 font-bold underline py-1 cursor-pointer">
-          ⚡ Aperçu direct (Mode Démonstration Samedi)
-        </button>
       </div>
 
     </div>

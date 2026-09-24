@@ -13,11 +13,12 @@ import {
   getDoc, 
   setDoc, 
   updateDoc, 
+  deleteDoc,
   collection, 
-  query,
-  where,
-  onSnapshot,
-  getDocs,
+  query, 
+  where, 
+  onSnapshot, 
+  getDocs, 
   serverTimestamp 
 } from "firebase/firestore";
 import { getFunctions, httpsCallable } from "firebase/functions";
@@ -42,11 +43,11 @@ export async function initStudentSession() {
   try {
     if (!auth.currentUser) {
       await signInAnonymously(auth);
-      console.log("[Auth] Session élève active (anonyme sécurisée) :", auth.currentUser.uid);
+      console.log("[Auth] Session élève active :", auth.currentUser.uid);
     }
     return auth.currentUser;
   } catch (err) {
-    console.warn("[Auth] Authentification anonyme non active ou hors ligne :", err.message);
+    console.warn("[Auth] Session locale active :", err.message);
     return null;
   }
 }
@@ -62,7 +63,6 @@ export async function loginProfesseurGoogle() {
     if (!isTeacherEmailAllowed(user.email)) {
       console.warn("[Auth Prof] Adresse non autorisée sur la liste blanche :", user.email);
       await signOut(auth);
-      // Réinitialiser la session anonyme
       await initStudentSession();
       return { 
         success: false, 
@@ -72,7 +72,7 @@ export async function loginProfesseurGoogle() {
     }
 
     const profile = getTeacherProfile(user.email);
-    console.log("[Auth Prof] Enseignant authentifié avec succès :", profile);
+    console.log("[Auth Prof] Enseignant authentifié :", profile);
     return {
       success: true,
       user,
@@ -123,6 +123,7 @@ export async function saveEleveProgression(classeId, eleveId, data) {
     
     const payload = {
       classe_id: classeId,
+      classe: classeId,
       eleve_id: eleveId,
       eleve_nom: data.nom || "Élève",
       updated_at: new Date().toISOString(),
@@ -137,15 +138,26 @@ export async function saveEleveProgression(classeId, eleveId, data) {
     };
 
     await setDoc(docRef, payload, { merge: true });
+
+    // Enregistrement miroir dans collection 'users' (compatibilité V1)
+    const userRef = doc(db, "users", eleveId);
+    await setDoc(userRef, {
+      nom: data.nom || "Élève",
+      classe: classeId,
+      xp: data.xp || 0,
+      status: "actif",
+      last_active: serverTimestamp()
+    }, { merge: true });
+
     console.log(`[Firestore] Progression synchronisée pour ${data.nom} (${classeId})`);
     return true;
   } catch (err) {
-    console.warn("[Firestore] Impossible de sauvegarder en ligne (mode local actif) :", err.message);
+    console.warn("[Firestore] Mode local actif :", err.message);
     return false;
   }
 }
 
-// 6. Écoute temps réel des élèves d'une classe pour la "Météo de classe ed.ai"
+// 6. Écoute temps réel des élèves d'une classe pour la "Météo de classe SeGEC"
 export function listenToClasseProgressions(classeId, onUpdate) {
   try {
     const q = query(
@@ -158,7 +170,6 @@ export function listenToClasseProgressions(classeId, onUpdate) {
       snapshot.forEach(docSnap => {
         const d = docSnap.data();
         
-        // Calcul du score global estimé
         let egRatio = d.escape_game?.finished ? "5/5" : `${d.escape_game?.dossierUnlocked?.length || 1}/5`;
         let charteEtat = d.charte?.finished ? "acquis" : (d.charte?.score > 0 ? "en_cours" : "a_renforcer");
         let d5Etat = d.competences?.['NUM-1.D5'] || "en_cours";
@@ -186,43 +197,156 @@ export function listenToClasseProgressions(classeId, onUpdate) {
 
       onUpdate(eleves);
     }, (error) => {
-      console.warn("[Firestore] Erreur d'écoute de la classe :", error.message);
-      onUpdate(null); // Signal d'erreur/repli
+      console.warn("[Firestore] Écoute classe :", error.message);
+      onUpdate(null);
     });
   } catch (err) {
-    console.warn("[Firestore] Erreur initialisation snapshot :", err.message);
+    console.warn("[Firestore] Erreur snapshot :", err.message);
     return () => {};
   }
 }
 
-// 7. Injecteur de données de démonstration pour une classe (1 clic pour la présentation)
-export async function seedDemoClassData(classeId) {
-  const mockStudents = [
-    { id: 'el_1', nom: 'Lucas M.', eg: { finished: true, dossierUnlocked: [1,2,3,4,5] }, charte: { finished: true, score: 3 }, competences: { 'NUM-1.D5': 'en_cours', 'NUM-1.D6': 'en_cours', 'NUM-1.P2': 'a_renforcer' }, xp: 180 },
-    { id: 'el_2', nom: 'Emma B.', eg: { finished: true, dossierUnlocked: [1,2,3,4,5] }, charte: { finished: true, score: 3 }, competences: { 'NUM-1.D5': 'acquis', 'NUM-1.D6': 'acquis', 'NUM-1.P2': 'acquis' }, xp: 260 },
-    { id: 'el_3', nom: 'Youssef K.', eg: { finished: false, dossierUnlocked: [1,2,3,4] }, charte: { finished: true, score: 3 }, competences: { 'NUM-1.D5': 'acquis', 'NUM-1.D6': 'en_cours', 'NUM-1.P2': 'en_cours' }, xp: 210 },
-    { id: 'el_4', nom: 'Camille D.', eg: { finished: false, dossierUnlocked: [1,2,3] }, charte: { finished: false, score: 1 }, competences: { 'NUM-1.D5': 'a_renforcer', 'NUM-1.D6': 'a_renforcer', 'NUM-1.P2': 'a_renforcer' }, xp: 95 },
-    { id: 'el_5', nom: 'Noah V.', eg: { finished: true, dossierUnlocked: [1,2,3,4,5] }, charte: { finished: true, score: 3 }, competences: { 'NUM-1.D5': 'acquis', 'NUM-1.D6': 'acquis', 'NUM-1.P2': 'en_cours' }, xp: 235 },
-    { id: 'el_6', nom: 'Léa S.', eg: { finished: true, dossierUnlocked: [1,2,3,4,5] }, charte: { finished: true, score: 3 }, competences: { 'NUM-1.D5': 'en_cours', 'NUM-1.D6': 'acquis', 'NUM-1.P2': 'acquis' }, xp: 245 }
-  ];
+// 7. GESTION DES ÉLÈVES & CLASSES (SYSTÈME V1 ÉTENDU)
+export async function getRealClassStudents(classeId) {
+  try {
+    const studentMap = {};
 
-  for (const s of mockStudents) {
-    await saveEleveProgression(classeId, s.id, {
-      nom: s.nom,
-      xp: s.xp,
-      charte: s.charte,
-      escape_game: s.eg,
-      competences: s.competences
+    // 1. Récupérer depuis 'users'
+    const qUsers = classeId === 'all' 
+      ? collection(db, "users") 
+      : query(collection(db, "users"), where("classe", "==", classeId));
+    
+    const snapUsers = await getDocs(qUsers);
+    snapUsers.forEach(docSnap => {
+      const u = docSnap.data();
+      studentMap[docSnap.id] = {
+        id: docSnap.id,
+        nom: u.nom || u.displayName || docSnap.id,
+        email: u.email || "",
+        classe: u.classe || classeId,
+        status: u.status || "actif",
+        xp: u.xp || 0
+      };
     });
+
+    // 2. Récupérer depuis 'progressions_v2' pour fusionner les scores réels
+    const qProg = classeId === 'all'
+      ? collection(db, "progressions_v2")
+      : query(collection(db, "progressions_v2"), where("classe_id", "==", classeId));
+
+    const snapProg = await getDocs(qProg);
+    snapProg.forEach(docSnap => {
+      const p = docSnap.data();
+      const elId = p.eleve_id || docSnap.id;
+      if (!studentMap[elId]) {
+        studentMap[elId] = {
+          id: elId,
+          nom: p.eleve_nom || "Élève",
+          email: "",
+          classe: p.classe_id || classeId,
+          status: "actif",
+          xp: p.xp || 0
+        };
+      }
+      studentMap[elId].progression = p;
+      if (p.xp > studentMap[elId].xp) {
+        studentMap[elId].xp = p.xp;
+      }
+    });
+
+    return Object.values(studentMap).sort((a, b) => a.nom.localeCompare(b.nom));
+  } catch (err) {
+    console.error("[Firestore] Erreur chargement élèves réels :", err);
+    return [];
   }
-  return true;
 }
 
-// 8. Wrapper d'appel au tuteur socratique Gemini
+// Ajouter un élève manuellement (depuis le tableau de bord prof)
+export async function addRealStudent(nom, classe, email = "") {
+  try {
+    const studentId = 'el_' + Math.random().toString(36).substring(2, 9);
+    const userDocRef = doc(db, "users", studentId);
+    await setDoc(userDocRef, {
+      nom: nom.trim(),
+      classe: classe,
+      email: email.trim().toLowerCase(),
+      status: "actif",
+      created_at: serverTimestamp()
+    });
+
+    // Initialiser document progression
+    const progRef = doc(db, "progressions_v2", `${classe}_${studentId}`);
+    await setDoc(progRef, {
+      classe_id: classe,
+      classe: classe,
+      eleve_id: studentId,
+      eleve_nom: nom.trim(),
+      xp: 0,
+      updated_at: new Date().toISOString()
+    });
+
+    return { success: true, id: studentId };
+  } catch (err) {
+    console.error("[Firestore] Erreur création élève :", err);
+    return { success: false, error: err.message };
+  }
+}
+
+// Modifier la classe d'un élève
+export async function updateStudentClassInDb(studentId, newClass, currentClass = "1A") {
+  try {
+    const userDocRef = doc(db, "users", studentId);
+    await updateDoc(userDocRef, { classe: newClass });
+
+    // Migrer la progression si elle existe
+    const oldProgRef = doc(db, "progressions_v2", `${currentClass}_${studentId}`);
+    const oldSnap = await getDoc(oldProgRef);
+    if (oldSnap.exists()) {
+      const data = oldSnap.data();
+      data.classe_id = newClass;
+      data.classe = newClass;
+      const newProgRef = doc(db, "progressions_v2", `${newClass}_${studentId}`);
+      await setDoc(newProgRef, data);
+      await deleteDoc(oldProgRef);
+    }
+
+    return true;
+  } catch (err) {
+    console.error("[Firestore] Erreur changement de classe :", err);
+    return false;
+  }
+}
+
+// 8. CONFIGURATION DIAPORAMAS & NOTEBOOKLM
+export async function savePresentationConfig(moduleId, config) {
+  try {
+    const docRef = doc(db, "config_presentations", moduleId);
+    await setDoc(docRef, {
+      ...config,
+      updated_at: serverTimestamp()
+    }, { merge: true });
+    return true;
+  } catch (err) {
+    console.warn("[Firestore] Sauvegarde présentation :", err);
+    return false;
+  }
+}
+
+export async function getPresentationConfig(moduleId) {
+  try {
+    const docRef = doc(db, "config_presentations", moduleId);
+    const snap = await getDoc(docRef);
+    return snap.exists() ? snap.data() : null;
+  } catch (err) {
+    return null;
+  }
+}
+
+// 9. TUTEUR SOCRATIQUE GEMINI
 export async function interrogerTuteurIA(question, historique = [], idExercice = 'ch1-communication') {
   try {
     const fn = httpsCallable(functions, "interrogerTuteur");
-    const systemPromptFMTTN = `Tu es le Tuteur Socratique d'@lt_X pour des élèves de 1re secondaire (11-12 ans) en Belgique (programme FMTTN).
+    const systemPromptFMTTN = `Tu es le Tuteur Socratique d'@lt_X pour des élèves de 1re secondaire (11-12 ans) en Belgique (programme SeGEC / FMTTN).
 Ton rôle :
 1. Être chaleureux, encourageant et clair (mots simples, phrases courtes).
 2. Ne JAMAIS donner la réponse directement : pose une question guidée ou donne un indice sous forme d'analogie de la vie quotidienne.
