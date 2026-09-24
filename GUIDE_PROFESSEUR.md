@@ -89,11 +89,36 @@ Un outil dédié dans le **Dashboard Professeur** (`/admin.html` > Onglet *📝 
 
 ---
 
-## 🚀 4. Commandes Utiles de Déploiement
+## 🌟 4. ProfAssistant V2 : FMTTN 1re & Matrice ed.ai
+
+La version 2 (`/v2/`) propose un environnement léger dédié au cours de **FMTTN 1re secondaire** basé sur le manuel officiel *@lt_X* et la pédagogie de maîtrise par compétences.
+
+### 4.1 Ajouter des collègues enseignants (Liste blanche)
+Pour autoriser vos collègues à accéder à l'espace enseignant lors de leur connexion Google :
+1. Ouvrez `v2/src/services/teachers-config.js`.
+2. Ajoutez leurs adresses email et leurs classes attribuées dans le tableau `ALLOWED_TEACHERS` :
+   ```javascript
+   export const ALLOWED_TEACHERS = [
+     { email: "gatweb@gmail.com", nom: "Professeur Fondateur", classes: ["1A", "1B", "1C", "1D"] },
+     { email: "collegue1@ecole.be", nom: "Professeur 1A / 1B", classes: ["1A", "1B"] }
+   ];
+   ```
+3. Recompilez le frontend : `npm --prefix v2 run build`.
+
+### 4.2 Utilisation de la Météo de Classe (Vue ed.ai)
+- **Changement de classe :** Utilisez le menu déroulant en haut de la matrice pour basculer entre `Classe 1A`, `Classe 1B`... Les données et métriques se mettent à jour automatiquement.
+- **Synchronisation en direct :** Un voyant vert *Firestore en direct* confirme la réception des résultats des élèves en temps réel.
+- **Mode Démonstration :** Le bouton `👥 Injecter démo` permet de charger immédiatement 6 élèves types dans une classe vide pour une présentation.
+- **Remédiation en 1 clic :** Le bouton `⚡ Générer la remédiation ciblée` produit instantanément une micro-fiche personnalisée pour les élèves ayant des difficultés détectées (ex: confusion Cc/Cci).
+
+---
+
+## 🚀 5. Commandes Utiles de Déploiement
 
 | Action | Commande |
 |---|---|
-| Mettre en ligne le frontend | `npx firebase-tools deploy --only hosting` |
+| Mettre à jour et compiler la V2 | `npm --prefix v2 run build` |
+| Mettre en ligne le site web & règles | `npx firebase-tools deploy --only firestore:rules,hosting` |
 | Mettre en ligne les Cloud Functions | `npx firebase-tools deploy --only functions` |
-| Synchroniser les dépendances Bun | `cd functions && bun install` |
-| Tester les fonctions en local | `cd functions && node -c index.js` |
+| Déployer l'intégralité du projet | `npx firebase-tools deploy` |
+| Tester les fonctions en local | `node -c functions/index.js` |

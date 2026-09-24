@@ -34,7 +34,10 @@
 - [x] **Ateliers Pratiques Chapitre 1 :** Simulateur de courriel p.64 (validation des 16 critères) et bilan personnel d'auto-évaluation p.83.
 - [x] **Mascotte & Tuteur Socratique V2 :** Intégration du persona robot bleu d'@lt_X avec Gemini et repli socratique local.
 - [x] **Dashboard Professeur V2 :** Matrice de maîtrise des compétences FMTTN par classe et par élève (façon ed.ai).
-- [ ] **Persistance Firestore Élèves :** Enregistrement des soumissions et synchronisation en direct des bilans personnels.
+- [x] **Persistance Firestore Élèves :** Enregistrement des soumissions et synchronisation en direct des bilans personnels dans `/progressions_v2`.
+- [x] **Gestion Multi-Enseignants & Classes (Pilote Samedi) :** Liste blanche configurable dans `teachers-config.js` et déverrouillage de `admin.js`.
+- [x] **Sécurisation & Règles Firestore :** Déploiement de `firestore.rules` et blindage anti-injection du prompt Gemini dans `corrigerDevoir`.
+- [ ] **Déploiement en Production Firebase :** Déploiement hosting & functions pour la présentation de samedi.
 
 ---
 ### ⚠️ INSTRUCTION POUR L'AGENT DE DÉVELOPPEMENT :

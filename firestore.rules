@@ -1,0 +1,80 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Vérifie si l'utilisateur connecté est un enseignant autorisé
+    function isTeacher() {
+      return request.auth != null && (
+        request.auth.token.email != null && (
+          request.auth.token.email in [
+            'gatweb@gmail.com',
+            'collegue1@ecole.be',
+            'collegue2@ecole.be'
+          ] ||
+          request.auth.token.email.matches('.*@ecole\\.be$') ||
+          request.auth.token.email.matches('.*@enseignement\\.be$') ||
+          request.auth.token.role == 'enseignant' ||
+          request.auth.token.admin == true
+        )
+      );
+    }
+
+    // Collection des enseignants (annuaire et métadonnées)
+    match /enseignants/{profId} {
+      allow read: if request.auth != null;
+      allow write: if isTeacher();
+    }
+
+    // Collection des progressions V2 (par classe & élève)
+    match /progressions_v2/{docId} {
+      // Lecture autorisée pour l'enseignant et pour l'affichage de classe
+      allow read: if true;
+      // Création et mise à jour permises pour sauvegarder les exercices des élèves
+      allow create, update: if true;
+      // Suppression réservée aux enseignants
+      allow delete: if isTeacher();
+    }
+
+    // Classes et élèves (arborescence V2)
+    match /classes/{classeId} {
+      allow read: if true;
+      allow write: if isTeacher();
+
+      match /eleves/{eleveId} {
+        allow read: if true;
+        allow write: if true;
+      }
+    }
+
+    // Soumissions de devoirs (V1 & V2)
+    match /submissions/{subId} {
+      // Un prof peut tout lire ; un élève ne lit que ses propres copies
+      allow read: if isTeacher() || (
+        request.auth != null && (
+          resource.data.email_eleve == request.auth.token.email ||
+          resource.data.uid_eleve == request.auth.uid
+        )
+      );
+      // Remise de devoir permise aux utilisateurs connectés (ou anonymes)
+      allow create: if request.auth != null;
+      // Seul le professeur peut corriger, valider ou modifier le statut
+      allow update, delete: if isTeacher();
+    }
+
+    // Référentiel des cours et des exercices
+    match /exercices/{exId} {
+      allow read: if true;
+      allow write: if isTeacher();
+    }
+
+    match /cours/{courseId} {
+      allow read: if true;
+      allow write: if isTeacher();
+    }
+
+    // Règle par défaut : accès restreint aux enseignants
+    match /{document=**} {
+      allow read, write: if isTeacher();
+    }
+  }
+}

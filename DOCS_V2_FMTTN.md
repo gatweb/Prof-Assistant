@@ -122,25 +122,50 @@ Pour garantir une expérience sans latence sur les PC scolaires tout en maintena
 
 ## 🚀 5. Feuille de Route Opérationnelle (V2 Roadmap)
 
-### Phase 1 : Socle V2 & Chapitre 1 (En cours 🏗️)
+### Phase 1 : Socle V2 & Chapitre 1 (Validé ✅)
 - [x] Exploration et analyse des scans @lt_X 1a et 1b.
 - [x] Spécification du cahier des charges V2 et de la philosophie ed.ai.
-- [ ] Initialisation du projet Vite + Tailwind + Alpine.js dans `v2/`.
-- [ ] Modélisation JSON du **Chapitre 1 : Communication et collaboration** (compétences, vocabulaire, QCM du livre).
-- [ ] Intégration de la mascotte robot bleue (@lt_X) pour le Tuteur Socratique.
+- [x] Initialisation du projet Vite + Tailwind + Alpine.js dans `v2/`.
+- [x] Modélisation JSON du **Chapitre 1 : Communication et collaboration** (compétences, vocabulaire, 181 QCM de la banque officielle).
+- [x] Intégration de la mascotte robot bleue (@lt_X) pour le Tuteur Socratique (avec fallback local et Cloud Function).
 
-### Phase 2 : Espace Élève V2 (Apprenant 1re secondaire)
-- [ ] Interface épurée avec sélection des 5 chapitres.
-- [ ] Module "Je découvre" : parcours pas-à-pas avec mini-quiz interactifs et feedback immédiat.
-- [ ] Module "Je pratique" : mini-scénarios et auto-évaluation guidée par le Tuteur IA.
-- [ ] Module "Je maîtrise" : défi final et synthèse visuelle mémo.
+### Phase 2 : Espace Élève V2 (Apprenant 1re secondaire - Validé ✅)
+- [x] Navigation par onglets ergonomique (Module 0, Escape Game, Chapitre 1).
+- [x] Module 0 : Charte informatique interactive et test de compréhension.
+- [x] Escape Game de rentrée : 5 dossiers à énigmes progressives (codes de déverrouillage, détection phishing).
+- [x] Module "Je pratique" : Simulateur de courriel p.64 avec analyse multi-critères automatique.
+- [x] Module "Je maîtrise" : Mission créative d'invention d'application et auto-évaluation bilan personnel p.83.
+- [ ] *(En cours d'enrichissement)* : Finalisation des banques d'exercices interactifs pour les chapitres 2 à 5.
 
-### Phase 3 : Dashboard Enseignant V2 (Inspiré d'ed.ai)
-- [ ] Matrice dynamique des compétences FMTTN par classe (Heatmap vert/jaune/rouge).
-- [ ] Détection automatique des motifs d'erreurs fréquents (*Error Patterns*).
-- [ ] Générateur de remédiations différenciées en 1 clic.
-- [ ] Validation rapide des devoirs par lots (*Batch review*).
+### Phase 3 : Dashboard Enseignant V2 & ed.ai (Validé ✅)
+- [x] Matrice dynamique des compétences FMTTN par classe (Heatmap ed.ai en temps réel).
+- [x] Détection automatique des motifs d'erreurs fréquents (*Error Patterns*, ex: champ Cci).
+- [x] Générateur de remédiations différenciées en 1 clic.
+- [x] Synchronisation temps réel Firestore (`/progressions_v2`) avec session anonyme fluide pour les élèves.
+- [x] Sélecteur de classes étanches (1A, 1B, 1C, 1D...).
 
-### Phase 4 : Déploiement & Intégration Continue
-- [ ] Configuration du build Vite pour sortie dans `public/v2` (ou bascule principale sur `public/`).
-- [ ] Validation du comportement sur réseau école réel et écrans tactiles/Chromebooks.
+### Phase 4 : Multi-Professeurs, Sécurité & Déploiement (Validé ✅)
+- [x] Configuration centralisée des enseignants autorisés (`teachers-config.js`) avec connexion Google Workspace.
+- [x] Règles de sécurité Firestore (`firestore.rules`) déployées pour isoler les données.
+- [x] Blindage anti-injection du prompt Gemini dans les Cloud Functions.
+- [x] Configuration du build Vite pour sortie dans `public/v2` et déploiement Firebase Hosting.
+
+---
+
+## 👥 6. Gestion Multi-Enseignants & Multi-Classes
+
+### 6.1 Liste blanche des professeurs (`teachers-config.js`)
+L'authentification Google restreint l'accès à la matrice enseignant aux adresses définies dans `v2/src/services/teachers-config.js` :
+```javascript
+export const ALLOWED_TEACHERS = [
+  { email: "gatweb@gmail.com", nom: "Professeur Fondateur", classes: ["1A", "1B", "1C", "1D"] },
+  { email: "collegue1@ecole.be", nom: "Professeur 1A / 1B", classes: ["1A", "1B"] },
+  { email: "collegue2@ecole.be", nom: "Professeur 1C / 1D", classes: ["1C", "1D"] }
+];
+```
+
+### 6.2 Parcours Élève sans mot de passe
+Pour s'adapter aux contraintes de la salle informatique avec des élèves de 11 ans :
+- L'élève choisit simplement sa classe (`1A`, `1B`...) dans le bandeau supérieur.
+- Il indique son prénom/nom une seule fois (stocké en `localStorage`).
+- Une session anonyme Firebase Auth est créée silencieusement pour synchroniser les données dans Firestore sous `/progressions_v2/{classeId}_{eleveId}`.

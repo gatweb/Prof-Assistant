@@ -6,8 +6,23 @@ import { formatDate } from './utils.js';
 import { doc, onSnapshot, collection, addDoc, query, where, setDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 // ============================================
-// 1. Contrôle d'accès strict
+// 1. Contrôle d'accès strict (Liste blanche Enseignants)
 // ============================================
+export const ALLOWED_TEACHER_EMAILS = [
+    "gatweb@gmail.com",
+    // 👉 Ajoutez ici les emails de vos collègues pour samedi :
+    "collegue1@ecole.be",
+    "collegue2@ecole.be"
+];
+
+export function isTeacherAllowed(email) {
+    if (!email) return false;
+    const clean = email.toLowerCase().trim();
+    return ALLOWED_TEACHER_EMAILS.some(e => e.toLowerCase() === clean) ||
+           clean.endsWith("@ecole.be") ||
+           clean.endsWith("@enseignement.be");
+}
+
 const ADMIN_EMAIL = "gatweb@gmail.com";
 let currentAdminUser = null;
 
@@ -23,9 +38,9 @@ listenToAuthStatus((user) => {
         return;
     }
     
-    // FILTRE DE SÉCURITÉ PRÉSENTATION
-    if (user.email !== ADMIN_EMAIL) {
-        alert("Accès refusé. \nVotre adresse (" + user.email + ") n'est pas autorisée sur ce tableau de bord professeur.");
+    // FILTRE DE SÉCURITÉ PRÉSENTATION (Multi-professeurs)
+    if (!isTeacherAllowed(user.email)) {
+        alert("Accès refusé. \nVotre adresse (" + user.email + ") n'est pas encore autorisée sur ce tableau de bord professeur.\nContactez l'administrateur pour être ajouté à la liste blanche.");
         window.location.href = "workspace-html.html";
         return;
     }
