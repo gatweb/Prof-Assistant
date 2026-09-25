@@ -1,6 +1,7 @@
 import './style.css';
 import Alpine from 'alpinejs';
 import chapterData from './data/chapitre-1-communication.json';
+import chapter2Data from './data/chapitre-2-securite.json';
 import competencesData from './data/competences-fmttn.json';
 import module0Data from './data/module-0-introduction.json';
 import altxBank from './data/altx-bank.json';
@@ -15,7 +16,7 @@ import {
   getRealClassStudents,
   addRealStudent,
   updateStudentClassInDb,
-  savePresentationConfig,
+  savePresentationConfig, 
   interrogerTuteurIA 
 } from './services/firebase.js';
 import { AVAILABLE_CLASSES, ALLOWED_TEACHERS } from './services/teachers-config.js';
@@ -24,7 +25,7 @@ window.Alpine = Alpine;
 
 Alpine.data('profAssistantApp', () => ({
   // Navigation
-  selectedModuleId: 'module-0', // 'module-0' | 'escape-game' | 'ch1-communication'
+  selectedModuleId: 'module-0', // 'module-0' | 'escape-game' | 'ch1-communication' | 'ch2-securite'
   activeTab: 'decouvre',        // 'decouvre' | 'pratique' | 'maitrise' | 'cours' | 'prof'
   
   // Classes disponibles (Programme SeGEC : 1A, 1B, 1C, 1D...)
@@ -33,7 +34,9 @@ Alpine.data('profAssistantApp', () => ({
   // Données de cours FMTTN SeGEC
   module0: module0Data,
   chapter: chapterData,
+  chapter2: chapter2Data,
   competences: competencesData.chapitres[0].competences,
+  competencesCh2: competencesData.chapitres[1]?.competences,
   altxBank: altxBank,
   escapeGame: escapeGameData,
 
@@ -63,7 +66,16 @@ Alpine.data('profAssistantApp', () => ({
     'NUM-1.D1': 'acquis',
     'NUM-1.D5': 'en_cours',
     'NUM-1.D6': 'en_cours',
-    'NUM-1.P2': 'a_renforcer'
+    'NUM-1.P2': 'a_renforcer',
+    'NUM-2.D1': 'en_cours',
+    'NUM-2.D2': 'en_cours',
+    'NUM-2.D3': 'en_cours',
+    'NUM-2.D4': 'en_cours',
+    'NUM-2.D5': 'en_cours',
+    'NUM-2.P1': 'en_cours',
+    'NUM-2.P2': 'en_cours',
+    'NUM-2.P3': 'en_cours',
+    'NUM-2.M1': 'en_cours'
   },
 
   // Auto-évaluation p.83 (Bilan personnel SeGEC)
@@ -130,6 +142,88 @@ Alpine.data('profAssistantApp', () => ({
     aiFeedback: ''
   },
 
+  // ==========================================
+  // ÉTATS SPÉCIFIQUES CHAPITRE 2 : SÉCURITÉ
+  // ==========================================
+  activeSubthemeKeySecu: 'profil', // 'profil' | 'signaletique' | 'cyber' | 'confidentialite' | 'identite'
+  bankQuestionIndexSecu: 0,
+  bankUserSelectionSecu: null,
+  bankSubmittedSecu: false,
+  bankIsCorrectSecu: false,
+  bankScoreSecu: 0,
+
+  // Atelier HTTP vs HTTPS (Chapitre 2, p. 106)
+  httpSim: {
+    scenarioActif: 'ecole', // 'ecole' | 'banque' | 'piege'
+    scenarios: {
+      ecole: {
+        titre: 'Portail de l\'école (Wi-Fi public)',
+        url: 'http://connexion-college.be/login.php',
+        isHttps: false,
+        protocole: 'HTTP',
+        statut: 'Non sécurisé ⚠️',
+        couleur: 'rose',
+        explication: 'Alerte ! Ce site utilise HTTP sans chiffrement. Si tu te connectes sur le Wi-Fi de l\'école ou un hotspot public, ton mot de passe passe en texte clair et peut être intercepté par n\'importe qui !'
+      },
+      banque: {
+        titre: 'Espace Bancaire & Scolaire',
+        url: 'https://banque-securisee.be/espace-client',
+        isHttps: true,
+        protocole: 'HTTPS',
+        statut: 'Chiffré & Certifié 🔒',
+        couleur: 'emerald',
+        explication: 'Excellent ! Le cadenas vert et le "S" de HTTPS confirment que la communication est chiffrée avec un certificat SSL/TLS. Les données sont illisibles pendant le transport.'
+      },
+      piege: {
+        titre: 'Site Promo Cadeaux Gratuits',
+        url: 'https://cadeaux-gratuits-gagne-un-iphone.xyz/',
+        isHttps: true,
+        protocole: 'HTTPS',
+        statut: 'Chiffré mais frauduleux ⚠️',
+        couleur: 'amber',
+        explication: 'Attention au piège classique ! Le cadenas HTTPS prouve que personne n\'intercepte les données en route, mais cela ne prouve PAS que le site est honnête ! Un escroc peut très bien obtenir un certificat HTTPS gratuit pour son site d\'arnaque.'
+      }
+    }
+  },
+
+  // Atelier Données Actives vs Passives (Chapitre 2, p. 114)
+  triDonnees: {
+    items: [
+      { id: 1, label: "Une photo de mon chat postée en story publique", typeReel: "active", choixEleve: null, icone: "📸" },
+      { id: 2, label: "Mon adresse IP et mon modèle de smartphone", typeReel: "passive", choixEleve: null, icone: "🌐" },
+      { id: 3, label: "Mon commentaire sous la vidéo d'un streamer", typeReel: "active", choixEleve: null, icone: "💬" },
+      { id: 4, label: "Le temps exact (14 secondes) passé à regarder une pub", typeReel: "passive", choixEleve: null, icone: "⏱️" },
+      { id: 5, label: "La liste de mes recherches Google Maps de la journée", typeReel: "passive", choixEleve: null, icone: "📍" },
+      { id: 6, label: "Le message privé envoyé à mon binôme de classe", typeReel: "active", choixEleve: null, icone: "✉️" }
+    ],
+    score: 0,
+    valide: false,
+    feedback: ''
+  },
+
+  // Auto-évaluation Bilan personnel Chapitre 2 (p. 147)
+  bilanPersonnelCh2: {
+    'NUM-2.D1': 'bien',
+    'NUM-2.D2': 'bien',
+    'NUM-2.D3': 'moyen',
+    'NUM-2.D4': 'moyen',
+    'NUM-2.D5': 'bien',
+    'NUM-2.P1': 'bien',
+    'NUM-2.P2': 'moyen',
+    'NUM-2.P3': 'moyen'
+  },
+
+  // Mission Créative "Je maîtrise" Chapitre 2 (p. 158)
+  missionSecu: {
+    typeCampagne: 'cyberharcelement',
+    slogan: 'L\'écran n\'est pas un masque : ce que tu ne dirais pas en face, ne l\'écris pas en ligne !',
+    reflexe1: 'Faire une capture d\'écran immédiate comme preuve avant toute suppression.',
+    reflexe2: 'Bloquer le compte harceleur et signaler le comportement aux modérateurs.',
+    reflexe3: 'En parler immédiatement à un adulte de confiance ou appeler le 103 (Écoute-Enfants FWB).',
+    isSubmitted: false,
+    aiFeedback: ''
+  },
+
   // Tuteur Socratique IA (@lt_X)
   tutorOpen: false,
   tutorLoading: false,
@@ -152,6 +246,7 @@ Alpine.data('profAssistantApp', () => ({
   },
   modalLoginProfOpen: false,
   activeProfSubTab: 'matrice', // 'matrice' | 'eleves' | 'notebooklm'
+  profMatrixChapter: 'ch1',    // 'ch1' | 'ch2'
   selectedTeacherClass: '1A',
   unsubscribeTeacherListener: null,
   firestoreSynced: false,
@@ -241,6 +336,7 @@ Alpine.data('profAssistantApp', () => ({
       xp: this.user.xp,
       competences: this.eleveCompetences,
       bilan_personnel: this.bilanPersonnel,
+      bilan_personnel_ch2: this.bilanPersonnelCh2,
       charte: {
         score: this.charteState.score,
         finished: this.charteState.finished
@@ -255,6 +351,16 @@ Alpine.data('profAssistantApp', () => ({
       },
       mission_app: {
         isSubmitted: this.missionApp.isSubmitted
+      },
+      http_sim: {
+        scenarioActif: this.httpSim.scenarioActif
+      },
+      tri_donnees: {
+        score: this.triDonnees.score,
+        valide: this.triDonnees.valide
+      },
+      mission_secu: {
+        isSubmitted: this.missionSecu.isSubmitted
       }
     };
 
@@ -648,11 +754,137 @@ Alpine.data('profAssistantApp', () => ({
   },
 
   // ==========================================
+  // ATELIERS & QUESTIONS DU CHAPITRE 2 : SÉCURITÉ
+  // ==========================================
+  getActiveSubthemeSecu() {
+    return this.altxBank.secu[this.activeSubthemeKeySecu] || this.altxBank.secu.profil;
+  },
+
+  getCurrentBankQuestionSecu() {
+    const st = this.getActiveSubthemeSecu();
+    return st.questions[this.bankQuestionIndexSecu] || st.questions[0];
+  },
+
+  selectBankChoiceSecu(choice) {
+    if (this.bankSubmittedSecu) return;
+    this.bankUserSelectionSecu = choice;
+  },
+
+  validerBankReponseSecu() {
+    if (!this.bankUserSelectionSecu) return;
+    const q = this.getCurrentBankQuestionSecu();
+    this.bankSubmittedSecu = true;
+    this.bankIsCorrectSecu = (this.bankUserSelectionSecu === q.rep);
+
+    if (this.bankIsCorrectSecu) {
+      this.bankScoreSecu += 10;
+      this.user.xp += 10;
+      this.tutorMood = 'happy';
+
+      // Validation progressive de la compétence associée
+      if (this.activeSubthemeKeySecu === 'profil') this.eleveCompetences['NUM-2.D1'] = 'acquis';
+      if (this.activeSubthemeKeySecu === 'signaletique') this.eleveCompetences['NUM-2.D2'] = 'acquis';
+      if (this.activeSubthemeKeySecu === 'cyber') this.eleveCompetences['NUM-2.P2'] = 'acquis';
+      if (this.activeSubthemeKeySecu === 'confidentialite') this.eleveCompetences['NUM-2.P1'] = 'acquis';
+      if (this.activeSubthemeKeySecu === 'identite') this.eleveCompetences['NUM-2.D5'] = 'acquis';
+    } else {
+      this.tutorMood = 'thinking';
+    }
+
+    this.syncCurrentStudentProgress();
+  },
+
+  bankQuestionSuivanteSecu() {
+    const st = this.getActiveSubthemeSecu();
+    if (this.bankQuestionIndexSecu < st.questions.length - 1) {
+      this.bankQuestionIndexSecu++;
+      this.bankUserSelectionSecu = null;
+      this.bankSubmittedSecu = false;
+      this.bankIsCorrectSecu = false;
+    } else {
+      alert(`Entraînement Sécurité terminé ! Score : ${this.bankScoreSecu} points.`);
+      this.bankQuestionIndexSecu = 0;
+      this.bankUserSelectionSecu = null;
+      this.bankSubmittedSecu = false;
+    }
+  },
+
+  changeSubthemeSecu(key) {
+    this.activeSubthemeKeySecu = key;
+    this.bankQuestionIndexSecu = 0;
+    this.bankUserSelectionSecu = null;
+    this.bankSubmittedSecu = false;
+    this.bankIsCorrectSecu = false;
+  },
+
+  // Atelier HTTP vs HTTPS (p. 106)
+  choisirScenarioHttp(key) {
+    this.httpSim.scenarioActif = key;
+    if (key === 'banque') {
+      this.eleveCompetences['NUM-2.D3'] = 'acquis';
+      this.user.xp += 15;
+      this.syncCurrentStudentProgress();
+    }
+  },
+
+  // Atelier Données Actives vs Passives (p. 114)
+  classerDonneeTri(itemId, typeChoisi) {
+    const item = this.triDonnees.items.find(i => i.id === itemId);
+    if (item) {
+      item.choixEleve = typeChoisi;
+    }
+  },
+
+  validerTriDonnees() {
+    let score = 0;
+    let toutRempli = true;
+    this.triDonnees.items.forEach(item => {
+      if (!item.choixEleve) toutRempli = false;
+      if (item.choixEleve === item.typeReel) score++;
+    });
+
+    if (!toutRempli) {
+      alert('Veuillez classer les 6 éléments avant de valider.');
+      return;
+    }
+
+    this.triDonnees.score = score;
+    this.triDonnees.valide = true;
+    if (score === 6) {
+      this.triDonnees.feedback = 'Bravo ! 6/6 sans faute ! Tu distingues parfaitement ce que tu publies (données actives) des traces automatiques (données passives). Compétence NUM-2.D4 validée ! 🎉';
+      this.user.xp += 25;
+      this.eleveCompetences['NUM-2.D4'] = 'acquis';
+    } else {
+      this.triDonnees.feedback = `Score : ${score}/6. Rappel : les données passives sont celles récoltées automatiquement sans que tu tapes du texte (IP, temps d'écran, modèle de smartphone).`;
+      this.eleveCompetences['NUM-2.D4'] = 'en_cours';
+    }
+    this.syncCurrentStudentProgress();
+  },
+
+  // Bilan personnel Chapitre 2 (p. 147)
+  setBilanItemCh2(code, niveau) {
+    this.bilanPersonnelCh2[code] = niveau;
+    this.syncCurrentStudentProgress();
+  },
+
+  // Mission Citoyenne "Je maîtrise" Chapitre 2 (p. 158)
+  soumettreMissionSecu() {
+    this.missionSecu.isSubmitted = true;
+    this.missionSecu.aiFeedback = `Excellente campagne citoyenne ! Ton slogan "${this.missionSecu.slogan}" est percutant et responsabilisant pour des élèves de 1re. Tes 3 réflexes (conserver la preuve, bloquer & signaler, alerter un adulte ou le 103) respectent exactement le protocole de prévention FWB / SeGEC. Compétence NUM-2.M1 validée !`;
+    this.user.xp += 30;
+    this.eleveCompetences['NUM-2.M1'] = 'acquis';
+    this.syncCurrentStudentProgress();
+  },
+
+  // ==========================================
   // DIAPORAMA DE COURS & NOTEBOOKLM
   // ==========================================
   getCurrentModuleSlides() {
     if (this.selectedModuleId === 'module-0') {
       return this.module0?.support_cours?.slides || [];
+    }
+    if (this.selectedModuleId === 'ch2-securite') {
+      return this.chapter2?.support_cours?.slides || [];
     }
     return this.chapter?.support_cours?.slides || [];
   },
@@ -684,6 +916,9 @@ Alpine.data('profAssistantApp', () => ({
     if (this.selectedModuleId === 'module-0') {
       return this.module0?.support_cours?.notebooklm_url || 'https://notebooklm.google.com';
     }
+    if (this.selectedModuleId === 'ch2-securite') {
+      return this.chapter2?.support_cours?.notebooklm_url || 'https://notebooklm.google.com';
+    }
     return this.chapter?.support_cours?.notebooklm_url || 'https://notebooklm.google.com';
   },
 
@@ -692,6 +927,9 @@ Alpine.data('profAssistantApp', () => ({
     if (moduleId === 'module-0') {
       if (!this.module0.support_cours) this.module0.support_cours = {};
       this.module0.support_cours.notebooklm_url = newUrl;
+    } else if (moduleId === 'ch2-securite') {
+      if (!this.chapter2.support_cours) this.chapter2.support_cours = {};
+      this.chapter2.support_cours.notebooklm_url = newUrl;
     } else {
       if (!this.chapter.support_cours) this.chapter.support_cours = {};
       this.chapter.support_cours.notebooklm_url = newUrl;
@@ -729,6 +967,16 @@ Alpine.data('profAssistantApp', () => ({
       const lower = q.toLowerCase();
       if (lower.includes('cci') || lower.includes('cc')) {
         reponse = "Rappelle-toi de l'astuce : 'Cci' = Invisible ! Si tu écris à 25 personnes, pourquoi ne doivent-elles pas voir les adresses de tout le monde ?";
+      } else if (lower.includes('https') || lower.includes('http') || lower.includes('cadenas')) {
+        reponse = "Rappelle-toi : le 'S' de HTTPS = Sécurisé (la communication est chiffrée). Mais attention : un cadenas ne garantit pas que le commerçant est honnête !";
+      } else if (lower.includes('pegi')) {
+        reponse = "Attention au piège classique : le chiffre PEGI indique l'âge minimum conseillé pour la sensibilité psychologique, pas le niveau de difficulté du jeu !";
+      } else if (lower.includes('active') || lower.includes('passive') || lower.includes('trace')) {
+        reponse = "Astuce : une donnée active, c'est ce que tu tapes ou postes volontairement. Une trace passive, c'est ce que la machine enregistre en silence (ton IP, l'heure, ton temps d'écran).";
+      } else if (lower.includes('harcèlement') || lower.includes('bloquer') || lower.includes('signaler')) {
+        reponse = "La règle d'or face au cyberharcèlement : 1. Capture d'écran (preuve) 2. Bloquer & Signaler 3. En parler immédiatement à un adulte ou au 103 (gratuit).";
+      } else if (lower.includes('2fa') || lower.includes('double')) {
+        reponse = "La double authentification (2FA), c'est comme avoir une clé normale PLUS un code secret temporaire sur ton téléphone : impossible d'entrer avec seulement le mot de passe !";
       } else if (lower.includes('censure') || lower.includes('modération')) {
         reponse = "Pense à la règle : supprimer un message haineux ou insultant, c'est de la sécurité (modération). Bloquer une opinion légitime, c'est de la censure.";
       } else if (lower.includes('morse') || lower.includes('code')) {

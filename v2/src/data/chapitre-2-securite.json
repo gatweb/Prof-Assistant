@@ -1,0 +1,152 @@
+{
+  "id": "ch2-securite",
+  "numero": 2,
+  "titre": "Sécurité & Protection des données",
+  "tome": "1a",
+  "pages": "87-164",
+  "introduction": "Apprenez à maîtriser vos traces numériques, repérer les sites fiables (HTTPS), paramétrer la vie privée de vos profils et prévenir les cyberrisques.",
+  "competences": {
+    "je_decouvre": [
+      {
+        "id": "NUM-2.D1",
+        "code": "NUM-2.D1",
+        "intitule": "J'utilise en contexte le vocabulaire de sécurité : identifiant, mot de passe fort, biométrie, double authentification, piratage.",
+        "mots_cles": ["identifiant", "mot de passe", "biométrie", "2FA", "piratage"]
+      },
+      {
+        "id": "NUM-2.D2",
+        "code": "NUM-2.D2",
+        "intitule": "J'identifie et j'interprète la signalétique PEGI et les restrictions d'âge sur les contenus numériques.",
+        "mots_cles": ["PEGI", "âge", "violence", "langage", "achats intégrés"]
+      },
+      {
+        "id": "NUM-2.D3",
+        "code": "NUM-2.D3",
+        "intitule": "Je distingue un site sécurisé (HTTPS avec cadenas) d'un site non chiffré (HTTP).",
+        "mots_cles": ["HTTP", "HTTPS", "cadenas", "chiffrement", "certificat"]
+      },
+      {
+        "id": "NUM-2.D4",
+        "code": "NUM-2.D4",
+        "intitule": "Je différencie les données actives (publiées consciemment) des données passives (traces automatiques, cookies, géolocalisation).",
+        "mots_cles": ["données actives", "données passives", "empreinte numérique", "cookies", "traces"]
+      },
+      {
+        "id": "NUM-2.D5",
+        "code": "NUM-2.D5",
+        "intitule": "J'identifie les mécanismes conçus pour capter l'attention (notifications, scrolling infini, dark patterns) et les bienfaits de la déconnexion.",
+        "mots_cles": ["attention", "notifications", "scrolling", "dopamine", "déconnexion"]
+      }
+    ],
+    "je_pratique": [
+      {
+        "id": "NUM-2.P1",
+        "code": "NUM-2.P1",
+        "intitule": "Je configure les paramètres de confidentialité et de sécurité d'un profil ou d'une application.",
+        "mots_cles": ["paramètres", "privé", "public", "autorisations", "caméra"]
+      },
+      {
+        "id": "NUM-2.P2",
+        "code": "NUM-2.P2",
+        "intitule": "J'applique les procédures de signalement et de blocage face à un contenu abusif ou une situation de cyberharcèlement.",
+        "mots_cles": ["signaler", "bloquer", "preuves", "capture d'écran", "aide"]
+      },
+      {
+        "id": "NUM-2.P3",
+        "code": "NUM-2.P3",
+        "intitule": "J'analyse mon temps d'écran et je mets en œuvre des stratégies efficaces de déconnexion volontaire.",
+        "mots_cles": ["temps d'écran", "pause", "mode silencieux", "sommeil"]
+      }
+    ],
+    "je_maitrise": [
+      {
+        "id": "NUM-2.M1",
+        "code": "NUM-2.M1",
+        "intitule": "Je conçois un guide ou une campagne citoyenne pour sensibiliser mes pairs à la sécurité numérique et à la prévention des cyberrisques.",
+        "mots_cles": ["campagne", "affiche", "sensibilisation", "cyberharcèlement", "prévention"]
+      }
+    ]
+  },
+  "parties": [
+    {
+      "id": "partie-2-1",
+      "titre": "1. Profil, Mots de Passe & Authentification",
+      "pages": "88-97",
+      "resume": "Un bon mot de passe combine au moins 10 caractères (majuscules, minuscules, chiffres et symboles). La double authentification (2FA) ajoute un second verrou (code SMS ou application) pour empêcher toute intrusion."
+    },
+    {
+      "id": "partie-2-2",
+      "titre": "2. Signalétique PEGI & Classification des Jeux",
+      "pages": "98-105",
+      "resume": "La norme européenne PEGI classe les jeux et applications selon l'âge minimum requis (3, 7, 12, 16, 18 ans) et les descripteurs de contenu (peur, violence, drogues, achats intégrés). L'âge n'est pas une mesure de difficulté mais de protection psychologique."
+    },
+    {
+      "id": "partie-2-3",
+      "titre": "3. Navigation Sécurisée : HTTP vs HTTPS",
+      "pages": "106-109",
+      "resume": "Le 'S' de HTTPS signifie 'Sécurisé' : les données échangées entre ton ordinateur et le serveur sont chiffrées. Un site en HTTP normal permet à des tiers espions sur le même réseau Wi-Fi d'intercepter tes identifiants !"
+    },
+    {
+      "id": "partie-2-4",
+      "titre": "4. Traces Numériques : Données Actives vs Passives",
+      "pages": "114-117",
+      "resume": "Données actives = ce que tu décides de publier (stories, messages, likes). Données passives = ce que ton navigateur et ton téléphone enregistrent sans que tu tapes rien (adresse IP, temps passé, clics, géolocalisation)."
+    },
+    {
+      "id": "partie-2-5",
+      "titre": "5. Économie de l'Attention & Déconnexion",
+      "pages": "118-123",
+      "resume": "Les plateformes utilisent la 'captologie' (lumières rouges, pastilles de notifications, scrolling infini) pour déclencher de la dopamine et garder ton attention le plus longtemps possible. Savoir poser son téléphone préserve le sommeil et la concentration."
+    }
+  ],
+  "error_patterns": {
+    "https_garantie_morale": {
+      "titre": "Confusion : 'Le cadenas HTTPS prouve que le site est honnête'",
+      "explication": "Faux ! Le cadenas HTTPS prouve uniquement que la communication est chiffrée. Un escroc peut très bien créer un site frauduleux en HTTPS.",
+      "conseil_tuteur": "Le cadenas protège la tuyauterie, pas l'honnêteté du commerçant !"
+    },
+    "donnees_actives_vs_passives": {
+      "titre": "Confusion entre traces actives et traces passives",
+      "explication": "Même sans poster de message ni créer de profil, tu laisses des traces passives (ton adresse IP, ton modèle d'ordinateur, l'heure de connexion).",
+      "conseil_tuteur": "Distingue : ce que tu écris (actif) et ce que la machine enregistre en silence (passif)."
+    },
+    "pegi_age_vs_difficulte": {
+      "titre": "Confusion sur la signalétique PEGI",
+      "explication": "Le logo PEGI 16 ou 18 n'indique JAMAIS que le jeu est dur à finir, mais qu'il contient des scènes traumatisantes, violentes ou inadaptées avant cet âge.",
+      "conseil_tuteur": "PEGI = protection de la sensibilité, pas diplôme de gamer !"
+    },
+    "bloquer_vs_signaler": {
+      "titre": "Confusion entre Bloquer et Signaler",
+      "explication": "Bloquer empêche une personne de te contacter TOI. Signaler prévient les modérateurs pour protéger TOUT LE MONDE et faire sanctionner l'auteur.",
+      "conseil_tuteur": "En cas de harcèlement : fais une capture d'écran, bloque ET signale !"
+    }
+  },
+  "support_cours": {
+    "titre": "Présentation & Support de cours : Sécurité & Données",
+    "description": "Diaporama complet du chapitre 2 et carnet de synthèse NotebookLM sur la cybersécurité, les traces et la vie privée.",
+    "slides_url": "",
+    "notebooklm_url": "https://notebooklm.google.com",
+    "slides": [
+      {
+        "titre": "1. Mots de Passe & Protection des Profils",
+        "contenu": "Un mot de passe solide a au moins 10 caractères mixtes. Ne jamais le réutiliser sur plusieurs sites. Activer l'authentification à deux facteurs (2FA) dès que possible."
+      },
+      {
+        "titre": "2. Protocole HTTPS : Pourquoi le 'S' change tout",
+        "contenu": "HTTP transmet les données en texte clair (lisible par des pirates sur le Wi-Fi public). HTTPS chiffre la communication de bout en bout avec un certificat SSL/TLS valide."
+      },
+      {
+        "titre": "3. L'Empreinte Numérique : Actif vs Passif",
+        "contenu": "Tout ce qui va sur Internet y laisse une trace durable. Les traces passives (cookies, IP, historiques de clic) forment ton profilage publicitaire invisible."
+      },
+      {
+        "titre": "4. La Signalétique PEGI & Protection des Mineurs",
+        "contenu": "5 classes d'âge (3, 7, 12, 16, 18) et 8 descripteurs de contenu (peur, violence, discrimination...). Un repère légal indispensable pour protéger son bien-être mental."
+      },
+      {
+        "titre": "5. Économie de l'Attention & Hygiène Numérique",
+        "contenu": "Les algorithmes de recommandation récompensent les émotions fortes pour prolonger le temps d'écran. Reprendre le contrôle en désactivant les notifications non vitales."
+      }
+    ]
+  }
+}

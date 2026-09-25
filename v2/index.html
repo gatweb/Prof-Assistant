@@ -122,19 +122,25 @@
         <button 
           @click="selectedModuleId = 'ch1-communication'"
           :class="selectedModuleId === 'ch1-communication' ? 'bg-blue-600 text-white border-blue-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
-          class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0">
+          class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer">
           <span>💬</span> Chapitre 1 : Communication & E-mail
+        </button>
+        <button 
+          @click="selectedModuleId = 'ch2-securite'"
+          :class="selectedModuleId === 'ch2-securite' ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
+          class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer">
+          <span>🛡️</span> Chapitre 2 : Sécurité & Données
         </button>
       </div>
 
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 class="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
-            <span x-text="selectedModuleId === 'module-0' ? '🚀' : (selectedModuleId === 'escape-game' ? '🎮' : '💬')"></span>
-            <span x-text="selectedModuleId === 'module-0' ? module0.titre : (selectedModuleId === 'escape-game' ? escapeGame.titre : chapter.titre)"></span>
+            <span x-text="selectedModuleId === 'module-0' ? '🚀' : (selectedModuleId === 'escape-game' ? '🎮' : (selectedModuleId === 'ch2-securite' ? '🛡️' : '💬'))"></span>
+            <span x-text="selectedModuleId === 'module-0' ? module0.titre : (selectedModuleId === 'escape-game' ? escapeGame.titre : (selectedModuleId === 'ch2-securite' ? chapter2.titre : chapter.titre))"></span>
           </h2>
           <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl" 
-             x-text="selectedModuleId === 'module-0' ? module0.sous_titre : (selectedModuleId === 'escape-game' ? escapeGame.contexte : chapter.introduction)"></p>
+             x-text="selectedModuleId === 'module-0' ? module0.sous_titre : (selectedModuleId === 'escape-game' ? escapeGame.contexte : (selectedModuleId === 'ch2-securite' ? chapter2.introduction : chapter.introduction))"></p>
         </div>
 
         <!-- Onglets pour Module 0 (Ateliers vs Présentation NotebookLM) -->
@@ -179,6 +185,42 @@
             <button 
               @click="activeTab = 'competences'"
               :class="activeTab === 'competences' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+              <span>📊</span> Compétences
+            </button>
+            <button 
+              @click="activeTab = 'cours'"
+              :class="activeTab === 'cours' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+              <span>📽️</span> Diaporama & NotebookLM
+            </button>
+          </nav>
+        </template>
+
+        <!-- Onglets du cycle (Si Chapitre 2 et mode élève) -->
+        <template x-if="activeTab !== 'prof' && selectedModuleId === 'ch2-securite'">
+          <nav class="flex flex-wrap bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 self-start md:self-auto gap-1">
+            <button 
+              @click="activeTab = 'decouvre'"
+              :class="activeTab === 'decouvre' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+              <span>🔍</span> Je découvre
+            </button>
+            <button 
+              @click="activeTab = 'pratique'"
+              :class="activeTab === 'pratique' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+              <span>⚙️</span> Je pratique
+            </button>
+            <button 
+              @click="activeTab = 'maitrise'"
+              :class="activeTab === 'maitrise' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+              <span>🎯</span> Je maîtrise
+            </button>
+            <button 
+              @click="activeTab = 'competences'"
+              :class="activeTab === 'competences' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
               class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
               <span>📊</span> Compétences
             </button>
@@ -958,7 +1000,443 @@
     </div>
 
     <!-- ======================================================= -->
-    <!-- DIAPORAMA DE COURS & NOTEBOOKLM (MODULE 0 & CHAPITRE 1) -->
+    <!-- CHAPITRE 2 : SÉCURITÉ & PROTECTION DES DONNÉES           -->
+    <!-- ======================================================= -->
+    <div x-show="activeTab !== 'prof' && activeTab !== 'cours' && selectedModuleId === 'ch2-securite'" class="space-y-8">
+
+      <!-- ==================== 1. JE DÉCOUVRE ==================== -->
+      <div x-show="activeTab === 'decouvre'" class="space-y-6">
+        
+        <!-- Sélecteur des 5 sous-thèmes officiels d'@lt_X (100 Questions) -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          <button 
+            @click="changeSubthemeSecu('profil')"
+            :class="activeSubthemeKeySecu === 'profil' ? 'bg-emerald-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-emerald-300'"
+            class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
+            <span>👤</span> Profil (20 Q)
+          </button>
+          <button 
+            @click="changeSubthemeSecu('signaletique')"
+            :class="activeSubthemeKeySecu === 'signaletique' ? 'bg-emerald-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-emerald-300'"
+            class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
+            <span>🔞</span> PEGI (20 Q)
+          </button>
+          <button 
+            @click="changeSubthemeSecu('cyber')"
+            :class="activeSubthemeKeySecu === 'cyber' ? 'bg-emerald-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-emerald-300'"
+            class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
+            <span>🚨</span> Harcèlement (20 Q)
+          </button>
+          <button 
+            @click="changeSubthemeSecu('confidentialite')"
+            :class="activeSubthemeKeySecu === 'confidentialite' ? 'bg-emerald-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-emerald-300'"
+            class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
+            <span>🔒</span> Sécurité (20 Q)
+          </button>
+          <button 
+            @click="changeSubthemeSecu('identite')"
+            :class="activeSubthemeKeySecu === 'identite' ? 'bg-emerald-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-emerald-300'"
+            class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
+            <span>🐾</span> Traces (20 Q)
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Colonne Gauche : Synthèse Théorique Officielle du Livre & Pièges Fréquents SeGEC -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs lg:col-span-1 space-y-4">
+            <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+              <span class="text-xl" x-text="getActiveSubthemeSecu().icon"></span>
+              <h4 class="font-black text-sm text-slate-900" x-text="getActiveSubthemeSecu().label"></h4>
+            </div>
+            
+            <div class="text-xs text-slate-600 leading-relaxed space-y-2 whitespace-pre-line max-h-[380px] overflow-y-auto pr-2"
+                 x-text="getActiveSubthemeSecu().lecon">
+            </div>
+
+            <!-- Focus Piège Fréquent SeGEC -->
+            <div class="bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200 text-xs space-y-1">
+              <div class="font-black text-amber-900 flex items-center gap-1.5">
+                <span>⚠️</span> <span>Règle d'or @lt_X :</span>
+              </div>
+              <p class="text-amber-800 text-[11px] leading-relaxed">
+                Le cadenas HTTPS prouve que la connexion est chiffrée, mais <strong>JAMAIS</strong> que le commerçant est honnête ! Un escroc peut créer un faux site avec cadenas.
+              </p>
+            </div>
+          </div>
+
+          <!-- Colonne Droite : Entraînement Interactif issu de la Banque de Questions (100 Questions) -->
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs lg:col-span-2 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-extrabold" 
+                        x-text="'Question ' + (bankQuestionIndexSecu + 1) + ' / ' + getActiveSubthemeSecu().questions.length"></span>
+                  <span class="text-xs font-bold text-slate-400">•</span>
+                  <span class="text-xs font-bold text-slate-500">Banque officielle @lt_X (Sécurité)</span>
+                </div>
+                <div class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-xl">
+                  Score : <span x-text="bankScoreSecu"></span> pts
+                </div>
+              </div>
+
+              <div class="py-6">
+                <h3 class="text-base sm:text-lg font-black text-slate-900" x-text="getCurrentBankQuestionSecu().q"></h3>
+
+                <div class="grid grid-cols-1 gap-2.5 mt-6">
+                  <template x-for="(choice, idx) in getCurrentBankQuestionSecu().choices" :key="idx">
+                    <button 
+                      @click="selectBankChoiceSecu(choice)"
+                      :disabled="bankSubmittedSecu"
+                      :class="{
+                        'border-emerald-600 bg-emerald-50/70 text-emerald-900 font-bold': bankUserSelectionSecu === choice && !bankSubmittedSecu,
+                        'border-slate-200 hover:border-emerald-300 bg-white text-slate-700': bankUserSelectionSecu !== choice && !bankSubmittedSecu,
+                        'border-emerald-500 bg-emerald-50 text-emerald-900 font-bold': bankSubmittedSecu && choice === getCurrentBankQuestionSecu().rep,
+                        'border-rose-300 bg-rose-50 text-rose-800': bankSubmittedSecu && bankUserSelectionSecu === choice && !bankIsCorrectSecu
+                      }"
+                      class="p-3.5 rounded-2xl border-2 text-left text-xs sm:text-sm font-semibold transition-all flex items-center justify-between cursor-pointer">
+                      <span x-text="choice"></span>
+                      <span x-show="bankUserSelectionSecu === choice && !bankSubmittedSecu" class="text-emerald-600 font-black">●</span>
+                      <span x-show="bankSubmittedSecu && choice === getCurrentBankQuestionSecu().rep" class="text-emerald-600 font-black">✓ Bonne réponse</span>
+                      <span x-show="bankSubmittedSecu && bankUserSelectionSecu === choice && !bankIsCorrectSecu" class="text-rose-600 font-black">✕</span>
+                    </button>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <button 
+                @click="tutorOpen = true"
+                class="text-xs font-bold text-emerald-600 hover:text-emerald-800 flex items-center gap-1.5 cursor-pointer">
+                <span>🤖</span> Un conseil du robot ?
+              </button>
+
+              <div>
+                <button 
+                  x-show="!bankSubmittedSecu"
+                  @click="validerBankReponseSecu()"
+                  :disabled="!bankUserSelectionSecu"
+                  :class="bankUserSelectionSecu ? 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer' : 'bg-slate-200 text-slate-400 cursor-not-allowed'"
+                  class="px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">
+                  Valider ma réponse
+                </button>
+                <button 
+                  x-show="bankSubmittedSecu"
+                  @click="bankQuestionSuivanteSecu()"
+                  class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-2 cursor-pointer">
+                  <span>Question suivante</span>
+                  <span>➔</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ==================== 2. JE PRATIQUE ==================== -->
+      <div x-show="activeTab === 'pratique'" class="space-y-8">
+        
+        <!-- ATELIER 1 : Simulateur de Navigation HTTP vs HTTPS (@lt_X page 106) -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+            <div class="flex items-center gap-3">
+              <div class="p-2.5 rounded-2xl bg-emerald-100 text-emerald-700 text-lg font-black">🔒</div>
+              <div>
+                <h3 class="font-black text-base text-slate-900">Atelier 1 : Inspecteur d'Adresses Web — HTTP vs HTTPS (p. 106)</h3>
+                <p class="text-xs text-slate-500 font-medium">Repère les sites chiffrés et déjoue les pièges du cadenas</p>
+              </div>
+            </div>
+            <span class="text-xs font-extrabold px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full">Compétence NUM-2.D3</span>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Sélecteur de Scénarios -->
+            <div class="space-y-3">
+              <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider">Choisis un site à tester :</h4>
+              
+              <button 
+                @click="choisirScenarioHttp('ecole')"
+                :class="httpSim.scenarioActif === 'ecole' ? 'border-rose-500 bg-rose-50 text-rose-900' : 'border-slate-200 bg-white text-slate-700 hover:border-rose-200'"
+                class="w-full p-3.5 rounded-2xl border-2 text-left transition flex items-center justify-between cursor-pointer">
+                <div>
+                  <div class="font-black text-xs">1. Portail Wi-Fi École</div>
+                  <div class="text-[11px] text-slate-500 font-mono mt-0.5">http://connexion-college.be</div>
+                </div>
+                <span class="text-xs font-bold text-rose-600">Non sécurisé</span>
+              </button>
+
+              <button 
+                @click="choisirScenarioHttp('banque')"
+                :class="httpSim.scenarioActif === 'banque' ? 'border-emerald-500 bg-emerald-50 text-emerald-900' : 'border-slate-200 bg-white text-slate-700 hover:border-emerald-200'"
+                class="w-full p-3.5 rounded-2xl border-2 text-left transition flex items-center justify-between cursor-pointer">
+                <div>
+                  <div class="font-black text-xs">2. Espace Bancaire & Scolaire</div>
+                  <div class="text-[11px] text-slate-500 font-mono mt-0.5">https://banque-securisee.be</div>
+                </div>
+                <span class="text-xs font-bold text-emerald-600">Chiffré 🔒</span>
+              </button>
+
+              <button 
+                @click="choisirScenarioHttp('piege')"
+                :class="httpSim.scenarioActif === 'piege' ? 'border-amber-500 bg-amber-50 text-amber-900' : 'border-slate-200 bg-white text-slate-700 hover:border-amber-200'"
+                class="w-full p-3.5 rounded-2xl border-2 text-left transition flex items-center justify-between cursor-pointer">
+                <div>
+                  <div class="font-black text-xs">3. Arnaque Cadeaux Gratuits</div>
+                  <div class="text-[11px] text-slate-500 font-mono mt-0.5">https://cadeaux-gratuits.xyz</div>
+                </div>
+                <span class="text-xs font-bold text-amber-600">Le Piège ⚠️</span>
+              </button>
+            </div>
+
+            <!-- Navigateur Virtuel & Diagnostic -->
+            <div class="lg:col-span-2 bg-slate-900 rounded-2xl p-5 text-white flex flex-col justify-between space-y-4">
+              <div>
+                <!-- Fausse barre d'adresse de navigateur -->
+                <div class="bg-slate-800 rounded-xl px-4 py-2.5 flex items-center gap-3 border border-slate-700">
+                  <span class="text-base" x-text="httpSim.scenarios[httpSim.scenarioActif].isHttps ? '🔒' : '⚠️'"></span>
+                  <span class="text-xs font-mono flex-1 text-slate-200" x-text="httpSim.scenarios[httpSim.scenarioActif].url"></span>
+                  <span class="text-[10px] font-extrabold px-2 py-0.5 rounded"
+                        :class="httpSim.scenarios[httpSim.scenarioActif].isHttps ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'"
+                        x-text="httpSim.scenarios[httpSim.scenarioActif].protocole"></span>
+                </div>
+
+                <div class="mt-4 p-4 rounded-xl bg-slate-800/80 border border-slate-700/80 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <h5 class="text-xs font-black text-slate-200" x-text="httpSim.scenarios[httpSim.scenarioActif].titre"></h5>
+                    <span class="text-xs font-extrabold px-2.5 py-0.5 rounded-full"
+                          :class="{
+                            'bg-rose-900/60 text-rose-200': httpSim.scenarios[httpSim.scenarioActif].couleur === 'rose',
+                            'bg-emerald-900/60 text-emerald-200': httpSim.scenarios[httpSim.scenarioActif].couleur === 'emerald',
+                            'bg-amber-900/60 text-amber-200': httpSim.scenarios[httpSim.scenarioActif].couleur === 'amber'
+                          }"
+                          x-text="httpSim.scenarios[httpSim.scenarioActif].statut"></span>
+                  </div>
+                  <p class="text-xs text-slate-300 leading-relaxed" x-text="httpSim.scenarios[httpSim.scenarioActif].explication"></p>
+                </div>
+              </div>
+
+              <div class="pt-3 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+                <span>Observation @lt_X : Vérifie toujours l'adresse complète avant d'entrer un mot de passe.</span>
+                <span class="text-emerald-400 font-bold">+15 XP validés</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ATELIER 2 : Tri Interactif Données Actives vs Traces Passives (@lt_X page 114) -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+            <div class="flex items-center gap-3">
+              <div class="p-2.5 rounded-2xl bg-indigo-100 text-indigo-700 text-lg font-black">👣</div>
+              <div>
+                <h3 class="font-black text-base text-slate-900">Atelier 2 : Données Actives vs Traces Passives (p. 114)</h3>
+                <p class="text-xs text-slate-500 font-medium">Classe chaque situation : action volontaire ou trace silencieuse enregistrée par la machine ?</p>
+              </div>
+            </div>
+            <span class="text-xs font-extrabold px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full">Compétence NUM-2.D4</span>
+          </div>
+
+          <div class="space-y-3">
+            <template x-for="item in triDonnees.items" :key="item.id">
+              <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div class="flex items-center gap-3">
+                  <span class="text-2xl" x-text="item.icone"></span>
+                  <span class="font-bold text-slate-800" x-text="item.label"></span>
+                </div>
+                <div class="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                  <button 
+                    @click="classerDonneeTri(item.id, 'active')"
+                    :class="item.choixEleve === 'active' ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'"
+                    class="px-3 py-1.5 rounded-xl transition cursor-pointer">
+                    📤 Donnée Active
+                  </button>
+                  <button 
+                    @click="classerDonneeTri(item.id, 'passive')"
+                    :class="item.choixEleve === 'passive' ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'"
+                    class="px-3 py-1.5 rounded-xl transition cursor-pointer">
+                    🐾 Trace Passive
+                  </button>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="text-xs text-slate-600">
+              <span x-show="triDonnees.valide" class="font-bold" x-text="triDonnees.feedback"></span>
+              <span x-show="!triDonnees.valide" class="text-slate-400 italic">Classe les 6 éléments ci-dessus puis clique sur « Valider mon tri ».</span>
+            </div>
+            <button 
+              @click="validerTriDonnees()"
+              class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition shadow-sm cursor-pointer shrink-0">
+              Valider mon tri
+            </button>
+          </div>
+        </div>
+
+        <!-- ATELIER 3 : Bilan Personnel d'Auto-Évaluation (@lt_X page 147) -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+          <div class="pb-4 border-b border-slate-100 mb-6">
+            <h3 class="font-black text-base text-slate-900 flex items-center gap-2">
+              <span>🎯</span> Bilan personnel : Sécurité & Données (p. 147)
+            </h3>
+            <p class="text-xs text-slate-500 mt-1">Évalue ton niveau de maîtrise sur les compétences officielles du chapitre :</p>
+          </div>
+
+          <div class="space-y-3">
+            <template x-for="comp in competencesCh2?.je_decouvre || []" :key="comp.id">
+              <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div class="flex items-start gap-3">
+                  <span class="font-black px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700" x-text="comp.code"></span>
+                  <span class="font-semibold text-slate-800" x-text="comp.intitule"></span>
+                </div>
+                <div class="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                  <button 
+                    @click="setBilanItemCh2(comp.code, 'bien')"
+                    :class="bilanPersonnelCh2[comp.code] === 'bien' ? 'bg-emerald-500 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100'"
+                    class="px-2.5 py-1 rounded-xl text-base transition cursor-pointer">🙂</button>
+                  <button 
+                    @click="setBilanItemCh2(comp.code, 'moyen')"
+                    :class="bilanPersonnelCh2[comp.code] === 'moyen' ? 'bg-amber-500 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100'"
+                    class="px-2.5 py-1 rounded-xl text-base transition cursor-pointer">😐</button>
+                  <button 
+                    @click="setBilanItemCh2(comp.code, 'difficile')"
+                    :class="bilanPersonnelCh2[comp.code] === 'difficile' ? 'bg-rose-500 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100'"
+                    class="px-2.5 py-1 rounded-xl text-base transition cursor-pointer">🙁</button>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== 3. JE MAÎTRISE ==================== -->
+      <div x-show="activeTab === 'maitrise'" class="space-y-8">
+        
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+          <div class="pb-4 border-b border-slate-100 mb-6 flex items-center justify-between">
+            <div>
+              <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-600">Projet Citoyen • Page 158</span>
+              <h3 class="font-black text-xl text-slate-900 mt-1">Campagne de Prévention : Les 3 Réflexes Numériques</h3>
+            </div>
+            <span class="text-xs font-extrabold px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full">Compétence NUM-2.M1</span>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 text-xs">
+            <div class="space-y-4">
+              <div>
+                <label class="font-extrabold text-slate-800 block mb-1">1. Choisis le thème de ta campagne :</label>
+                <select x-model="missionSecu.typeCampagne" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 font-bold focus:outline-none focus:border-emerald-600">
+                  <option value="cyberharcelement">Lutte contre le cyberharcèlement (Bienveillance en ligne)</option>
+                  <option value="traces">Maîtrise de l'empreinte numérique et vie privée</option>
+                  <option value="deconnexion">Économie de l'attention & déconnexion volontaire</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="font-extrabold text-slate-800 block mb-1">2. Ton Slogan Percutant (mémorisable par des élèves de 1re) :</label>
+                <input type="text" x-model="missionSecu.slogan" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-600 font-bold">
+              </div>
+
+              <div>
+                <label class="font-extrabold text-slate-800 block mb-1">3. Réflexe d'urgence 1 (Preuve) :</label>
+                <input type="text" x-model="missionSecu.reflexe1" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-600">
+              </div>
+
+              <div>
+                <label class="font-extrabold text-slate-800 block mb-1">4. Réflexe d'action 2 (Blocage & Signalement) :</label>
+                <input type="text" x-model="missionSecu.reflexe2" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-600">
+              </div>
+
+              <div>
+                <label class="font-extrabold text-slate-800 block mb-1">5. Réflexe de recours 3 (Aide & Écoute) :</label>
+                <input type="text" x-model="missionSecu.reflexe3" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-600">
+              </div>
+
+              <button 
+                @click="soumettreMissionSecu()"
+                class="px-6 py-3 rounded-xl bg-emerald-600 text-white font-extrabold text-xs hover:bg-emerald-700 transition shadow-sm flex items-center gap-2 cursor-pointer">
+                <span>📢</span> Valider et publier ma campagne citoyenne
+              </button>
+            </div>
+
+            <!-- Retour du Tuteur Socratique IA -->
+            <div class="bg-emerald-50/50 p-6 rounded-3xl border border-emerald-100 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center gap-3 mb-4">
+                  <div class="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-xl">🛡️</div>
+                  <div>
+                    <h4 class="font-black text-emerald-950">Validation du Protocole Citoyen</h4>
+                    <p class="text-xs text-emerald-700">Conforme au protocole SeGEC / Écoute-Enfants 103</p>
+                  </div>
+                </div>
+
+                <template x-if="missionSecu.isSubmitted">
+                  <div class="p-4 bg-white rounded-2xl border border-emerald-200 text-slate-700 leading-relaxed space-y-2">
+                    <div class="font-bold text-emerald-700">✓ Campagne conforme au référentiel FWB !</div>
+                    <p x-text="missionSecu.aiFeedback"></p>
+                  </div>
+                </template>
+
+                <template x-if="!missionSecu.isSubmitted">
+                  <p class="text-slate-500 leading-relaxed italic">
+                    Formule ton slogan et les 3 réflexes pour valider la compétence NUM-2.M1 et obtenir la certification citoyenne !
+                  </p>
+                </template>
+              </div>
+
+              <div class="mt-6 pt-4 border-t border-emerald-100 text-xs text-emerald-800 font-semibold">
+                Rappel légal : En cas d'urgence en Belgique francophone, le numéro gratuit d'écoute et d'aide est le <strong>103</strong>.
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== 4. MES COMPÉTENCES ==================== -->
+      <div x-show="activeTab === 'competences'" class="space-y-6">
+        <div class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h3 class="font-black text-lg text-slate-900">Mon Tableau de Compétences FMTTN</h3>
+              <p class="text-xs text-slate-500 font-medium">Référentiel officiel SeGEC — Chapitre 2</p>
+            </div>
+            <div class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
+              Chapitre 2 : Sécurité & Protection des données
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <template x-for="comp in competencesCh2?.je_decouvre || []" :key="comp.id">
+              <div class="p-3.5 rounded-xl border border-slate-200 flex items-center justify-between gap-4">
+                <div class="flex items-start gap-3">
+                  <span class="font-black text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700" x-text="comp.code"></span>
+                  <p class="text-xs text-slate-800 font-medium" x-text="comp.intitule"></p>
+                </div>
+                <div>
+                  <span x-show="eleveCompetences[comp.code] === 'acquis'" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1">✓ Acquis</span>
+                  <span x-show="eleveCompetences[comp.code] === 'en_cours' || !eleveCompetences[comp.code]" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 flex items-center gap-1">⏳ En cours</span>
+                  <span x-show="eleveCompetences[comp.code] === 'a_renforcer'" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800 flex items-center gap-1">⚠️ À renforcer</span>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- DIAPORAMA DE COURS & NOTEBOOKLM                         -->
     <!-- ======================================================= -->
     <div x-show="activeTab !== 'prof' && activeTab === 'cours'" class="space-y-8">
       
@@ -968,9 +1446,9 @@
           <span class="px-3 py-1 bg-white/10 text-indigo-200 rounded-full text-xs font-extrabold uppercase tracking-wider">
             Support de Cours • Programme SeGEC FMTTN
           </span>
-          <h3 class="text-2xl font-black mt-2" x-text="selectedModuleId === 'module-0' ? module0.support_cours?.titre : chapter.support_cours?.titre"></h3>
+          <h3 class="text-2xl font-black mt-2" x-text="selectedModuleId === 'module-0' ? module0.support_cours?.titre : (selectedModuleId === 'ch2-securite' ? chapter2.support_cours?.titre : chapter.support_cours?.titre)"></h3>
           <p class="text-xs sm:text-sm text-indigo-100 mt-2 max-w-xl leading-relaxed" 
-             x-text="selectedModuleId === 'module-0' ? module0.support_cours?.description : chapter.support_cours?.description">
+             x-text="selectedModuleId === 'module-0' ? module0.support_cours?.description : (selectedModuleId === 'ch2-securite' ? chapter2.support_cours?.description : chapter.support_cours?.description)">
           </p>
         </div>
         <div class="flex items-center gap-3">
@@ -1174,59 +1652,135 @@
 
         <!-- Tableau Heatmap Matrice de la Classe -->
         <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs overflow-x-auto">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-extrabold text-base text-slate-900">Matrice de Maîtrise des Acquis (Référentiel SeGEC FMTTN)</h3>
-            <span class="text-xs text-slate-400 font-bold" x-text="classeEleves.length + ' élève(s) actif(s)'"></span>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <h3 class="font-extrabold text-base text-slate-900">Matrice de Maîtrise des Acquis (Référentiel SeGEC FMTTN)</h3>
+              <span class="text-xs text-slate-400 font-bold" x-text="classeEleves.length + ' élève(s) actif(s)'"></span>
+            </div>
+
+            <!-- Sélecteur de Chapitre pour la matrice -->
+            <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
+              <button 
+                @click="profMatrixChapter = 'ch1'"
+                :class="profMatrixChapter === 'ch1' ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+                class="px-3 py-1 rounded-lg text-xs transition cursor-pointer">
+                Chapitre 1 : Communication
+              </button>
+              <button 
+                @click="profMatrixChapter = 'ch2'"
+                :class="profMatrixChapter === 'ch2' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+                class="px-3 py-1 rounded-lg text-xs transition cursor-pointer">
+                Chapitre 2 : Sécurité & Données
+              </button>
+            </div>
           </div>
           
-          <table class="w-full text-left text-xs border-collapse min-w-[700px]">
-            <thead>
-              <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
-                <th class="py-3 px-4">Élève</th>
-                <th class="py-3 px-4">Escape Game</th>
-                <th class="py-3 px-4">Charte p.10</th>
-                <th class="py-3 px-4">Réseaux NUM-1.D1</th>
-                <th class="py-3 px-4">Courriel NUM-1.D5</th>
-                <th class="py-3 px-4">Éthique NUM-1.D6</th>
-                <th class="py-3 px-4">Simulateur NUM-1.P2</th>
-                <th class="py-3 px-4 text-right">Score</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              <template x-for="eleve in classeEleves" :key="eleve.id">
-                <tr class="hover:bg-slate-50/70 transition">
-                  <td class="py-3.5 px-4 font-extrabold text-slate-900" x-text="eleve.nom"></td>
-                  <td class="py-3.5 px-4 font-bold text-purple-700" x-text="eleve.eg"></td>
-                  <td class="py-3.5 px-4">
-                    <span :class="eleve.charte === 'acquis' ? 'bg-emerald-100 text-emerald-800' : (eleve.charte === 'en_cours' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')"
-                          class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.charte"></span>
-                  </td>
-                  <td class="py-3.5 px-4">
-                    <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">Acquis</span>
-                  </td>
-                  <td class="py-3.5 px-4">
-                    <span :class="eleve.d5 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
-                          class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.d5"></span>
-                  </td>
-                  <td class="py-3.5 px-4">
-                    <span :class="eleve.d6 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
-                          class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.d6"></span>
-                  </td>
-                  <td class="py-3.5 px-4">
-                    <span :class="eleve.p2 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
-                          class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.p2"></span>
-                  </td>
-                  <td class="py-3.5 px-4 text-right font-black" :class="eleve.score >= 80 ? 'text-emerald-600' : 'text-amber-600'" x-text="eleve.score + '%'"></td>
+          <!-- TABLEAU CHAPITRE 1 -->
+          <template x-if="profMatrixChapter === 'ch1'">
+            <table class="w-full text-left text-xs border-collapse min-w-[700px]">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
+                  <th class="py-3 px-4">Élève</th>
+                  <th class="py-3 px-4">Escape Game</th>
+                  <th class="py-3 px-4">Charte p.10</th>
+                  <th class="py-3 px-4">Réseaux NUM-1.D1</th>
+                  <th class="py-3 px-4">Courriel NUM-1.D5</th>
+                  <th class="py-3 px-4">Éthique NUM-1.D6</th>
+                  <th class="py-3 px-4">Simulateur NUM-1.P2</th>
+                  <th class="py-3 px-4 text-right">Score</th>
                 </tr>
-              </template>
-              <tr x-show="classeEleves.length === 0">
-                <td colspan="8" class="py-8 text-center text-slate-400 font-medium">
-                  Aucun élève n'a encore enregistré de progression dans la classe <strong x-text="selectedTeacherClass"></strong>.<br>
-                  Basculez sur l'onglet <strong>« Gestion des Élèves & Classes »</strong> ci-dessus pour inscrire vos élèves.
-                </td>
-              </tr>
-            </tbody>
-          </table>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <template x-for="eleve in classeEleves" :key="eleve.id">
+                  <tr class="hover:bg-slate-50/70 transition">
+                    <td class="py-3.5 px-4 font-extrabold text-slate-900" x-text="eleve.nom"></td>
+                    <td class="py-3.5 px-4 font-bold text-purple-700" x-text="eleve.eg"></td>
+                    <td class="py-3.5 px-4">
+                      <span :class="eleve.charte === 'acquis' ? 'bg-emerald-100 text-emerald-800' : (eleve.charte === 'en_cours' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')"
+                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.charte"></span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">Acquis</span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span :class="eleve.d5 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.d5"></span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span :class="eleve.d6 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.d6"></span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span :class="eleve.p2 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.p2"></span>
+                    </td>
+                    <td class="py-3.5 px-4 text-right font-black" :class="eleve.score >= 80 ? 'text-emerald-600' : 'text-amber-600'" x-text="eleve.score + '%'"></td>
+                  </tr>
+                </template>
+                <tr x-show="classeEleves.length === 0">
+                  <td colspan="8" class="py-8 text-center text-slate-400 font-medium">
+                    Aucun élève n'a encore enregistré de progression dans la classe <strong x-text="selectedTeacherClass"></strong>.<br>
+                    Basculez sur l'onglet <strong>« Gestion des Élèves & Classes »</strong> ci-dessus pour inscrire vos élèves.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </template>
+
+          <!-- TABLEAU CHAPITRE 2 -->
+          <template x-if="profMatrixChapter === 'ch2'">
+            <table class="w-full text-left text-xs border-collapse min-w-[700px]">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
+                  <th class="py-3 px-4">Élève</th>
+                  <th class="py-3 px-4">Mots de passe NUM-2.D1</th>
+                  <th class="py-3 px-4">PEGI NUM-2.D2</th>
+                  <th class="py-3 px-4">HTTPS NUM-2.D3</th>
+                  <th class="py-3 px-4">Traces NUM-2.D4</th>
+                  <th class="py-3 px-4">Attention NUM-2.D5</th>
+                  <th class="py-3 px-4">Mission NUM-2.M1</th>
+                  <th class="py-3 px-4 text-right">Score</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <template x-for="eleve in classeEleves" :key="eleve.id">
+                  <tr class="hover:bg-slate-50/70 transition">
+                    <td class="py-3.5 px-4 font-extrabold text-slate-900" x-text="eleve.nom"></td>
+                    <td class="py-3.5 px-4">
+                      <span :class="eleve.num2_d1 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_d1 || 'en_cours'"></span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span :class="eleve.num2_d2 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_d2 || 'en_cours'"></span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span :class="eleve.num2_d3 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_d3 || 'en_cours'"></span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span :class="eleve.num2_d4 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : (eleve.num2_d4 === 'en_cours' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')"
+                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_d4 || 'en_cours'"></span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span :class="eleve.num2_d5 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_d5 || 'en_cours'"></span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span :class="eleve.num2_m1 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_m1 || 'en_cours'"></span>
+                    </td>
+                    <td class="py-3.5 px-4 text-right font-black" :class="eleve.score >= 80 ? 'text-emerald-600' : 'text-amber-600'" x-text="eleve.score + '%'"></td>
+                  </tr>
+                </template>
+                <tr x-show="classeEleves.length === 0">
+                  <td colspan="8" class="py-8 text-center text-slate-400 font-medium">
+                    Aucun élève n'a encore enregistré de progression dans la classe <strong x-text="selectedTeacherClass"></strong>.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </template>
         </div>
 
         <!-- Fiche de Remédiation en 1 Clic -->
@@ -1235,17 +1789,23 @@
             <div class="flex items-center gap-3">
               <span class="text-2xl">✨</span>
               <div>
-                <h4 class="font-black text-indigo-950 text-base">Fiche de Remédiation Ciblée Générée</h4>
-                <p class="text-xs text-indigo-700">Générée pour les élèves en difficulté sur la compétence NUM-1.P2 (Courriel & Cci)</p>
+                <h4 class="font-black text-indigo-950 text-base" x-text="profMatrixChapter === 'ch2' ? 'Fiche de Remédiation Ciblée : Sécurité & Données' : 'Fiche de Remédiation Ciblée : Courriel & Cci'"></h4>
+                <p class="text-xs text-indigo-700" x-text="profMatrixChapter === 'ch2' ? 'Générée pour les élèves en difficulté sur le cadenas HTTPS (NUM-2.D3) et les données passives (NUM-2.D4)' : 'Générée pour les élèves en difficulté sur la compétence NUM-1.P2 (Courriel & Cci)'"></p>
               </div>
             </div>
             <button onclick="window.print()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-xs hover:bg-indigo-700 cursor-pointer">Imprimer / PDF</button>
           </div>
-          <div class="bg-white p-4 rounded-2xl border border-indigo-100 text-xs text-slate-700 space-y-2">
-            <p><strong>Exercice de renfort : « Où placer chaque adresse ? »</strong></p>
+          <div x-show="profMatrixChapter === 'ch1'" class="bg-white p-4 rounded-2xl border border-indigo-100 text-xs text-slate-700 space-y-2">
+            <p><strong>Exercice de renfort Chapitre 1 : « Où placer chaque adresse ? »</strong></p>
             <p>1. Tu écris au professeur pour lui poser une question sur le cours. ➔ <strong>Champ [ À ]</strong></p>
             <p>2. Tu envoies les photos de la sortie scolaire à 28 élèves de la classe. ➔ <strong>Champ [ Cci ]</strong> (pour protéger leur vie privée / RGPD)</p>
             <p>3. Tu envoies un document à ton binôme et tu veux que ton professeur le voie aussi sans être le destinataire direct. ➔ <strong>Champ [ Cc ]</strong></p>
+          </div>
+          <div x-show="profMatrixChapter === 'ch2'" class="bg-white p-4 rounded-2xl border border-emerald-100 text-xs text-slate-700 space-y-2">
+            <p><strong>Exercice de renfort Chapitre 2 : « Déjouer les pièges de sécurité »</strong></p>
+            <p>1. Un site d'achats affiche un cadenas vert 🔒. Peux-tu faire confiance les yeux fermés ? ➔ <strong>Non ! Le cadenas prouve le chiffrement du transport, pas l'honnêteté du vendeur.</strong></p>
+            <p>2. Sans rien taper, mon téléphone sait où je suis et combien de temps je regarde un écran. Est-ce actif ou passif ? ➔ <strong>Donnée passive (trace automatique).</strong></p>
+            <p>3. Quelqu'un m'envoie des insultes répétées en message privé. Quel est le réflexe 1 ? ➔ <strong>Capture d'écran (preuve) avant tout !</strong></p>
           </div>
         </div>
 
@@ -1344,7 +1904,7 @@
             <p class="text-xs text-slate-500 mt-0.5">Associez vos liens de carnets de notes NotebookLM ou vos présentations Google Slides à chaque chapitre.</p>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Module 0 Config -->
             <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
               <div class="flex items-center justify-between">
@@ -1384,6 +1944,27 @@
                 @click="sauvegarderNotebookLMConfig('ch1-communication', chapter.support_cours.notebooklm_url)"
                 class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition cursor-pointer">
                 Enregistrer pour le Chapitre 1
+              </button>
+            </div>
+
+            <!-- Chapitre 2 Config -->
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-extrabold text-sm text-slate-900">Chapitre 2 : Sécurité & Données</span>
+                <span class="text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">FMTTN 1re</span>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Lien de votre carnet NotebookLM :</label>
+                <input 
+                  type="url" 
+                  x-model="chapter2.support_cours.notebooklm_url" 
+                  placeholder="https://notebooklm.google.com/notebook/..." 
+                  class="w-full bg-white px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-emerald-600 font-mono" />
+              </div>
+              <button 
+                @click="sauvegarderNotebookLMConfig('ch2-securite', chapter2.support_cours.notebooklm_url)"
+                class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition cursor-pointer">
+                Enregistrer pour le Chapitre 2
               </button>
             </div>
           </div>

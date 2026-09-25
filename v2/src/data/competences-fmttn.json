@@ -125,6 +125,75 @@
           }
         ]
       }
+    },
+    {
+      "id": "ch2",
+      "numero": 2,
+      "titre": "Sécurité et protection des données",
+      "tome": "1a",
+      "couleur": "emerald",
+      "competences": {
+        "je_decouvre": [
+          {
+            "id": "NUM-2.D1",
+            "code": "NUM-2.D1",
+            "intitule": "J'utilise en contexte le vocabulaire de sécurité : mot de passe fort, biométrie, double authentification (2FA), piratage.",
+            "mots_cles": ["mot de passe", "2FA", "biométrie", "piratage"]
+          },
+          {
+            "id": "NUM-2.D2",
+            "code": "NUM-2.D2",
+            "intitule": "J'identifie et j'interprète la signalétique PEGI et les restrictions d'âge sur les contenus numériques.",
+            "mots_cles": ["PEGI", "âge", "violence", "discrimination", "achats intégrés"]
+          },
+          {
+            "id": "NUM-2.D3",
+            "code": "NUM-2.D3",
+            "intitule": "Je distingue un site sécurisé (HTTPS avec cadenas et certificat) d'un site non chiffré (HTTP).",
+            "mots_cles": ["HTTP", "HTTPS", "cadenas", "chiffrement", "certificat"]
+          },
+          {
+            "id": "NUM-2.D4",
+            "code": "NUM-2.D4",
+            "intitule": "Je différencie les données actives (publiées consciemment) des données passives (traces automatiques, cookies, géolocalisation).",
+            "mots_cles": ["données actives", "données passives", "empreinte numérique", "cookies"]
+          },
+          {
+            "id": "NUM-2.D5",
+            "code": "NUM-2.D5",
+            "intitule": "J'identifie les mécanismes conçus pour capter l'attention (notifications, scrolling infini) et les bienfaits de la déconnexion.",
+            "mots_cles": ["attention", "notifications", "scrolling", "déconnexion", "temps d'écran"]
+          }
+        ],
+        "je_pratique": [
+          {
+            "id": "NUM-2.P1",
+            "code": "NUM-2.P1",
+            "intitule": "Je configure les paramètres de confidentialité et de sécurité d'un profil ou d'une application.",
+            "mots_cles": ["paramètres", "privé", "public", "autorisations"]
+          },
+          {
+            "id": "NUM-2.P2",
+            "code": "NUM-2.P2",
+            "intitule": "J'applique les procédures de signalement et de blocage face à un contenu abusif ou une situation de cyberharcèlement.",
+            "mots_cles": ["signaler", "bloquer", "preuves", "capture d'écran"]
+          },
+          {
+            "id": "NUM-2.P3",
+            "code": "NUM-2.P3",
+            "intitule": "J'analyse mon temps d'écran et je mets en œuvre des stratégies efficaces de déconnexion volontaire.",
+            "mots_cles": ["temps d'écran", "pause", "mode nuit", "sommeil"]
+          }
+        ],
+        "je_maitrise": [
+          {
+            "id": "NUM-2.M1",
+            "code": "NUM-2.M1",
+            "intitule": "Je conçois un guide ou une campagne citoyenne pour sensibiliser mes pairs à la sécurité numérique et à la prévention des cyberrisques.",
+            "mots_cles": ["campagne", "affiche", "sensibilisation", "cyberharcèlement"]
+          }
+        ]
+      }
     }
   ]
 }

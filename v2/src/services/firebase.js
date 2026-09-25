@@ -134,6 +134,10 @@ export async function saveEleveProgression(classeId, eleveId, data) {
       email_sim: data.email_sim || null,
       bilan_personnel: data.bilan_personnel || null,
       mission_app: data.mission_app || null,
+      http_sim: data.http_sim || null,
+      tri_donnees: data.tri_donnees || null,
+      mission_secu: data.mission_secu || null,
+      bilan_personnel_ch2: data.bilan_personnel_ch2 || null,
       competences: data.competences || {}
     };
 
@@ -176,10 +180,20 @@ export function listenToClasseProgressions(classeId, onUpdate) {
         let d6Etat = d.competences?.['NUM-1.D6'] || "en_cours";
         let p2Etat = d.competences?.['NUM-1.P2'] || (d.email_sim?.validationResults?.scoreGlobal >= 5 ? "acquis" : "a_renforcer");
         
+        // Chapitre 2 : Sécurité & Données
+        let num2_d1 = d.competences?.['NUM-2.D1'] || "en_cours";
+        let num2_d2 = d.competences?.['NUM-2.D2'] || "en_cours";
+        let num2_d3 = d.competences?.['NUM-2.D3'] || (d.http_sim?.scenarioActif === 'banque' ? "acquis" : "en_cours");
+        let num2_d4 = d.competences?.['NUM-2.D4'] || (d.tri_donnees?.score === 6 ? "acquis" : (d.tri_donnees?.score > 0 ? "en_cours" : "a_renforcer"));
+        let num2_d5 = d.competences?.['NUM-2.D5'] || "en_cours";
+        let num2_m1 = d.competences?.['NUM-2.M1'] || (d.mission_secu?.isSubmitted ? "acquis" : "en_cours");
+
         let score = 50;
-        if (egRatio === "5/5") score += 20;
+        if (egRatio === "5/5") score += 15;
         if (charteEtat === "acquis") score += 10;
-        if (p2Etat === "acquis") score += 20;
+        if (p2Etat === "acquis") score += 15;
+        if (num2_d3 === "acquis") score += 5;
+        if (num2_d4 === "acquis") score += 5;
 
         eleves.push({
           id: d.eleve_id,
@@ -189,6 +203,12 @@ export function listenToClasseProgressions(classeId, onUpdate) {
           d5: d5Etat,
           d6: d6Etat,
           p2: p2Etat,
+          num2_d1,
+          num2_d2,
+          num2_d3,
+          num2_d4,
+          num2_d5,
+          num2_m1,
           score: Math.min(100, score),
           xp: d.xp || 0,
           updated_at: d.updated_at
