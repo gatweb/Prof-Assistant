@@ -37,9 +37,13 @@ import { AVAILABLE_CLASSES } from './services/teachers-config.js';
 import {
   isClassroomConnected,
   getClassroomToken,
+  setClassroomToken,
   connectGoogleClassroom,
   disconnectGoogleClassroom,
   fetchClassroomCourses,
+  fetchStudentEnrolledCourses,
+  detectClassFromCourses,
+  checkIfClassroomTeacher,
   fetchCourseStudents,
   fetchCourseWork,
   publishCourseWork,
@@ -126,6 +130,7 @@ Alpine.data('profAssistantApp', () => ({
   loginLoading: false,
   loginError: '',
   modalClassChoiceOpen: false,
+  classroomDetectedClass: null,
 
   // Profil Utilisateur Connecté (Google ou invité)
   user: {
@@ -468,10 +473,27 @@ Alpine.data('profAssistantApp', () => ({
           this.user.photoURL = u.photoURL || '';
           this.user.isLoggedIn = true;
 
+          // Détection automatique de la classe élève depuis Google Classroom si token disponible
+          if (!this.user.classe && getClassroomToken()) {
+            try {
+              const studentCourses = await fetchStudentEnrolledCourses();
+              const detectedClass = detectClassFromCourses(studentCourses, this.availableClasses);
+              if (detectedClass) {
+                this.user.classe = detectedClass;
+                localStorage.setItem('profassistant_student_classe', detectedClass);
+                this.classroomDetectedClass = detectedClass;
+                if (!this.availableClasses.includes(detectedClass)) {
+                  this.availableClasses.push(detectedClass);
+                }
+              }
+            } catch (_) {}
+          }
+
           if (!this.user.classe) {
             this.user.classe = savedClass || '1A';
           }
-          if (!savedClass) {
+          // On n'ouvre la modale QUE si aucune classe n'a pu être détectée automatiquement
+          if (!savedClass && !this.classroomDetectedClass) {
             this.modalClassChoiceOpen = true;
           }
 
@@ -507,7 +529,41 @@ Alpine.data('profAssistantApp', () => ({
     this.loginLoading = true;
     this.loginError = '';
     try {
-      await loginUtilisateurGoogle();
+      const { user, accessToken } = await loginUtilisateurGoogle();
+
+      if (accessToken) {
+        setClassroomToken(accessToken);
+        this.classroomConnected = true;
+
+        // 1. Détection automatique de la classe élève depuis Google Classroom
+        try {
+          const studentCourses = await fetchStudentEnrolledCourses();
+          if (studentCourses && studentCourses.length) {
+            const detectedClass = detectClassFromCourses(studentCourses, this.availableClasses);
+            if (detectedClass) {
+              console.log(`[Classroom] Classe détectée automatiquement : ${detectedClass}`);
+              this.user.classe = detectedClass;
+              localStorage.setItem('profassistant_student_classe', detectedClass);
+              this.classroomDetectedClass = detectedClass;
+              if (!this.availableClasses.includes(detectedClass)) {
+                this.availableClasses.push(detectedClass);
+              }
+              this.modalClassChoiceOpen = false;
+            }
+          }
+        } catch (cErr) {
+          console.warn("[Classroom] Détection automatique classe élève ignorée :", cErr.message);
+        }
+
+        // 2. Détection automatique de rôle Enseignant via Google Classroom
+        try {
+          const isClassroomTeacher = await checkIfClassroomTeacher();
+          if (isClassroomTeacher && !this.teacherAuth.isTeacher) {
+            console.log("[Classroom] Rôle Enseignant actif détecté dans Classroom");
+            this.teacherAuth.isTeacher = true;
+          }
+        } catch (_) {}
+      }
     } catch (err) {
       if (err.code !== 'auth/popup-closed-by-user') {
         this.loginError = "Erreur de connexion : " + (err.message || "Veuillez réessayer.");

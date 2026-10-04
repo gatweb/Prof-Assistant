@@ -158,6 +158,67 @@ export async function fetchClassroomCourses() {
 }
 
 /**
+ * 1b. Liste les cours actifs où l'utilisateur est inscrit comme élève
+ */
+export async function fetchStudentEnrolledCourses() {
+  try {
+    const data = await classroomFetch('/courses?studentId=me&courseStates=ACTIVE');
+    return (data.courses || []).map(c => ({
+      id: c.id,
+      name: c.name || '',
+      section: c.section || '',
+      descriptionHeading: c.descriptionHeading || '',
+      room: c.room || '',
+      alternateLink: c.alternateLink || `https://classroom.google.com/c/${c.id}`
+    }));
+  } catch (err) {
+    console.warn("[Classroom] Impossible de récupérer les cours de l'élève :", err.message);
+    return [];
+  }
+}
+
+/**
+ * Détecte intelligemment la classe d'un élève depuis ses cours Google Classroom
+ */
+export function detectClassFromCourses(courses = [], availableClasses = []) {
+  if (!courses || !courses.length) return null;
+
+  // 1. Chercher d'abord parmi les classes configurées dans l'école
+  for (const course of courses) {
+    const text = `${course.section || ''} ${course.name || ''} ${course.room || ''}`.trim();
+    for (const c of availableClasses) {
+      const regex = new RegExp(`(^|[^a-zA-Z0-9])${c}([^a-zA-Z0-9]|$)`, 'i');
+      if (regex.test(text)) {
+        return c;
+      }
+    }
+  }
+
+  // 2. Détection par motif standard (ex: 1A, 1ère A, 2B, 3TT, etc.)
+  for (const course of courses) {
+    const text = `${course.section || ''} ${course.name || ''}`.trim();
+    const match = text.match(/\b([1-6])[\s\-_]*(ère|ere|ème|eme)?[\s\-_]*([A-Za-z]{1,2})\b/i);
+    if (match) {
+      return `${match[1]}${match[3].toUpperCase()}`;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Vérifie si l'utilisateur possède au moins un cours en tant qu'enseignant
+ */
+export async function checkIfClassroomTeacher() {
+  try {
+    const data = await classroomFetch('/courses?teacherId=me&courseStates=ACTIVE');
+    return Array.isArray(data.courses) && data.courses.length > 0;
+  } catch (_) {
+    return false;
+  }
+}
+
+/**
  * 2. Récupère la liste des élèves (roster) d'un cours Classroom
  */
 export async function fetchCourseStudents(courseId) {

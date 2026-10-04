@@ -56,9 +56,14 @@ export async function initStudentSession() {
 export async function loginUtilisateurGoogle() {
   try {
     const provider = new GoogleAuthProvider();
+    provider.addScope('https://www.googleapis.com/auth/classroom.courses.readonly');
     provider.setCustomParameters({ prompt: 'select_account' });
     const result = await signInWithPopup(auth, provider);
-    return result.user;
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    return {
+      user: result.user,
+      accessToken: credential?.accessToken || null
+    };
   } catch (err) {
     console.error("[loginUtilisateurGoogle] Erreur connexion Google :", err);
     throw err;

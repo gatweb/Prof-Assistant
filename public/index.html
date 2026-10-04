@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>body{font-family:Plus Jakarta Sans,sans-serif}</style>
-  <script type="module" crossorigin src="/assets/index-DF6bRIao.js"></script>
+  <script type="module" crossorigin src="/assets/index-CtGXZTp-.js"></script>
   <link rel="stylesheet" crossorigin href="/assets/index-OzidiVF3.css">
 </head>
 <body class="h-full flex flex-col bg-slate-50 text-slate-800" x-data="profAssistantApp()">
@@ -85,7 +85,8 @@
             <button 
               @click="modalClassChoiceOpen = true"
               class="px-2 py-1 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 rounded-lg text-xs font-black transition cursor-pointer flex items-center gap-1"
-              title="Changer de classe">
+              :title="classroomDetectedClass ? 'Classe détectée automatiquement via Google Classroom' : 'Changer de classe'">
+              <span x-show="classroomDetectedClass" class="text-[10px]" title="Détectée automatiquement via Google Classroom">✨</span>
               <span x-text="'Classe ' + (user.classe || '1A')"></span>
               <span class="text-[10px]">▾</span>
             </button>
@@ -174,7 +175,7 @@
           💡 Compatible avec les comptes Google Workspace for Education et adresses scolaires (<span class="font-semibold text-slate-600">@ecole.be</span>).
         </p>
         <p class="text-[11px] text-indigo-600 font-bold">
-          🧑‍🏫 Enseignant ou 🎒 Élève : votre espace s'ouvre automatiquement selon votre profil.
+          ✨ Détection automatique de votre classe et de vos cours via Google Classroom.
         </p>
       </div>
 
