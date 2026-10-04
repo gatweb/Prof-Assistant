@@ -38,12 +38,12 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const functions = getFunctions(app, "europe-west1");
 
-// 1. Initialisation silencieuse de l'authentification (anonyme pour l'élève si non connecté)
+// 1. Initialisation silencieuse de l'authentification (mode démo / secours invité)
 export async function initStudentSession() {
   try {
     if (!auth.currentUser) {
       await signInAnonymously(auth);
-      console.log("[Auth] Session élève active :", auth.currentUser.uid);
+      console.log("[Auth] Session invité active :", auth.currentUser.uid);
     }
     return auth.currentUser;
   } catch (err) {
@@ -52,7 +52,20 @@ export async function initStudentSession() {
   }
 }
 
-// 2. Connexion Enseignant via Google (Synchronisation dynamique & Custom Claims)
+// 2. Connexion Universelle via Google (Élève & Enseignant)
+export async function loginUtilisateurGoogle() {
+  try {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    const result = await signInWithPopup(auth, provider);
+    return result.user;
+  } catch (err) {
+    console.error("[loginUtilisateurGoogle] Erreur connexion Google :", err);
+    throw err;
+  }
+}
+
+// 2b. Connexion Enseignant dédiée via Google (pour synchronisation immédiate)
 export async function loginProfesseurGoogle() {
   try {
     const provider = new GoogleAuthProvider();
@@ -68,7 +81,6 @@ export async function loginProfesseurGoogle() {
       if (!data.isTeacher) {
         console.warn("[Auth Prof] Adresse non autorisée :", data.message || user.email);
         await signOut(auth);
-        await initStudentSession();
         return { 
           success: false, 
           reason: data.reason || "not_allowed", 
@@ -77,7 +89,6 @@ export async function loginProfesseurGoogle() {
         };
       }
 
-      // Forcer le rafraîchissement du token pour obtenir les claims
       await user.getIdToken(true);
 
       const profile = data.profile || {
@@ -87,14 +98,9 @@ export async function loginProfesseurGoogle() {
         classes: ["1A", "1B", "1C", "1D"]
       };
 
-      console.log("[Auth Prof] Enseignant authentifié :", profile);
-      return {
-        success: true,
-        user,
-        profile
-      };
+      return { success: true, user, profile };
     } catch (fnErr) {
-      console.warn("[Auth Prof] Erreur sync function, tentative de vérification directe Firestore :", fnErr);
+      console.warn("[Auth Prof] Erreur sync function, vérification directe Firestore :", fnErr);
       const docSnap = await getDoc(doc(db, "enseignants", user.email.toLowerCase()));
       if (docSnap.exists() && docSnap.data().actif !== false) {
         const profile = docSnap.data();
@@ -104,7 +110,6 @@ export async function loginProfesseurGoogle() {
         return { success: true, user, profile: { email: user.email, nom: "Administrateur", role: "admin", classes: ["all"] } };
       }
       await signOut(auth);
-      await initStudentSession();
       return { success: false, reason: "error", error: fnErr.message };
     }
   } catch (err) {
@@ -113,19 +118,23 @@ export async function loginProfesseurGoogle() {
   }
 }
 
-// 3. Déconnexion Enseignant
-export async function logoutProfesseur() {
+// 3. Déconnexion Globale (Élève & Professeur)
+export async function deconnexionGlobale() {
   try {
     await signOut(auth);
-    await initStudentSession();
+    console.log("[Auth] Déconnexion réussie");
     return true;
   } catch (err) {
-    console.error("[Auth Prof] Erreur de déconnexion :", err);
+    console.error("[Auth] Erreur lors de la déconnexion :", err);
     return false;
   }
 }
 
-// 4. Écoute de l'état d'authentification
+export async function logoutProfesseur() {
+  return deconnexionGlobale();
+}
+
+// 4. Écoute réactive de l'état d'authentification (détection automatique Prof / Élève)
 export function subscribeToAuthState(callback) {
   return onAuthStateChanged(auth, async (user) => {
     if (user && !user.isAnonymous && user.email) {
@@ -144,6 +153,7 @@ export function subscribeToAuthState(callback) {
             classes: ["1A", "1B", "1C", "1D"]
           };
           callback({
+            isLoggedIn: true,
             isTeacher: true,
             isAdmin,
             user,
@@ -157,6 +167,7 @@ export function subscribeToAuthState(callback) {
         if (docSnap.exists() && docSnap.data().actif !== false) {
           const profile = docSnap.data();
           callback({
+            isLoggedIn: true,
             isTeacher: true,
             isAdmin: profile.role === 'admin' || user.email === 'gatweb@gmail.com',
             user,
@@ -164,12 +175,40 @@ export function subscribeToAuthState(callback) {
           });
           return;
         }
+
+        // C'EST UN ÉLÈVE AUTHENTIFIÉ PAR GOOGLE !
+        callback({
+          isLoggedIn: true,
+          isTeacher: false,
+          isAdmin: false,
+          user,
+          profile: {
+            email: user.email.toLowerCase(),
+            nom: user.displayName || user.email.split('@')[0],
+            photoURL: user.photoURL || ''
+          }
+        });
+        return;
       } catch (err) {
-        console.warn("[subscribeToAuthState] Erreur vérification enseignant :", err.message);
+        console.warn("[subscribeToAuthState] Erreur vérification rôle :", err.message);
+        callback({
+          isLoggedIn: true,
+          isTeacher: false,
+          isAdmin: false,
+          user,
+          profile: {
+            email: user.email.toLowerCase(),
+            nom: user.displayName || user.email.split('@')[0],
+            photoURL: user.photoURL || ''
+          }
+        });
+        return;
       }
     }
 
+    // Utilisateur non connecté avec Google (ou visiteur anonyme)
     callback({
+      isLoggedIn: user ? !user.isAnonymous : false,
       isTeacher: false,
       isAdmin: false,
       user: user || null,
@@ -208,18 +247,25 @@ export async function supprimerEnseignantCloud(email) {
 // 5. Sauvegarde de la progression élève dans Firestore (/progressions_v2)
 export async function saveEleveProgression(classeId, eleveId, data) {
   try {
-    const docKey = `${classeId}_${eleveId}`.replace(/[^a-zA-Z0-9_-]/g, '_');
-    const docRef = doc(db, "progressions_v2", docKey);
-    
     if (!auth.currentUser) await initStudentSession();
     if (!auth.currentUser) throw new Error("Aucune session Firebase");
 
+    const email = auth.currentUser.email ? auth.currentUser.email.toLowerCase() : (data.email || '');
+    const nom = data.nom || auth.currentUser.displayName || (email ? email.split('@')[0] : "Élève");
+    const uid = auth.currentUser.uid;
+
+    const docKey = email 
+      ? `${classeId}_${email}`.replace(/[^a-zA-Z0-9_-]/g, '_')
+      : `${classeId}_${eleveId}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const docRef = doc(db, "progressions_v2", docKey);
+
     const payload = {
-      uid: auth.currentUser.uid,
+      uid: uid,
       classe_id: classeId,
       classe: classeId,
       eleve_id: eleveId,
-      eleve_nom: data.nom || "Élève",
+      eleve_nom: nom,
+      eleve_email: email,
       updated_at: new Date().toISOString(),
       timestamp: serverTimestamp(),
       xp: data.xp || 0,
@@ -236,16 +282,62 @@ export async function saveEleveProgression(classeId, eleveId, data) {
     };
 
     await setDoc(docRef, payload, { merge: true });
-
-    // Note : l'ancien miroir vers 'users' a été retiré (Phase 0 de la fusion).
-    // 'users' est indexé par email (V1) et réservé aux enseignants ; les élèves
-    // V2 sont déjà listés via 'progressions_v2' dans getRealClassStudents().
-
-    console.log(`[Firestore] Progression synchronisée pour ${data.nom} (${classeId})`);
+    console.log(`[Firestore] Progression synchronisée pour ${nom} (${email || eleveId} - ${classeId})`);
     return true;
   } catch (err) {
     console.warn("[Firestore] Mode local actif :", err.message);
     return false;
+  }
+}
+
+// 5b. Chargement de la progression réelle d'un élève depuis Firestore
+export async function chargerProgressionEleveReelle(classeId, email, uid) {
+  try {
+    const normalizedEmail = (email || '').toLowerCase().trim();
+    let progressionData = null;
+
+    if (classeId && normalizedEmail) {
+      const docKey = `${classeId}_${normalizedEmail}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const snap = await getDoc(doc(db, "progressions_v2", docKey));
+      if (snap.exists()) {
+        progressionData = snap.data();
+      }
+    }
+
+    if (!progressionData && normalizedEmail) {
+      const q = query(collection(db, "progressions_v2"), where("eleve_email", "==", normalizedEmail));
+      const qSnap = await getDocs(q);
+      if (!qSnap.empty) {
+        progressionData = qSnap.docs[0].data();
+      }
+    }
+
+    if (!progressionData && uid) {
+      const q = query(collection(db, "progressions_v2"), where("uid", "==", uid));
+      const qSnap = await getDocs(q);
+      if (!qSnap.empty) {
+        progressionData = qSnap.docs[0].data();
+      }
+    }
+
+    // Charger l'historique des soumissions de devoirs de l'élève
+    const submissions = [];
+    if (normalizedEmail) {
+      const qSub = query(collection(db, "submissions"), where("email_eleve", "==", normalizedEmail));
+      const subSnap = await getDocs(qSub);
+      subSnap.forEach(d => {
+        submissions.push({ id: d.id, ...d.data() });
+      });
+      submissions.sort((a, b) => new Date(b.date_soumission || 0) - new Date(a.date_soumission || 0));
+    }
+
+    return {
+      progression: progressionData,
+      submissions
+    };
+  } catch (err) {
+    console.warn("[chargerProgressionEleveReelle] Erreur :", err.message);
+    return null;
   }
 }
 
@@ -345,16 +437,20 @@ export async function getRealClassStudents(classeId) {
     const snapProg = await getDocs(qProg);
     snapProg.forEach(docSnap => {
       const p = docSnap.data();
-      const elId = p.eleve_id || docSnap.id;
+      const elId = p.eleve_email || p.eleve_id || docSnap.id;
       if (!studentMap[elId]) {
         studentMap[elId] = {
           id: elId,
           nom: p.eleve_nom || "Élève",
-          email: "",
+          email: p.eleve_email || (elId.includes('@') ? elId : ""),
           classe: p.classe_id || classeId,
           status: "actif",
           xp: p.xp || 0
         };
+      } else {
+        if (!studentMap[elId].email && p.eleve_email) {
+          studentMap[elId].email = p.eleve_email;
+        }
       }
       studentMap[elId].progression = p;
       if (p.xp > studentMap[elId].xp) {

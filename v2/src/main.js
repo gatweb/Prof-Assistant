@@ -10,10 +10,13 @@ import { marked } from 'marked';
 import { courseManagerV2 } from './services/courseManager.js';
 import { 
   initStudentSession, 
+  loginUtilisateurGoogle,
   loginProfesseurGoogle, 
+  deconnexionGlobale,
   logoutProfesseur, 
   subscribeToAuthState, 
   saveEleveProgression, 
+  chargerProgressionEleveReelle,
   listenToClasseProgressions, 
   getRealClassStudents,
   addRealStudent,
@@ -116,21 +119,32 @@ Alpine.data('profAssistantApp', () => ({
   bankIsCorrect: false,
   bankScore: 0,
 
-  // Profil Élève (Sauvegardé en local pour éviter les ressaisies)
+  // Authentification globale (Élève & Enseignant)
+  authReady: false,
+  isLoggedIn: false,
+  isGuestMode: false,
+  loginLoading: false,
+  loginError: '',
+  modalClassChoiceOpen: false,
+
+  // Profil Utilisateur Connecté (Google ou invité)
   user: {
-    id: 'el_' + Math.random().toString(36).substring(2, 8),
-    nom: 'Lucas M.',
+    id: '',
+    email: '',
+    nom: 'Élève',
     classe: '1A',
-    xp: 180,
-    avatar: 'robot'
+    photoURL: '',
+    xp: 0,
+    avatar: 'robot',
+    isLoggedIn: false
   },
 
   // Progression des compétences élève (Référentiel SeGEC)
   eleveCompetences: {
-    'NUM-1.D1': 'acquis',
+    'NUM-1.D1': 'en_cours',
     'NUM-1.D5': 'en_cours',
     'NUM-1.D6': 'en_cours',
-    'NUM-1.P2': 'a_renforcer',
+    'NUM-1.P2': 'en_cours',
     'NUM-2.D1': 'en_cours',
     'NUM-2.D2': 'en_cours',
     'NUM-2.D3': 'en_cours',
@@ -416,42 +430,63 @@ Alpine.data('profAssistantApp', () => ({
     // 0. Initialisation du catalogue multi-cours
     await this.initCoursesCatalogue();
 
-    // 1. Récupération du profil élève en local
-    const savedUser = localStorage.getItem('profassistant_student');
-    if (savedUser) {
-      try {
-        const parsed = JSON.parse(savedUser);
-        if (parsed.nom && parsed.classe) {
-          this.user = { ...this.user, ...parsed };
-        }
-      } catch (e) {
-        console.warn('Erreur lecture profil local', e);
-      }
+    // 1. Récupération de la classe préférée en local si mémorisée
+    const savedClass = localStorage.getItem('profassistant_student_classe');
+    if (savedClass) {
+      this.user.classe = savedClass;
     }
 
-    // 2. Initialisation silencieuse de la session élève
-    await initStudentSession();
+    // 2. Écoute réactive de l'état d'authentification Firebase (Prof ou Élève)
+    subscribeToAuthState(async (authStatus) => {
+      this.authReady = true;
 
-    // 3. Écoute de l'état d'authentification enseignant
-    subscribeToAuthState((authStatus) => {
-      this.teacherAuth.isTeacher = authStatus.isTeacher;
-      this.teacherAuth.isAdmin = authStatus.isAdmin;
-      this.teacherAuth.user = authStatus.user;
-      this.teacherAuth.profile = authStatus.profile;
+      if (authStatus.isLoggedIn) {
+        this.isLoggedIn = true;
+        this.teacherAuth.isTeacher = authStatus.isTeacher;
+        this.teacherAuth.isAdmin = authStatus.isAdmin;
+        this.teacherAuth.user = authStatus.user;
+        this.teacherAuth.profile = authStatus.profile;
 
-      if (authStatus.isTeacher) {
-        console.log(`[Prof] Bienvenue ${authStatus.profile?.nom || authStatus.user?.email}`);
-        if (authStatus.profile?.classes?.length) {
-          this.selectedTeacherClass = authStatus.profile.classes[0];
-        }
-        this.activerEcouteClasse(this.selectedTeacherClass);
-        this.activerEcouteSubmissions();
-        this.chargerElevesReels();
-        this.classroomConnected = isClassroomConnected();
-        if (this.classroomConnected) {
-          this.chargerCoursClassroom();
+        if (authStatus.isTeacher) {
+          console.log(`[Prof] Bienvenue ${authStatus.profile?.nom || authStatus.user?.email}`);
+          if (authStatus.profile?.classes?.length) {
+            this.selectedTeacherClass = authStatus.profile.classes[0];
+          }
+          this.activerEcouteClasse(this.selectedTeacherClass);
+          this.activerEcouteSubmissions();
+          this.chargerElevesReels();
+          this.classroomConnected = isClassroomConnected();
+          if (this.classroomConnected) {
+            this.chargerCoursClassroom();
+          }
+        } else {
+          // ÉLÈVE AUTHENTIFIÉ AVEC GOOGLE
+          const u = authStatus.user;
+          this.user.id = u.uid;
+          this.user.email = (u.email || '').toLowerCase();
+          this.user.nom = u.displayName || (u.email ? u.email.split('@')[0] : "Élève");
+          this.user.photoURL = u.photoURL || '';
+          this.user.isLoggedIn = true;
+
+          if (!this.user.classe) {
+            this.user.classe = savedClass || '1A';
+          }
+          if (!savedClass) {
+            this.modalClassChoiceOpen = true;
+          }
+
+          // Charger la vraie progression depuis Firestore
+          await this.chargerProgressionEleveReelleDepuisDb();
         }
       } else {
+        // Non connecté
+        if (!this.isGuestMode) {
+          this.isLoggedIn = false;
+        }
+        this.teacherAuth.isTeacher = false;
+        this.teacherAuth.isAdmin = false;
+        this.teacherAuth.user = null;
+        this.teacherAuth.profile = null;
         this.classroomConnected = false;
         if (this.unsubscribeTeacherListener) {
           this.unsubscribeTeacherListener();
@@ -463,9 +498,82 @@ Alpine.data('profAssistantApp', () => ({
         }
       }
     });
+  },
 
-    // 4. Première synchronisation de la progression de l'élève
+  // ==========================================
+  // AUTHENTIFICATION GOOGLE UNIFIÉE
+  // ==========================================
+  async connexionGoogle() {
+    this.loginLoading = true;
+    this.loginError = '';
+    try {
+      await loginUtilisateurGoogle();
+    } catch (err) {
+      if (err.code !== 'auth/popup-closed-by-user') {
+        this.loginError = "Erreur de connexion : " + (err.message || "Veuillez réessayer.");
+      }
+    } finally {
+      this.loginLoading = false;
+    }
+  },
+
+  async deconnexionUtilisateur() {
+    await deconnexionGlobale();
+    this.isLoggedIn = false;
+    this.isGuestMode = false;
+    this.user = {
+      id: '',
+      email: '',
+      nom: 'Élève',
+      classe: '1A',
+      photoURL: '',
+      xp: 0,
+      avatar: 'robot',
+      isLoggedIn: false
+    };
+  },
+
+  activerModeInvite() {
+    this.isGuestMode = true;
+    this.isLoggedIn = true;
+    this.user.id = 'guest_' + Math.random().toString(36).substring(2, 8);
+    this.user.nom = 'Élève Invité';
+    this.user.classe = '1A';
+    this.user.email = 'invite@demo.local';
+    initStudentSession();
+  },
+
+  choisirClasseEleve(c) {
+    this.user.classe = c;
+    localStorage.setItem('profassistant_student_classe', c);
+    this.modalClassChoiceOpen = false;
     this.syncCurrentStudentProgress();
+  },
+
+  async chargerProgressionEleveReelleDepuisDb() {
+    if (!this.user.email && !this.user.id) return;
+    try {
+      const data = await chargerProgressionEleveReelle(this.user.classe, this.user.email, this.user.id);
+      if (data) {
+        if (data.progression) {
+          const p = data.progression;
+          if (p.classe_id) this.user.classe = p.classe_id;
+          if (p.xp) this.user.xp = p.xp;
+          if (p.competences) this.eleveCompetences = { ...this.eleveCompetences, ...p.competences };
+          if (p.bilan_personnel) this.bilanPersonnel = { ...this.bilanPersonnel, ...p.bilan_personnel };
+          if (p.bilan_personnel_ch2) this.bilanPersonnelCh2 = { ...this.bilanPersonnelCh2, ...p.bilan_personnel_ch2 };
+          if (p.charte) this.charteState = { ...this.charteState, ...p.charte };
+          if (p.escape_game) this.egState = { ...this.egState, ...p.escape_game };
+          if (p.email_sim) this.emailSim = { ...this.emailSim, ...p.email_sim };
+        }
+        if (data.submissions?.length) {
+          const validated = data.submissions.filter(s => s.status === 'valide').length;
+          console.log(`[Progression] ${data.submissions.length} travaux trouvés (${validated} validés)`);
+        }
+      }
+    } catch (e) {
+      console.warn("[chargerProgressionEleveReelleDepuisDb] Erreur :", e);
+    }
   },
 
   // ==========================================
@@ -473,15 +581,11 @@ Alpine.data('profAssistantApp', () => ({
   // ==========================================
   updateStudentProfile(newNom, newClasse) {
     if (newNom) this.user.nom = newNom.trim();
-    if (newClasse) this.user.classe = newClasse;
+    if (newClasse) {
+      this.user.classe = newClasse;
+      localStorage.setItem('profassistant_student_classe', newClasse);
+    }
     
-    localStorage.setItem('profassistant_student', JSON.stringify({
-      id: this.user.id,
-      nom: this.user.nom,
-      classe: this.user.classe,
-      xp: this.user.xp
-    }));
-
     this.syncCurrentStudentProgress();
   },
 
@@ -746,6 +850,7 @@ Alpine.data('profAssistantApp', () => ({
   async syncCurrentStudentProgress() {
     const dataToSave = {
       nom: this.user.nom,
+      email: this.user.email,
       classe: this.user.classe,
       xp: this.user.xp,
       competences: this.eleveCompetences,
@@ -778,7 +883,7 @@ Alpine.data('profAssistantApp', () => ({
       }
     };
 
-    await saveEleveProgression(this.user.classe, this.user.id, dataToSave);
+    await saveEleveProgression(this.user.classe, this.user.email || this.user.id || 'el_student', dataToSave);
   },
 
   // ==========================================
