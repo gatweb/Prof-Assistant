@@ -548,4 +548,39 @@ export async function deleteTeacherSubmission(subId) {
   }
 }
 
+// 12. GÉNÉRATEUR & SYNCHRONISATION GOOGLE FORMS (PHASE 5)
+export async function genererQuizGoogleFormsCloud({ sujet, niveau, nombreQuestions, titreQuiz, folderId, accessToken }) {
+  try {
+    const fn = httpsCallable(functions, "genererQuizGoogleFormsIA");
+    const res = await fn({
+      sujet,
+      niveau,
+      nombreQuestions,
+      titreQuiz,
+      folderId,
+      accessToken
+    });
+    return res.data;
+  } catch (err) {
+    console.error("[genererQuizGoogleFormsCloud] Erreur :", err);
+    throw err;
+  }
+}
+
+export async function recupererReponsesGoogleFormsCloud({ formId, accessToken, classeId, courseId }) {
+  try {
+    const fn = httpsCallable(functions, "recupererReponsesGoogleForms");
+    const res = await fn({
+      formId,
+      accessToken,
+      classeId,
+      courseId
+    });
+    return res.data;
+  } catch (err) {
+    console.error("[recupererReponsesGoogleFormsCloud] Erreur :", err);
+    throw err;
+  }
+}
+
 

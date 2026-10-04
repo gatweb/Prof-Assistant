@@ -619,6 +619,34 @@ Format de sortie OBLIGATOIRE : Un JSON pur respectant cette structure exacte :
                     },
                     updateMask: "quizSettings.isQuiz"
                 }
+            },
+            {
+                createItem: {
+                    item: {
+                        title: "Nom et Prénom de l'élève :",
+                        questionItem: {
+                            question: {
+                                required: true,
+                                textQuestion: {}
+                            }
+                        }
+                    },
+                    location: { index: 0 }
+                }
+            },
+            {
+                createItem: {
+                    item: {
+                        title: "Adresse e-mail de l'élève :",
+                        questionItem: {
+                            question: {
+                                required: true,
+                                textQuestion: {}
+                            }
+                        }
+                    },
+                    location: { index: 1 }
+                }
             }
         ];
 
@@ -652,7 +680,7 @@ Format de sortie OBLIGATOIRE : Un JSON pur respectant cette structure exacte :
                         }
                     },
                     location: {
-                        index: index
+                        index: index + 2
                     }
                 }
             });
@@ -675,6 +703,125 @@ Format de sortie OBLIGATOIRE : Un JSON pur respectant cette structure exacte :
     } catch (error) {
         console.error("[genererQuizGoogleFormsIA] Erreur:", error);
         throw new HttpsError("internal", error.message || "Erreur lors de la génération du quiz IA.");
+    }
+});
+
+/**
+ * `recupererReponsesGoogleForms` — Récupère les réponses et notes d'un Google Form
+ * et les synchronise dans la collection Firestore `exam_results`.
+ */
+exports.recupererReponsesGoogleForms = onCall({
+    region: "europe-west1",
+    cors: true
+}, async (request) => {
+    if (!request.auth) throw new HttpsError("unauthenticated", "Connexion requise.");
+
+    const { formId, accessToken, classeId, courseId } = request.data;
+    if (!formId) throw new HttpsError("invalid-argument", "Identifiant du formulaire requis.");
+
+    const clients = getGoogleClients(accessToken);
+    if (!clients) {
+        throw new HttpsError(
+            "failed-precondition",
+            "Identifiants Google non configurés. Veuillez connecter votre compte Google avec les accès Forms/Drive."
+        );
+    }
+
+    try {
+        const { forms } = clients;
+
+        // 1. Récupérer les métadonnées et questions du formulaire
+        const formDetails = await forms.forms.get({ formId });
+        const items = formDetails.data.items || [];
+        let maxPoints = 0;
+        const questionMap = {};
+
+        items.forEach(it => {
+            const q = it.questionItem?.question;
+            if (q) {
+                const pts = q.grading?.pointValue || 0;
+                maxPoints += pts;
+                questionMap[q.questionId] = {
+                    title: it.title,
+                    pointValue: pts
+                };
+            }
+        });
+
+        // 2. Récupérer les réponses soumises
+        const responsesRes = await forms.forms.responses.list({ formId });
+        const responsesList = responsesRes.data.responses || [];
+
+        const firestoreBatch = admin.firestore().batch();
+        const savedResults = [];
+
+        for (const resp of responsesList) {
+            let studentEmail = (resp.respondentEmail || "").trim().toLowerCase();
+            let studentName = "";
+
+            // Chercher dans les réponses textuelles si nom/email ont été renseignés
+            const answers = resp.answers || {};
+            for (const [qId, ans] of Object.entries(answers)) {
+                const qInfo = questionMap[qId];
+                const val = (ans.textAnswers?.answers?.[0]?.value || "").trim();
+                if (qInfo?.title) {
+                    const t = qInfo.title.toLowerCase();
+                    if (!studentEmail && (t.includes("email") || t.includes("courriel")) && val.includes("@")) {
+                        studentEmail = val.toLowerCase();
+                    }
+                    if (!studentName && (t.includes("nom") || t.includes("prénom") || t.includes("prenom"))) {
+                        studentName = val;
+                    }
+                }
+            }
+
+            if (!studentEmail) {
+                studentEmail = `reponse_${resp.responseId.substring(0, 8)}@forms.local`;
+            }
+            if (!studentName) {
+                studentName = studentEmail.split("@")[0];
+            }
+
+            const totalScore = resp.totalScore !== undefined && resp.totalScore !== null ? Number(resp.totalScore) : 0;
+            const percentage = maxPoints > 0 ? Math.round((totalScore / maxPoints) * 100) : totalScore;
+
+            const docId = `form_${formId}_${resp.responseId}`;
+            const docRef = admin.firestore().collection("exam_results").doc(docId);
+
+            const resultData = {
+                form_id: formId,
+                form_title: formDetails.data.info?.title || "Quiz Google Forms",
+                response_id: resp.responseId,
+                email_eleve: studentEmail,
+                nom_eleve: studentName,
+                classe_id: classeId || "1A",
+                course_id: courseId || "bureautique-pro",
+                score: totalScore,
+                max_score: maxPoints || 10,
+                percentage: percentage,
+                date_passage: resp.lastSubmittedTime || resp.createTime || new Date().toISOString(),
+                created_at: admin.firestore.FieldValue.serverTimestamp()
+            };
+
+            firestoreBatch.set(docRef, resultData, { merge: true });
+            savedResults.push(resultData);
+        }
+
+        if (savedResults.length > 0) {
+            await firestoreBatch.commit();
+        }
+
+        return {
+            success: true,
+            formTitle: formDetails.data.info?.title || "Quiz",
+            maxPoints: maxPoints,
+            count: savedResults.length,
+            results: savedResults
+        };
+
+    } catch (error) {
+        console.error("[recupererReponsesGoogleForms] Erreur :", error);
+        throw new HttpsError("internal", error.message || "Erreur lors de la récupération des réponses Forms.");
     }
 });
 

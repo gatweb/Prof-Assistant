@@ -2219,6 +2219,12 @@
             <span>🏫</span> Google Classroom
             <span x-show="classroomConnected" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           </button>
+          <button 
+            @click="activeProfSubTab = 'forms'"
+            :class="activeProfSubTab === 'forms' ? 'bg-indigo-600 text-white font-extrabold' : 'bg-slate-800/80 text-slate-400 hover:text-white'"
+            class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
+            <span>📝</span> Quiz & Forms (IA)
+          </button>
         </div>
       </div>
 
@@ -3406,6 +3412,287 @@
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ============================================== -->
+      <!-- SOUS-ONGLET 6 : QUIZ & GOOGLE FORMS (PHASE 5) -->
+      <!-- ============================================== -->
+      <div x-show="activeProfSubTab === 'forms'" class="space-y-6">
+        
+        <!-- En-tête Générateur IA Google Forms -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 mb-6">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl font-bold shadow-xs border border-purple-100">
+                📝
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-black text-base text-slate-900">Générateur de Quiz IA Google Forms</h3>
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-700">Gemini 2.5</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">Créez des QCM auto-corrigés sur mesure, exportez-les vers Google Forms et récupérez les notes des élèves.</p>
+              </div>
+            </div>
+
+            <!-- Actions rapides -->
+            <div class="flex items-center gap-2">
+              <button 
+                type="button"
+                @click="formsTopicInput = 'Mise en page Google Docs : styles de titre, table des matières, sauts de page et marges'; formsTitleInput = 'Quiz - Mise en page Google Docs'; formsTargetCourseId = 'bureautique-pro';"
+                class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] transition cursor-pointer">
+                Exemple Docs
+              </button>
+              <button 
+                type="button"
+                @click="formsTopicInput = 'Structure HTML sémantique, balises head/body, balises div, p, h1-h6 et attributs'; formsTitleInput = 'Quiz - Fondamentaux HTML'; formsTargetCourseId = 'prog-web';"
+                class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] transition cursor-pointer">
+                Exemple HTML
+              </button>
+            </div>
+          </div>
+
+          <!-- Formulaire de Génération -->
+          <form @submit.prevent="genererQuizForms()" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-black text-slate-700 mb-1">Titre de l'évaluation :</label>
+                <input 
+                  type="text" 
+                  x-model="formsTitleInput" 
+                  required 
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-purple-600" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-black text-slate-700 mb-1">Cours rattaché :</label>
+                <select 
+                  x-model="formsTargetCourseId" 
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:outline-none focus:border-purple-600 cursor-pointer">
+                  <template x-for="c in coursesList" :key="c.id">
+                    <option :value="c.id" x-text="c.title"></option>
+                  </template>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-black text-slate-700 mb-1">Sujet détaillé ou compétences à évaluer :</label>
+              <textarea 
+                rows="2" 
+                x-model="formsTopicInput" 
+                required
+                placeholder="Ex: Raccourcis clavier (Ctrl+C, Ctrl+V, Ctrl+Z), hiérarchie des dossiers Google Drive, gestion des partages..."
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-purple-600 leading-relaxed"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-black text-slate-700 mb-1">Niveau scolaire :</label>
+                <input 
+                  type="text" 
+                  x-model="formsLevelInput" 
+                  class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-purple-600" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-black text-slate-700 mb-1">Nombre de questions :</label>
+                <div class="flex items-center gap-2">
+                  <input 
+                    type="range" 
+                    min="3" 
+                    max="15" 
+                    step="1" 
+                    x-model="formsCountInput" 
+                    class="flex-1 accent-purple-600 cursor-pointer" />
+                  <span class="w-12 text-center text-xs font-black px-2 py-1 bg-slate-100 rounded-lg text-slate-800" x-text="formsCountInput + ' Q'"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="text-[11px] text-slate-400">
+                Chaque question inclut 4 options, 1 bonne réponse vérifiée, un barème de points et une explication pédagogique.
+              </div>
+
+              <button 
+                type="submit" 
+                :disabled="formsGenerating"
+                class="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl transition shadow-sm hover:shadow flex items-center justify-center gap-2 cursor-pointer">
+                <span x-show="formsGenerating" class="animate-spin">⏳</span>
+                <span x-show="!formsGenerating">✨</span>
+                <span x-text="formsGenerating ? 'Génération IA en cours...' : 'Générer le QCM avec Gemini'"></span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- RÉSULTAT DU QUIZ GÉNÉRÉ (SI PRÉSENT) -->
+        <div x-show="formsGeneratedData" class="space-y-6 animate-scaleUp">
+          
+          <!-- Carte Résumé & Liens Google Forms -->
+          <div class="bg-gradient-to-br from-purple-500/10 via-indigo-500/5 to-white rounded-3xl p-6 sm:p-8 border border-purple-200 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-purple-100 mb-6">
+              <div>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[11px] font-black">
+                  🎉 Quiz Prêt
+                </span>
+                <h4 class="text-xl font-black text-slate-900 mt-1" x-text="formsGeneratedData?.titre"></h4>
+                <p class="text-xs text-slate-500 mt-0.5" x-text="formsGeneratedData?.description"></p>
+              </div>
+
+              <div class="flex items-center gap-2 flex-wrap">
+                <!-- Lien Édition Google Forms -->
+                <a 
+                  x-show="formsEditUrl"
+                  :href="formsEditUrl" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                  <span>✏️</span> Éditer dans Forms ↗
+                </a>
+
+                <!-- Lien Réponse Élèves -->
+                <a 
+                  x-show="formsResponderUrl"
+                  :href="formsResponderUrl" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-black text-xs rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                  <span>🔗</span> Lien Élèves ↗
+                </a>
+              </div>
+            </div>
+
+            <!-- Passerelle Classroom & Synchronisation des Notes -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              <!-- Action 1 : Publier dans Classroom -->
+              <div class="p-4 bg-white rounded-2xl border border-purple-100 flex flex-col justify-between">
+                <div>
+                  <div class="text-xs font-black text-slate-900 flex items-center gap-2">
+                    <span>🏫</span> Publier ce Quiz dans Google Classroom
+                  </div>
+                  <p class="text-[11px] text-slate-500 mt-1">
+                    Diffusez immédiatement le formulaire comme devoir noté auprès de votre classe.
+                  </p>
+                  
+                  <div x-show="formsPublishToClassroomSuccessMsg" class="mt-2 p-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-lg animate-fadeIn" x-text="formsPublishToClassroomSuccessMsg"></div>
+                </div>
+
+                <div class="mt-4">
+                  <button 
+                    @click="publierQuizFormsDansClassroom()"
+                    :disabled="formsPublishToClassroomLoading || !formsResponderUrl"
+                    class="w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span x-show="formsPublishToClassroomLoading" class="animate-spin">⏳</span>
+                    <span x-show="!formsPublishToClassroomLoading">📤</span>
+                    <span>Publier dans le cours Classroom actif</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Action 2 : Récupérer les Réponses et Notes -->
+              <div class="p-4 bg-white rounded-2xl border border-purple-100 flex flex-col justify-between">
+                <div>
+                  <div class="text-xs font-black text-slate-900 flex items-center gap-2">
+                    <span>📥</span> Synchroniser les Réponses & Notes
+                  </div>
+                  <p class="text-[11px] text-slate-500 mt-1">
+                    Importe automatiquement les scores des élèves depuis Google Forms vers <code class="font-mono text-[10px] bg-slate-100 px-1 py-0.5 rounded">exam_results</code> et met à jour la classe.
+                  </p>
+
+                  <div x-show="formsSyncSuccessMsg" class="mt-2 p-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-lg animate-fadeIn" x-text="formsSyncSuccessMsg"></div>
+                </div>
+
+                <div class="mt-4">
+                  <button 
+                    @click="synchroniserReponsesForms()"
+                    :disabled="formsSyncLoading || !formsFormId"
+                    class="w-full py-2 px-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span x-show="formsSyncLoading" class="animate-spin">⏳</span>
+                    <span x-show="!formsSyncLoading">🔄</span>
+                    <span>Récupérer les notes des élèves</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Tableau des Résultats Récents Récupérés (si synchronisé) -->
+          <div x-show="formsSyncResults.length > 0" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+            <h4 class="font-black text-base text-slate-900 mb-1">Notes des Élèves Récupérées</h4>
+            <p class="text-xs text-slate-400 mb-4">Résultats officiels importés de Google Forms vers ProfAssistant.</p>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse min-w-[500px]">
+                <thead>
+                  <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
+                    <th class="py-3 px-4">Élève</th>
+                    <th class="py-3 px-4">Email</th>
+                    <th class="py-3 px-4">Score</th>
+                    <th class="py-3 px-4">Taux de Réussite</th>
+                    <th class="py-3 px-4 text-right">Date</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <template x-for="r in formsSyncResults" :key="r.response_id">
+                    <tr class="hover:bg-slate-50/70 transition">
+                      <td class="py-3 px-4 font-black text-slate-900" x-text="r.nom_eleve"></td>
+                      <td class="py-3 px-4 text-slate-500 font-mono text-[11px]" x-text="r.email_eleve"></td>
+                      <td class="py-3 px-4 font-extrabold text-slate-800" x-text="r.score + ' / ' + r.max_score"></td>
+                      <td class="py-3 px-4">
+                        <span 
+                          :class="r.percentage >= 70 ? 'bg-emerald-100 text-emerald-800' : (r.percentage >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')"
+                          class="px-2 py-0.5 rounded-full font-black text-[11px]" 
+                          x-text="r.percentage + '%'"></span>
+                      </td>
+                      <td class="py-3.5 px-4 text-right text-slate-400" x-text="new Date(r.date_passage).toLocaleString('fr-BE')"></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Prévisualisation Détaillée des Questions Générées -->
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h4 class="font-black text-base text-slate-900">Questions & Réponses du Questionnaire</h4>
+              <span class="text-xs font-bold text-slate-400" x-text="formsGeneratedData?.questions?.length + ' questions'"></span>
+            </div>
+
+            <div class="space-y-4">
+              <template x-for="(q, idx) in (formsGeneratedData?.questions || [])" :key="idx">
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
+                  <div class="flex items-start gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-purple-100 text-purple-700 font-black text-xs flex items-center justify-center shrink-0 mt-0.5" x-text="idx + 1"></span>
+                    <div class="font-extrabold text-xs text-slate-900 leading-snug" x-text="q.intitule"></div>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-8">
+                    <template x-for="opt in q.options" :key="opt">
+                      <div 
+                        :class="opt === q.bonne_reponse ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-extrabold' : 'bg-white border-slate-200 text-slate-700'"
+                        class="p-2.5 rounded-xl border text-xs flex items-center justify-between">
+                        <span x-text="opt"></span>
+                        <span x-show="opt === q.bonne_reponse" class="text-emerald-600 font-bold ml-1">✓</span>
+                      </div>
+                    </template>
+                  </div>
+
+                  <div x-show="q.explication" class="ml-8 p-2.5 rounded-xl bg-purple-50/70 border border-purple-100 text-[11px] text-purple-900 font-medium">
+                    <span class="font-bold">💡 Explication pédagogique :</span> <span x-text="q.explication"></span>
+                  </div>
+                </div>
+              </template>
             </div>
           </div>
 
