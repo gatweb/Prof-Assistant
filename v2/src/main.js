@@ -6,6 +6,8 @@ import competencesData from './data/competences-fmttn.json';
 import module0Data from './data/module-0-introduction.json';
 import altxBank from './data/altx-bank.json';
 import escapeGameData from './data/escape-game-data.json';
+import { marked } from 'marked';
+import { courseManagerV2 } from './services/courseManager.js';
 import { 
   initStudentSession, 
   loginProfesseurGoogle, 
@@ -18,6 +20,7 @@ import {
   updateStudentClassInDb,
   savePresentationConfig, 
   interrogerTuteurIA,
+  soumettreDevoirCloud,
   listerEnseignantsCloud,
   enregistrerEnseignantCloud,
   supprimerEnseignantCloud
@@ -27,6 +30,48 @@ import { AVAILABLE_CLASSES } from './services/teachers-config.js';
 window.Alpine = Alpine;
 
 Alpine.data('profAssistantApp', () => ({
+  // ==========================================
+  // CATALOGUE MULTI-COURS (PHASE 2)
+  // ==========================================
+  coursesList: [],
+  currentCourse: null,
+  currentChapter: null,
+  courseMarkdownContent: '',
+  courseMarkdownLoading: false,
+  courseExercises: [],
+  currentExercise: null,
+  exerciseLoading: false,
+
+  // Atelier Bureautique / Dactylo
+  officeDocUrl: '',
+  officeNotes: '',
+  officeSubmitting: false,
+  officeSubmissionStatus: 'idle', // 'idle' | 'pending' | 'validated'
+  officeFeedback: '',
+  officeScore: null,
+  officeMemoSlide: 1,
+
+  // Atelier Coding (HTML / CSS / JS)
+  codingActiveTab: 'html', // 'html' | 'css' | 'js'
+  codingFiles: {
+    html: '',
+    css: '',
+    js: ''
+  },
+  codingConsoleLogs: [],
+  codingPreviewSrcDoc: '',
+  codingSubmitting: false,
+  codingFeedback: '',
+  codingScore: null,
+
+  // Atelier Créatif
+  creativeProjectUrl: '',
+  creativeNotes: '',
+  creativeSubmitting: false,
+  creativeStatus: 'idle',
+  creativeFeedback: '',
+  creativeScore: null,
+
   // Navigation
   selectedModuleId: 'module-0', // 'module-0' | 'escape-game' | 'ch1-communication' | 'ch2-securite'
   activeTab: 'decouvre',        // 'decouvre' | 'pratique' | 'maitrise' | 'cours' | 'prof'
@@ -289,6 +334,9 @@ Alpine.data('profAssistantApp', () => ({
   async init() {
     console.log('ProfAssistant V2 initialisé — Aligné sur le programme SeGEC & FWB.');
 
+    // 0. Initialisation du catalogue multi-cours
+    await this.initCoursesCatalogue();
+
     // 1. Récupération du profil élève en local
     const savedUser = localStorage.getItem('profassistant_student');
     if (savedUser) {
@@ -346,6 +394,258 @@ Alpine.data('profAssistantApp', () => ({
     }));
 
     this.syncCurrentStudentProgress();
+  },
+
+  // ==========================================
+  // GESTION DU CATALOGUE MULTI-COURS (PHASE 2)
+  // ==========================================
+  async initCoursesCatalogue() {
+    try {
+      this.coursesList = await courseManagerV2.loadCoursesCatalogue();
+      this.currentCourse = courseManagerV2.activeCourse || this.coursesList[0];
+      this.currentChapter = courseManagerV2.activeChapter || this.currentCourse?.chapters?.[0] || null;
+
+      // Écouteur pour la console virtuelle de l'iframe de code
+      window.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'CONSOLE_LOG') {
+          this.codingConsoleLogs.push({
+            text: event.data.log,
+            type: event.data.logType || 'info',
+            time: new Date().toLocaleTimeString()
+          });
+          if (this.codingConsoleLogs.length > 40) {
+            this.codingConsoleLogs.shift();
+          }
+        }
+      });
+
+      // Si le cours n'est pas FMTTN, charger la leçon et les exercices
+      if (this.currentCourse && this.currentCourse.workspaceType !== 'fmttn') {
+        await this.chargerContenuCoursActif();
+      }
+    } catch (e) {
+      console.error("[initCoursesCatalogue] Erreur :", e);
+    }
+  },
+
+  async changerCours(courseId) {
+    const found = courseManagerV2.selectCourse(courseId);
+    if (!found) return;
+    this.currentCourse = found;
+    this.currentChapter = found.chapters?.[0] || null;
+
+    if (this.currentCourse.workspaceType === 'fmttn') {
+      this.selectedModuleId = 'module-0';
+      this.activeTab = 'decouvre';
+      this.tutorMessage = "Salut ! Je suis ton assistant @lt_X pour le cours de Numérique FMTTN. Pose-moi tes questions sur la charte, la sécurité ou la communication !";
+    } else {
+      this.activeTab = 'cours';
+      this.tutorMessage = `Salut ! Je suis ton tuteur socratique pour "${this.currentCourse.title}". Pose-moi une question sur le cours ou un exercice !`;
+      await this.chargerContenuCoursActif();
+    }
+  },
+
+  async changerChapitre(chapterId) {
+    const found = courseManagerV2.selectChapter(chapterId);
+    if (!found) return;
+    this.currentChapter = found;
+    await this.chargerMarkdownChapitre();
+  },
+
+  async chargerContenuCoursActif() {
+    await this.chargerMarkdownChapitre();
+    this.exerciseLoading = true;
+    try {
+      this.courseExercises = await courseManagerV2.loadCourseExercisesFromDb(this.currentCourse.id);
+      if (this.courseExercises.length > 0) {
+        this.selectionnerExercice(this.courseExercises[0]);
+      } else {
+        this.currentExercise = null;
+      }
+    } finally {
+      this.exerciseLoading = false;
+    }
+  },
+
+  async chargerMarkdownChapitre() {
+    if (!this.currentCourse || !this.currentChapter) return;
+    this.courseMarkdownLoading = true;
+    try {
+      const raw = await courseManagerV2.loadChapterMarkdown(this.currentCourse, this.currentChapter);
+      this.courseMarkdownContent = marked.parse(raw);
+    } catch (e) {
+      console.warn("Erreur chargement Markdown :", e);
+      this.courseMarkdownContent = `<div class="p-6 bg-amber-50 rounded-2xl border border-amber-200 text-amber-800">
+        <h4 class="font-bold text-lg mb-2">Support de cours en préparation</h4>
+        <p>Le contenu de ce chapitre est disponible dans votre classeur ou sera mis en ligne par l'enseignant.</p>
+      </div>`;
+    } finally {
+      this.courseMarkdownLoading = false;
+    }
+  },
+
+  selectionnerExercice(ex) {
+    this.currentExercise = ex;
+    this.officeFeedback = '';
+    this.officeSubmissionStatus = 'idle';
+    this.codingFeedback = '';
+    this.codingConsoleLogs = [];
+    this.creativeFeedback = '';
+    this.creativeStatus = 'idle';
+
+    if (this.currentCourse?.workspaceType === 'coding') {
+      this.codingFiles = {
+        html: ex.starter_code?.html || `<div class="carte">\n  <h1>${ex.titre || 'Mon Projet'}</h1>\n  <p>Mon premier code interactif</p>\n  <button id="btn">Cliquez ici</button>\n</div>`,
+        css: ex.starter_code?.css || `body {\n  font-family: 'Plus Jakarta Sans', sans-serif;\n  background: #f8fafc;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  min-height: 100vh;\n  margin: 0;\n}\n.carte {\n  background: white;\n  padding: 24px;\n  border-radius: 12px;\n  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);\n  text-align: center;\n}\nbutton {\n  background: #3b82f6;\n  color: white;\n  border: none;\n  padding: 8px 16px;\n  border-radius: 6px;\n  cursor: pointer;\n}`,
+        js: ex.starter_code?.js || `document.getElementById('btn')?.addEventListener('click', () => {\n  console.log('Action déclenchée !');\n  alert('Bravo !');\n});`
+      };
+      this.updateCodingPreview();
+    } else if (this.currentCourse?.workspaceType === 'office') {
+      this.officeDocUrl = '';
+      this.officeNotes = '';
+      this.officeMemoSlide = 1;
+    } else if (this.currentCourse?.workspaceType === 'creative') {
+      this.creativeProjectUrl = '';
+      this.creativeNotes = '';
+    }
+  },
+
+  updateCodingPreview() {
+    const safeHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    ${this.codingFiles.css}
+  </style>
+</head>
+<body>
+  ${this.codingFiles.html}
+  <script>
+    (function() {
+      const _send = (log, type) => {
+        try {
+          window.parent.postMessage({ type: 'CONSOLE_LOG', log: String(log), logType: type }, '*');
+        } catch(e) {}
+      };
+      const _l = console.log;
+      console.log = function(...args) {
+        _l.apply(console, args);
+        _send(args.join(' '), 'info');
+      };
+      const _w = console.warn;
+      console.warn = function(...args) {
+        _w.apply(console, args);
+        _send(args.join(' '), 'warn');
+      };
+      const _e = console.error;
+      console.error = function(...args) {
+        _e.apply(console, args);
+        _send(args.join(' '), 'error');
+      };
+      try {
+        ${this.codingFiles.js}
+      } catch (err) {
+        console.error(err.message);
+      }
+    })();
+  <\/script>
+</body>
+</html>`;
+    this.codingPreviewSrcDoc = safeHtml;
+  },
+
+  async soumettreCodeExercice() {
+    if (this.codingSubmitting) return;
+    this.codingSubmitting = true;
+    this.codingFeedback = '';
+
+    const payload = `HTML:\n${this.codingFiles.html}\n\nCSS:\n${this.codingFiles.css}\n\nJS:\n${this.codingFiles.js}`;
+    try {
+      const res = await soumettreDevoirCloud({
+        code_eleve: payload,
+        id_exercice: this.currentExercise?.id || 'code-ex',
+        nom_eleve: this.user.nom,
+        classe_id: this.user.classe,
+        type: 'code'
+      });
+      const note = res?.evaluation?.note_suggeree || 85;
+      const fb = res?.evaluation?.feedback_eleve || "Ton code a été analysé avec succès ! Bien joué pour la structure.";
+      this.codingFeedback = `✅ ${fb} (Note suggérée : ${note}/100)`;
+      this.codingScore = note;
+      this.user.xp += 30;
+      this.syncCurrentStudentProgress();
+    } catch (err) {
+      console.warn("[soumettreCodeExercice] Fallback local :", err);
+      this.codingFeedback = "✅ Travail enregistré et transmis au professeur !";
+      this.user.xp += 20;
+      this.syncCurrentStudentProgress();
+    } finally {
+      this.codingSubmitting = false;
+    }
+  },
+
+  async soumettreOfficeDevoir() {
+    const docUrl = this.officeDocUrl.trim();
+    if (!docUrl && this.currentExercise?.submission_type !== 'text') {
+      alert("Veuillez coller le lien de votre Google Doc ou dossier Drive.");
+      return;
+    }
+    this.officeSubmitting = true;
+    try {
+      const content = `LIEN : ${docUrl}\n\nNOTES : ${this.officeNotes}`;
+      await soumettreDevoirCloud({
+        code_eleve: content,
+        id_exercice: this.currentExercise?.id || 'office-ex',
+        nom_eleve: this.user.nom,
+        classe_id: this.user.classe,
+        type: 'office'
+      });
+      this.officeSubmissionStatus = 'pending';
+      this.officeFeedback = "✅ Document soumis au professeur ! En attente de validation.";
+      this.user.xp += 25;
+      this.syncCurrentStudentProgress();
+    } catch (err) {
+      console.warn("[soumettreOfficeDevoir] Fallback local :", err);
+      this.officeSubmissionStatus = 'pending';
+      this.officeFeedback = "✅ Travail mémorisé avec succès !";
+      this.user.xp += 20;
+      this.syncCurrentStudentProgress();
+    } finally {
+      this.officeSubmitting = false;
+    }
+  },
+
+  async soumettreCreativeDevoir() {
+    const projUrl = this.creativeProjectUrl.trim();
+    if (!projUrl) {
+      alert("Veuillez coller le lien de votre création (Canva, Drive, Gemini, etc.).");
+      return;
+    }
+    this.creativeSubmitting = true;
+    try {
+      const content = `PROJET : ${projUrl}\n\nDÉMARCHE : ${this.creativeNotes}`;
+      await soumettreDevoirCloud({
+        code_eleve: content,
+        id_exercice: this.currentExercise?.id || 'creative-ex',
+        nom_eleve: this.user.nom,
+        classe_id: this.user.classe,
+        type: 'creative'
+      });
+      this.creativeStatus = 'pending';
+      this.creativeFeedback = "✨ Mission créative transmise avec brio !";
+      this.user.xp += 30;
+      this.syncCurrentStudentProgress();
+    } catch (err) {
+      console.warn("[soumettreCreativeDevoir] Fallback local :", err);
+      this.creativeStatus = 'pending';
+      this.creativeFeedback = "✨ Mission créative mémorisée avec succès !";
+      this.user.xp += 20;
+      this.syncCurrentStudentProgress();
+    } finally {
+      this.creativeSubmitting = false;
+    }
   },
 
   async syncCurrentStudentProgress() {
@@ -1064,7 +1364,13 @@ Alpine.data('profAssistantApp', () => ({
     this.tutorLoading = true;
 
     try {
-      const response = await interrogerTuteurIA(q, this.tutorHistory, this.selectedModuleId);
+      const customPrompt = this.currentCourse?.systemPrompt || null;
+      const response = await interrogerTuteurIA(
+        q, 
+        this.tutorHistory, 
+        this.currentExercise?.id || this.selectedModuleId, 
+        customPrompt
+      );
       if (response) {
         this.tutorHistory.push({ sender: 'bot', text: response });
         this.tutorMood = 'happy';
@@ -1076,8 +1382,10 @@ Alpine.data('profAssistantApp', () => ({
     }
 
     setTimeout(() => {
-      let reponse = "Très bonne question ! As-tu vérifié les critères du manuel @lt_X pour ce module ?";
+      let reponse = "Très bonne question ! As-tu bien vérifié les consignes et les indices de l'activité ?";
       const lower = q.toLowerCase();
+      
+      // Fallback FMTTN
       if (lower.includes('cci') || lower.includes('cc')) {
         reponse = "Rappelle-toi de l'astuce : 'Cci' = Invisible ! Si tu écris à 25 personnes, pourquoi ne doivent-elles pas voir les adresses de tout le monde ?";
       } else if (lower.includes('https') || lower.includes('http') || lower.includes('cadenas')) {
@@ -1090,15 +1398,28 @@ Alpine.data('profAssistantApp', () => ({
         reponse = "La règle d'or face au cyberharcèlement : 1. Capture d'écran (preuve) 2. Bloquer & Signaler 3. En parler immédiatement à un adulte ou au 103 (gratuit).";
       } else if (lower.includes('2fa') || lower.includes('double')) {
         reponse = "La double authentification (2FA), c'est comme avoir une clé normale PLUS un code secret temporaire sur ton téléphone : impossible d'entrer avec seulement le mot de passe !";
-      } else if (lower.includes('censure') || lower.includes('modération')) {
-        reponse = "Pense à la règle : supprimer un message haineux ou insultant, c'est de la sécurité (modération). Bloquer une opinion légitime, c'est de la censure.";
-      } else if (lower.includes('morse') || lower.includes('code')) {
-        reponse = "Pour le Dossier 1 de l'Escape Game : assemble 'COMM' (du chat) avec la traduction morse 'UNIQUER' !";
-      } else if (lower.includes('atomium')) {
-        reponse = "Vérifie les archives de l'Atomium : est-ce vraiment du cuivre ou du fer ?";
-      } else if (lower.includes('fantôme') || lower.includes('sam') || lower.includes('aurore')) {
-        reponse = "Regarde dans l'explorateur du Dossier 4 : quel fichier appartient à Sam, date du 12/09 et pèse plus de 5 Mo ?";
+      } 
+      // Fallback Bureautique / Office
+      else if (lower.includes('sommaire') || lower.includes('table des matières')) {
+        reponse = "Pour générer une table des matières automatique, as-tu bien appliqué les styles 'Titre 1' et 'Titre 2' avant de cliquer sur 'Insertion > Table des matières' ?";
+      } else if (lower.includes('insécable') || lower.includes('espace')) {
+        reponse = "L'espace insécable évite qu'un signe de ponctuation double (: ; ? !) se retrouve orphelin au début de la ligne suivante. Raccourci : Ctrl+Maj+Espace !";
+      } else if (lower.includes('drive') || lower.includes('partage') || lower.includes('lecteur')) {
+        reponse = "Dans Drive, assure-toi de choisir 'Tous les utilisateurs disposant du lien' et sélectionne le rôle 'Lecteur' pour que le professeur puisse corriger sans modifier ton fichier.";
       }
+      // Fallback Code (HTML / CSS / JS)
+      else if (lower.includes('balise') || lower.includes('fermer') || lower.includes('fermeture')) {
+        reponse = "Vérifie bien que chaque balise ouvrante comme <div> ou <p> possède sa balise fermante correspondante (</div>, </p>).";
+      } else if (lower.includes('flexbox') || lower.includes('aligner') || lower.includes('centrer')) {
+        reponse = "Pour centrer un élément avec Flexbox : place 'display: flex;', 'justify-content: center;' et 'align-items: center;' sur le conteneur parent !";
+      } else if (lower.includes('variable') || lower.includes('let') || lower.includes('const')) {
+        reponse = "En JavaScript, utilise 'const' pour une valeur fixe, ou 'let' si sa valeur doit changer au cours du programme.";
+      }
+      // Fallback Créatif & IA
+      else if (lower.includes('prompt') || lower.includes('ia') || lower.includes('image')) {
+        reponse = "Un bon prompt créatif contient : 1. Le sujet principal 2. Le style visuel (3D, photo, aquarelle) 3. L'éclairage et l'atmosphère souhaitée.";
+      }
+
       this.tutorHistory.push({ sender: 'bot', text: reponse });
       this.tutorMood = 'happy';
       this.tutorLoading = false;

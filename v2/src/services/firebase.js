@@ -450,22 +450,21 @@ export async function getPresentationConfig(moduleId) {
   }
 }
 
-// 9. TUTEUR SOCRATIQUE GEMINI
-export async function interrogerTuteurIA(question, historique = [], idExercice = 'ch1-communication') {
+// 9. TUTEUR SOCRATIQUE GEMINI (MULTI-COURS)
+export async function interrogerTuteurIA(question, historique = [], idExercice = 'ch1-communication', customPrompt = null) {
   try {
     const fn = httpsCallable(functions, "interrogerTuteur");
-    const systemPromptFMTTN = `Tu es le Tuteur Socratique d'@lt_X pour des élèves de 1re secondaire (11-12 ans) en Belgique (programme SeGEC / FMTTN).
+    const defaultPrompt = `Tu es le Tuteur Socratique de ProfAssistant.
 Ton rôle :
 1. Être chaleureux, encourageant et clair (mots simples, phrases courtes).
 2. Ne JAMAIS donner la réponse directement : pose une question guidée ou donne un indice sous forme d'analogie de la vie quotidienne.
-3. Rappelle les principes de respect de la vie privée (RGPD), de sécurité et de nétiquette.
-4. Si l'élève parle de courriel, rappelle l'astuce de 'Cci' = Invisible, 'Cc' = visible par tous.`;
+3. Reste concis et adapté aux élèves.`;
 
     const res = await fn({
       question,
       historique,
       id_exercice: idExercice,
-      system_prompt_custom: systemPromptFMTTN
+      system_prompt_custom: customPrompt || defaultPrompt
     });
     return res.data?.reponse || res.data?.feedback || res.data;
   } catch (err) {
@@ -473,3 +472,23 @@ Ton rôle :
     return null;
   }
 }
+
+// 10. SOUMISSION & CORRECTION AUTOMATISÉE DE DEVOIR
+export async function soumettreDevoirCloud({ code_eleve, id_exercice, nom_eleve, classe_id, type }) {
+  try {
+    if (!auth.currentUser) await initStudentSession();
+    const fn = httpsCallable(functions, "corrigerDevoir");
+    const res = await fn({
+      code_eleve,
+      id_exercice,
+      nom_eleve,
+      classe_id,
+      type
+    });
+    return res.data;
+  } catch (err) {
+    console.error("[soumettreDevoirCloud] Erreur :", err);
+    throw err;
+  }
+}
+

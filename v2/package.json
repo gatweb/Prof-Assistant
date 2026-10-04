@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "alpinejs": "^3.17.3",
-    "firebase": "^12.19.0"
+    "firebase": "^12.19.0",
+    "marked": "^18.0.14"
   }
 }
