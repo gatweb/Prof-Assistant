@@ -21,34 +21,32 @@
   3. `publie` : Professeur a validé, visible par l'élève en temps réel.
 * **Collection `cours` :** Documents de référence pour le RAG (Chatbot).
 
-## 📍 4. Phase Actuelle : Déploiement V2 FMTTN & Chapitres 1 & 2 (@lt_X / SeGEC) [VALIDÉ & PRÊT POUR PROD 🚀]
-* **Cible :** 1re secondaire FWB (Tronc commun, 2 périodes/semaine), aligné sur le programme SeGEC et basé sur le manuel *@lt_X* (Lacroix & Ouanassi, Tomes 1a & 1b).
-* **Architecture V2 :** Frontend ultra-léger dans `/v2` (Vite + Tailwind CSS + Alpine.js) connecté au backend Firebase/Gemini existant.
-* **Modules disponibles :** Module 0 (Charte), Escape Game (5 dossiers), Chapitre 1 (Communication), Chapitre 2 (Sécurité & Traces).
-* **Pédagogie SeGEC :** Évaluation par compétences (standards-aligned), détection des conceptions erronées (*error patterns*), intégration NotebookLM et remédiation différenciée en un clic.
-* **Documentation :** Cahier des charges complet rédigé dans `DOCS_V2_FMTTN.md`.
+## 📍 4. Phase Actuelle : Fusion V1/V2 — Phase 1 Validée & Déployée en Production 🚀
+* **Phase 0 (Sécurisation & Règles Firestore) :** [TERMINÉ ✅] Réécriture complète de `firestore.rules`, accès élèves V1 restaurés (cours, config, devoirs, examens, indices), progressions V2 rattachées à la session Firebase Auth, et 24 tests unitaires validés sur émulateur.
+* **Phase 1 (Socle Multi-Enseignants & Rôles) :** [TERMINÉ & DÉPLOYÉ ✅]
+  - Collection Firestore `enseignants` dynamique (fin des listes blanches statiques).
+  - Cloud Functions déployées : `synchroniserProfilEnseignant`, `listerEnseignants`, `enregistrerEnseignant`, `supprimerEnseignant`.
+  - Attribution automatique des **Custom User Claims Firebase Auth** (`role: 'admin' | 'enseignant'`) pour validation instantanée.
+  - Interface complète "🧑‍🏫 Équipe Enseignante" intégrée dans les dashboards V1 (`admin.html`) et V2 (`v2/index.html`).
+* **Phase en cours :** Phase 2 — Moteur de cours modulaire & Harmonisation des Workspaces dans la V2.
 
-## 🔮 5. Prochaines Étapes (Backlog V2)
-- [x] **Documentation & Cadrage V2 :** Rédaction de `DOCS_V2_FMTTN.md` et analyse des scans @lt_X.
-- [x] **Initialisation Frontend V2 :** Setup Vite + Tailwind CSS + Alpine.js dans `v2/`.
-- [x] **Intégration Contenus @lt_X Réels :** Extraction et intégration des 181 questions officielles, des synthèses théoriques et de l'Escape Game (5 dossiers complets).
-- [x] **Ateliers Pratiques Chapitre 1 :** Simulateur de courriel p.64 (validation des 16 critères) et bilan personnel d'auto-évaluation p.83.
-- [x] **Intégration Complète Chapitre 2 : Sécurité & Données :**
-  - 100 questions officielles d'@lt_X réparties en 5 sous-thèmes (Profil, Signalétique PEGI, Cyberrisques, Confidentialité, Traces).
-  - Atelier 1 : Simulateur d'adresses Web HTTP vs HTTPS (p. 106) et diagnostic du cadenas SSL.
-  - Atelier 2 : Tri interactif Données actives vs Traces passives (p. 114).
-  - Atelier 3 : Bilan personnel SeGEC d'auto-évaluation (p. 147).
-  - Mission citoyenne : Campagne de prévention cyberharcèlement et réflexe d'urgence 103 (p. 158).
-  - Support de cours : Diaporama interactif et intégration du carnet NotebookLM.
-  - Espace Professeur : Matrice SeGEC commutable Chapitre 1 / Chapitre 2 et remédiation ciblée.
-- [x] **Mascotte & Tuteur Socratique V2 :** Intégration du persona robot bleu d'@lt_X avec Gemini et repli socratique local.
-- [x] **Dashboard Professeur SeGEC V2 :** Matrice de maîtrise des compétences FMTTN par classe et par élève.
-- [x] **Gestion Élèves Réels (Héritage V1) :** Récupération de la liste des élèves réels, changement de classe et persistance Firestore.
-- [x] **Intégration Diaporamas & NotebookLM :** Lecteur de diaporamas interactif et carnet de notes NotebookLM pour chaque module.
-- [x] **Persistance Firestore Élèves :** Enregistrement des soumissions et synchronisation en direct des bilans personnels dans `/progressions_v2`.
-- [x] **Gestion Multi-Enseignants & Classes (Pilote Samedi) :** Liste blanche configurable dans `teachers-config.js` et déverrouillage de `admin.js`.
-- [x] **Sécurisation & Règles Firestore :** Déploiement de `firestore.rules` et blindage anti-injection du prompt Gemini dans `corrigerDevoir`.
-- [ ] **Déploiement en Production Firebase :** Déploiement hosting & rules pour validation live.
+## 🔮 5. Prochaines Étapes (Feuille de Route de Fusion)
+- [x] **Phase 0 : Sécurisation & Rétrocompatibilité Règles Firestore :** [OK] Déployé en production.
+- [x] **Phase 1 : Multi-Enseignants Centralisé & Rôles :** [OK] Cloud Functions, règles et interfaces déployées.
+- [ ] **Phase 2 : Moteur de Cours Modulaire V2 :**
+  - Rendre la V2 multi-cours (intégration du catalogue V1 : Bureautique 3e, Création Web, Dactylo, JS UAA5, Studio Créatif, Rap Academy + FMTTN 1re).
+  - Portage des workspaces interactifs (`office`, `coding` avec Monaco, `creative`, `quizz`).
+- [ ] **Phase 3 : Espace Professeur Unifié V2 :**
+  - Fusion du flux de validation des devoirs V1 (`submissions`) dans le design V2.
+  - Heatmap des compétences disponible pour tous les cours.
+- [ ] **Phase 4 : Intégration Google Classroom :**
+  - Authentification OAuth prof avec scopes Classroom.
+  - Importation automatique des classes et élèves.
+  - Publication des devoirs et synchronisation des notes en retour.
+- [ ] **Phase 5 : Intégration Avancée Google Forms & Drive :**
+  - Synchronisation bidirectionnelle des résultats des formulaires auto-corrigés.
+- [ ] **Phase 6 : Bascule Finale :**
+  - Redirection de la racine `/` vers la V2 unifiée.
 
 ---
 ### ⚠️ INSTRUCTION POUR L'AGENT DE DÉVELOPPEMENT :
