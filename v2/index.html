@@ -2180,10 +2180,19 @@
         <!-- Sous-onglets de navigation Enseignant -->
         <div class="mt-6 pt-4 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto">
           <button 
+            @click="activeProfSubTab = 'copies'"
+            :class="activeProfSubTab === 'copies' ? 'bg-indigo-600 text-white font-extrabold' : 'bg-slate-800/80 text-slate-400 hover:text-white'"
+            class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
+            <span>📥</span> Copies & Devoirs
+            <span x-show="getPendingSubmissionsCount() > 0" 
+                  class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-400 text-slate-900"
+                  x-text="getPendingSubmissionsCount()"></span>
+          </button>
+          <button 
             @click="activeProfSubTab = 'matrice'"
             :class="activeProfSubTab === 'matrice' ? 'bg-indigo-600 text-white font-extrabold' : 'bg-slate-800/80 text-slate-400 hover:text-white'"
             class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
-            <span>📊</span> Matrice des Compétences SeGEC
+            <span>📊</span> Matrice & Suivi de Classe
           </button>
           <button 
             @click="activeProfSubTab = 'eleves'"
@@ -2207,201 +2216,587 @@
       </div>
 
       <!-- ============================================== -->
-      <!-- SOUS-ONGLET 1 : MATRICE DES COMPÉTENCES SEGEC  -->
+      <!-- SOUS-ONGLET 0 : COPIES & VALIDATION DES DEVOIRS -->
+      <!-- ============================================== -->
+      <div x-show="activeProfSubTab === 'copies'" class="space-y-6">
+        
+        <!-- Cartes Statistiques Copies -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Copies Reçues</div>
+            <div class="text-3xl font-black text-slate-900 mt-1" x-text="teacherSubmissions.length">0</div>
+            <p class="text-xs text-slate-500 mt-1">Tous cours et classes confondus</p>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-amber-200/80 shadow-xs bg-gradient-to-br from-white to-amber-50/40">
+            <div class="text-xs font-bold uppercase tracking-wider text-amber-700 flex items-center gap-1.5">
+              <span>⏳</span> En Attente de Validation
+            </div>
+            <div class="text-3xl font-black text-amber-600 mt-1" x-text="getPendingSubmissionsCount()">0</div>
+            <p class="text-xs text-slate-500 mt-1">Nécessite votre relecture / note</p>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-emerald-200/80 shadow-xs bg-gradient-to-br from-white to-emerald-50/40">
+            <div class="text-xs font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
+              <span>✅</span> Devoirs Validés
+            </div>
+            <div class="text-3xl font-black text-emerald-600 mt-1" x-text="teacherSubmissions.filter(s => s.status === 'valide').length">0</div>
+            <p class="text-xs text-slate-500 mt-1">Corrigés et transmis aux élèves</p>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Export & Rapports</div>
+            <button 
+              @click="exporterSubmissionsCSV()"
+              class="w-full mt-2 py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-xs">
+              <span>📥</span> Exporter le relevé (CSV)
+            </button>
+            <p class="text-[11px] text-slate-400 text-center mt-1">Compatible Excel / Google Sheets</p>
+          </div>
+        </div>
+
+        <!-- Barre de Filtres Multi-Critères -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            
+            <!-- Recherche élève / exercice -->
+            <div>
+              <label class="block text-xs font-bold text-slate-500 mb-1">Recherche :</label>
+              <input 
+                type="text" 
+                x-model="submissionSearchText"
+                placeholder="Nom, email, exercice..."
+                class="w-full text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
+            </div>
+
+            <!-- Filtre Statut -->
+            <div>
+              <label class="block text-xs font-bold text-slate-500 mb-1">Statut :</label>
+              <select 
+                x-model="submissionFilterStatus"
+                class="w-full text-xs font-bold px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                <option value="tous">Tous les statuts</option>
+                <option value="a_valider">⏳ À valider (en attente)</option>
+                <option value="valide">✅ Validé</option>
+                <option value="a_corriger">🔄 Corrections demandées</option>
+                <option value="archive">🗄️ Archivé</option>
+              </select>
+            </div>
+
+            <!-- Filtre Classe -->
+            <div>
+              <label class="block text-xs font-bold text-slate-500 mb-1">Classe :</label>
+              <select 
+                x-model="submissionFilterClass"
+                class="w-full text-xs font-bold px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                <option value="tous">Toutes les classes</option>
+                <template x-for="c in availableClasses" :key="c">
+                  <option :value="c" x-text="'Classe ' + c"></option>
+                </template>
+              </select>
+            </div>
+
+            <!-- Filtre Cours -->
+            <div>
+              <label class="block text-xs font-bold text-slate-500 mb-1">Cours :</label>
+              <select 
+                x-model="submissionFilterCourse"
+                class="w-full text-xs font-bold px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                <option value="tous">Tous les cours</option>
+                <template x-for="crs in coursesList" :key="crs.id">
+                  <option :value="crs.id" x-text="(crs.theme?.icon || '📚') + ' ' + crs.title"></option>
+                </template>
+              </select>
+            </div>
+
+          </div>
+
+          <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
+            <div>
+              Affichage de <span class="font-extrabold text-slate-900" x-text="getFilteredSubmissions().length"></span> copie(s)
+            </div>
+            <button 
+              x-show="submissionSearchText || submissionFilterStatus !== 'tous' || submissionFilterClass !== 'tous' || submissionFilterCourse !== 'tous'"
+              @click="submissionSearchText = ''; submissionFilterStatus = 'tous'; submissionFilterClass = 'tous'; submissionFilterCourse = 'tous'"
+              class="text-indigo-600 hover:underline font-bold cursor-pointer">
+              Réinitialiser les filtres
+            </button>
+          </div>
+        </div>
+
+        <!-- Tableau des Copies -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-600">
+              <thead class="bg-slate-50 text-slate-700 font-extrabold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+                <tr>
+                  <th class="py-3.5 px-4">Date & Heure</th>
+                  <th class="py-3.5 px-4">Élève & Classe</th>
+                  <th class="py-3.5 px-4">Exercice & Cours</th>
+                  <th class="py-3.5 px-4">Note Proposée</th>
+                  <th class="py-3.5 px-4">Statut</th>
+                  <th class="py-3.5 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <template x-for="sub in getFilteredSubmissions()" :key="sub.id">
+                  <tr class="hover:bg-slate-50/80 transition">
+                    <td class="py-3 px-4 font-mono text-slate-500">
+                      <div class="font-bold text-slate-700" x-text="sub.date_soumission ? new Date(sub.date_soumission).toLocaleDateString('fr-BE') : 'Date n/d'"></div>
+                      <div class="text-[10px]" x-text="sub.date_soumission ? new Date(sub.date_soumission).toLocaleTimeString('fr-BE', {hour: '2-digit', minute:'2-digit'}) : ''"></div>
+                    </td>
+                    <td class="py-3 px-4">
+                      <div class="font-extrabold text-slate-900" x-text="sub.nom_eleve || 'Élève'"></div>
+                      <div class="text-[11px] text-slate-400 flex items-center gap-1">
+                        <span class="font-bold text-indigo-600" x-text="sub.classe_id || sub.classe || 'Classe n/d'"></span>
+                        <span x-show="sub.email_eleve">•</span>
+                        <span x-text="sub.email_eleve"></span>
+                      </div>
+                    </td>
+                    <td class="py-3 px-4">
+                      <div class="font-bold text-slate-800" x-text="sub.titre_exercice || 'Exercice'"></div>
+                      <div class="text-[11px] text-slate-400" x-text="sub.course_id || sub.id_course || 'js-uaa5-classic'"></div>
+                    </td>
+                    <td class="py-3 px-4">
+                      <span 
+                        :class="sub.note_suggeree >= 80 ? 'bg-emerald-100 text-emerald-800' : (sub.note_suggeree >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')"
+                        class="px-2.5 py-1 rounded-full font-black text-xs inline-block">
+                        <span x-text="(sub.note_suggeree !== undefined && sub.note_suggeree !== null ? sub.note_suggeree : '--') + ' / 100'"></span>
+                      </span>
+                    </td>
+                    <td class="py-3 px-4">
+                      <span 
+                        :class="{
+                          'bg-amber-100 text-amber-800': sub.status === 'a_valider' || sub.status === 'pending',
+                          'bg-emerald-100 text-emerald-800': sub.status === 'valide',
+                          'bg-orange-100 text-orange-800': sub.status === 'a_corriger',
+                          'bg-slate-100 text-slate-600': sub.status === 'archive'
+                        }"
+                        class="px-2.5 py-1 rounded-full font-extrabold text-[11px] inline-flex items-center gap-1">
+                        <span x-text="(sub.status === 'a_valider' || sub.status === 'pending') ? '⏳ À valider' : (sub.status === 'valide' ? '✅ Validé' : (sub.status === 'a_corriger' ? '🔄 À corriger' : '🗄️ Archivé'))"></span>
+                      </span>
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                      <div class="flex items-center justify-end gap-1.5">
+                        <button 
+                          @click="ouvrirModalCorrection(sub)"
+                          class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs transition shadow-xs cursor-pointer flex items-center gap-1">
+                          <span>🔍 Corriger</span>
+                        </button>
+                        <button 
+                          @click="archiverCopie(sub)"
+                          x-show="sub.status !== 'archive'"
+                          class="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition cursor-pointer"
+                          title="Archiver cette copie">
+                          🗄️
+                        </button>
+                        <button 
+                          @click="supprimerCopie(sub)"
+                          class="p-1.5 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition cursor-pointer"
+                          title="Supprimer">
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+                <tr x-show="getFilteredSubmissions().length === 0">
+                  <td colspan="6" class="py-12 text-center text-slate-400 font-medium">
+                    <div class="text-3xl mb-2">📭</div>
+                    <div>Aucune copie trouvée selon vos critères de recherche.</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ============================================== -->
+      <!-- SOUS-ONGLET 1 : MATRICE DES COMPÉTENCES & SUIVI -->
       <!-- ============================================== -->
       <div x-show="activeProfSubTab === 'matrice'" class="space-y-6">
         
-        <!-- Métriques Globales -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-            <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Progression Globale Classe</div>
-            <div class="text-3xl font-black text-slate-900 mt-2" x-text="getProgressionMoyenneClasse() + '%'">0%</div>
-            <p class="text-xs text-slate-500 mt-1">
-              <span class="font-bold" x-text="getNbElevesTermineEG()">0</span> élèves sur <span class="font-bold" x-text="classeEleves.length">0</span> ont terminé l'Escape Game.
-            </p>
-            <div class="w-full bg-slate-100 h-2 rounded-full mt-4 overflow-hidden">
-              <div class="bg-emerald-500 h-full rounded-full transition-all duration-500" :style="'width: ' + getProgressionMoyenneClasse() + '%'"></div>
+        <!-- Barre de Sélection de Cours pour la Matrice -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
+              📊
             </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-            <div class="text-xs font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5">
-              <span>⚠️</span> Point d'attention : E-mail & RGPD
-            </div>
-            <div class="text-sm font-extrabold text-slate-900 mt-2">Usage du champ Cci</div>
-            <p class="text-xs text-slate-600 mt-1">
-              Difficulté récurrente : masquer les adresses de contacts multiples pour respecter la vie privée.
-            </p>
-          </div>
-
-          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-            <div class="text-xs font-bold uppercase tracking-wider text-emerald-600 flex items-center gap-1.5">
-              <span>✓</span> Point fort collectif
-            </div>
-            <div class="text-sm font-extrabold text-slate-900 mt-2">Charte & Sécurité du poste</div>
-            <p class="text-xs text-slate-600 mt-1">
-              Excellente assimilation de la règle d'or « Écran fermé ≠ Déconnecté ».
-            </p>
-          </div>
-        </div>
-
-        <!-- Tableau Heatmap Matrice de la Classe -->
-        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs overflow-x-auto">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
-              <h3 class="font-extrabold text-base text-slate-900">Matrice de Maîtrise des Acquis (Référentiel SeGEC FMTTN)</h3>
-              <span class="text-xs text-slate-400 font-bold" x-text="classeEleves.length + ' élève(s) actif(s)'"></span>
-            </div>
-
-            <!-- Sélecteur de Chapitre pour la matrice -->
-            <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
-              <button 
-                @click="profMatrixChapter = 'ch1'"
-                :class="profMatrixChapter === 'ch1' ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-                class="px-3 py-1 rounded-lg text-xs transition cursor-pointer">
-                Chapitre 1 : Communication
-              </button>
-              <button 
-                @click="profMatrixChapter = 'ch2'"
-                :class="profMatrixChapter === 'ch2' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-                class="px-3 py-1 rounded-lg text-xs transition cursor-pointer">
-                Chapitre 2 : Sécurité & Données
-              </button>
+              <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Cours analysé pour la classe <span class="text-indigo-600 font-black" x-text="selectedTeacherClass"></span>
+              </div>
+              <div class="text-sm font-black text-slate-900" x-text="coursesList.find(c => c.id === profSelectedCourseId)?.title || 'Référentiel Numérique'"></div>
             </div>
           </div>
-          
-          <!-- TABLEAU CHAPITRE 1 -->
-          <template x-if="profMatrixChapter === 'ch1'">
-            <table class="w-full text-left text-xs border-collapse min-w-[700px]">
-              <thead>
-                <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
-                  <th class="py-3 px-4">Élève</th>
-                  <th class="py-3 px-4">Escape Game</th>
-                  <th class="py-3 px-4">Charte p.10</th>
-                  <th class="py-3 px-4">Réseaux NUM-1.D1</th>
-                  <th class="py-3 px-4">Courriel NUM-1.D5</th>
-                  <th class="py-3 px-4">Éthique NUM-1.D6</th>
-                  <th class="py-3 px-4">Simulateur NUM-1.P2</th>
-                  <th class="py-3 px-4 text-right">Score</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100">
-                <template x-for="eleve in classeEleves" :key="eleve.id">
-                  <tr class="hover:bg-slate-50/70 transition">
-                    <td class="py-3.5 px-4 font-extrabold text-slate-900" x-text="eleve.nom"></td>
-                    <td class="py-3.5 px-4 font-bold text-purple-700" x-text="eleve.eg"></td>
-                    <td class="py-3.5 px-4">
-                      <span :class="eleve.charte === 'acquis' ? 'bg-emerald-100 text-emerald-800' : (eleve.charte === 'en_cours' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')"
-                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.charte"></span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">Acquis</span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span :class="eleve.d5 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
-                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.d5"></span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span :class="eleve.d6 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
-                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.d6"></span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span :class="eleve.p2 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
-                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.p2"></span>
-                    </td>
-                    <td class="py-3.5 px-4 text-right font-black" :class="eleve.score >= 80 ? 'text-emerald-600' : 'text-amber-600'" x-text="eleve.score + '%'"></td>
-                  </tr>
-                </template>
-                <tr x-show="classeEleves.length === 0">
-                  <td colspan="8" class="py-8 text-center text-slate-400 font-medium">
-                    Aucun élève n'a encore enregistré de progression dans la classe <strong x-text="selectedTeacherClass"></strong>.<br>
-                    Basculez sur l'onglet <strong>« Gestion des Élèves & Classes »</strong> ci-dessus pour inscrire vos élèves.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </template>
 
-          <!-- TABLEAU CHAPITRE 2 -->
-          <template x-if="profMatrixChapter === 'ch2'">
-            <table class="w-full text-left text-xs border-collapse min-w-[700px]">
-              <thead>
-                <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
-                  <th class="py-3 px-4">Élève</th>
-                  <th class="py-3 px-4">Mots de passe NUM-2.D1</th>
-                  <th class="py-3 px-4">PEGI NUM-2.D2</th>
-                  <th class="py-3 px-4">HTTPS NUM-2.D3</th>
-                  <th class="py-3 px-4">Traces NUM-2.D4</th>
-                  <th class="py-3 px-4">Attention NUM-2.D5</th>
-                  <th class="py-3 px-4">Mission NUM-2.M1</th>
-                  <th class="py-3 px-4 text-right">Score</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100">
-                <template x-for="eleve in classeEleves" :key="eleve.id">
-                  <tr class="hover:bg-slate-50/70 transition">
-                    <td class="py-3.5 px-4 font-extrabold text-slate-900" x-text="eleve.nom"></td>
-                    <td class="py-3.5 px-4">
-                      <span :class="eleve.num2_d1 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
-                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_d1 || 'en_cours'"></span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span :class="eleve.num2_d2 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
-                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_d2 || 'en_cours'"></span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span :class="eleve.num2_d3 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
-                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_d3 || 'en_cours'"></span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span :class="eleve.num2_d4 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : (eleve.num2_d4 === 'en_cours' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')"
-                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_d4 || 'en_cours'"></span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span :class="eleve.num2_d5 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
-                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_d5 || 'en_cours'"></span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span :class="eleve.num2_m1 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
-                            class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_m1 || 'en_cours'"></span>
-                    </td>
-                    <td class="py-3.5 px-4 text-right font-black" :class="eleve.score >= 80 ? 'text-emerald-600' : 'text-amber-600'" x-text="eleve.score + '%'"></td>
-                  </tr>
-                </template>
-                <tr x-show="classeEleves.length === 0">
-                  <td colspan="8" class="py-8 text-center text-slate-400 font-medium">
-                    Aucun élève n'a encore enregistré de progression dans la classe <strong x-text="selectedTeacherClass"></strong>.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </template>
+          <!-- Liste des cours disponibles -->
+          <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+            <template x-for="c in coursesList" :key="c.id">
+              <button 
+                @click="changerCoursMatriceProf(c.id)"
+                :class="profSelectedCourseId === c.id ? 'bg-indigo-600 text-white shadow-xs font-black' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold'"
+                class="px-3.5 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 shrink-0 cursor-pointer">
+                <span x-text="c.icon"></span>
+                <span x-text="c.title"></span>
+              </button>
+            </template>
+          </div>
         </div>
 
-        <!-- Fiche de Remédiation en 1 Clic -->
-        <div x-show="remediationGenerated" class="bg-indigo-50 border border-indigo-200 rounded-3xl p-6 sm:p-8 animate-fadeIn">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-3">
-              <span class="text-2xl">✨</span>
-              <div>
-                <h4 class="font-black text-indigo-950 text-base" x-text="profMatrixChapter === 'ch2' ? 'Fiche de Remédiation Ciblée : Sécurité & Données' : 'Fiche de Remédiation Ciblée : Courriel & Cci'"></h4>
-                <p class="text-xs text-indigo-700" x-text="profMatrixChapter === 'ch2' ? 'Générée pour les élèves en difficulté sur le cadenas HTTPS (NUM-2.D3) et les données passives (NUM-2.D4)' : 'Générée pour les élèves en difficulté sur la compétence NUM-1.P2 (Courriel & Cci)'"></p>
+        <!-- ============================================== -->
+        <!-- VUE 1 : RÉFÉRENTIEL FMTTN (SeGEC)              -->
+        <!-- ============================================== -->
+        <div x-show="profSelectedCourseId === 'fmttn-1c'" class="space-y-6">
+          <!-- Métriques Globales -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+              <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Progression Globale Classe</div>
+              <div class="text-3xl font-black text-slate-900 mt-2" x-text="getProgressionMoyenneClasse() + '%'">0%</div>
+              <p class="text-xs text-slate-500 mt-1">
+                <span class="font-bold" x-text="getNbElevesTermineEG()">0</span> élèves sur <span class="font-bold" x-text="classeEleves.length">0</span> ont terminé l'Escape Game.
+              </p>
+              <div class="w-full bg-slate-100 h-2 rounded-full mt-4 overflow-hidden">
+                <div class="bg-emerald-500 h-full rounded-full transition-all duration-500" :style="'width: ' + getProgressionMoyenneClasse() + '%'"></div>
               </div>
             </div>
-            <button onclick="window.print()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-xs hover:bg-indigo-700 cursor-pointer">Imprimer / PDF</button>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+              <div class="text-xs font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5">
+                <span>⚠️</span> Point d'attention : E-mail & RGPD
+              </div>
+              <div class="text-sm font-extrabold text-slate-900 mt-2">Usage du champ Cci</div>
+              <p class="text-xs text-slate-600 mt-1">
+                Difficulté récurrente : masquer les adresses de contacts multiples pour respecter la vie privée.
+              </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+              <div class="text-xs font-bold uppercase tracking-wider text-emerald-600 flex items-center gap-1.5">
+                <span>✓</span> Point fort collectif
+              </div>
+              <div class="text-sm font-extrabold text-slate-900 mt-2">Charte & Sécurité du poste</div>
+              <p class="text-xs text-slate-600 mt-1">
+                Excellente assimilation de la règle d'or « Écran fermé ≠ Déconnecté ».
+              </p>
+            </div>
           </div>
-          <div x-show="profMatrixChapter === 'ch1'" class="bg-white p-4 rounded-2xl border border-indigo-100 text-xs text-slate-700 space-y-2">
-            <p><strong>Exercice de renfort Chapitre 1 : « Où placer chaque adresse ? »</strong></p>
-            <p>1. Tu écris au professeur pour lui poser une question sur le cours. ➔ <strong>Champ [ À ]</strong></p>
-            <p>2. Tu envoies les photos de la sortie scolaire à 28 élèves de la classe. ➔ <strong>Champ [ Cci ]</strong> (pour protéger leur vie privée / RGPD)</p>
-            <p>3. Tu envoies un document à ton binôme et tu veux que ton professeur le voie aussi sans être le destinataire direct. ➔ <strong>Champ [ Cc ]</strong></p>
+
+          <!-- Tableau Heatmap Matrice de la Classe -->
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs overflow-x-auto">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div>
+                <h3 class="font-extrabold text-base text-slate-900">Matrice de Maîtrise des Acquis (Référentiel SeGEC FMTTN)</h3>
+                <span class="text-xs text-slate-400 font-bold" x-text="classeEleves.length + ' élève(s) actif(s)'"></span>
+              </div>
+
+              <!-- Sélecteur de Chapitre pour la matrice -->
+              <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
+                <button 
+                  @click="profMatrixChapter = 'ch1'"
+                  :class="profMatrixChapter === 'ch1' ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+                  class="px-3 py-1 rounded-lg text-xs transition cursor-pointer">
+                  Chapitre 1 : Communication
+                </button>
+                <button 
+                  @click="profMatrixChapter = 'ch2'"
+                  :class="profMatrixChapter === 'ch2' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+                  class="px-3 py-1 rounded-lg text-xs transition cursor-pointer">
+                  Chapitre 2 : Sécurité & Données
+                </button>
+              </div>
+            </div>
+            
+            <!-- TABLEAU CHAPITRE 1 -->
+            <template x-if="profMatrixChapter === 'ch1'">
+              <table class="w-full text-left text-xs border-collapse min-w-[700px]">
+                <thead>
+                  <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
+                    <th class="py-3 px-4">Élève</th>
+                    <th class="py-3 px-4">Escape Game</th>
+                    <th class="py-3 px-4">Charte p.10</th>
+                    <th class="py-3 px-4">Réseaux NUM-1.D1</th>
+                    <th class="py-3 px-4">Courriel NUM-1.D5</th>
+                    <th class="py-3 px-4">Éthique NUM-1.D6</th>
+                    <th class="py-3 px-4">Simulateur NUM-1.P2</th>
+                    <th class="py-3 px-4 text-right">Score</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <template x-for="eleve in classeEleves" :key="eleve.id">
+                    <tr class="hover:bg-slate-50/70 transition">
+                      <td class="py-3.5 px-4 font-extrabold text-slate-900" x-text="eleve.nom"></td>
+                      <td class="py-3.5 px-4 font-bold text-purple-700" x-text="eleve.eg"></td>
+                      <td class="py-3.5 px-4">
+                        <span :class="eleve.charte === 'acquis' ? 'bg-emerald-100 text-emerald-800' : (eleve.charte === 'en_cours' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')"
+                              class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.charte"></span>
+                      </td>
+                      <td class="py-3.5 px-4">
+                        <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">Acquis</span>
+                      </td>
+                      <td class="py-3.5 px-4">
+                        <span :class="eleve.d5 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                              class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.d5"></span>
+                      </td>
+                      <td class="py-3.5 px-4">
+                        <span :class="eleve.d6 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+                              class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.d6"></span>
+                      </td>
+                      <td class="py-3.5 px-4">
+                        <span :class="eleve.p2 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+                              class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.p2"></span>
+                      </td>
+                      <td class="py-3.5 px-4 text-right font-black" :class="eleve.score >= 80 ? 'text-emerald-600' : 'text-amber-600'" x-text="eleve.score + '%'"></td>
+                    </tr>
+                  </template>
+                  <tr x-show="classeEleves.length === 0">
+                    <td colspan="8" class="py-8 text-center text-slate-400 font-medium">
+                      Aucun élève n'a encore enregistré de progression dans la classe <strong x-text="selectedTeacherClass"></strong>.<br>
+                      Basculez sur l'onglet <strong>« Gestion des Élèves & Classes »</strong> ci-dessus pour inscrire vos élèves.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </template>
+
+            <!-- TABLEAU CHAPITRE 2 -->
+            <template x-if="profMatrixChapter === 'ch2'">
+              <table class="w-full text-left text-xs border-collapse min-w-[700px]">
+                <thead>
+                  <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
+                    <th class="py-3 px-4">Élève</th>
+                    <th class="py-3 px-4">Mots de passe NUM-2.D1</th>
+                    <th class="py-3 px-4">PEGI NUM-2.D2</th>
+                    <th class="py-3 px-4">HTTPS NUM-2.D3</th>
+                    <th class="py-3 px-4">Traces NUM-2.D4</th>
+                    <th class="py-3 px-4">Attention NUM-2.D5</th>
+                    <th class="py-3 px-4">Mission NUM-2.M1</th>
+                    <th class="py-3 px-4 text-right">Score</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <template x-for="eleve in classeEleves" :key="eleve.id">
+                    <tr class="hover:bg-slate-50/70 transition">
+                      <td class="py-3.5 px-4 font-extrabold text-slate-900" x-text="eleve.nom"></td>
+                      <td class="py-3.5 px-4">
+                        <span :class="eleve.num2_d1 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                              class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_d1 || 'en_cours'"></span>
+                      </td>
+                      <td class="py-3.5 px-4">
+                        <span :class="eleve.num2_d2 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                              class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_d2 || 'en_cours'"></span>
+                      </td>
+                      <td class="py-3.5 px-4">
+                        <span :class="eleve.num2_d3 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                              class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_d3 || 'en_cours'"></span>
+                      </td>
+                      <td class="py-3.5 px-4">
+                        <span :class="eleve.num2_d4 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : (eleve.num2_d4 === 'en_cours' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')"
+                              class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_d4 || 'en_cours'"></span>
+                      </td>
+                      <td class="py-3.5 px-4">
+                        <span :class="eleve.num2_d5 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                              class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_d5 || 'en_cours'"></span>
+                      </td>
+                      <td class="py-3.5 px-4">
+                        <span :class="eleve.num2_m1 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                              class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_m1 || 'en_cours'"></span>
+                      </td>
+                      <td class="py-3.5 px-4 text-right font-black" :class="eleve.score >= 80 ? 'text-emerald-600' : 'text-amber-600'" x-text="eleve.score + '%'"></td>
+                    </tr>
+                  </template>
+                  <tr x-show="classeEleves.length === 0">
+                    <td colspan="8" class="py-8 text-center text-slate-400 font-medium">
+                      Aucun élève n'a encore enregistré de progression dans la classe <strong x-text="selectedTeacherClass"></strong>.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </template>
           </div>
-          <div x-show="profMatrixChapter === 'ch2'" class="bg-white p-4 rounded-2xl border border-emerald-100 text-xs text-slate-700 space-y-2">
-            <p><strong>Exercice de renfort Chapitre 2 : « Déjouer les pièges de sécurité »</strong></p>
-            <p>1. Un site d'achats affiche un cadenas vert 🔒. Peux-tu faire confiance les yeux fermés ? ➔ <strong>Non ! Le cadenas prouve le chiffrement du transport, pas l'honnêteté du vendeur.</strong></p>
-            <p>2. Sans rien taper, mon téléphone sait où je suis et combien de temps je regarde un écran. Est-ce actif ou passif ? ➔ <strong>Donnée passive (trace automatique).</strong></p>
-            <p>3. Quelqu'un m'envoie des insultes répétées en message privé. Quel est le réflexe 1 ? ➔ <strong>Capture d'écran (preuve) avant tout !</strong></p>
+
+          <!-- Fiche de Remédiation en 1 Clic -->
+          <div x-show="remediationGenerated" class="bg-indigo-50 border border-indigo-200 rounded-3xl p-6 sm:p-8 animate-fadeIn">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">✨</span>
+                <div>
+                  <h4 class="font-black text-indigo-950 text-base" x-text="profMatrixChapter === 'ch2' ? 'Fiche de Remédiation Ciblée : Sécurité & Données' : 'Fiche de Remédiation Ciblée : Courriel & Cci'"></h4>
+                  <p class="text-xs text-indigo-700" x-text="profMatrixChapter === 'ch2' ? 'Générée pour les élèves en difficulté sur le cadenas HTTPS (NUM-2.D3) et les données passives (NUM-2.D4)' : 'Générée pour les élèves en difficulté sur la compétence NUM-1.P2 (Courriel & Cci)'"></p>
+                </div>
+              </div>
+              <button onclick="window.print()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-xs hover:bg-indigo-700 cursor-pointer">Imprimer / PDF</button>
+            </div>
+            <div x-show="profMatrixChapter === 'ch1'" class="bg-white p-4 rounded-2xl border border-indigo-100 text-xs text-slate-700 space-y-2">
+              <p><strong>Exercice de renfort Chapitre 1 : « Où placer chaque adresse ? »</strong></p>
+              <p>1. Tu écris au professeur pour lui poser une question sur le cours. ➔ <strong>Champ [ À ]</strong></p>
+              <p>2. Tu envoies les photos de la sortie scolaire à 28 élèves de la classe. ➔ <strong>Champ [ Cci ]</strong> (pour protéger leur vie privée / RGPD)</p>
+              <p>3. Tu envoies un document à ton binôme et tu veux que ton professeur le voie aussi sans être le destinataire direct. ➔ <strong>Champ [ Cc ]</strong></p>
+            </div>
+            <div x-show="profMatrixChapter === 'ch2'" class="bg-white p-4 rounded-2xl border border-emerald-100 text-xs text-slate-700 space-y-2">
+              <p><strong>Exercice de renfort Chapitre 2 : « Déjouer les pièges de sécurité »</strong></p>
+              <p>1. Un site d'achats affiche un cadenas vert 🔒. Peux-tu faire confiance les yeux fermés ? ➔ <strong>Non ! Le cadenas prouve le chiffrement du transport, pas l'honnêteté du vendeur.</strong></p>
+              <p>2. Sans rien taper, mon téléphone sait où je suis et combien de temps je regarde un écran. Est-ce actif ou passif ? ➔ <strong>Donnée passive (trace automatique).</strong></p>
+              <p>3. Quelqu'un m'envoie des insultes répétées en message privé. Quel est le réflexe 1 ? ➔ <strong>Capture d'écran (preuve) avant tout !</strong></p>
+            </div>
           </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- VUE 2 : COURS MODULAIRE (CODING, OFFICE, ETC.) -->
+        <!-- ============================================== -->
+        <div x-show="profSelectedCourseId !== 'fmttn-1c'" class="space-y-6">
+          
+          <!-- Métriques du Cours Sélectionné -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+              <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Soumissions</div>
+              <div class="text-3xl font-black text-slate-900 mt-1" x-text="getCourseStatsForCurrentClass().total">0</div>
+              <p class="text-xs text-slate-500 mt-1">Devoirs reçus dans cette classe</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-emerald-200/80 shadow-xs bg-gradient-to-br from-white to-emerald-50/40">
+              <div class="text-xs font-bold uppercase tracking-wider text-emerald-600">Copies Validées</div>
+              <div class="text-3xl font-black text-emerald-700 mt-1" x-text="getCourseStatsForCurrentClass().validated">0</div>
+              <p class="text-xs text-emerald-600/80 mt-1">Évaluées et notées</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-amber-200/80 shadow-xs bg-gradient-to-br from-white to-amber-50/40">
+              <div class="text-xs font-bold uppercase tracking-wider text-amber-600">En Attente de Note</div>
+              <div class="text-3xl font-black text-amber-700 mt-1" x-text="getCourseStatsForCurrentClass().pending">0</div>
+              <p class="text-xs text-amber-600/80 mt-1">Nécessitent votre relecture</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-indigo-200/80 shadow-xs bg-gradient-to-br from-white to-indigo-50/40">
+              <div class="text-xs font-bold uppercase tracking-wider text-indigo-600">Exercices au Programme</div>
+              <div class="text-3xl font-black text-indigo-700 mt-1" x-text="profCourseExercises.length">0</div>
+              <p class="text-xs text-indigo-600/80 mt-1">Missions configurées</p>
+            </div>
+          </div>
+
+          <!-- Matrice Élèves × Exercices -->
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs overflow-x-auto">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+              <div>
+                <h3 class="font-black text-base text-slate-900 flex items-center gap-2">
+                  <span>Matrice de Réalisation des Devoirs :</span>
+                  <span class="text-indigo-600" x-text="coursesList.find(c => c.id === profSelectedCourseId)?.title"></span>
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Cliquez sur une pastille pour ouvrir la copie de l'élève, consulter son travail et attribuer une note.
+                </p>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <span class="text-xs text-slate-400 font-bold" x-text="classeEleves.length + ' élève(s)'"></span>
+                <button 
+                  @click="activeProfSubTab = 'copies'; submissionFilterCourse = profSelectedCourseId"
+                  class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5">
+                  <span>📥</span> Voir les copies de ce cours
+                </button>
+              </div>
+            </div>
+
+            <!-- Chargement des exercices -->
+            <div x-show="profCourseLoading" class="py-12 text-center text-slate-400">
+              <div class="animate-spin text-2xl mb-2">⏳</div>
+              <p class="text-xs font-bold">Chargement des exercices du cours...</p>
+            </div>
+
+            <!-- Table Matrice Élèves × Exercices -->
+            <div x-show="!profCourseLoading" class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse min-w-[700px]">
+                <thead>
+                  <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
+                    <th class="py-3 px-4 w-48">Élève</th>
+                    <template x-for="exo in profCourseExercises" :key="exo.id">
+                      <th class="py-3 px-4 text-center">
+                        <div class="flex flex-col items-center">
+                          <span class="text-[10px] font-black text-indigo-600 uppercase" x-text="exo.type || 'EXO'"></span>
+                          <span class="text-slate-800 font-bold max-w-[120px] truncate" x-text="exo.title" :title="exo.title"></span>
+                        </div>
+                      </th>
+                    </template>
+                    <th class="py-3 px-4 text-right w-36">Progression</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <template x-for="eleve in classeEleves" :key="eleve.id">
+                    <tr class="hover:bg-slate-50/70 transition">
+                      <td class="py-3.5 px-4 font-extrabold text-slate-900">
+                        <div x-text="eleve.nom"></div>
+                        <div class="text-[10px] text-slate-400 font-normal" x-text="eleve.email || ''"></div>
+                      </td>
+
+                      <!-- Cellule pour chaque exercice -->
+                      <template x-for="exo in profCourseExercises" :key="exo.id">
+                        <td class="py-3.5 px-4 text-center">
+                          <template x-if="getStudentExerciseSubmission(eleve, exo)">
+                            <div>
+                              <!-- Statut : Validé -->
+                              <button 
+                                x-show="getStudentExerciseSubmission(eleve, exo)?.status === 'valide' || getStudentExerciseSubmission(eleve, exo)?.status === 'validee'"
+                                @click="ouvrirModalCorrection(getStudentExerciseSubmission(eleve, exo))"
+                                class="px-2.5 py-1 rounded-lg text-[11px] font-black bg-emerald-100 hover:bg-emerald-200 text-emerald-800 transition inline-flex items-center gap-1 cursor-pointer">
+                                <span>✓</span>
+                                <span x-text="(getStudentExerciseSubmission(eleve, exo)?.note_suggeree || 80) + '/100'"></span>
+                              </button>
+
+                              <!-- Statut : À valider / pending -->
+                              <button 
+                                x-show="getStudentExerciseSubmission(eleve, exo)?.status === 'a_valider' || getStudentExerciseSubmission(eleve, exo)?.status === 'pending'"
+                                @click="ouvrirModalCorrection(getStudentExerciseSubmission(eleve, exo))"
+                                class="px-2.5 py-1 rounded-lg text-[11px] font-black bg-amber-100 hover:bg-amber-200 text-amber-800 transition animate-pulse inline-flex items-center gap-1 cursor-pointer">
+                                <span>⏳</span>
+                                <span>À noter</span>
+                              </button>
+
+                              <!-- Statut : À corriger -->
+                              <button 
+                                x-show="getStudentExerciseSubmission(eleve, exo)?.status === 'a_corriger'"
+                                @click="ouvrirModalCorrection(getStudentExerciseSubmission(eleve, exo))"
+                                class="px-2.5 py-1 rounded-lg text-[11px] font-black bg-rose-100 hover:bg-rose-200 text-rose-800 transition inline-flex items-center gap-1 cursor-pointer">
+                                <span>⚠️</span>
+                                <span>À revoir</span>
+                              </button>
+
+                              <!-- Statut : Archivé -->
+                              <button 
+                                x-show="getStudentExerciseSubmission(eleve, exo)?.status === 'archive'"
+                                @click="ouvrirModalCorrection(getStudentExerciseSubmission(eleve, exo))"
+                                class="px-2 py-1 rounded-lg text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 transition cursor-pointer">
+                                <span>🗄️</span>
+                              </button>
+                            </div>
+                          </template>
+                          <template x-if="!getStudentExerciseSubmission(eleve, exo)">
+                            <span class="text-slate-300 font-bold">—</span>
+                          </template>
+                        </td>
+                      </template>
+
+                      <!-- Progression de l'élève sur le cours -->
+                      <td class="py-3.5 px-4 text-right">
+                        <div class="flex items-center justify-end gap-2">
+                          <div class="w-16 bg-slate-100 h-2 rounded-full overflow-hidden">
+                            <div class="bg-indigo-600 h-full rounded-full transition-all duration-300" :style="'width: ' + getStudentCourseProgress(eleve) + '%'"></div>
+                          </div>
+                          <span class="font-black text-slate-900" x-text="getStudentCourseProgress(eleve) + '%'"></span>
+                        </div>
+                      </td>
+                    </tr>
+                  </template>
+
+                  <!-- Aucun élève -->
+                  <tr x-show="classeEleves.length === 0">
+                    <td :colspan="profCourseExercises.length + 2" class="py-8 text-center text-slate-400 font-medium">
+                      Aucun élève trouvé dans la classe <strong x-text="selectedTeacherClass"></strong>.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
 
       </div>
@@ -2967,6 +3362,192 @@
         <p class="text-[11px] text-slate-400">
           Comptes enseignants autorisés : liste blanche Sécurité FMTTN (Pacte d'Excellence SeGEC).
         </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 📝 MODALE DE CORRECTION DÉTAILLÉE DES COPIES (PHASE 3) -->
+  <div 
+    x-show="modalCorrectionOpen" 
+    x-transition.opacity 
+    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto"
+    style="display: none;">
+    <div 
+      @click.away="modalCorrectionOpen = false"
+      class="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative my-8 max-h-[92vh] flex flex-col animate-scaleUp">
+      
+      <!-- En-tête de la Copie -->
+      <div class="flex items-start justify-between pb-4 border-b border-slate-100 shrink-0">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 font-black text-base flex items-center justify-center shadow-xs">
+            <span x-text="selectedSubmission?.nom_eleve ? selectedSubmission.nom_eleve.substring(0,2).toUpperCase() : '👨‍🎓'"></span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="text-lg font-black text-slate-900" x-text="selectedSubmission?.nom_eleve || 'Élève'"></h3>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-100 text-indigo-700" x-text="'Classe ' + (selectedSubmission?.classe_id || selectedSubmission?.classe || '1A')"></span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700" x-text="coursesList.find(c => c.id === selectedSubmission?.course_id)?.title || selectedSubmission?.course_id || 'Cours Web'"></span>
+            </div>
+            <p class="text-xs text-slate-500 mt-1 flex items-center gap-2">
+              <span class="font-bold text-slate-700" x-text="selectedSubmission?.titre_exercice || 'Devoir'"></span>
+              <span>•</span>
+              <span x-text="selectedSubmission?.date_soumission ? new Date(selectedSubmission.date_soumission).toLocaleString('fr-BE') : 'Date inconnue'"></span>
+            </p>
+          </div>
+        </div>
+
+        <button 
+          @click="modalCorrectionOpen = false" 
+          class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl text-lg font-bold transition cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <!-- Corps Défilable de la Modale -->
+      <div class="flex-1 overflow-y-auto py-5 space-y-6 pr-1">
+        
+        <!-- Bloc Travail Soumis par l'Élève -->
+        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+              <span>📄</span> Travail rendu par l'élève
+            </span>
+            <div class="flex items-center gap-2">
+              <button 
+                @click="telechargerCodeEleve(selectedSubmission)"
+                class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-xs transition flex items-center gap-1 cursor-pointer">
+                <span>⬇️</span> Télécharger
+              </button>
+            </div>
+          </div>
+
+          <!-- Cas 1 : Lien externe (Google Docs, Drive, Canva, etc.) -->
+          <template x-if="selectedSubmission?.code_eleve && (selectedSubmission.code_eleve.includes('http://') || selectedSubmission.code_eleve.includes('https://'))">
+            <div class="p-4 bg-white rounded-xl border border-slate-200 space-y-3">
+              <p class="text-xs text-slate-600 font-medium">L'élève a fourni un document ou une ressource externe :</p>
+              
+              <div class="flex items-center gap-2 flex-wrap">
+                <a 
+                  :href="selectedSubmission.code_eleve.match(/https?:\/\/[^\s\n\r]+/)?.[0] || '#'" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs transition shadow-sm flex items-center gap-2 inline-flex">
+                  <span>🔗</span> Ouvrir le travail de l'élève (Google Doc / Drive) ↗
+                </a>
+              </div>
+
+              <!-- Notes d'accompagnement éventuelles -->
+              <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-700 whitespace-pre-wrap font-sans" x-text="selectedSubmission.code_eleve"></div>
+            </div>
+          </template>
+
+          <!-- Cas 2 : Code source HTML / CSS / JS ou texte brut -->
+          <template x-if="!selectedSubmission?.code_eleve || (!selectedSubmission.code_eleve.includes('http://') && !selectedSubmission.code_eleve.includes('https://'))">
+            <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono overflow-x-auto max-h-72 leading-relaxed select-all" x-text="selectedSubmission?.code_eleve || 'Aucun contenu fourni'"></pre>
+          </template>
+        </div>
+
+        <!-- Bloc Pré-évaluation IA Gemini (si disponible) -->
+        <template x-if="selectedSubmission?.feedback_ia">
+          <div class="bg-purple-50/70 border border-purple-200/80 rounded-2xl p-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-xl">🤖</span>
+                <span class="text-xs font-black uppercase tracking-wider text-purple-900">Analyse IA Gemini (Tuteur)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-purple-700 font-bold">Note suggérée :</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-purple-600 text-white text-xs font-black" x-text="(selectedSubmission.note_suggeree || 80) + '/100'"></span>
+                <button 
+                  @click="gradingNote = selectedSubmission.note_suggeree || 80"
+                  class="text-[11px] underline font-bold text-purple-700 hover:text-purple-900 cursor-pointer">
+                  Appliquer la note
+                </button>
+              </div>
+            </div>
+            <p class="text-xs text-purple-900 font-medium leading-relaxed" x-text="selectedSubmission.feedback_ia"></p>
+          </div>
+        </template>
+
+        <!-- Bloc Notation & Commentaire Enseignant -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 space-y-4">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <label class="text-xs font-black uppercase tracking-wider text-slate-700">Barème & Note Finale (/100)</label>
+            <div class="flex items-center gap-1.5">
+              <template x-for="p in [60, 70, 80, 90, 100]" :key="p">
+                <button 
+                  type="button"
+                  @click="gradingNote = p"
+                  :class="gradingNote === p ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                  class="px-2.5 py-1 rounded-lg text-xs font-extrabold transition cursor-pointer"
+                  x-text="p">
+                </button>
+              </template>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <input 
+              type="number" 
+              min="0" 
+              max="100" 
+              x-model="gradingNote" 
+              class="w-24 px-3 py-2 text-center text-lg font-black rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600" />
+            <input 
+              type="range" 
+              min="0" 
+              max="100" 
+              step="5" 
+              x-model="gradingNote" 
+              class="flex-1 accent-indigo-600 cursor-pointer" />
+          </div>
+
+          <div>
+            <label class="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">Commentaire & Conseils pour l'élève</label>
+            <textarea 
+              rows="3" 
+              x-model="gradingProfMessage" 
+              placeholder="Écrivez un mot d'encouragement ou une piste d'amélioration précise..."
+              class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600 leading-relaxed"></textarea>
+          </div>
+
+          <!-- Message de confirmation -->
+          <div x-show="gradingFeedbackSuccess" x-text="gradingFeedbackSuccess" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-black text-center"></div>
+        </div>
+
+      </div>
+
+      <!-- Barre d'Actions & Décision Enseignant -->
+      <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-2">
+          <button 
+            @click="supprimerCopie(selectedSubmission)"
+            class="px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-xl text-xs font-bold transition cursor-pointer">
+            🗑️ Supprimer
+          </button>
+          <button 
+            @click="archiverCopie(selectedSubmission)"
+            :disabled="gradingLoading"
+            class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer">
+            🗄️ Archiver
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button 
+            @click="validerCorrection('a_corriger')"
+            :disabled="gradingLoading"
+            class="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-black transition shadow-xs cursor-pointer">
+            ⚠️ Demander correction
+          </button>
+          <button 
+            @click="validerCorrection('valide')"
+            :disabled="gradingLoading"
+            class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black transition shadow-sm cursor-pointer flex items-center gap-2">
+            <span>✓</span> Valider la copie
+          </button>
+        </div>
       </div>
 
     </div>

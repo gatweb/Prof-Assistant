@@ -474,13 +474,15 @@ Ton rôle :
 }
 
 // 10. SOUMISSION & CORRECTION AUTOMATISÉE DE DEVOIR
-export async function soumettreDevoirCloud({ code_eleve, id_exercice, nom_eleve, classe_id, type }) {
+export async function soumettreDevoirCloud({ code_eleve, id_exercice, titre_exercice, course_id, nom_eleve, classe_id, type }) {
   try {
     if (!auth.currentUser) await initStudentSession();
     const fn = httpsCallable(functions, "corrigerDevoir");
     const res = await fn({
       code_eleve,
       id_exercice,
+      titre_exercice,
+      course_id,
       nom_eleve,
       classe_id,
       type
@@ -491,4 +493,59 @@ export async function soumettreDevoirCloud({ code_eleve, id_exercice, nom_eleve,
     throw err;
   }
 }
+
+// 11. GESTION DES SOUMISSIONS & VALIDATION PROFESSEUR (PHASE 3)
+export function listenToTeacherSubmissions(callback) {
+  try {
+    const q = collection(db, "submissions");
+    return onSnapshot(q, (snapshot) => {
+      const subs = [];
+      snapshot.forEach(docSnap => {
+        subs.push({
+          id: docSnap.id,
+          ...docSnap.data()
+        });
+      });
+      // Tri du plus récent au plus ancien
+      subs.sort((a, b) => new Date(b.date_soumission || 0) - new Date(a.date_soumission || 0));
+      callback(subs);
+    }, (err) => {
+      console.warn("[listenToTeacherSubmissions] Erreur écoute submissions :", err);
+      callback([]);
+    });
+  } catch (err) {
+    console.error("[listenToTeacherSubmissions] Erreur :", err);
+    return () => {};
+  }
+}
+
+export async function updateTeacherSubmission(subId, { status, note, profMessage, feedbackIa }) {
+  try {
+    const docRef = doc(db, "submissions", subId);
+    const payload = {
+      status,
+      date_correction: serverTimestamp()
+    };
+    if (note !== undefined && note !== null) payload.note_suggeree = Number(note);
+    if (profMessage !== undefined) payload.prof_message = profMessage;
+    if (feedbackIa !== undefined) payload.feedback_ia = feedbackIa;
+
+    await updateDoc(docRef, payload);
+    return true;
+  } catch (err) {
+    console.error("[updateTeacherSubmission] Erreur :", err);
+    throw err;
+  }
+}
+
+export async function deleteTeacherSubmission(subId) {
+  try {
+    await deleteDoc(doc(db, "submissions", subId));
+    return true;
+  } catch (err) {
+    console.error("[deleteTeacherSubmission] Erreur :", err);
+    throw err;
+  }
+}
+
 

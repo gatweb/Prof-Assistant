@@ -23,7 +23,10 @@ import {
   soumettreDevoirCloud,
   listerEnseignantsCloud,
   enregistrerEnseignantCloud,
-  supprimerEnseignantCloud
+  supprimerEnseignantCloud,
+  listenToTeacherSubmissions,
+  updateTeacherSubmission,
+  deleteTeacherSubmission
 } from './services/firebase.js';
 import { AVAILABLE_CLASSES } from './services/teachers-config.js';
 
@@ -294,12 +297,31 @@ Alpine.data('profAssistantApp', () => ({
     errorMsg: ''
   },
   modalLoginProfOpen: false,
-  activeProfSubTab: 'matrice', // 'matrice' | 'eleves' | 'notebooklm' | 'equipe'
+  activeProfSubTab: 'copies', // 'copies' | 'matrice' | 'eleves' | 'notebooklm' | 'equipe'
   profMatrixChapter: 'ch1',    // 'ch1' | 'ch2'
   selectedTeacherClass: '1A',
   unsubscribeTeacherListener: null,
   firestoreSynced: false,
   remediationGenerated: false,
+
+  // Gestion des copies & devoirs (Phase 3)
+  teacherSubmissions: [],
+  unsubscribeSubmissionsListener: null,
+  submissionFilterStatus: 'tous', // 'tous' | 'a_valider' | 'valide' | 'a_corriger' | 'archive'
+  submissionFilterCourse: 'tous',
+  submissionFilterClass: 'tous',
+  submissionSearchText: '',
+  selectedSubmission: null,
+  modalCorrectionOpen: false,
+  gradingNote: 80,
+  gradingProfMessage: '',
+  gradingLoading: false,
+  gradingFeedbackSuccess: '',
+
+  // Matrice multi-cours (Phase 3)
+  profSelectedCourseId: 'fmttn-1c',
+  profCourseExercises: [],
+  profCourseLoading: false,
 
   // Gestion de l'équipe enseignante (Phase 1)
   teachersList: [],
@@ -366,11 +388,16 @@ Alpine.data('profAssistantApp', () => ({
           this.selectedTeacherClass = authStatus.profile.classes[0];
         }
         this.activerEcouteClasse(this.selectedTeacherClass);
+        this.activerEcouteSubmissions();
         this.chargerElevesReels();
       } else {
         if (this.unsubscribeTeacherListener) {
           this.unsubscribeTeacherListener();
           this.unsubscribeTeacherListener = null;
+        }
+        if (this.unsubscribeSubmissionsListener) {
+          this.unsubscribeSubmissionsListener();
+          this.unsubscribeSubmissionsListener = null;
         }
       }
     });
@@ -566,6 +593,8 @@ Alpine.data('profAssistantApp', () => ({
       const res = await soumettreDevoirCloud({
         code_eleve: payload,
         id_exercice: this.currentExercise?.id || 'code-ex',
+        titre_exercice: this.currentExercise?.title || 'Code Web',
+        course_id: this.currentCourseId || 'js-uaa5-classic',
         nom_eleve: this.user.nom,
         classe_id: this.user.classe,
         type: 'code'
@@ -598,6 +627,8 @@ Alpine.data('profAssistantApp', () => ({
       await soumettreDevoirCloud({
         code_eleve: content,
         id_exercice: this.currentExercise?.id || 'office-ex',
+        titre_exercice: this.currentExercise?.title || 'Devoir Office',
+        course_id: this.currentCourseId || 'bureautique-pro',
         nom_eleve: this.user.nom,
         classe_id: this.user.classe,
         type: 'office'
@@ -629,6 +660,8 @@ Alpine.data('profAssistantApp', () => ({
       await soumettreDevoirCloud({
         code_eleve: content,
         id_exercice: this.currentExercise?.id || 'creative-ex',
+        titre_exercice: this.currentExercise?.title || 'Projet Créatif',
+        course_id: this.currentCourseId || 'design-multimedia',
         nom_eleve: this.user.nom,
         classe_id: this.user.classe,
         type: 'creative'
@@ -895,6 +928,240 @@ Alpine.data('profAssistantApp', () => ({
 
   genererRemediationProf() {
     this.remediationGenerated = true;
+  },
+
+  // ==========================================
+  // GESTION DES COPIES & VALIDATION (PHASE 3)
+  // ==========================================
+  activerEcouteSubmissions() {
+    if (this.unsubscribeSubmissionsListener) {
+      this.unsubscribeSubmissionsListener();
+    }
+    this.unsubscribeSubmissionsListener = listenToTeacherSubmissions((subs) => {
+      this.teacherSubmissions = subs;
+      console.log(`[Prof] ${subs.length} soumissions synchronisées en temps réel.`);
+    });
+  },
+
+  getFilteredSubmissions() {
+    return this.teacherSubmissions.filter(sub => {
+      // 1. Filtre par statut
+      if (this.submissionFilterStatus !== 'tous') {
+        if (this.submissionFilterStatus === 'a_valider') {
+          if (sub.status !== 'a_valider' && sub.status !== 'pending') return false;
+        } else if (sub.status !== this.submissionFilterStatus) {
+          return false;
+        }
+      }
+
+      // 2. Filtre par classe
+      if (this.submissionFilterClass !== 'tous') {
+        const subClass = sub.classe_id || sub.classe || '';
+        if (subClass !== this.submissionFilterClass) return false;
+      }
+
+      // 3. Filtre par cours
+      if (this.submissionFilterCourse !== 'tous') {
+        const subCourse = sub.course_id || sub.id_course || 'js-uaa5-classic';
+        if (subCourse !== this.submissionFilterCourse) return false;
+      }
+
+      // 4. Recherche textuelle (nom élève, email ou titre exercice)
+      if (this.submissionSearchText.trim()) {
+        const q = this.submissionSearchText.toLowerCase();
+        const nom = (sub.nom_eleve || '').toLowerCase();
+        const email = (sub.email_eleve || '').toLowerCase();
+        const titre = (sub.titre_exercice || '').toLowerCase();
+        if (!nom.includes(q) && !email.includes(q) && !titre.includes(q)) return false;
+      }
+
+      return true;
+    });
+  },
+
+  getPendingSubmissionsCount() {
+    return this.teacherSubmissions.filter(s => s.status === 'a_valider' || s.status === 'pending').length;
+  },
+
+  ouvrirModalCorrection(sub) {
+    this.selectedSubmission = sub;
+    this.gradingNote = sub.note_suggeree !== undefined && sub.note_suggeree !== null ? sub.note_suggeree : 80;
+    this.gradingProfMessage = sub.prof_message || '';
+    this.gradingFeedbackSuccess = '';
+    this.modalCorrectionOpen = true;
+  },
+
+  async validerCorrection(nouveauStatut) {
+    if (!this.selectedSubmission) return;
+    this.gradingLoading = true;
+    try {
+      await updateTeacherSubmission(this.selectedSubmission.id, {
+        status: nouveauStatut,
+        note: Number(this.gradingNote),
+        profMessage: this.gradingProfMessage
+      });
+      this.selectedSubmission.status = nouveauStatut;
+      this.selectedSubmission.note_suggeree = Number(this.gradingNote);
+      this.selectedSubmission.prof_message = this.gradingProfMessage;
+      this.gradingFeedbackSuccess = `✅ Statut mis à jour : "${nouveauStatut}" (${this.gradingNote}/100) !`;
+      setTimeout(() => {
+        this.modalCorrectionOpen = false;
+      }, 1000);
+    } catch (err) {
+      alert("Erreur lors de la mise à jour : " + err.message);
+    } finally {
+      this.gradingLoading = false;
+    }
+  },
+
+  async archiverCopie(sub) {
+    try {
+      await updateTeacherSubmission(sub.id, { status: 'archive' });
+      sub.status = 'archive';
+    } catch (err) {
+      alert("Erreur archivage : " + err.message);
+    }
+  },
+
+  async supprimerCopie(sub) {
+    if (!confirm(`Supprimer définitivement la copie de ${sub.nom_eleve || 'cet élève'} ?`)) return;
+    try {
+      await deleteTeacherSubmission(sub.id);
+      this.teacherSubmissions = this.teacherSubmissions.filter(s => s.id !== sub.id);
+      if (this.selectedSubmission?.id === sub.id) {
+        this.modalCorrectionOpen = false;
+      }
+    } catch (err) {
+      alert("Erreur suppression : " + err.message);
+    }
+  },
+
+  telechargerCodeEleve(sub) {
+    const content = sub.code_eleve || '';
+    const safeNom = (sub.nom_eleve || 'eleve').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const filename = `copie_${safeNom}_${sub.id.substring(0, 6)}.txt`;
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
+
+  exporterSubmissionsCSV() {
+    const list = this.getFilteredSubmissions();
+    if (list.length === 0) {
+      alert("Aucune copie à exporter selon les filtres actuels.");
+      return;
+    }
+
+    const headers = ["Date", "Nom Elève", "Email", "Classe", "Cours", "Exercice", "Statut", "Note", "Feedback IA", "Message Enseignant"];
+    const rows = list.map(s => [
+      `"${s.date_soumission ? new Date(s.date_soumission).toLocaleDateString('fr-BE') : ''}"`,
+      `"${(s.nom_eleve || '').replace(/"/g, '""')}"`,
+      `"${(s.email_eleve || '').replace(/"/g, '""')}"`,
+      `"${s.classe_id || s.classe || ''}"`,
+      `"${s.course_id || s.id_course || 'js-uaa5-classic'}"`,
+      `"${(s.titre_exercice || '').replace(/"/g, '""')}"`,
+      `"${s.status || ''}"`,
+      `"${s.note_suggeree !== undefined ? s.note_suggeree : ''}"`,
+      `"${(s.feedback_ia || '').replace(/"/g, '""')}"`,
+      `"${(s.prof_message || '').replace(/"/g, '""')}"`
+    ]);
+
+    const csvContent = "\uFEFF" + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `profassistant_copies_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  },
+
+  async changerCoursMatriceProf(courseId) {
+    this.profSelectedCourseId = courseId;
+    if (courseId === 'fmttn-1c') {
+      this.profCourseExercises = [];
+      return;
+    }
+    this.profCourseLoading = true;
+    try {
+      this.profCourseExercises = await courseManagerV2.loadCourseExercisesFromDb(courseId);
+    } catch (err) {
+      console.warn("Erreur chargement exercices cours prof :", err);
+      this.profCourseExercises = [];
+    } finally {
+      this.profCourseLoading = false;
+    }
+  },
+
+  getStudentExerciseSubmission(eleve, exercise) {
+    if (!this.teacherSubmissions || !exercise) return null;
+    const cid = this.profSelectedCourseId;
+    return this.teacherSubmissions.find(s => {
+      // 1. Vérifier la classe si renseignée
+      const subClass = s.classe_id || s.classe || '';
+      if (this.selectedTeacherClass && subClass && subClass !== this.selectedTeacherClass) {
+        return false;
+      }
+
+      // 2. Vérifier le cours
+      const subCourse = s.course_id || s.id_course || 'js-uaa5-classic';
+      if (subCourse !== cid) return false;
+
+      // 3. Vérifier l'élève
+      const matchesStudent = 
+        (eleve.id && (s.id_eleve === eleve.id || s.uid_eleve === eleve.id)) ||
+        (eleve.email && s.email_eleve && s.email_eleve.toLowerCase() === eleve.email.toLowerCase()) ||
+        (eleve.nom && s.nom_eleve && s.nom_eleve.trim().toLowerCase() === eleve.nom.trim().toLowerCase());
+      if (!matchesStudent) return false;
+
+      // 4. Vérifier l'exercice
+      const matchesExo = 
+        (s.id_exercice && s.id_exercice === exercise.id) ||
+        (s.exercice_id && s.exercice_id === exercise.id) ||
+        (s.exercise_id && s.exercise_id === exercise.id) ||
+        (s.titre_exercice && exercise.title && (
+          s.titre_exercice.toLowerCase() === exercise.title.toLowerCase() ||
+          s.titre_exercice.toLowerCase().includes(exercise.title.toLowerCase()) ||
+          exercise.title.toLowerCase().includes(s.titre_exercice.toLowerCase())
+        ));
+      return matchesExo;
+    }) || null;
+  },
+
+  getStudentCourseProgress(eleve) {
+    if (!this.profCourseExercises || this.profCourseExercises.length === 0) return 0;
+    let validated = 0;
+    for (const ex of this.profCourseExercises) {
+      const sub = this.getStudentExerciseSubmission(eleve, ex);
+      if (sub && (sub.status === 'valide' || sub.status === 'validee')) {
+        validated++;
+      }
+    }
+    return Math.round((validated / this.profCourseExercises.length) * 100);
+  },
+
+  getCourseStatsForCurrentClass() {
+    const list = this.teacherSubmissions.filter(s => {
+      const subClass = s.classe_id || s.classe || '';
+      if (this.selectedTeacherClass && subClass && subClass !== this.selectedTeacherClass) return false;
+      const subCourse = s.course_id || s.id_course || 'js-uaa5-classic';
+      return subCourse === this.profSelectedCourseId;
+    });
+    const validated = list.filter(s => s.status === 'valide' || s.status === 'validee').length;
+    const pending = list.filter(s => s.status === 'a_valider' || s.status === 'pending').length;
+    return {
+      total: list.length,
+      validated,
+      pending
+    };
   },
 
   // ==========================================
