@@ -1360,7 +1360,7 @@ Alpine.data('profAssistantApp', () => ({
     try {
       const cId = this.classroomNewAssignment.selectedCourseId || this.currentCourseId || 'js-uaa5-classic';
       const exId = this.classroomNewAssignment.selectedExerciseId || this.currentExercise?.id || '';
-      const activityUrl = `${window.location.origin}/v2/?course=${encodeURIComponent(cId)}${exId ? '&ex=' + encodeURIComponent(exId) : ''}`;
+      const activityUrl = `${window.location.origin}/?course=${encodeURIComponent(cId)}${exId ? '&ex=' + encodeURIComponent(exId) : ''}`;
 
       const created = await publishCourseWork(this.classroomSelectedCourseId, {
         title: this.classroomNewAssignment.title,

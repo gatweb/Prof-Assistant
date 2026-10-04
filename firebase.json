@@ -23,6 +23,29 @@
       "**/.*",
       "**/node_modules/**",
       "functions/**"
+    ],
+    "redirects": [
+      {
+        "source": "/v2",
+        "destination": "/",
+        "type": 301
+      },
+      {
+        "source": "/v2/",
+        "destination": "/",
+        "type": 301
+      },
+      {
+        "source": "/v2/**",
+        "destination": "/",
+        "type": 301
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "/admin",
+        "destination": "/v1/admin.html"
+      }
     ]
   },
   "emulators": {

@@ -10,7 +10,7 @@ export class CourseManager {
     constructor() {
         this.courses = [];
         this.selectedCourse = null;
-        this.manifestUrl = './cours/manifest.json';
+        this.manifestUrl = '/cours/manifest.json';
         this.storageKey = 'profassistant_active_course_id';
     }
 
@@ -125,7 +125,7 @@ export class CourseManager {
      * @returns {string}
      */
     getCourseFileUrl(course, fileName) {
-        return `./cours/${course.folder}/${fileName}`;
+        return `/cours/${course.folder}/${fileName}`;
     }
 }
 

@@ -207,7 +207,7 @@ export async function publishCourseWork(courseId, { title, description, linkUrl,
     materials: [
       {
         link: {
-          url: linkUrl || window.location.origin + '/v2/',
+          url: linkUrl || window.location.origin + '/',
           title: "🚀 Ouvrir l'activité ProfAssistant"
         }
       }

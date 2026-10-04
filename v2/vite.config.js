@@ -2,13 +2,13 @@ import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  base: './',
+  base: '/',
   plugins: [
     tailwindcss(),
   ],
   build: {
-    outDir: '../public/v2',
-    emptyOutDir: true,
+    outDir: '../public',
+    emptyOutDir: false,
   },
   server: {
     port: 5173,
