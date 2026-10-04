@@ -1,68 +1,57 @@
 rules_version = '2';
+
+// =====================================================================
+// ProfAssistant — Règles Firestore communes V1 + V2 (Phase 0 de la fusion)
+// ---------------------------------------------------------------------
+// Principes :
+//  - Les Cloud Functions (Admin SDK) contournent ces règles : corrigerDevoir,
+//    interrogerTuteur, etc. ne sont pas concernées.
+//  - Un élève Google (V1) ne lit/écrit que SES documents (clé = email).
+//  - Un élève anonyme (V2) ne lit/écrit que SA progression (clé = uid).
+//  - Tout le reste est réservé aux enseignants.
+//  - Tests : tests/firestore/rules.test.mjs
+// =====================================================================
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Vérifie si l'utilisateur connecté est un enseignant autorisé
+    // ---------- Identité ----------
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isGoogleUser() {
+      return signedIn()
+        && request.auth.token.firebase.sign_in_provider != 'anonymous'
+        && request.auth.token.email != null
+        && request.auth.token.email_verified == true;
+    }
+
+    function myEmail() {
+      return request.auth.token.email.lower();
+    }
+
+    // Liste blanche TEMPORAIRE : sera remplacée en Phase 1 par la collection
+    // `enseignants` + custom claim `role` posé par une Cloud Function.
+    // ⚠️ Garder synchronisé avec public/src/admin.js et v2/src/services/teachers-config.js
     function isTeacher() {
-      return request.auth != null && (
-        request.auth.token.email != null && (
-          request.auth.token.email in [
-            'gatweb@gmail.com',
-            'collegue1@ecole.be',
-            'collegue2@ecole.be'
-          ] ||
-          request.auth.token.email.matches('.*@ecole\\.be$') ||
-          request.auth.token.email.matches('.*@enseignement\\.be$') ||
-          request.auth.token.role == 'enseignant' ||
-          request.auth.token.admin == true
-        )
+      return signedIn() && (
+        request.auth.token.get('role', '') in ['enseignant', 'admin'] ||
+        request.auth.token.get('admin', false) == true ||
+        (isGoogleUser() && myEmail() in [
+          'gatweb@gmail.com',
+          'collegue1@ecole.be',
+          'collegue2@ecole.be'
+        ])
       );
     }
 
-    // Collection des enseignants (annuaire et métadonnées)
-    match /enseignants/{profId} {
-      allow read: if request.auth != null;
-      allow write: if isTeacher();
-    }
-
-    // Collection des progressions V2 (par classe & élève)
-    match /progressions_v2/{docId} {
-      // Lecture autorisée pour l'enseignant et pour l'affichage de classe
-      allow read: if true;
-      // Création et mise à jour permises pour sauvegarder les exercices des élèves
-      allow create, update: if true;
-      // Suppression réservée aux enseignants
-      allow delete: if isTeacher();
-    }
-
-    // Classes et élèves (arborescence V2)
-    match /classes/{classeId} {
+    // ---------- Référentiel public (lecture seule pour les élèves) ----------
+    match /config/{docId} {
       allow read: if true;
       allow write: if isTeacher();
-
-      match /eleves/{eleveId} {
-        allow read: if true;
-        allow write: if true;
-      }
     }
 
-    // Soumissions de devoirs (V1 & V2)
-    match /submissions/{subId} {
-      // Un prof peut tout lire ; un élève ne lit que ses propres copies
-      allow read: if isTeacher() || (
-        request.auth != null && (
-          resource.data.email_eleve == request.auth.token.email ||
-          resource.data.uid_eleve == request.auth.uid
-        )
-      );
-      // Remise de devoir permise aux utilisateurs connectés (ou anonymes)
-      allow create: if request.auth != null;
-      // Seul le professeur peut corriger, valider ou modifier le statut
-      allow update, delete: if isTeacher();
-    }
-
-    // Référentiel des cours et des exercices
-    match /exercices/{exId} {
+    match /courses/{courseId} {
       allow read: if true;
       allow write: if isTeacher();
     }
@@ -72,7 +61,109 @@ service cloud.firestore {
       allow write: if isTeacher();
     }
 
-    // Règle par défaut : accès restreint aux enseignants
+    match /exercices/{exId} {
+      allow read: if true;
+      allow write: if isTeacher();
+    }
+
+    match /config_presentations/{moduleId} {
+      allow read: if true;
+      allow write: if isTeacher();
+    }
+
+    // ---------- Annuaires (enseignants uniquement) ----------
+    match /enseignants/{profId} {
+      allow read, write: if isTeacher();
+    }
+
+    match /users/{userId} {
+      // Un élève Google peut lire sa propre fiche (clé = email en V1)
+      allow read: if isTeacher() || (isGoogleUser() && userId.lower() == myEmail());
+      allow write: if isTeacher();
+    }
+
+    match /classes/{classeId} {
+      allow read: if signedIn();
+      allow write: if isTeacher();
+
+      match /eleves/{eleveId} {
+        allow read, write: if isTeacher();
+      }
+    }
+
+    // ---------- V1 : progression par cours (clé = email_coursId) ----------
+    match /users_progress/{docId} {
+      // resource == null : lecture d'un document inexistant (1re visite), sans fuite.
+      allow read: if isTeacher()
+        || (isGoogleUser() && (resource == null || resource.data.email.lower() == myEmail()));
+      allow create: if isGoogleUser() && request.resource.data.email.lower() == myEmail();
+      allow update: if isTeacher()
+        || (isGoogleUser()
+            && resource.data.email.lower() == myEmail()
+            && request.resource.data.email.lower() == myEmail());
+      allow delete: if isTeacher();
+    }
+
+    // ---------- V1 : résultats d'examen ----------
+    match /exam_results/{resId} {
+      allow read: if isTeacher()
+        || (isGoogleUser() && resource.data.email_eleve.lower() == myEmail());
+      allow create: if isGoogleUser() && request.resource.data.email_eleve.lower() == myEmail();
+      allow update, delete: if isTeacher();
+    }
+
+    // ---------- V1 + V2 : soumissions de devoirs ----------
+    function ownsSubmission(data) {
+      return (isGoogleUser() && data.get('email_eleve', '').lower() == myEmail())
+        || (signedIn() && data.get('uid_eleve', '') == request.auth.uid);
+    }
+
+    match /submissions/{subId} {
+      allow read: if isTeacher() || ownsSubmission(resource.data);
+
+      // Un élève ne peut créer qu'une copie à son nom, jamais déjà « publiée ».
+      allow create: if isTeacher()
+        || (ownsSubmission(request.resource.data)
+            && request.resource.data.get('status', '') != 'publie');
+
+      // L'élève ne peut mettre à jour que les compteurs d'autonomie / d'indices.
+      allow update: if isTeacher()
+        || (ownsSubmission(resource.data)
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['autonomie', 'indices_utilises', 'questions_libres']));
+
+      allow delete: if isTeacher();
+    }
+
+    // ---------- V1 : file d'envoi d'emails (extension Trigger Email) ----------
+    match /mail_queue/{mailId} {
+      // Un élève ne peut s'envoyer un email qu'à lui-même.
+      allow create: if isTeacher()
+        || (isGoogleUser() && request.resource.data.to.lower() == myEmail());
+      allow read, update, delete: if isTeacher();
+    }
+
+    // ---------- V2 : progression FMTTN (clé = classe_eleveId) ----------
+    match /progressions_v2/{docId} {
+      allow read: if isTeacher()
+        || (signedIn() && (resource == null || resource.data.get('uid', '') == request.auth.uid));
+
+      allow create: if isTeacher()
+        || (signedIn() && request.resource.data.uid == request.auth.uid);
+
+      // L'élève met à jour sa propre progression. Les anciens documents sans `uid`
+      // (créés avant ce correctif) sont rattachés à la session au 1er enregistrement :
+      // leur clé aléatoire n'est pas énumérable (lecture interdite aux autres).
+      allow update: if isTeacher()
+        || (signedIn()
+            && request.resource.data.uid == request.auth.uid
+            && (resource.data.get('uid', null) == request.auth.uid
+                || !('uid' in resource.data)));
+
+      allow delete: if isTeacher();
+    }
+
+    // ---------- Par défaut : enseignants uniquement ----------
     match /{document=**} {
       allow read, write: if isTeacher();
     }

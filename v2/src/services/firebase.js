@@ -121,7 +121,11 @@ export async function saveEleveProgression(classeId, eleveId, data) {
     const docKey = `${classeId}_${eleveId}`.replace(/[^a-zA-Z0-9_-]/g, '_');
     const docRef = doc(db, "progressions_v2", docKey);
     
+    if (!auth.currentUser) await initStudentSession();
+    if (!auth.currentUser) throw new Error("Aucune session Firebase");
+
     const payload = {
+      uid: auth.currentUser.uid,
       classe_id: classeId,
       classe: classeId,
       eleve_id: eleveId,
@@ -143,15 +147,9 @@ export async function saveEleveProgression(classeId, eleveId, data) {
 
     await setDoc(docRef, payload, { merge: true });
 
-    // Enregistrement miroir dans collection 'users' (compatibilité V1)
-    const userRef = doc(db, "users", eleveId);
-    await setDoc(userRef, {
-      nom: data.nom || "Élève",
-      classe: classeId,
-      xp: data.xp || 0,
-      status: "actif",
-      last_active: serverTimestamp()
-    }, { merge: true });
+    // Note : l'ancien miroir vers 'users' a été retiré (Phase 0 de la fusion).
+    // 'users' est indexé par email (V1) et réservé aux enseignants ; les élèves
+    // V2 sont déjà listés via 'progressions_v2' dans getRealClassStudents().
 
     console.log(`[Firestore] Progression synchronisée pour ${data.nom} (${classeId})`);
     return true;

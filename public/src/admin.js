@@ -18,9 +18,8 @@ export const ALLOWED_TEACHER_EMAILS = [
 export function isTeacherAllowed(email) {
     if (!email) return false;
     const clean = email.toLowerCase().trim();
-    return ALLOWED_TEACHER_EMAILS.some(e => e.toLowerCase() === clean) ||
-           clean.endsWith("@ecole.be") ||
-           clean.endsWith("@enseignement.be");
+    // Liste blanche stricte (synchronisée avec firestore.rules). Plus d'autorisation par domaine.
+    return ALLOWED_TEACHER_EMAILS.some(e => e.toLowerCase() === clean);
 }
 
 const ADMIN_EMAIL = "gatweb@gmail.com";

@@ -41,16 +41,10 @@ export function isTeacherEmailAllowed(email) {
   if (!email) return false;
   const cleanEmail = email.toLowerCase().trim();
   
-  // 1. Vérification dans la liste blanche explicite
-  const found = ALLOWED_TEACHERS.some(t => t.email.toLowerCase() === cleanEmail);
-  if (found) return true;
-  
-  // 2. Autorisation automatique des comptes académiques / école si applicable
-  if (cleanEmail.endsWith("@ecole.be") || cleanEmail.endsWith("@enseignement.be")) {
-    return true;
-  }
-  
-  return false;
+  // 1. Vérification dans la liste blanche explicite (synchronisée avec firestore.rules).
+  //    L'autorisation automatique par domaine (@ecole.be...) a été retirée : elle donnait
+  //    les droits enseignant à tout élève du même domaine. Phase 1 : collection `enseignants`.
+  return ALLOWED_TEACHERS.some(t => t.email.toLowerCase() === cleanEmail);
 }
 
 /**
