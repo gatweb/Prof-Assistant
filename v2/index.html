@@ -2212,6 +2212,13 @@
             class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
             <span>🧑‍🏫</span> Équipe Enseignante & Rôles
           </button>
+          <button 
+            @click="activeProfSubTab = 'classroom'; if (classroomConnected) chargerCoursClassroom();"
+            :class="activeProfSubTab === 'classroom' ? 'bg-indigo-600 text-white font-extrabold' : 'bg-slate-800/80 text-slate-400 hover:text-white'"
+            class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
+            <span>🏫</span> Google Classroom
+            <span x-show="classroomConnected" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          </button>
         </div>
       </div>
 
@@ -3082,6 +3089,330 @@
         </div>
       </div>
 
+      <!-- ============================================== -->
+      <!-- SOUS-ONGLET 5 : GOOGLE CLASSROOM (PHASE 4)     -->
+      <!-- ============================================== -->
+      <div x-show="activeProfSubTab === 'classroom'" class="space-y-6">
+        
+        <!-- ÉTAT 1 : NON CONNECTÉ -->
+        <div x-show="!classroomConnected" class="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200/80 shadow-xs text-center max-w-3xl mx-auto">
+          <div class="w-20 h-20 mx-auto mb-6 rounded-3xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-4xl shadow-xs border border-emerald-100">
+            🏫
+          </div>
+
+          <h3 class="text-2xl font-black text-slate-900 tracking-tight">Intégration Google Classroom</h3>
+          <p class="text-sm text-slate-500 mt-2 max-w-xl mx-auto leading-relaxed">
+            Connectez vos cours Google Classroom pour importer instantanément vos listes d'élèves, publier vos activités ProfAssistant en 1 clic et synchroniser les notes de devoirs.
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 my-8 text-left">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+              <div class="text-xl mb-1.5">👥</div>
+              <div class="text-xs font-black text-slate-900">Import des Élèves</div>
+              <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Récupérez automatiquement les noms et emails de vos élèves sans saisie manuelle.</p>
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+              <div class="text-xl mb-1.5">🚀</div>
+              <div class="text-xs font-black text-slate-900">Publication de Devoirs</div>
+              <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Publiez les missions interactives avec lien direct vers le workspace adapté.</p>
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+              <div class="text-xl mb-1.5">📤</div>
+              <div class="text-xs font-black text-slate-900">Remontée des Notes</div>
+              <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Après correction dans l'espace prof, renvoyez la note officielle en 1 clic.</p>
+            </div>
+          </div>
+
+          <div class="flex flex-col items-center gap-3">
+            <button 
+              @click="connecterGoogleClassroom()" 
+              :disabled="classroomLoading"
+              class="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl transition shadow-md hover:shadow-lg flex items-center justify-center gap-3 cursor-pointer">
+              <span x-show="classroomLoading" class="animate-spin text-base">⏳</span>
+              <span x-show="!classroomLoading" class="text-base">🏫</span>
+              <span x-text="classroomLoading ? 'Connexion en cours...' : 'Connecter mon compte Google Classroom'"></span>
+            </button>
+            <p class="text-[11px] text-slate-400">
+              Utilise les permissions OAuth standard pour Google Workspace for Education.
+            </p>
+          </div>
+        </div>
+
+        <!-- ÉTAT 2 : CONNECTÉ -->
+        <div x-show="classroomConnected" class="space-y-6">
+          
+          <!-- Barre d'état & sélecteur de cours Classroom -->
+          <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-bold shadow-xs border border-emerald-100">
+                🏫
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Connecté à Classroom
+                  </span>
+                  <span class="text-xs text-slate-400 font-bold" x-text="classroomCourses.length + ' cours actif(s)'"></span>
+                </div>
+                <div class="text-base font-black text-slate-900 mt-1" x-text="classroomSelectedCourse?.name || 'Sélectionnez un cours Classroom'"></div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <!-- Sélecteur de cours Classroom -->
+              <select 
+                x-model="classroomSelectedCourseId" 
+                @change="selectionnerCoursClassroom($event.target.value)"
+                class="px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600 cursor-pointer bg-slate-50">
+                <template x-for="c in classroomCourses" :key="c.id">
+                  <option :value="c.id" x-text="c.name + (c.section ? ' (' + c.section + ')' : '')"></option>
+                </template>
+              </select>
+
+              <button 
+                @click="chargerCoursClassroom()"
+                :disabled="classroomLoading"
+                class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer"
+                title="Rafraîchir les cours">
+                🔄
+              </button>
+
+              <button 
+                @click="deconnecterGoogleClassroom()"
+                class="px-3 py-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 rounded-xl text-xs font-bold transition cursor-pointer">
+                Déconnecter
+              </button>
+            </div>
+          </div>
+
+          <!-- Grille des 2 Volets : Import Élèves & Publication Devoirs -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- VOLET 1 : IMPORTATION DE CLASSES & ÉLÈVES -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+                  <div class="flex items-center gap-2.5">
+                    <span class="text-xl">👥</span>
+                    <div>
+                      <h4 class="font-black text-base text-slate-900">Importer les Élèves</h4>
+                      <p class="text-xs text-slate-400">Depuis le cours Classroom vers ProfAssistant</p>
+                    </div>
+                  </div>
+                  <span class="px-2.5 py-1 rounded-full text-xs font-black bg-indigo-50 text-indigo-700" x-text="classroomSelectedCourseStudents.length + ' élève(s)'"></span>
+                </div>
+
+                <!-- Notification succès import -->
+                <div x-show="classroomImportSuccessMsg" class="mb-4 p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 text-xs font-black flex items-center justify-between animate-fadeIn">
+                  <span x-text="classroomImportSuccessMsg"></span>
+                  <button @click="classroomImportSuccessMsg = ''" class="text-emerald-700 hover:text-emerald-900 text-base font-bold cursor-pointer">&times;</button>
+                </div>
+
+                <!-- Aperçu des élèves du cours Classroom -->
+                <div class="space-y-2 mb-6">
+                  <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Élèves trouvés dans Classroom :</div>
+                  
+                  <div x-show="classroomStudentsLoading" class="py-6 text-center text-slate-400 text-xs">
+                    <span class="animate-spin inline-block mr-1">⏳</span> Récupération du roster Classroom...
+                  </div>
+
+                  <div x-show="!classroomStudentsLoading && classroomSelectedCourseStudents.length > 0" class="max-h-48 overflow-y-auto space-y-1.5 pr-1 divide-y divide-slate-50">
+                    <template x-for="st in classroomSelectedCourseStudents" :key="st.userId">
+                      <div class="flex items-center justify-between py-1.5 px-2 hover:bg-slate-50 rounded-lg text-xs">
+                        <div class="font-extrabold text-slate-800" x-text="st.fullName"></div>
+                        <div class="text-[11px] text-slate-400 font-mono" x-text="st.email"></div>
+                      </div>
+                    </template>
+                  </div>
+
+                  <div x-show="!classroomStudentsLoading && classroomSelectedCourseStudents.length === 0" class="py-6 text-center text-slate-400 text-xs italic">
+                    Aucun élève inscrit dans ce cours Classroom pour le moment.
+                  </div>
+                </div>
+
+                <!-- Choix de la classe de destination -->
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3">
+                  <label class="block text-xs font-black text-slate-700">Classe de destination dans ProfAssistant :</label>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <span class="text-[10px] text-slate-400 font-bold block mb-1">Classe existante :</span>
+                      <select 
+                        x-model="classroomTargetClass"
+                        class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:outline-none focus:border-indigo-600">
+                        <template x-for="c in availableClasses" :key="c">
+                          <option :value="c" x-text="'Classe ' + c"></option>
+                        </template>
+                      </select>
+                    </div>
+
+                    <div>
+                      <span class="text-[10px] text-slate-400 font-bold block mb-1">Ou nouvelle classe :</span>
+                      <input 
+                        type="text" 
+                        x-model="classroomNewClassName" 
+                        placeholder="Ex: 3A, 4TQ..." 
+                        class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white uppercase focus:outline-none focus:border-indigo-600" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bouton d'action import -->
+              <div class="pt-6">
+                <button 
+                  @click="importerElevesClassroom(classroomTargetClass)"
+                  :disabled="classroomImportLoading || classroomSelectedCourseStudents.length === 0"
+                  class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl transition shadow-sm hover:shadow flex items-center justify-center gap-2 cursor-pointer">
+                  <span x-show="classroomImportLoading" class="animate-spin">⏳</span>
+                  <span x-show="!classroomImportLoading">📥</span>
+                  <span x-text="classroomImportLoading ? 'Importation en cours...' : 'Importer ' + classroomSelectedCourseStudents.length + ' élèves dans ProfAssistant'"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- VOLET 2 : PUBLICATION D'ACTIVITÉS EN DEVOIR -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+                  <div class="flex items-center gap-2.5">
+                    <span class="text-xl">🚀</span>
+                    <div>
+                      <h4 class="font-black text-base text-slate-900">Publier un Devoir</h4>
+                      <p class="text-xs text-slate-400">Créer un devoir dans Google Classroom avec lien direct</p>
+                    </div>
+                  </div>
+                  <span class="px-2.5 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-700" x-text="classroomCourseWorkList.length + ' devoir(s) en ligne'"></span>
+                </div>
+
+                <!-- Notification succès publication -->
+                <div x-show="classroomPublishSuccess" class="mb-4 p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 text-xs font-black flex items-center justify-between animate-fadeIn">
+                  <span x-text="classroomPublishSuccess"></span>
+                  <button @click="classroomPublishSuccess = ''" class="text-emerald-700 hover:text-emerald-900 text-base font-bold cursor-pointer">&times;</button>
+                </div>
+
+                <!-- Formulaire de Publication -->
+                <div class="space-y-4">
+                  <!-- Sélection rapide depuis les cours ProfAssistant -->
+                  <div>
+                    <label class="block text-xs font-black text-slate-700 mb-1">Pré-remplir depuis un cours ProfAssistant :</label>
+                    <select 
+                      @change="preparerDevoirClassroom($event.target.value)"
+                      class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:outline-none focus:border-emerald-600 cursor-pointer">
+                      <option value="">-- Choisir une activité du catalogue --</option>
+                      <template x-for="c in coursesList" :key="c.id">
+                        <option :value="c.id" x-text="c.icon + ' ' + c.title"></option>
+                      </template>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-black text-slate-700 mb-1">Titre du devoir dans Classroom :</label>
+                    <input 
+                      type="text" 
+                      x-model="classroomNewAssignment.title" 
+                      placeholder="Ex: [Web] Exercice 1 - Ma première page HTML" 
+                      class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-600" />
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-black text-slate-700 mb-1">Consignes / Description pour les élèves :</label>
+                    <textarea 
+                      rows="2" 
+                      x-model="classroomNewAssignment.description" 
+                      placeholder="Cliquez sur le lien ci-joint pour ouvrir votre espace de travail..."
+                      class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-emerald-600"></textarea>
+                  </div>
+
+                  <div class="flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-2">
+                      <label class="text-xs font-black text-slate-700">Barème :</label>
+                      <input 
+                        type="number" 
+                        min="10" 
+                        max="100" 
+                        step="5" 
+                        x-model="classroomNewAssignment.maxPoints" 
+                        class="w-20 px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-black text-center" />
+                      <span class="text-xs text-slate-400 font-bold">points</span>
+                    </div>
+
+                    <span class="text-[11px] text-slate-400 font-medium">Lien direct généré automatiquement 🔗</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bouton d'action publication -->
+              <div class="pt-6">
+                <button 
+                  @click="publierActiviteClassroom()"
+                  :disabled="classroomPublishLoading || !classroomNewAssignment.title.trim()"
+                  class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl transition shadow-sm hover:shadow flex items-center justify-center gap-2 cursor-pointer">
+                  <span x-show="classroomPublishLoading" class="animate-spin">⏳</span>
+                  <span x-show="!classroomPublishLoading">📤</span>
+                  <span x-text="classroomPublishLoading ? 'Publication dans Classroom...' : 'Publier ce devoir dans ' + (classroomSelectedCourse?.name || 'Classroom')"></span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Tableau des Devoirs Actifs du Cours Classroom -->
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+              <div>
+                <h4 class="font-black text-base text-slate-900">Devoirs Classroom du Cours</h4>
+                <p class="text-xs text-slate-400">Consultez les devoirs publiés et accédez directement aux copies dans Google Classroom.</p>
+              </div>
+
+              <span class="text-xs font-bold text-slate-500" x-text="classroomCourseWorkList.length + ' devoir(s)'"></span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse min-w-[600px]">
+                <thead>
+                  <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
+                    <th class="py-3 px-4">Titre du Devoir</th>
+                    <th class="py-3 px-4">Barème</th>
+                    <th class="py-3 px-4">Date de Création</th>
+                    <th class="py-3 px-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <template x-for="cw in classroomCourseWorkList" :key="cw.id">
+                    <tr class="hover:bg-slate-50/70 transition">
+                      <td class="py-3.5 px-4 font-black text-slate-900">
+                        <div x-text="cw.title"></div>
+                        <div class="text-[11px] text-slate-400 font-normal truncate max-w-md" x-text="cw.description"></div>
+                      </td>
+                      <td class="py-3.5 px-4 font-bold text-slate-700">
+                        <span class="px-2 py-0.5 rounded-full bg-slate-100" x-text="(cw.maxPoints || 100) + ' pts'"></span>
+                      </td>
+                      <td class="py-3.5 px-4 text-slate-500" x-text="cw.creationTime ? new Date(cw.creationTime).toLocaleDateString('fr-BE') : '—'"></td>
+                      <td class="py-3.5 px-4 text-right">
+                        <a 
+                          :href="cw.alternateLink || '#'" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-xl transition inline-flex items-center gap-1">
+                          <span>Ouvrir dans Classroom</span> ↗
+                        </a>
+                      </td>
+                    </tr>
+                  </template>
+                  <tr x-show="classroomCourseWorkList.length === 0">
+                    <td colspan="4" class="py-8 text-center text-slate-400 font-medium">
+                      Aucun devoir publié dans ce cours pour l'instant. Utilisez le formulaire ci-dessus pour publier votre premier devoir !
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
 
     <!-- ➕ MODALE INVITER/MODIFIER UN ENSEIGNANT (PHASE 1) -->
@@ -3514,6 +3845,39 @@
 
           <!-- Message de confirmation -->
           <div x-show="gradingFeedbackSuccess" x-text="gradingFeedbackSuccess" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-black text-center"></div>
+
+          <!-- Synchronisation Google Classroom (si connecté) -->
+          <div x-show="classroomConnected" class="p-3.5 bg-emerald-50/60 rounded-2xl border border-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <span class="text-base">🏫</span>
+              <div>
+                <div class="text-xs font-black text-emerald-950">Synchronisation Google Classroom</div>
+                <div class="text-[11px] text-emerald-700">Transmet la note validée de cet élève vers son devoir Classroom.</div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 flex-wrap">
+              <select 
+                x-model="classroomSelectedAssignmentForSync"
+                class="px-2.5 py-1.5 rounded-xl border border-emerald-200 bg-white text-xs font-bold text-slate-800 focus:outline-none">
+                <template x-for="cw in classroomCourseWorkList" :key="cw.id">
+                  <option :value="cw.id" x-text="cw.title"></option>
+                </template>
+              </select>
+
+              <button 
+                type="button"
+                @click="synchroniserNoteVersClassroom(selectedSubmission, gradingNote)"
+                :disabled="classroomSyncGradeLoading || !classroomSelectedAssignmentForSync"
+                class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0">
+                <span x-show="classroomSyncGradeLoading" class="animate-spin">⏳</span>
+                <span x-show="!classroomSyncGradeLoading">📤</span>
+                <span>Envoyer note</span>
+              </button>
+            </div>
+          </div>
+
+          <div x-show="classroomSyncGradeFeedback" x-text="classroomSyncGradeFeedback" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-black text-center animate-fadeIn"></div>
         </div>
 
       </div>
