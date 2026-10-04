@@ -707,3 +707,280 @@ exports.listerModelesGemini = onCall({
         throw new HttpsError("internal", error.message || "Impossible de lister les modèles.");
     }
 });
+
+// =====================================================================
+// GESTION MULTI-ENSEIGNANTS & RÔLES CENTRALISÉS (PHASE 1)
+// =====================================================================
+
+const SUPER_ADMIN_EMAIL = "gatweb@gmail.com";
+
+/**
+ * Vérifie si l'appelant a les privilèges d'administrateur
+ */
+async function checkCallerIsAdmin(request) {
+    if (!request.auth || !request.auth.token) return false;
+    const email = (request.auth.token.email || "").toLowerCase().trim();
+    if (email === SUPER_ADMIN_EMAIL) return true;
+    if (request.auth.token.role === 'admin' || request.auth.token.admin === true) return true;
+
+    // Vérification dans Firestore en cas de claims pas encore rafraîchis
+    const docSnap = await admin.firestore().collection("enseignants").doc(email).get();
+    if (docSnap.exists) {
+        const data = docSnap.data();
+        return data.role === 'admin' && data.actif !== false;
+    }
+    return false;
+}
+
+/**
+ * Vérifie si l'appelant est un enseignant autorisé
+ */
+async function checkCallerIsTeacher(request) {
+    if (!request.auth || !request.auth.token) return false;
+    const email = (request.auth.token.email || "").toLowerCase().trim();
+    if (email === SUPER_ADMIN_EMAIL) return true;
+    if (['enseignant', 'admin'].includes(request.auth.token.role) || request.auth.token.admin === true) return true;
+
+    const docSnap = await admin.firestore().collection("enseignants").doc(email).get();
+    return docSnap.exists && docSnap.data().actif !== false;
+}
+
+/**
+ * `synchroniserProfilEnseignant`
+ * Appelé à la connexion Google d'un enseignant.
+ * Pose les Custom Claims Firebase Auth et synchronise les métadonnées.
+ */
+exports.synchroniserProfilEnseignant = onCall({
+    region: "europe-west1",
+    cors: true
+}, async (request) => {
+    if (!request.auth || !request.auth.token.email) {
+        throw new HttpsError("unauthenticated", "Connexion Google requise.");
+    }
+
+    const email = request.auth.token.email.toLowerCase().trim();
+    const uid = request.auth.uid;
+    const name = request.auth.token.name || email.split('@')[0];
+
+    const enseignantsRef = admin.firestore().collection("enseignants");
+    const teacherDoc = await enseignantsRef.doc(email).get();
+
+    // 1. Cas particulier : Super-Administrateur fondateur
+    if (email === SUPER_ADMIN_EMAIL) {
+        const adminProfile = {
+            email: SUPER_ADMIN_EMAIL,
+            nom: name || "Professeur Administrateur",
+            role: "admin",
+            classes: ["all", "1A", "1B", "1C", "1D", "1E", "3GB", "3CB", "4e"],
+            cours: ["all"],
+            actif: true,
+            updated_at: admin.firestore.FieldValue.serverTimestamp(),
+            last_login: admin.firestore.FieldValue.serverTimestamp()
+        };
+
+        if (!teacherDoc.exists) {
+            adminProfile.created_at = admin.firestore.FieldValue.serverTimestamp();
+            await enseignantsRef.doc(email).set(adminProfile);
+        } else {
+            await enseignantsRef.doc(email).update({
+                role: "admin",
+                actif: true,
+                last_login: admin.firestore.FieldValue.serverTimestamp()
+            });
+        }
+
+        // Poser les custom claims admin
+        await admin.auth().setCustomUserClaims(uid, {
+            role: "admin",
+            admin: true
+        });
+
+        return {
+            isTeacher: true,
+            role: "admin",
+            profile: { ...adminProfile, email }
+        };
+    }
+
+    // 2. Enseignant existant dans la collection
+    if (teacherDoc.exists) {
+        const data = teacherDoc.data();
+
+        if (data.actif === false) {
+            // Révoquer les claims si désactivé
+            await admin.auth().setCustomUserClaims(uid, { role: null, admin: false });
+            return {
+                isTeacher: false,
+                reason: "disabled",
+                message: "Votre compte enseignant a été désactivé par un administrateur."
+            };
+        }
+
+        const role = data.role === "admin" ? "admin" : "enseignant";
+        await admin.auth().setCustomUserClaims(uid, {
+            role: role,
+            admin: role === "admin"
+        });
+
+        await enseignantsRef.doc(email).update({
+            last_login: admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        return {
+            isTeacher: true,
+            role: role,
+            profile: { ...data, email }
+        };
+    }
+
+    // 3. Utilisateur non autorisé
+    await admin.auth().setCustomUserClaims(uid, { role: null, admin: false });
+    return {
+        isTeacher: false,
+        reason: "not_registered",
+        message: "Cette adresse email n'est pas enregistrée dans l'équipe enseignante."
+    };
+});
+
+/**
+ * `listerEnseignants`
+ * Retourne la liste des enseignants enregistrés (réservé aux enseignants/admins).
+ */
+exports.listerEnseignants = onCall({
+    region: "europe-west1",
+    cors: true
+}, async (request) => {
+    const isTeacher = await checkCallerIsTeacher(request);
+    if (!isTeacher) {
+        throw new HttpsError("permission-denied", "Accès réservé aux enseignants.");
+    }
+
+    try {
+        const snap = await admin.firestore().collection("enseignants").get();
+        const list = [];
+        snap.forEach(docSnap => {
+            list.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        list.sort((a, b) => (a.nom || a.email).localeCompare(b.nom || b.email));
+        return { success: true, teachers: list };
+    } catch (err) {
+        console.error("[listerEnseignants] Erreur:", err);
+        throw new HttpsError("internal", err.message);
+    }
+});
+
+/**
+ * `enregistrerEnseignant`
+ * Crée ou modifie un enseignant (réservé aux administrateurs).
+ */
+exports.enregistrerEnseignant = onCall({
+    region: "europe-west1",
+    cors: true
+}, async (request) => {
+    const isAdmin = await checkCallerIsAdmin(request);
+    if (!isAdmin) {
+        throw new HttpsError("permission-denied", "Action réservée aux administrateurs.");
+    }
+
+    const { email, nom, role, classes, cours, actif } = request.data || {};
+    if (!email || typeof email !== 'string') {
+        throw new HttpsError("invalid-argument", "Email requis.");
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+    const cleanRole = role === "admin" ? "admin" : "enseignant";
+    const cleanClasses = Array.isArray(classes) && classes.length > 0 ? classes : ["all"];
+    const cleanCours = Array.isArray(cours) && cours.length > 0 ? cours : ["all"];
+    const isActif = actif !== false;
+
+    try {
+        const docRef = admin.firestore().collection("enseignants").doc(cleanEmail);
+        const existing = await docRef.get();
+
+        const payload = {
+            email: cleanEmail,
+            nom: (nom || cleanEmail.split('@')[0]).trim(),
+            role: cleanRole,
+            classes: cleanClasses,
+            cours: cleanCours,
+            actif: isActif,
+            updated_at: admin.firestore.FieldValue.serverTimestamp()
+        };
+
+        if (!existing.exists) {
+            payload.created_at = admin.firestore.FieldValue.serverTimestamp();
+            await docRef.set(payload);
+        } else {
+            // Empêcher de rétrograder le super admin
+            if (cleanEmail === SUPER_ADMIN_EMAIL) {
+                payload.role = "admin";
+                payload.actif = true;
+            }
+            await docRef.update(payload);
+        }
+
+        // Tenter d'appliquer les custom claims directement si l'utilisateur Firebase Auth existe déjà
+        try {
+            const userRecord = await admin.auth().getUserByEmail(cleanEmail);
+            if (userRecord) {
+                await admin.auth().setCustomUserClaims(userRecord.uid, {
+                    role: isActif ? cleanRole : null,
+                    admin: isActif && cleanRole === "admin"
+                });
+            }
+        } catch (authErr) {
+            // L'utilisateur ne s'est peut-être pas encore connecté pour la 1re fois, c'est normal
+            console.log(`[enregistrerEnseignant] Utilisateur Auth pas encore créé pour ${cleanEmail}: ${authErr.message}`);
+        }
+
+        return { success: true, teacher: payload };
+    } catch (err) {
+        console.error("[enregistrerEnseignant] Erreur:", err);
+        throw new HttpsError("internal", err.message);
+    }
+});
+
+/**
+ * `supprimerEnseignant`
+ * Supprime un enseignant (réservé aux administrateurs).
+ */
+exports.supprimerEnseignant = onCall({
+    region: "europe-west1",
+    cors: true
+}, async (request) => {
+    const isAdmin = await checkCallerIsAdmin(request);
+    if (!isAdmin) {
+        throw new HttpsError("permission-denied", "Action réservée aux administrateurs.");
+    }
+
+    const { email } = request.data || {};
+    if (!email) throw new HttpsError("invalid-argument", "Email requis.");
+
+    const cleanEmail = email.toLowerCase().trim();
+    if (cleanEmail === SUPER_ADMIN_EMAIL) {
+        throw new HttpsError("failed-precondition", "Impossible de supprimer l'administrateur principal.");
+    }
+
+    try {
+        await admin.firestore().collection("enseignants").doc(cleanEmail).delete();
+
+        // Révoquer les custom claims
+        try {
+            const userRecord = await admin.auth().getUserByEmail(cleanEmail);
+            if (userRecord) {
+                await admin.auth().setCustomUserClaims(userRecord.uid, {
+                    role: null,
+                    admin: false
+                });
+            }
+        } catch (authErr) {
+            console.log(`[supprimerEnseignant] User Auth non trouvé (${authErr.message})`);
+        }
+
+        return { success: true };
+    } catch (err) {
+        console.error("[supprimerEnseignant] Erreur:", err);
+        throw new HttpsError("internal", err.message);
+    }
+});
+

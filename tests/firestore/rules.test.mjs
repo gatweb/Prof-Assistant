@@ -47,6 +47,18 @@ beforeEach(async () => {
     await setDoc(doc(db, 'users_progress/alice@eleve.be_bureautique-3e'), { email: 'alice@eleve.be', completedChapters: [] });
     await setDoc(doc(db, 'progressions_v2/1A_el_owned'), { uid: 'anon-1', classe_id: '1A', eleve_id: 'el_owned', xp: 10 });
     await setDoc(doc(db, 'progressions_v2/1A_el_legacy'), { classe_id: '1A', eleve_id: 'el_legacy', xp: 5 });
+    await setDoc(doc(db, 'enseignants/prof_dynamique@ecole.be'), {
+      email: 'prof_dynamique@ecole.be',
+      nom: 'Prof Dynamique',
+      role: 'enseignant',
+      actif: true
+    });
+    await setDoc(doc(db, 'enseignants/prof_desactive@ecole.be'), {
+      email: 'prof_desactive@ecole.be',
+      nom: 'Prof Désactivé',
+      role: 'enseignant',
+      actif: false
+    });
   });
 });
 
@@ -171,3 +183,31 @@ test('Enseignant via custom claim role', async () => {
   const db = env.authenticatedContext('p2', { email: 'x@y.be', email_verified: true, role: 'enseignant', firebase: { sign_in_provider: 'google.com' } }).firestore();
   await assertSucceeds(getDocs(collection(db, 'users')));
 });
+
+test('Enseignant dynamique via collection enseignants (sans claim préalable)', async () => {
+  const db = env.authenticatedContext('dyn', google('prof_dynamique@ecole.be')).firestore();
+  await assertSucceeds(getDocs(collection(db, 'users')));
+  await assertSucceeds(getDoc(doc(db, 'enseignants/prof_dynamique@ecole.be')));
+});
+
+test('Enseignant désactivé dans la collection : accès refusé', async () => {
+  const db = env.authenticatedContext('des', google('prof_desactive@ecole.be')).firestore();
+  await assertFails(getDocs(collection(db, 'users')));
+});
+
+test('Enseignant non-admin : lecture des enseignants autorisée, écriture refusée', async () => {
+  const db = env.authenticatedContext('dyn', google('prof_dynamique@ecole.be')).firestore();
+  await assertSucceeds(getDoc(doc(db, 'enseignants/gatweb@gmail.com')));
+  await assertFails(setDoc(doc(db, 'enseignants/hacker@ecole.be'), { role: 'admin' }));
+});
+
+test('Administrateur (gatweb@gmail.com ou claim admin) : écriture sur enseignants autorisée', async () => {
+  const db = prof();
+  await assertSucceeds(setDoc(doc(db, 'enseignants/nouveau_collegue@ecole.be'), {
+    email: 'nouveau_collegue@ecole.be',
+    nom: 'Nouveau',
+    role: 'enseignant',
+    actif: true
+  }));
+});
+

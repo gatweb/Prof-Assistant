@@ -1608,6 +1608,12 @@
             class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
             <span>📽️</span> Supports de Cours & NotebookLM
           </button>
+          <button 
+            @click="activeProfSubTab = 'equipe'; chargerEquipeEnseignants()"
+            :class="activeProfSubTab === 'equipe' ? 'bg-indigo-600 text-white font-extrabold' : 'bg-slate-800/80 text-slate-400 hover:text-white'"
+            class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
+            <span>🧑‍🏫</span> Équipe Enseignante & Rôles
+          </button>
         </div>
       </div>
 
@@ -1972,6 +1978,204 @@
 
       </div>
 
+      <!-- ============================================== -->
+      <!-- SOUS-ONGLET 4 : ÉQUIPE ENSEIGNANTE & RÔLES     -->
+      <!-- ============================================== -->
+      <div x-show="activeProfSubTab === 'equipe'" class="space-y-6">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100 mb-6">
+            <div>
+              <h3 class="font-black text-base text-slate-900 flex items-center gap-2">
+                <span>🧑‍🏫</span> Équipe Enseignante & Droits d'Accès
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">Gérez les professeurs autorisés, attribuez les rôles (Admin / Enseignant) et filtrez les classes assignées.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button 
+                x-show="teacherAuth.isAdmin || teacherAuth.user?.email === 'gatweb@gmail.com'"
+                @click="ouvrirModalEnseignant(false)"
+                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition flex items-center gap-2 shadow-sm cursor-pointer">
+                <span>➕</span> Inviter un enseignant
+              </button>
+              <button 
+                @click="chargerEquipeEnseignants()"
+                class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition cursor-pointer">
+                🔄
+              </button>
+            </div>
+          </div>
+
+          <!-- Recherche -->
+          <div class="mb-4">
+            <input 
+              type="text" 
+              x-model="searchTeacherQuery" 
+              placeholder="🔍 Rechercher un collègue (nom, email, rôle)..." 
+              class="w-full sm:w-80 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white" />
+          </div>
+
+          <!-- Tableau -->
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase font-black tracking-wider">
+                <tr>
+                  <th class="py-3 px-4">Enseignant</th>
+                  <th class="py-3 px-4">Email</th>
+                  <th class="py-3 px-4">Rôle</th>
+                  <th class="py-3 px-4">Classes</th>
+                  <th class="py-3 px-4">Statut</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <template x-if="teachersLoading">
+                  <tr>
+                    <td colspan="6" class="py-8 text-center text-slate-400 font-medium">Chargement de l'équipe...</td>
+                  </tr>
+                </template>
+                <template x-if="!teachersLoading && teachersList.length === 0">
+                  <tr>
+                    <td colspan="6" class="py-8 text-center text-slate-400 font-medium">Aucun enseignant configuré.</td>
+                  </tr>
+                </template>
+                <template x-for="t in teachersList.filter(t => !searchTeacherQuery || (t.nom||'').toLowerCase().includes(searchTeacherQuery.toLowerCase()) || (t.email||'').toLowerCase().includes(searchTeacherQuery.toLowerCase()))" :key="t.email">
+                  <tr class="hover:bg-slate-50/80 transition">
+                    <td class="py-3 px-4 font-bold text-slate-900 flex items-center gap-1.5">
+                      <span x-text="t.nom || t.email.split('@')[0]"></span>
+                      <template x-if="t.email === 'gatweb@gmail.com'">
+                        <span title="Administrateur principal" class="text-amber-500">⭐</span>
+                      </template>
+                    </td>
+                    <td class="py-3 px-4 font-mono text-slate-600" x-text="t.email"></td>
+                    <td class="py-3 px-4">
+                      <span 
+                        :class="t.role === 'admin' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-indigo-100 text-indigo-800 border-indigo-200'"
+                        class="px-2 py-0.5 rounded-full font-extrabold text-[11px] border"
+                        x-text="t.role === 'admin' ? '👑 Admin' : '🎓 Enseignant'">
+                      </span>
+                    </td>
+                    <td class="py-3 px-4">
+                      <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium" x-text="Array.isArray(t.classes) ? t.classes.join(', ') : (t.classes || 'all')"></span>
+                    </td>
+                    <td class="py-3 px-4">
+                      <span 
+                        :class="t.actif !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+                        class="px-2 py-0.5 rounded-full font-bold text-[11px]"
+                        x-text="t.actif !== false ? '✅ Actif' : '🚫 Inactif'">
+                      </span>
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                      <div class="flex items-center justify-end gap-1.5" x-show="teacherAuth.isAdmin || teacherAuth.user?.email === 'gatweb@gmail.com'">
+                        <button 
+                          @click="ouvrirModalEnseignant(true, t)"
+                          class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition text-[11px] cursor-pointer">
+                          ✏️
+                        </button>
+                        <template x-if="t.email !== 'gatweb@gmail.com'">
+                          <div class="flex items-center gap-1">
+                            <button 
+                              @click="basculerStatutEnseignant(t, t.actif === false)"
+                              :class="t.actif !== false ? 'text-amber-600 hover:bg-amber-50' : 'text-emerald-600 hover:bg-emerald-50'"
+                              class="px-2 py-1 rounded-lg border border-slate-200 font-bold transition text-[11px] cursor-pointer"
+                              :title="t.actif !== false ? 'Désactiver' : 'Activer'">
+                              <span x-text="t.actif !== false ? '⏸️' : '▶️'"></span>
+                            </button>
+                            <button 
+                              @click="supprimerEnseignantModal(t.email)"
+                              class="px-2 py-1 rounded-lg hover:bg-rose-50 text-rose-600 border border-slate-200 font-bold transition text-[11px] cursor-pointer"
+                              title="Retirer">
+                              🗑️
+                            </button>
+                          </div>
+                        </template>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ➕ MODALE INVITER/MODIFIER UN ENSEIGNANT (PHASE 1) -->
+    <div 
+      x-show="modalAddTeacherOpen" 
+      x-transition.opacity 
+      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
+      style="display: none;">
+      <div 
+        @click.away="fermerModalEnseignant()"
+        class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative animate-scaleUp">
+        <h3 class="text-base font-black text-slate-900 mb-1" x-text="isEditingTeacher ? '✏️ Modifier un Enseignant' : '➕ Inviter un Enseignant'"></h3>
+        <p class="text-xs text-slate-500 mb-5">Définissez l'adresse Google et le rôle de l'enseignant.</p>
+
+        <form @submit.prevent="enregistrerEnseignantForm()" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Email Google :</label>
+            <input 
+              type="email" 
+              x-model="teacherFormData.email" 
+              :disabled="isEditingTeacher"
+              required 
+              placeholder="collegue@ecole.be" 
+              class="w-full bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-600 font-mono disabled:opacity-60 disabled:bg-slate-100" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Nom d'affichage :</label>
+            <input 
+              type="text" 
+              x-model="teacherFormData.nom" 
+              placeholder="Ex: M. Dupont" 
+              class="w-full bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-600" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Rôle :</label>
+            <select 
+              x-model="teacherFormData.role" 
+              class="w-full bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-600 font-bold">
+              <option value="enseignant">Enseignant</option>
+              <option value="admin">Administrateur</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Classes assignées (séparées par virgules, ou 'all') :</label>
+            <input 
+              type="text" 
+              x-model="teacherFormData.classes" 
+              placeholder="1A, 1B, 1C ou all" 
+              class="w-full bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-600" />
+          </div>
+
+          <div class="flex items-center gap-2 pt-1">
+            <input 
+              type="checkbox" 
+              id="v2TeacherActif" 
+              x-model="teacherFormData.actif" 
+              class="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer" />
+            <label for="v2TeacherActif" class="text-xs font-bold text-slate-700 cursor-pointer">Compte actif (autorisé)</label>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+            <button 
+              type="button" 
+              @click="fermerModalEnseignant()" 
+              class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer">
+              Annuler
+            </button>
+            <button 
+              type="submit" 
+              class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl transition shadow-md cursor-pointer">
+              Enregistrer
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- ➕ MODALE INSCRIRE UN ÉLÈVE (SYSTÈME V1) -->

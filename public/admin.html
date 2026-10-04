@@ -27,6 +27,7 @@
                 <button class="tab-link active" data-target="listView">📥 Flux de corrections</button>
                 <button class="tab-link" data-target="progressionView">📊 Suivi de progression</button>
                 <button class="tab-link" data-target="usersView">👥 Élèves & Classes</button>
+                <button class="tab-link" data-target="teachersView">🧑‍🏫 Équipe Enseignante</button>
                 <button class="tab-link" data-target="quizView">📝 Générateur de Quiz</button>
                 <button class="tab-link" data-target="configView">⚙️ Configuration</button>
             </div>
@@ -217,6 +218,87 @@
             </table>
         </div>
     </main>
+
+    <!-- Vue principale 4 : Équipe Enseignante & Gestion des Rôles -->
+    <main id="teachersView" class="admin-container hidden">
+        <div class="header-actions">
+            <div>
+                <h2>🧑‍🏫 Équipe Enseignante & Droits d'Accès</h2>
+                <p class="subtitle">Gérez les comptes enseignants autorisés, leurs rôles (Admin / Enseignant) et leurs classes assignées.</p>
+            </div>
+            <button id="addTeacherBtn" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px;">
+                <span>➕</span> Inviter un enseignant
+            </button>
+        </div>
+
+        <div class="md-card mt-16 p-16" style="background: #ffffff; border-radius: 12px; display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 250px;">
+                <input type="text" id="filterTeacherSearch" class="md-input" placeholder="🔍 Rechercher un collègue (nom, email, rôle)..." style="width: 100%; padding: 10px 14px; font-size: 13px;">
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span id="teacherCountBadge" class="badge" style="background: #e0f2fe; color: #0369a1; padding: 6px 12px; font-size: 13px;">0 enseignant(s)</span>
+                <button id="refreshTeachersBtn" class="btn-secondary" style="padding: 10px 16px; font-size: 13px;">🔄 Rafraîchir</button>
+            </div>
+        </div>
+
+        <div class="md-card mt-16 p-0" style="overflow-x: auto; border-radius: 12px;">
+            <table class="admin-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; text-align: left; font-size: 13px; color: #475569;">
+                        <th style="padding: 12px 16px;">Enseignant</th>
+                        <th style="padding: 12px 16px;">Email Google</th>
+                        <th style="padding: 12px 16px;">Rôle</th>
+                        <th style="padding: 12px 16px;">Classes Assignées</th>
+                        <th style="padding: 12px 16px;">Statut</th>
+                        <th style="padding: 12px 16px; text-align: right; min-width: 180px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="teachersTableBody">
+                    <tr><td colspan="6" style="text-align: center; padding: 24px; color: #64748b;">Chargement de l'équipe enseignante...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal Ajout / Édition Enseignant -->
+        <div id="teacherModal" class="modal-overlay hidden" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 16px;">
+            <div class="md-card" style="background: white; max-width: 480px; width: 100%; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; padding: 0;">
+                <div style="padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 id="teacherModalTitle" style="margin: 0; font-size: 18px; color: #0f172a;">➕ Ajouter un Enseignant</h3>
+                    <button id="closeTeacherModalBtn" style="border: none; background: none; font-size: 20px; cursor: pointer; color: #64748b;">✕</button>
+                </div>
+                <form id="teacherForm" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Adresse Email Google (obligatoire) :</label>
+                        <input type="email" id="teacherEmailInput" class="md-input" placeholder="collegue@ecole.be ou collegue@gmail.com" required style="width: 100%; padding: 10px 14px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Nom d'affichage :</label>
+                        <input type="text" id="teacherNomInput" class="md-input" placeholder="Ex: M. Dupont" style="width: 100%; padding: 10px 14px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Rôle dans l'application :</label>
+                        <select id="teacherRoleSelect" class="md-input" style="width: 100%; padding: 10px 14px;">
+                            <option value="enseignant" selected>Enseignant (Accès aux copies, progressions et créations de quiz)</option>
+                            <option value="admin">Administrateur (Gestion de l'équipe, configuration globale)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">Classes assignées (séparées par des virgules, ou "all") :</label>
+                        <input type="text" id="teacherClassesInput" class="md-input" value="all" placeholder="Ex: 1A, 1B, 3GB ou all" style="width: 100%; padding: 10px 14px;">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="teacherActifCheckbox" checked style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer;">
+                        <label for="teacherActifCheckbox" style="font-size: 13px; font-weight: 500; color: #334155; cursor: pointer;">Compte actif (autorisé à se connecter)</label>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
+                        <button type="button" id="cancelTeacherModalBtn" class="btn-secondary">Annuler</button>
+                        <button type="submit" id="saveTeacherBtn" class="btn-primary">Enregistrer l'enseignant</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
 
     <!-- Vue principale : Générateur de Quiz Google Forms -->
     <main id="quizView" class="admin-container hidden">

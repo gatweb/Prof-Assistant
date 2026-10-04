@@ -30,18 +30,28 @@ service cloud.firestore {
       return request.auth.token.email.lower();
     }
 
-    // Liste blanche TEMPORAIRE : sera remplacée en Phase 1 par la collection
-    // `enseignants` + custom claim `role` posé par une Cloud Function.
-    // ⚠️ Garder synchronisé avec public/src/admin.js et v2/src/services/teachers-config.js
     function isTeacher() {
       return signedIn() && (
         request.auth.token.get('role', '') in ['enseignant', 'admin'] ||
         request.auth.token.get('admin', false) == true ||
-        (isGoogleUser() && myEmail() in [
-          'gatweb@gmail.com',
-          'collegue1@ecole.be',
-          'collegue2@ecole.be'
-        ])
+        (isGoogleUser() && (
+          myEmail() == 'gatweb@gmail.com' ||
+          (exists(/databases/$(database)/documents/enseignants/$(myEmail())) &&
+           get(/databases/$(database)/documents/enseignants/$(myEmail())).data.get('actif', true) == true)
+        ))
+      );
+    }
+
+    function isAdmin() {
+      return signedIn() && (
+        request.auth.token.get('role', '') == 'admin' ||
+        request.auth.token.get('admin', false) == true ||
+        (isGoogleUser() && (
+          myEmail() == 'gatweb@gmail.com' ||
+          (exists(/databases/$(database)/documents/enseignants/$(myEmail())) &&
+           get(/databases/$(database)/documents/enseignants/$(myEmail())).data.get('role', '') == 'admin' &&
+           get(/databases/$(database)/documents/enseignants/$(myEmail())).data.get('actif', true) == true)
+        ))
       );
     }
 
@@ -71,9 +81,10 @@ service cloud.firestore {
       allow write: if isTeacher();
     }
 
-    // ---------- Annuaires (enseignants uniquement) ----------
+    // ---------- Annuaires ----------
     match /enseignants/{profId} {
-      allow read, write: if isTeacher();
+      allow read: if isTeacher();
+      allow write: if isAdmin();
     }
 
     match /users/{userId} {
@@ -163,9 +174,10 @@ service cloud.firestore {
       allow delete: if isTeacher();
     }
 
-    // ---------- Par défaut : enseignants uniquement ----------
+    // ---------- Par défaut : administrateurs pour l'écriture ----------
     match /{document=**} {
-      allow read, write: if isTeacher();
+      allow read: if isTeacher();
+      allow write: if isAdmin();
     }
   }
 }

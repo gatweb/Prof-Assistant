@@ -24,9 +24,10 @@ export function isTeacherAllowed(email) {
 
 const ADMIN_EMAIL = "gatweb@gmail.com";
 let currentAdminUser = null;
+let currentAdminProfile = null;
 
 // Écoute de l'état asynchrone (s'exécute au chargement)
-listenToAuthStatus((user) => {
+listenToAuthStatus(async (user) => {
     const isDemoMode = window.location.search.includes("demo=true");
     if (!user && isDemoMode) {
         user = { email: ADMIN_EMAIL, displayName: "Professeur Admin (Démo)", uid: "demo-admin-123" };
@@ -37,20 +38,48 @@ listenToAuthStatus((user) => {
         return;
     }
     
-    // FILTRE DE SÉCURITÉ PRÉSENTATION (Multi-professeurs)
-    if (!isTeacherAllowed(user.email)) {
-        alert("Accès refusé. \nVotre adresse (" + user.email + ") n'est pas encore autorisée sur ce tableau de bord professeur.\nContactez l'administrateur pour être ajouté à la liste blanche.");
-        window.location.href = "workspace-html.html";
-        return;
-    }
+    try {
+        // Synchronisation du profil enseignant et récupération des Custom Claims
+        const syncFn = httpsCallable(functions, "synchroniserProfilEnseignant");
+        const res = await syncFn();
+        const data = res.data || {};
 
-    currentAdminUser = user;
-    
-    const emailEl = document.getElementById('userEmail');
-    if(emailEl) emailEl.textContent = user.email;
-    
-    // Démarrage de l'app Admin
-    loadSubmissionsList();
+        if (!data.isTeacher) {
+            alert("Accès refusé.\n" + (data.message || "Votre compte n'est pas autorisé sur ce tableau de bord professeur."));
+            window.location.href = "workspace-html.html";
+            return;
+        }
+
+        // Rafraîchir le token pour obtenir immédiatement les claims Firestore
+        await user.getIdToken(true);
+        currentAdminUser = user;
+        currentAdminProfile = data.profile || { email: user.email, role: data.role || "enseignant" };
+
+        const emailEl = document.getElementById('userEmail');
+        if (emailEl) {
+            const roleBadge = currentAdminProfile.role === 'admin' ? ' 👑 (Admin)' : ' 🎓 (Enseignant)';
+            emailEl.textContent = (user.email || "") + roleBadge;
+        }
+
+        // Masquer le bouton d'ajout d'enseignant si l'utilisateur n'est pas admin
+        const addTeacherBtn = document.getElementById('addTeacherBtn');
+        if (addTeacherBtn && currentAdminProfile.role !== 'admin' && user.email !== ADMIN_EMAIL) {
+            addTeacherBtn.style.display = 'none';
+        }
+
+        loadSubmissionsList();
+    } catch (err) {
+        console.warn("[AdminAuth] Erreur Cloud Function, fallback local :", err);
+        if (isTeacherAllowed(user.email)) {
+            currentAdminUser = user;
+            const emailEl = document.getElementById('userEmail');
+            if (emailEl) emailEl.textContent = user.email;
+            loadSubmissionsList();
+        } else {
+            alert("Erreur d'authentification enseignant : " + err.message);
+            window.location.href = "workspace-html.html";
+        }
+    }
 });
 
 const logoutBtn = document.getElementById('logoutBtn');
@@ -1415,5 +1444,249 @@ if (refreshUsersBtn) {
 
 // Exposer globalement pour l'activation d'onglet
 window.loadUsersManagement = loadUsersData;
+
+// ============================================
+// 10. GESTION DE L'ÉQUIPE ENSEIGNANTE (PHASE 1)
+// ============================================
+let allLoadedTeachers = [];
+const teachersTableBody = document.getElementById('teachersTableBody');
+const filterTeacherSearch = document.getElementById('filterTeacherSearch');
+const teacherCountBadge = document.getElementById('teacherCountBadge');
+const refreshTeachersBtn = document.getElementById('refreshTeachersBtn');
+const addTeacherBtn = document.getElementById('addTeacherBtn');
+
+const teacherModal = document.getElementById('teacherModal');
+const teacherModalTitle = document.getElementById('teacherModalTitle');
+const closeTeacherModalBtn = document.getElementById('closeTeacherModalBtn');
+const cancelTeacherModalBtn = document.getElementById('cancelTeacherModalBtn');
+const teacherForm = document.getElementById('teacherForm');
+
+const teacherEmailInput = document.getElementById('teacherEmailInput');
+const teacherNomInput = document.getElementById('teacherNomInput');
+const teacherRoleSelect = document.getElementById('teacherRoleSelect');
+const teacherClassesInput = document.getElementById('teacherClassesInput');
+const teacherActifCheckbox = document.getElementById('teacherActifCheckbox');
+
+let editingTeacherEmail = null;
+
+async function loadTeachersData() {
+    if (!teachersTableBody) return;
+    teachersTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 24px; color: #64748b;">Chargement sécurisé de l\'équipe...</td></tr>';
+
+    try {
+        // Tente via Cloud Function
+        let teachers = [];
+        try {
+            const listFn = httpsCallable(functions, "listerEnseignants");
+            const res = await listFn();
+            teachers = res.data?.teachers || [];
+        } catch (fnErr) {
+            console.warn("[Teachers] Fallback lecture directe Firestore:", fnErr);
+            const snap = await getDocs(collection(db, "enseignants"));
+            snap.forEach(d => teachers.push({ id: d.id, ...d.data() }));
+        }
+
+        allLoadedTeachers = teachers;
+        renderTeachersTable();
+    } catch (err) {
+        console.error("Erreur chargement équipe :", err);
+        teachersTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: #ef4444;">Erreur lors du chargement : ${escapeHtml(err.message)}</td></tr>`;
+    }
+}
+
+function renderTeachersTable() {
+    if (!teachersTableBody) return;
+
+    const query = (filterTeacherSearch?.value || '').toLowerCase().trim();
+    const filtered = allLoadedTeachers.filter(t => {
+        const email = (t.email || '').toLowerCase();
+        const nom = (t.nom || '').toLowerCase();
+        const role = (t.role || '').toLowerCase();
+        return !query || email.includes(query) || nom.includes(query) || role.includes(query);
+    });
+
+    if (teacherCountBadge) {
+        teacherCountBadge.textContent = `${filtered.length} enseignant(s)`;
+    }
+
+    if (filtered.length === 0) {
+        teachersTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 24px; color: #64748b;">Aucun enseignant trouvé.</td></tr>';
+        return;
+    }
+
+    const isCurrentAdmin = currentAdminProfile?.role === 'admin' || currentAdminUser?.email === ADMIN_EMAIL;
+
+    teachersTableBody.innerHTML = filtered.map(t => {
+        const isAdmin = t.role === 'admin';
+        const isSuperAdmin = t.email === ADMIN_EMAIL;
+        const isActif = t.actif !== false;
+        const classesLabel = Array.isArray(t.classes) ? t.classes.join(', ') : (t.classes || 'all');
+
+        const roleBadge = isAdmin 
+            ? '<span class="badge" style="background: #fef3c7; color: #b45309; font-weight: 700;">👑 Administrateur</span>'
+            : '<span class="badge" style="background: #e0e7ff; color: #4338ca; font-weight: 600;">🎓 Enseignant</span>';
+
+        const statusBadge = isActif
+            ? '<span class="badge" style="background: #dcfce7; color: #15803d;">✅ Actif</span>'
+            : '<span class="badge" style="background: #fee2e2; color: #b91c1c;">🚫 Désactivé</span>';
+
+        let actionButtons = '';
+        if (isCurrentAdmin) {
+            actionButtons = `
+                <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
+                    <button class="btn-secondary" style="padding: 6px 10px; font-size: 12px;" onclick="window.editTeacher('${escapeHtml(t.email)}')">✏️ Modifier</button>
+                    ${!isSuperAdmin ? `
+                        <button class="btn-secondary" style="padding: 6px 10px; font-size: 12px; color: ${isActif ? '#d97706' : '#16a34a'};" onclick="window.toggleTeacherStatus('${escapeHtml(t.email)}', ${!isActif})">
+                            ${isActif ? '⏸️ Désactiver' : '▶️ Activer'}
+                        </button>
+                        <button class="btn-secondary" style="padding: 6px 10px; font-size: 12px; color: #dc2626;" onclick="window.deleteTeacher('${escapeHtml(t.email)}')">🗑️</button>
+                    ` : '<span style="font-size: 11px; color: #94a3b8;">Principal</span>'}
+                </div>
+            `;
+        } else {
+            actionButtons = '<span style="font-size: 12px; color: #94a3b8;">Lecture seule</span>';
+        }
+
+        return `
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 12px 16px; font-weight: 600; color: #1e293b;">
+                    ${escapeHtml(t.nom || t.email.split('@')[0])}
+                    ${isSuperAdmin ? ' <span title="Administrateur fondateur">⭐</span>' : ''}
+                </td>
+                <td style="padding: 12px 16px; color: #475569; font-family: monospace; font-size: 12px;">${escapeHtml(t.email)}</td>
+                <td style="padding: 12px 16px;">${roleBadge}</td>
+                <td style="padding: 12px 16px;"><span class="badge" style="background: #f1f5f9; color: #334155;">${escapeHtml(classesLabel)}</span></td>
+                <td style="padding: 12px 16px;">${statusBadge}</td>
+                <td style="padding: 12px 16px; text-align: right;">${actionButtons}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Modal management
+function openTeacherModal(isEdit = false, teacher = null) {
+    if (!teacherModal) return;
+    editingTeacherEmail = isEdit && teacher ? teacher.email : null;
+
+    if (teacherModalTitle) {
+        teacherModalTitle.textContent = isEdit ? "✏️ Modifier l'Enseignant" : "➕ Ajouter un Enseignant";
+    }
+
+    if (teacherEmailInput) {
+        teacherEmailInput.value = teacher?.email || '';
+        teacherEmailInput.disabled = isEdit; // L'email fait office d'identifiant unique
+    }
+    if (teacherNomInput) teacherNomInput.value = teacher?.nom || '';
+    if (teacherRoleSelect) teacherRoleSelect.value = teacher?.role || 'enseignant';
+    if (teacherClassesInput) teacherClassesInput.value = Array.isArray(teacher?.classes) ? teacher.classes.join(', ') : (teacher?.classes || 'all');
+    if (teacherActifCheckbox) teacherActifCheckbox.checked = teacher ? (teacher.actif !== false) : true;
+
+    teacherModal.classList.remove('hidden');
+}
+
+function closeTeacherModal() {
+    if (teacherModal) teacherModal.classList.add('hidden');
+    editingTeacherEmail = null;
+}
+
+if (addTeacherBtn) {
+    addTeacherBtn.addEventListener('click', () => openTeacherModal(false));
+}
+if (closeTeacherModalBtn) {
+    closeTeacherModalBtn.addEventListener('click', closeTeacherModal);
+}
+if (cancelTeacherModalBtn) {
+    cancelTeacherModalBtn.addEventListener('click', closeTeacherModal);
+}
+if (filterTeacherSearch) {
+    filterTeacherSearch.addEventListener('input', renderTeachersTable);
+}
+if (refreshTeachersBtn) {
+    refreshTeachersBtn.addEventListener('click', loadTeachersData);
+}
+
+// Soumission formulaire
+if (teacherForm) {
+    teacherForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = teacherEmailInput?.value?.trim().toLowerCase();
+        if (!email) return;
+
+        const nom = teacherNomInput?.value?.trim() || email.split('@')[0];
+        const role = teacherRoleSelect?.value || 'enseignant';
+        const classes = (teacherClassesInput?.value || 'all')
+            .split(',')
+            .map(c => c.trim())
+            .filter(Boolean);
+        const actif = teacherActifCheckbox ? teacherActifCheckbox.checked : true;
+
+        const saveBtn = document.getElementById('saveTeacherBtn');
+        const origText = saveBtn?.textContent || 'Enregistrer';
+        if (saveBtn) { saveBtn.textContent = 'Enregistrement...'; saveBtn.disabled = true; }
+
+        try {
+            const saveFn = httpsCallable(functions, "enregistrerEnseignant");
+            await saveFn({
+                email,
+                nom,
+                role,
+                classes,
+                cours: ["all"],
+                actif
+            });
+
+            closeTeacherModal();
+            await loadTeachersData();
+        } catch (err) {
+            console.error("Erreur enregistrement enseignant :", err);
+            alert("Erreur lors de l'enregistrement : " + err.message);
+        } finally {
+            if (saveBtn) { saveBtn.textContent = origText; saveBtn.disabled = false; }
+        }
+    });
+}
+
+// Fonctions globales exposées pour les boutons du tableau
+window.editTeacher = (email) => {
+    const teacher = allLoadedTeachers.find(t => t.email === email);
+    if (teacher) openTeacherModal(true, teacher);
+};
+
+window.toggleTeacherStatus = async (email, newStatus) => {
+    const teacher = allLoadedTeachers.find(t => t.email === email);
+    if (!teacher) return;
+
+    try {
+        const saveFn = httpsCallable(functions, "enregistrerEnseignant");
+        await saveFn({
+            email: teacher.email,
+            nom: teacher.nom,
+            role: teacher.role,
+            classes: teacher.classes || ["all"],
+            cours: teacher.cours || ["all"],
+            actif: newStatus
+        });
+        await loadTeachersData();
+    } catch (err) {
+        console.error("Erreur bascule statut :", err);
+        alert("Erreur lors de la mise à jour du statut : " + err.message);
+    }
+};
+
+window.deleteTeacher = async (email) => {
+    if (!confirm(`Êtes-vous sûr de vouloir retirer ${email} de l'équipe enseignante ?`)) return;
+
+    try {
+        const delFn = httpsCallable(functions, "supprimerEnseignant");
+        await delFn({ email });
+        await loadTeachersData();
+    } catch (err) {
+        console.error("Erreur suppression enseignant :", err);
+        alert("Erreur lors de la suppression : " + err.message);
+    }
+};
+
+window.loadTeachersManagement = loadTeachersData;
+
 
 

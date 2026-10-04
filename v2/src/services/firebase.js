@@ -52,32 +52,61 @@ export async function initStudentSession() {
   }
 }
 
-// 2. Connexion Enseignant via Google
+// 2. Connexion Enseignant via Google (Synchronisation dynamique & Custom Claims)
 export async function loginProfesseurGoogle() {
   try {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
-    
-    if (!isTeacherEmailAllowed(user.email)) {
-      console.warn("[Auth Prof] Adresse non autorisée sur la liste blanche :", user.email);
+
+    try {
+      const syncFn = httpsCallable(functions, "synchroniserProfilEnseignant");
+      const syncRes = await syncFn();
+      const data = syncRes.data || {};
+
+      if (!data.isTeacher) {
+        console.warn("[Auth Prof] Adresse non autorisée :", data.message || user.email);
+        await signOut(auth);
+        await initStudentSession();
+        return { 
+          success: false, 
+          reason: data.reason || "not_allowed", 
+          message: data.message || "Votre adresse n'est pas encore enregistrée dans l'équipe enseignante.",
+          email: user.email 
+        };
+      }
+
+      // Forcer le rafraîchissement du token pour obtenir les claims
+      await user.getIdToken(true);
+
+      const profile = data.profile || {
+        email: user.email,
+        nom: user.displayName || user.email.split('@')[0],
+        role: data.role || "enseignant",
+        classes: ["1A", "1B", "1C", "1D"]
+      };
+
+      console.log("[Auth Prof] Enseignant authentifié :", profile);
+      return {
+        success: true,
+        user,
+        profile
+      };
+    } catch (fnErr) {
+      console.warn("[Auth Prof] Erreur sync function, tentative de vérification directe Firestore :", fnErr);
+      const docSnap = await getDoc(doc(db, "enseignants", user.email.toLowerCase()));
+      if (docSnap.exists() && docSnap.data().actif !== false) {
+        const profile = docSnap.data();
+        return { success: true, user, profile };
+      }
+      if (user.email === 'gatweb@gmail.com') {
+        return { success: true, user, profile: { email: user.email, nom: "Administrateur", role: "admin", classes: ["all"] } };
+      }
       await signOut(auth);
       await initStudentSession();
-      return { 
-        success: false, 
-        reason: "not_whitelisted", 
-        email: user.email 
-      };
+      return { success: false, reason: "error", error: fnErr.message };
     }
-
-    const profile = getTeacherProfile(user.email);
-    console.log("[Auth Prof] Enseignant authentifié :", profile);
-    return {
-      success: true,
-      user,
-      profile
-    };
   } catch (err) {
     console.error("[Auth Prof] Erreur de connexion Google :", err);
     return { success: false, reason: "error", error: err.message };
@@ -98,21 +127,82 @@ export async function logoutProfesseur() {
 
 // 4. Écoute de l'état d'authentification
 export function subscribeToAuthState(callback) {
-  return onAuthStateChanged(auth, (user) => {
-    if (user && !user.isAnonymous && isTeacherEmailAllowed(user.email)) {
-      callback({
-        isTeacher: true,
-        user,
-        profile: getTeacherProfile(user.email)
-      });
-    } else {
-      callback({
-        isTeacher: false,
-        user: user || null,
-        profile: null
-      });
+  return onAuthStateChanged(auth, async (user) => {
+    if (user && !user.isAnonymous && user.email) {
+      try {
+        const idTokenResult = await user.getIdTokenResult();
+        const role = idTokenResult.claims.role;
+        const isAdmin = idTokenResult.claims.admin === true || role === 'admin' || user.email === 'gatweb@gmail.com';
+        const isTeacher = ['enseignant', 'admin'].includes(role) || isAdmin;
+
+        if (isTeacher) {
+          const docSnap = await getDoc(doc(db, "enseignants", user.email.toLowerCase()));
+          const profile = docSnap.exists() ? docSnap.data() : {
+            email: user.email,
+            nom: user.displayName || user.email.split('@')[0],
+            role: role || (isAdmin ? "admin" : "enseignant"),
+            classes: ["1A", "1B", "1C", "1D"]
+          };
+          callback({
+            isTeacher: true,
+            isAdmin,
+            user,
+            profile
+          });
+          return;
+        }
+
+        // Vérification directe si claims en cours de propagation
+        const docSnap = await getDoc(doc(db, "enseignants", user.email.toLowerCase()));
+        if (docSnap.exists() && docSnap.data().actif !== false) {
+          const profile = docSnap.data();
+          callback({
+            isTeacher: true,
+            isAdmin: profile.role === 'admin' || user.email === 'gatweb@gmail.com',
+            user,
+            profile
+          });
+          return;
+        }
+      } catch (err) {
+        console.warn("[subscribeToAuthState] Erreur vérification enseignant :", err.message);
+      }
     }
+
+    callback({
+      isTeacher: false,
+      isAdmin: false,
+      user: user || null,
+      profile: null
+    });
   });
+}
+
+// 4.b Gestion d'équipe Cloud
+export async function listerEnseignantsCloud() {
+  try {
+    const fn = httpsCallable(functions, "listerEnseignants");
+    const res = await fn();
+    return res.data?.teachers || [];
+  } catch (err) {
+    console.warn("[listerEnseignantsCloud] Fallback direct Firestore :", err.message);
+    const snap = await getDocs(collection(db, "enseignants"));
+    const list = [];
+    snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+    return list;
+  }
+}
+
+export async function enregistrerEnseignantCloud(teacherData) {
+  const fn = httpsCallable(functions, "enregistrerEnseignant");
+  const res = await fn(teacherData);
+  return res.data;
+}
+
+export async function supprimerEnseignantCloud(email) {
+  const fn = httpsCallable(functions, "supprimerEnseignant");
+  const res = await fn({ email });
+  return res.data;
 }
 
 // 5. Sauvegarde de la progression élève dans Firestore (/progressions_v2)

@@ -140,6 +140,9 @@ class ProgressionManager {
                 if (targetId === 'usersView') {
                     window.loadUsersManagement?.();
                 }
+                if (targetId === 'teachersView') {
+                    window.loadTeachersManagement?.();
+                }
             });
         });
     }

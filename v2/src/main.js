@@ -17,9 +17,12 @@ import {
   addRealStudent,
   updateStudentClassInDb,
   savePresentationConfig, 
-  interrogerTuteurIA 
+  interrogerTuteurIA,
+  listerEnseignantsCloud,
+  enregistrerEnseignantCloud,
+  supprimerEnseignantCloud
 } from './services/firebase.js';
-import { AVAILABLE_CLASSES, ALLOWED_TEACHERS } from './services/teachers-config.js';
+import { AVAILABLE_CLASSES } from './services/teachers-config.js';
 
 window.Alpine = Alpine;
 
@@ -239,18 +242,33 @@ Alpine.data('profAssistantApp', () => ({
   // ==========================================
   teacherAuth: {
     isTeacher: false,
+    isAdmin: false,
     user: null,
     profile: null,
     loading: false,
     errorMsg: ''
   },
   modalLoginProfOpen: false,
-  activeProfSubTab: 'matrice', // 'matrice' | 'eleves' | 'notebooklm'
+  activeProfSubTab: 'matrice', // 'matrice' | 'eleves' | 'notebooklm' | 'equipe'
   profMatrixChapter: 'ch1',    // 'ch1' | 'ch2'
   selectedTeacherClass: '1A',
   unsubscribeTeacherListener: null,
   firestoreSynced: false,
   remediationGenerated: false,
+
+  // Gestion de l'équipe enseignante (Phase 1)
+  teachersList: [],
+  teachersLoading: false,
+  searchTeacherQuery: '',
+  modalAddTeacherOpen: false,
+  isEditingTeacher: false,
+  teacherFormData: {
+    email: '',
+    nom: '',
+    role: 'enseignant',
+    classes: 'all',
+    actif: true
+  },
 
   // Gestion des élèves réels
   allClassStudents: [],
@@ -290,6 +308,7 @@ Alpine.data('profAssistantApp', () => ({
     // 3. Écoute de l'état d'authentification enseignant
     subscribeToAuthState((authStatus) => {
       this.teacherAuth.isTeacher = authStatus.isTeacher;
+      this.teacherAuth.isAdmin = authStatus.isAdmin;
       this.teacherAuth.user = authStatus.user;
       this.teacherAuth.profile = authStatus.profile;
 
@@ -393,10 +412,8 @@ Alpine.data('profAssistantApp', () => ({
       this.activeTab = 'prof';
       this.activerEcouteClasse(this.selectedTeacherClass);
       this.chargerElevesReels();
-    } else if (res.reason === 'not_whitelisted') {
-      this.teacherAuth.errorMsg = `L'adresse Google "${res.email}" n'est pas encore inscrite sur la liste blanche des professeurs autorisés. Contactez l'administrateur.`;
     } else {
-      this.teacherAuth.errorMsg = `Erreur de connexion : ${res.error || 'Veuillez réessayer'}`;
+      this.teacherAuth.errorMsg = res.message || `L'adresse Google "${res.email}" n'est pas autorisée sur l'espace enseignant.`;
     }
   },
 
@@ -430,6 +447,102 @@ Alpine.data('profAssistantApp', () => ({
 
   async chargerElevesReels() {
     this.allClassStudents = await getRealClassStudents(this.selectedTeacherClass);
+  },
+
+  // ==========================================
+  // GESTION DE L'ÉQUIPE ENSEIGNANTE (PHASE 1)
+  // ==========================================
+  async chargerEquipeEnseignants() {
+    this.teachersLoading = true;
+    try {
+      this.teachersList = await listerEnseignantsCloud();
+    } catch (e) {
+      console.warn("Erreur chargement équipe :", e);
+    } finally {
+      this.teachersLoading = false;
+    }
+  },
+
+  ouvrirModalEnseignant(isEdit = false, teacher = null) {
+    this.isEditingTeacher = isEdit;
+    if (isEdit && teacher) {
+      this.teacherFormData = {
+        email: teacher.email,
+        nom: teacher.nom || teacher.email.split('@')[0],
+        role: teacher.role || 'enseignant',
+        classes: Array.isArray(teacher.classes) ? teacher.classes.join(', ') : (teacher.classes || 'all'),
+        actif: teacher.actif !== false
+      };
+    } else {
+      this.teacherFormData = {
+        email: '',
+        nom: '',
+        role: 'enseignant',
+        classes: 'all',
+        actif: true
+      };
+    }
+    this.modalAddTeacherOpen = true;
+  },
+
+  fermerModalEnseignant() {
+    this.modalAddTeacherOpen = false;
+  },
+
+  async enregistrerEnseignantForm() {
+    const email = (this.teacherFormData.email || '').trim().toLowerCase();
+    if (!email) return;
+
+    const classes = (this.teacherFormData.classes || 'all')
+      .split(',')
+      .map(c => c.trim())
+      .filter(Boolean);
+
+    try {
+      await enregistrerEnseignantCloud({
+        email,
+        nom: (this.teacherFormData.nom || email.split('@')[0]).trim(),
+        role: this.teacherFormData.role || 'enseignant',
+        classes,
+        cours: ["all"],
+        actif: this.teacherFormData.actif !== false
+      });
+
+      this.fermerModalEnseignant();
+      await this.chargerEquipeEnseignants();
+    } catch (err) {
+      console.error("Erreur enregistrement enseignant :", err);
+      alert("Erreur lors de l'enregistrement : " + err.message);
+    }
+  },
+
+  async basculerStatutEnseignant(teacher, nouveauStatut) {
+    try {
+      await enregistrerEnseignantCloud({
+        email: teacher.email,
+        nom: teacher.nom,
+        role: teacher.role,
+        classes: teacher.classes || ["all"],
+        cours: teacher.cours || ["all"],
+        actif: nouveauStatut
+      });
+      await this.chargerEquipeEnseignants();
+    } catch (err) {
+      console.error("Erreur mise à jour statut enseignant :", err);
+      alert("Erreur : " + err.message);
+    }
+  },
+
+  async supprimerEnseignantModal(email) {
+    if (!confirm(`Retirer définitivement ${email} de l'équipe enseignante ?`)) return;
+
+    try {
+      await supprimerEnseignantCloud(email);
+      await this.chargerEquipeEnseignants();
+    } catch (err) {
+      console.error("Erreur suppression enseignant :", err);
+      alert("Erreur : " + err.message);
+    }
   },
 
   async ajouterEleveManuel() {
