@@ -64,11 +64,21 @@ service cloud.firestore {
     match /courses/{courseId} {
       allow read: if true;
       allow write: if isTeacher();
+
+      match /modules/{moduleId} {
+        allow read: if true;
+        allow write: if isTeacher();
+      }
     }
 
     match /cours/{courseId} {
       allow read: if true;
       allow write: if isTeacher();
+
+      match /modules/{moduleId} {
+        allow read: if true;
+        allow write: if isTeacher();
+      }
     }
 
     match /exercices/{exId} {

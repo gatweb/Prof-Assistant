@@ -1392,3 +1392,142 @@ exports.supprimerEnseignant = onCall({
     }
 });
 
+// =====================================================================
+// PHASE 10 : COURSE STUDIO SANS CODE & IMPORT PAR IA (5 SOURCES)
+// =====================================================================
+
+/**
+ * `structurerCoursIA`
+ * Convertit un Google Doc (via Drive API), un syllabus/texte PDF, ou des supports Classroom
+ * en un cours complet structuré (modules, théorie Markdown, missions/exercices par type, et quiz).
+ * Respecte un `responseSchema` strict et retourne la proposition pour relecture par l'enseignant.
+ */
+exports.structurerCoursIA = onCall({
+    secrets: [geminiApiKey],
+    region: "europe-west1",
+    cors: true,
+    timeoutSeconds: 60
+}, async (request) => {
+    const isTeacher = await checkCallerIsTeacher(request);
+    if (!isTeacher) {
+        throw new HttpsError("permission-denied", "Accès réservé aux enseignants.");
+    }
+
+    const {
+        sourceType = "syllabus", // 'classroom' | 'gdoc' | 'syllabus'
+        rawText = "",
+        googleDocId = "",
+        accessToken = "",
+        courseTitleHint = "",
+        workspaceTypeHint = "office", // 'office' | 'coding' | 'creative'
+        targetLevel = "Secondaire (12-16 ans)"
+    } = request.data || {};
+
+    let extractedContent = String(rawText || "").trim();
+
+    // Si source = Google Doc et qu'on a un identifiant de fichier Drive, tenter de l'exporter en texte
+    if (sourceType === "gdoc" && googleDocId) {
+        const cleanDocId = String(googleDocId).replace(/.*\/d\/([a-zA-Z0-9_-]+).*/, "$1").trim();
+        const clients = getGoogleClients(accessToken);
+        if (clients && clients.drive) {
+            try {
+                const exportRes = await clients.drive.files.export({
+                    fileId: cleanDocId,
+                    mimeType: "text/plain"
+                });
+                if (exportRes && exportRes.data) {
+                    extractedContent = `${ String(exportRes.data) }\n\n${ extractedContent }`.trim();
+                }
+            } catch (driveErr) {
+                console.warn("[structurerCoursIA] Export Google Doc direct non disponible, utilisation du texte fourni :", driveErr.message);
+            }
+        }
+    }
+
+    if (!extractedContent || extractedContent.length < 10) {
+        throw new HttpsError(
+            "invalid-argument",
+            "Le contenu source est vide ou trop court. Collez le texte du document/syllabus ou vérifiez le lien."
+        );
+    }
+
+    const safeInput = extractedContent.slice(0, 28000);
+    const ai = new GoogleGenAI({ apiKey: geminiApiKey.value() });
+
+    const systemInstruction = `Tu es un ingénieur pédagogique expert en création de cours numériques interactifs pour l'enseignement secondaire (${targetLevel}).
+À partir du contenu brut fourni (source : ${sourceType}), tu dois structurer un cours complet prêt à être édité dans ProfAssistant Course Studio.
+Le cours doit :
+1. Avoir un identifiant slug propre (ex: "python-bases-3e", "reseaux-4e"), un titre accrocheur, un pitch court, une icône emoji, un type d'atelier ("office", "coding" ou "creative" — privilégie "${workspaceTypeHint}") et un prompt système socratique pour le tuteur IA.
+2. Être découpé en 2 à 6 modules logiques et progressifs.
+3. Chaque module contient :
+   - "id" : ex "mod-1", "mod-2"
+   - "title" : ex "Module 1 : Introduction et concepts clés"
+   - "order" : numéro d'ordre (1, 2, ...)
+   - "theorie_md" : un cours complet, clair et bien structuré en Markdown (titres ###, listes à puces, exemples concrets, astuces).
+   - "missions" : 1 à 3 missions pratiques associées à ce module, avec "titre", "consigne", "submission_type" ("code", "drive_link", "creative_link" ou "text") et "starter_code" optionnel (html, css, js si atelier coding).`;
+
+    const { text: geminiText } = await generateWithModelCascade(ai, {
+        contents: `Titre souhaité : "${courseTitleHint || 'Nouveau Cours'}"\nAtelier cible : "${workspaceTypeHint}"\n\nCONTENU SOURCE À STRUCTURER EN MODULES ET MISSIONS :\n\n${safeInput}`,
+        config: {
+            systemInstruction,
+            temperature: 0.3,
+            maxOutputTokens: 3500,
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    id: { type: Type.STRING },
+                    title: { type: Type.STRING },
+                    pitch: { type: Type.STRING },
+                    workspaceType: { type: Type.STRING },
+                    icon: { type: Type.STRING },
+                    primaryColor: { type: Type.STRING },
+                    systemPrompt: { type: Type.STRING },
+                    modules: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                id: { type: Type.STRING },
+                                title: { type: Type.STRING },
+                                order: { type: Type.INTEGER },
+                                theorie_md: { type: Type.STRING },
+                                missions: {
+                                    type: Type.ARRAY,
+                                    items: {
+                                        type: Type.OBJECT,
+                                        properties: {
+                                            id: { type: Type.STRING },
+                                            titre: { type: Type.STRING },
+                                            consigne: { type: Type.STRING },
+                                            submission_type: { type: Type.STRING },
+                                            starter_html: { type: Type.STRING },
+                                            starter_css: { type: Type.STRING },
+                                            starter_js: { type: Type.STRING }
+                                        },
+                                        required: ["titre", "consigne", "submission_type"]
+                                    }
+                                }
+                            },
+                            required: ["id", "title", "order", "theorie_md", "missions"]
+                        }
+                    }
+                },
+                required: ["id", "title", "pitch", "workspaceType", "icon", "systemPrompt", "modules"]
+            }
+        }
+    }, "structurerCoursIA");
+
+    const jsonMatch = (geminiText || "").match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+        throw new HttpsError("internal", "L'IA n'a pas pu structurer le cours en JSON valide.");
+    }
+
+    const proposal = JSON.parse(jsonMatch[0]);
+    return {
+        success: true,
+        proposal
+    };
+});
+
+

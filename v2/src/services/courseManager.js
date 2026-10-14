@@ -1,5 +1,5 @@
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "./firebase.js";
+import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
+import { db, getFirestoreCoursesList, getCourseModulesFromFirestore, saveCourseStudioBundle } from "./firebase.js";
 
 /**
  * FMTTN 1re — Cours officiel SeGEC / @lt_X intégré par défaut dans la V2
@@ -212,9 +212,12 @@ export class CourseManagerV2 {
   }
 
   /**
-   * Charge l'ensemble des cours depuis le manifeste public et y intègre le cours FMTTN 1re
+   * Charge l'ensemble des cours :
+   * 1. En priorité depuis Firestore `cours/{id}` (Phase 10)
+   * 2. En secours / fusion depuis `public/cours/manifest.json`
+   * 3. Intègre le cours FMTTN 1re
    */
-  async loadCoursesCatalogue() {
+  async loadCoursesCatalogue(includeDrafts = false) {
     try {
       let localCourses = [];
       try {
@@ -226,19 +229,44 @@ export class CourseManagerV2 {
         console.warn("[CourseManagerV2] Erreur lecture manifest.json :", err);
       }
 
-      // Normalisation des cours
-      const normalizedLocal = localCourses.map(c => ({
-        ...c,
-        folder: c.folder || c.id,
-        workspaceType: this.normalizeWorkspaceType(c),
-        chapters: c.chapters || []
-      }));
+      const firestoreCourses = await getFirestoreCoursesList(includeDrafts);
+      const fsMap = new Map();
+      firestoreCourses.forEach(fc => {
+        fsMap.set(fc.id, {
+          ...fc,
+          folder: fc.folder || fc.id,
+          workspaceType: this.normalizeWorkspaceType(fc),
+          chapters: fc.chapters || [],
+          source: 'firestore'
+        });
+      });
 
-      // Le cours FMTTN est placé en première position
-      const allCourses = [FMTTN_COURSE_DEF, ...normalizedLocal.filter(c => c.id !== "fmttn-1re")];
+      // Normalisation des cours statiques (utilisés en secours si absents de Firestore)
+      const normalizedLocal = localCourses.map(c => {
+        if (fsMap.has(c.id)) {
+          const fsCourse = fsMap.get(c.id);
+          fsMap.delete(c.id);
+          return fsCourse;
+        }
+        return {
+          ...c,
+          folder: c.folder || c.id,
+          workspaceType: this.normalizeWorkspaceType(c),
+          chapters: c.chapters || [],
+          source: 'static'
+        };
+      });
+
+      const customFirestoreCourses = Array.from(fsMap.values()).filter(c => c.id !== "fmttn-1re");
+      const fmttnCourse = fsMap.get("fmttn-1re") || FMTTN_COURSE_DEF;
+
+      const allCourses = [
+        fmttnCourse,
+        ...normalizedLocal.filter(c => c.id !== "fmttn-1re"),
+        ...customFirestoreCourses
+      ];
       this.courses = allCourses;
 
-      // Récupération du cours mémorisé ou défaut sur FMTTN
       const savedCourseId = localStorage.getItem(this.storageKey);
       if (savedCourseId) {
         this.activeCourse = this.courses.find(c => c.id === savedCourseId) || this.courses[0];
@@ -302,10 +330,30 @@ export class CourseManagerV2 {
   }
 
   /**
-   * Charge le fichier Markdown d'un chapitre de cours
+   * Charge le contenu Markdown d'un module/chapitre :
+   * 1. En priorité depuis Firestore `cours/{id}/modules/{mid}` (`theorie_md`)
+   * 2. En secours depuis `public/cours/<folder>/<file>.md`
    */
   async loadChapterMarkdown(course, chapter) {
-    if (!course || !chapter || !chapter.file) return "";
+    if (!course || !chapter) return "";
+
+    if (typeof chapter.theorie_md === "string" && chapter.theorie_md.trim()) {
+      return chapter.theorie_md;
+    }
+
+    if (course.id && chapter.id) {
+      try {
+        const modSnap = await getDoc(doc(db, "cours", course.id, "modules", chapter.id));
+        if (modSnap.exists() && modSnap.data()?.theorie_md) {
+          return modSnap.data().theorie_md;
+        }
+      } catch (_) {}
+    }
+
+    if (!chapter.file) {
+      return `# ${chapter.title}\n\n*Support de cours éditable dans le Course Studio.*`;
+    }
+
     const url = this.getCourseFileUrl(course, chapter.file);
     try {
       const res = await fetch(url);
@@ -315,6 +363,51 @@ export class CourseManagerV2 {
       console.warn(`[CourseManagerV2] Impossible de charger le cours ${url} :`, e);
       return `# ${chapter.title}\n\n*Le support de cours est accessible dans votre manuel ou en ligne.*`;
     }
+  }
+
+  /**
+   * Migre les 6 cours statiques (`public/cours/manifest.json`) vers Firestore (`cours/{id}`, `modules/{mid}`, `exercices`)
+   */
+  async migrateStaticCoursesToFirestore() {
+    const res = await fetch("/cours/manifest.json");
+    if (!res.ok) throw new Error("Impossible de lire manifest.json");
+    const staticCourses = await res.json();
+    let migratedCount = 0;
+
+    for (const c of staticCourses) {
+      const modules = [];
+      for (let i = 0; i < (c.chapters || []).length; i++) {
+        const ch = c.chapters[i];
+        let md = "";
+        if (ch.file) {
+          try {
+            const mdRes = await fetch(`/cours/${c.folder || c.id}/${ch.file}`);
+            if (mdRes.ok) md = await mdRes.text();
+          } catch (_) {}
+        }
+        modules.push({
+          id: ch.id || `mod-${i + 1}`,
+          title: ch.title || `Module ${i + 1}`,
+          order: i + 1,
+          file: ch.file || '',
+          theorie_md: md
+        });
+      }
+
+      const defaultMissions = DEFAULT_EXERCISES_BY_COURSE[c.id] || [];
+      await saveCourseStudioBundle({
+        course: {
+          ...c,
+          workspaceType: this.normalizeWorkspaceType(c),
+          status: 'published'
+        },
+        modules,
+        missions: defaultMissions
+      });
+      migratedCount++;
+    }
+
+    return migratedCount;
   }
 
   /**

@@ -260,5 +260,26 @@ test('Phase 9 classes : un enseignant crée et met à jour les liaisons Classroo
   await assertSucceeds(setDoc(doc(teacherDb, 'classes/3GB/eleves/alice'), { email: 'alice@eleve.be' }));
 });
 
+// =========================== Phase 10 : Course Studio cours/{id}/modules/{mid} ===========================
+test('Phase 10 Course Studio : un enseignant crée/modifie un cours et ses modules, un élève les lit mais ne peut pas les modifier', async () => {
+  const teacherDb = env.authenticatedContext('dyn', google('prof_dynamique@ecole.be')).firestore();
+  await assertSucceeds(setDoc(doc(teacherDb, 'cours/python-3e'), {
+    id: 'python-3e',
+    title: 'Python 3e',
+    status: 'published',
+    profs: ['prof_dynamique@ecole.be']
+  }));
+  await assertSucceeds(setDoc(doc(teacherDb, 'cours/python-3e/modules/mod-1'), {
+    id: 'mod-1',
+    title: 'Module 1 : Variables',
+    order: 1,
+    theorie_md: '# Variables en Python'
+  }));
+  await assertSucceeds(getDoc(doc(alice(), 'cours/python-3e')));
+  await assertSucceeds(getDoc(doc(alice(), 'cours/python-3e/modules/mod-1')));
+  await assertFails(setDoc(doc(alice(), 'cours/python-3e/modules/mod-1'), { title: 'Piraté' }));
+});
+
+
 
 

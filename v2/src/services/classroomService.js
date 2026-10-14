@@ -15,6 +15,7 @@ export const CLASSROOM_SCOPES = [
   'https://www.googleapis.com/auth/classroom.courses.readonly',
   'https://www.googleapis.com/auth/classroom.rosters.readonly',
   'https://www.googleapis.com/auth/classroom.coursework.students',
+  'https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly',
   'https://www.googleapis.com/auth/classroom.topics'
 ];
 
@@ -299,6 +300,26 @@ export async function fetchCourseWork(courseId) {
     alternateLink: cw.alternateLink || '',
     creationTime: cw.creationTime
   }));
+}
+
+/**
+ * 3d. Récupère les supports de cours (CourseWorkMaterials) d'un cours Google Classroom (Phase 10)
+ */
+export async function fetchCourseMaterials(courseId) {
+  if (!courseId) return [];
+  try {
+    const data = await classroomFetch(`/courses/${courseId}/courseWorkMaterials`);
+    return (data.courseWorkMaterial || []).map(m => ({
+      id: m.id,
+      title: m.title || 'Support de cours',
+      description: m.description || '',
+      materials: m.materials || [],
+      topicId: m.topicId || ''
+    }));
+  } catch (err) {
+    console.warn("[Classroom] Supports de cours non disponibles :", err.message);
+    return [];
+  }
 }
 
 /**

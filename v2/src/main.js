@@ -7,6 +7,7 @@ import { createTutorStore } from './stores/tutor.js';
 import { createTeacherStore } from './stores/teacher.js';
 import { createClassroomStore } from './stores/classroom.js';
 import { createFormsStore } from './stores/forms.js';
+import { createStudioStore } from './stores/studio.js';
 
 window.Alpine = Alpine;
 
@@ -18,6 +19,7 @@ Alpine.data('profAssistantApp', () => ({
   ...createTeacherStore(),
   ...createClassroomStore(),
   ...createFormsStore(),
+  ...createStudioStore(),
 
   async init() {
     console.log('ProfAssistant V3 initialisé — Architecture modulaire (Phase 8).');

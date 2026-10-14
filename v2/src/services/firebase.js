@@ -722,5 +722,132 @@ export async function saveClassMapping(classeId, { classroom_course_id, classroo
   }
 }
 
+// 14. COURSE STUDIO & IMPORT IA (PHASE 10)
+export async function structurerCoursIACloud(payload) {
+  const fn = httpsCallable(functions, "structurerCoursIA", { timeout: 65000 });
+  const res = await fn(payload);
+  return res.data;
+}
+
+export async function getFirestoreCoursesList(includeDrafts = false) {
+  try {
+    const snap = await getDocs(collection(db, "cours"));
+    const list = [];
+    snap.forEach(d => {
+      const data = d.data();
+      if (includeDrafts || data.status !== 'draft') {
+        list.push({ id: d.id, ...data });
+      }
+    });
+    return list;
+  } catch (err) {
+    console.warn("[getFirestoreCoursesList] Erreur :", err.message);
+    return [];
+  }
+}
+
+export async function getCourseModulesFromFirestore(courseId) {
+  if (!courseId) return [];
+  try {
+    const snap = await getDocs(collection(db, "cours", courseId, "modules"));
+    const modules = [];
+    snap.forEach(d => modules.push({ id: d.id, ...d.data() }));
+    modules.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+    return modules;
+  } catch (err) {
+    console.warn("[getCourseModulesFromFirestore] Erreur :", err.message);
+    return [];
+  }
+}
+
+export async function saveCourseStudioBundle({ course, modules = [], missions = [] }) {
+  if (!course || !course.id) throw new Error("Identifiant du cours requis.");
+  const cleanCourseId = String(course.id)
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9_-]/g, '-');
+
+  const chaptersSummary = modules.map((m, idx) => ({
+    id: m.id || `mod-${idx + 1}`,
+    title: m.title || `Module ${idx + 1}`,
+    order: Number(m.order) || (idx + 1),
+    file: m.file || ''
+  }));
+
+  const courseRef = doc(db, "cours", cleanCourseId);
+  const coursePayload = {
+    id: cleanCourseId,
+    title: (course.title || 'Nouveau Cours').trim(),
+    pitch: (course.pitch || '').trim(),
+    workspaceType: course.workspaceType || 'office',
+    status: course.status === 'draft' ? 'draft' : 'published',
+    profs: Array.isArray(course.profs) && course.profs.length > 0
+      ? course.profs
+      : (auth.currentUser?.email ? [auth.currentUser.email.toLowerCase()] : ['gatweb@gmail.com']),
+    systemPrompt: course.systemPrompt || '',
+    theme: {
+      primaryColor: course.theme?.primaryColor || course.primaryColor || '#2563eb',
+      icon: course.theme?.icon || course.icon || '📚'
+    },
+    chapters: chaptersSummary,
+    updated_at: serverTimestamp()
+  };
+
+  await setDoc(courseRef, coursePayload, { merge: true });
+
+  // Sauvegarder chaque module dans cours/{id}/modules/{mid}
+  for (let i = 0; i < modules.length; i++) {
+    const mod = modules[i];
+    const modId = String(mod.id || `mod-${i + 1}`).trim();
+    const modRef = doc(db, "cours", cleanCourseId, "modules", modId);
+    await setDoc(modRef, {
+      id: modId,
+      course_id: cleanCourseId,
+      title: mod.title || `Module ${i + 1}`,
+      order: Number(mod.order) || (i + 1),
+      theorie_md: mod.theorie_md || '',
+      updated_at: serverTimestamp()
+    }, { merge: true });
+  }
+
+  // Sauvegarder chaque mission dans exercices/{exId}
+  for (let j = 0; j < missions.length; j++) {
+    const ex = missions[j];
+    const exId = String(ex.id || `${cleanCourseId}-ex-${j + 1}`).trim();
+    const exRef = doc(db, "exercices", exId);
+    await setDoc(exRef, {
+      id: exId,
+      course_id: cleanCourseId,
+      module_id: ex.module_id || ex.chapitre || (modules[0]?.id || 'mod-1'),
+      chapitre: ex.module_id || ex.chapitre || (modules[0]?.id || 'mod-1'),
+      titre: ex.titre || ex.title || `Mission ${j + 1}`,
+      consigne: ex.consigne || ex.enonce_md || '',
+      enonce_md: ex.consigne || ex.enonce_md || '',
+      theorie_md: ex.theorie_md || '',
+      submission_type: ex.submission_type || (coursePayload.workspaceType === 'coding' ? 'code' : 'drive_link'),
+      type: ex.type || coursePayload.workspaceType || 'office',
+      starter_code: ex.starter_code || {
+        html: ex.starter_html || '',
+        css: ex.starter_css || '',
+        js: ex.starter_js || ''
+      },
+      updated_at: serverTimestamp()
+    }, { merge: true });
+  }
+
+  return {
+    success: true,
+    courseId: cleanCourseId,
+    course: coursePayload
+  };
+}
+
+export async function deleteCourseFromFirestore(courseId) {
+  if (!courseId) return false;
+  await deleteDoc(doc(db, "cours", courseId));
+  return true;
+}
+
+
 
 
