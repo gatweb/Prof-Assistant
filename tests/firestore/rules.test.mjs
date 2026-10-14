@@ -59,6 +59,11 @@ beforeEach(async () => {
       role: 'enseignant',
       actif: false
     });
+    await setDoc(doc(db, 'usage/alice-uid'), {
+      uid: 'alice-uid',
+      hourWindow: 492000,
+      count: 12
+    });
   });
 });
 
@@ -210,4 +215,19 @@ test('Administrateur (gatweb@gmail.com ou claim admin) : écriture sur enseignan
     actif: true
   }));
 });
+
+// =========================== Phase 7 : Compteurs quota usage/{uid} ===========================
+test('Phase 7 usage : un élève lit son propre quota mais ne peut PAS le modifier ni lire celui d\'un autre', async () => {
+  await assertSucceeds(getDoc(doc(alice(), 'usage/alice-uid')));
+  await assertFails(getDoc(doc(bob(), 'usage/alice-uid')));
+  await assertFails(setDoc(doc(alice(), 'usage/alice-uid'), { count: 0 }));
+  await assertFails(deleteDoc(doc(alice(), 'usage/alice-uid')));
+});
+
+test('Phase 7 usage : un enseignant lit les quotas mais ne peut pas les modifier (seul Admin SDK / SuperAdmin)', async () => {
+  const teacherDb = env.authenticatedContext('dyn', google('prof_dynamique@ecole.be')).firestore();
+  await assertSucceeds(getDoc(doc(teacherDb, 'usage/alice-uid')));
+  await assertFails(setDoc(doc(teacherDb, 'usage/alice-uid'), { count: 0 }));
+});
+
 

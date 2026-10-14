@@ -174,6 +174,14 @@ service cloud.firestore {
       allow delete: if isTeacher();
     }
 
+    // ---------- Phase 7 : Compteurs de quota IA par utilisateur (usage/{uid}) ----------
+    match /usage/{uid} {
+      // Lecture autorisée pour l'utilisateur concerné ou un enseignant.
+      // Écriture strictement réservée aux Cloud Functions (Admin SDK) pour empêcher toute remise à zéro côté client.
+      allow read: if isTeacher() || (signedIn() && request.auth.uid == uid);
+      allow write: if false;
+    }
+
     // ---------- Par défaut : administrateurs pour l'écriture ----------
     match /{document=**} {
       allow read: if isTeacher();

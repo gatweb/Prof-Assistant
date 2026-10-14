@@ -551,27 +551,30 @@ export async function getPresentationConfig(moduleId) {
   }
 }
 
-// 9. TUTEUR SOCRATIQUE GEMINI (MULTI-COURS)
-export async function interrogerTuteurIA(question, historique = [], idExercice = 'ch1-communication', customPrompt = null) {
-  try {
-    const fn = httpsCallable(functions, "interrogerTuteur");
-    const defaultPrompt = `Tu es le Tuteur Socratique de ProfAssistant.
-Ton rôle :
-1. Être chaleureux, encourageant et clair (mots simples, phrases courtes).
-2. Ne JAMAIS donner la réponse directement : pose une question guidée ou donne un indice sous forme d'analogie de la vie quotidienne.
-3. Reste concis et adapté aux élèves.`;
-
-    const res = await fn({
-      question,
-      historique,
-      id_exercice: idExercice,
-      system_prompt_custom: customPrompt || defaultPrompt
-    });
-    return res.data?.reponse || res.data?.feedback || res.data;
-  } catch (err) {
-    console.warn("[TuteurIA] Erreur d'appel Cloud Function (fallback local activé) :", err.message);
-    return null;
+// 9. TUTEUR SOCRATIQUE GEMINI (MULTI-COURS — PHASE 7 SÉCURISÉE)
+export async function interrogerTuteurIA({ question, historique = [], idExercice = 'ch1-communication', courseId = 'fmttn-1re', contexteEleve = '' }) {
+  if (!auth.currentUser) {
+    await initStudentSession();
   }
+  const fn = httpsCallable(functions, "interrogerTuteur", { timeout: 28000 });
+
+  // Convertir les 10 derniers messages au format attendu par Gemini : { role: 'user' | 'model', text }
+  const normalizedHistory = (historique || [])
+    .slice(-10)
+    .map(msg => ({
+      role: (msg.role === 'model' || msg.sender === 'bot') ? 'model' : 'user',
+      text: String(msg.text || '')
+    }))
+    .filter(m => m.text.trim().length > 0);
+
+  const res = await fn({
+    question,
+    historique: normalizedHistory,
+    id_exercice: idExercice,
+    course_id: courseId,
+    contexte_eleve: contexteEleve
+  });
+  return res.data?.reponse || res.data?.feedback || res.data;
 }
 
 // 10. SOUMISSION & CORRECTION AUTOMATISÉE DE DEVOIR
