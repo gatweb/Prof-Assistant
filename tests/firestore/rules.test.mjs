@@ -64,6 +64,15 @@ beforeEach(async () => {
       hourWindow: 492000,
       count: 12
     });
+    await setDoc(doc(db, 'classes/1A'), {
+      id: '1A',
+      nom: '1A',
+      classroom_course_id: 'cr_123456',
+      classroom_course_name: '1re A - Numérique FMTTN',
+      course_id: 'fmttn-1re',
+      cours: ['fmttn-1re'],
+      auto_sync_grades: true
+    });
   });
 });
 
@@ -229,5 +238,27 @@ test('Phase 7 usage : un enseignant lit les quotas mais ne peut pas les modifier
   await assertSucceeds(getDoc(doc(teacherDb, 'usage/alice-uid')));
   await assertFails(setDoc(doc(teacherDb, 'usage/alice-uid'), { count: 0 }));
 });
+
+// =========================== Phase 9 : Liaisons Classroom classes/{id} ===========================
+test('Phase 9 classes : un élève connecté lit les liaisons classes mais ne peut pas les modifier ni lire la sous-collection eleves', async () => {
+  await assertSucceeds(getDoc(doc(alice(), 'classes/1A')));
+  await assertSucceeds(getDocs(collection(alice(), 'classes')));
+  await assertFails(setDoc(doc(alice(), 'classes/1A'), { classroom_course_id: 'pirate' }));
+  await assertFails(getDocs(collection(alice(), 'classes/1A/eleves')));
+  await assertFails(getDoc(doc(visiteur(), 'classes/1A')));
+});
+
+test('Phase 9 classes : un enseignant crée et met à jour les liaisons Classroom (classroom_course_id, auto_sync_grades)', async () => {
+  const teacherDb = env.authenticatedContext('dyn', google('prof_dynamique@ecole.be')).firestore();
+  await assertSucceeds(setDoc(doc(teacherDb, 'classes/3GB'), {
+    id: '3GB',
+    nom: '3GB',
+    classroom_course_id: 'cr_999888',
+    course_id: 'bureautique-3e',
+    auto_sync_grades: true
+  }));
+  await assertSucceeds(setDoc(doc(teacherDb, 'classes/3GB/eleves/alice'), { email: 'alice@eleve.be' }));
+});
+
 
 

@@ -336,16 +336,25 @@ export function createCourseStore() {
     },
 
     /**
-     * Filtre les cours du Hub selon la classe de l'élève (avec tous les cours accessibles)
+     * Filtre les cours du Hub selon la classe de l'élève et les liaisons Classroom (Phase 9)
      */
     getFilteredHubCourses() {
       if (!this.coursesList || !this.coursesList.length) return [];
       const cl = (this.user?.classe || '1A').toUpperCase();
       const is1re2e = cl.startsWith('1') || cl.startsWith('2');
 
+      const explicitMapping = (this.classMappings || []).find(
+        m => String(m.id || '').toUpperCase() === cl
+      );
+      const linkedCourseIds = new Set(
+        explicitMapping?.cours || (explicitMapping?.course_id ? [explicitMapping.course_id] : [])
+      );
+
       return this.coursesList.map(c => {
         let recommended = true;
-        if (is1re2e) {
+        if (linkedCourseIds.size > 0) {
+          recommended = linkedCourseIds.has(c.id);
+        } else if (is1re2e) {
           recommended = c.id === 'fmttn-1re' || c.id === 'studio-creatif' || c.id === 'rap-academy';
         } else {
           recommended = c.id !== 'fmttn-1re';
@@ -353,6 +362,7 @@ export function createCourseStore() {
         return {
           ...c,
           recommended,
+          explicitlyLinked: linkedCourseIds.has(c.id),
           progressPercent: this.getCourseCompletionPercent(c)
         };
       });

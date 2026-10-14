@@ -6,7 +6,8 @@ import {
   logoutProfesseur, 
   subscribeToAuthState, 
   saveEleveProgression, 
-  chargerProgressionEleveReelle
+  chargerProgressionEleveReelle,
+  getClassMappings
 } from '../services/firebase.js';
 import { AVAILABLE_CLASSES } from '../services/teachers-config.js';
 import {
@@ -21,6 +22,7 @@ import {
 export function createAuthStore() {
   return {
     availableClasses: AVAILABLE_CLASSES,
+    classMappings: [],
     authReady: false,
     isLoggedIn: false,
     isGuestMode: false,
@@ -67,6 +69,14 @@ export function createAuthStore() {
           this.teacherAuth.user = authStatus.user;
           this.teacherAuth.profile = authStatus.profile;
 
+          // Charger les liaisons explicites de classes (Phase 9)
+          this.classMappings = await getClassMappings();
+          this.classMappings.forEach(m => {
+            if (m.id && !this.availableClasses.includes(m.id)) {
+              this.availableClasses.push(m.id);
+            }
+          });
+
           if (authStatus.isTeacher) {
             console.log(`[Prof] Bienvenue ${authStatus.profile?.nom || authStatus.user?.email}`);
             if (authStatus.profile?.classes?.length) {
@@ -75,10 +85,11 @@ export function createAuthStore() {
             }
             this.activerEcouteClasse(this.selectedTeacherClass);
             this.activerEcouteSubmissions();
-            this.chargerElevesReels();
+            await this.chargerElevesReels();
             this.classroomConnected = isClassroomConnected();
             if (this.classroomConnected) {
-              this.chargerCoursClassroom();
+              await this.chargerCoursClassroom();
+              await this.verifierNouveauxElevesClassroom();
             }
           } else {
             // ÉLÈVE AUTHENTIFIÉ AVEC GOOGLE
@@ -89,10 +100,10 @@ export function createAuthStore() {
             this.user.photoURL = u.photoURL || '';
             this.user.isLoggedIn = true;
 
-            if (!this.user.classe && getClassroomToken()) {
+            if (getClassroomToken()) {
               try {
                 const studentCourses = await fetchStudentEnrolledCourses();
-                const detectedClass = detectClassFromCourses(studentCourses, this.availableClasses);
+                const detectedClass = detectClassFromCourses(studentCourses, this.availableClasses, this.classMappings);
                 if (detectedClass) {
                   this.user.classe = detectedClass;
                   localStorage.setItem('profassistant_student_classe', detectedClass);
@@ -145,9 +156,12 @@ export function createAuthStore() {
           this.classroomConnected = true;
 
           try {
+            if (!this.classMappings?.length) {
+              this.classMappings = await getClassMappings();
+            }
             const studentCourses = await fetchStudentEnrolledCourses();
             if (studentCourses && studentCourses.length) {
-              const detectedClass = detectClassFromCourses(studentCourses, this.availableClasses);
+              const detectedClass = detectClassFromCourses(studentCourses, this.availableClasses, this.classMappings);
               if (detectedClass) {
                 console.log(`[Classroom] Classe détectée automatiquement : ${detectedClass}`);
                 this.user.classe = detectedClass;

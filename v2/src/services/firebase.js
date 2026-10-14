@@ -687,4 +687,40 @@ export async function recupererReponsesGoogleFormsCloud({ formId, accessToken, c
   }
 }
 
+// 13. GESTION DES LIAISONS DE CLASSES CLASSROOM (PHASE 9)
+export async function getClassMappings() {
+  try {
+    const snap = await getDocs(collection(db, "classes"));
+    const list = [];
+    snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+    return list;
+  } catch (err) {
+    console.warn("[getClassMappings] Erreur :", err.message);
+    return [];
+  }
+}
+
+export async function saveClassMapping(classeId, { classroom_course_id, classroom_course_name, course_id, cours_ids = [], auto_sync_grades = false }) {
+  try {
+    const cleanId = String(classeId || '1A').trim().toUpperCase();
+    const docRef = doc(db, "classes", cleanId);
+    const payload = {
+      id: cleanId,
+      nom: cleanId,
+      classroom_course_id: classroom_course_id || '',
+      classroom_course_name: classroom_course_name || '',
+      course_id: course_id || 'fmttn-1re',
+      cours: Array.isArray(cours_ids) && cours_ids.length > 0 ? cours_ids : [course_id || 'fmttn-1re'],
+      auto_sync_grades: Boolean(auto_sync_grades),
+      updated_at: serverTimestamp()
+    };
+    await setDoc(docRef, payload, { merge: true });
+    return { success: true, mapping: payload };
+  } catch (err) {
+    console.error("[saveClassMapping] Erreur :", err);
+    throw err;
+  }
+}
+
+
 

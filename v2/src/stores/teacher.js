@@ -297,9 +297,22 @@ export function createTeacherStore() {
         this.selectedSubmission.note_suggeree = Number(this.gradingNote);
         this.selectedSubmission.prof_message = this.gradingProfMessage;
         this.gradingFeedbackSuccess = `✅ Statut mis à jour : "${nouveauStatut}" (${this.gradingNote}/100) !`;
+
+        // Phase 9 : Si le devoir est validé et que la classe a activé le renvoi automatique des notes vers Classroom
+        if (nouveauStatut === 'valide' && typeof this.autoSyncGradeIfEnabled === 'function') {
+          try {
+            const autoSynced = await this.autoSyncGradeIfEnabled(this.selectedSubmission, Number(this.gradingNote));
+            if (autoSynced) {
+              this.gradingFeedbackSuccess += ' 📤 Note renvoyée automatiquement sur Classroom !';
+            }
+          } catch (syncErr) {
+            console.warn("[Phase 9 AutoSync] Note non renvoyée automatiquement :", syncErr.message);
+          }
+        }
+
         setTimeout(() => {
           this.modalCorrectionOpen = false;
-        }, 1000);
+        }, 1200);
       } catch (err) {
         alert("Erreur lors de la mise à jour : " + err.message);
       } finally {

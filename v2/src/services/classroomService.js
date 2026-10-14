@@ -14,7 +14,8 @@ import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 export const CLASSROOM_SCOPES = [
   'https://www.googleapis.com/auth/classroom.courses.readonly',
   'https://www.googleapis.com/auth/classroom.rosters.readonly',
-  'https://www.googleapis.com/auth/classroom.coursework.students'
+  'https://www.googleapis.com/auth/classroom.coursework.students',
+  'https://www.googleapis.com/auth/classroom.topics'
 ];
 
 const STORAGE_KEY_TOKEN = 'prof_classroom_access_token';
@@ -178,12 +179,25 @@ export async function fetchStudentEnrolledCourses() {
 }
 
 /**
- * Détecte intelligemment la classe d'un élève depuis ses cours Google Classroom
+ * Détecte la classe d'un élève depuis ses cours Google Classroom :
+ * 1. Priorité absolue : Liaison explicite `classes/{id}.classroom_course_id` enregistrée par le professeur (Phase 9 - C2)
+ * 2. Secours 1 : Parmi les classes configurées dans l'école
+ * 3. Secours 2 : Expression régulière sur le nom/section du cours
  */
-export function detectClassFromCourses(courses = [], availableClasses = []) {
+export function detectClassFromCourses(courses = [], availableClasses = [], classMappings = []) {
   if (!courses || !courses.length) return null;
 
-  // 1. Chercher d'abord parmi les classes configurées dans l'école
+  // 0. Priorité absolue : Liaison explicite par identifiant du cours Classroom (fiable à 100%)
+  if (Array.isArray(classMappings) && classMappings.length > 0) {
+    const enrolledIds = new Set(courses.map(c => String(c.id)));
+    for (const mapping of classMappings) {
+      if (mapping.classroom_course_id && enrolledIds.has(String(mapping.classroom_course_id))) {
+        return mapping.id || mapping.nom;
+      }
+    }
+  }
+
+  // 1. Secours : Chercher parmi les classes configurées dans l'école
   for (const course of courses) {
     const text = `${course.section || ''} ${course.name || ''} ${course.room || ''}`.trim();
     for (const c of availableClasses) {
@@ -194,7 +208,7 @@ export function detectClassFromCourses(courses = [], availableClasses = []) {
     }
   }
 
-  // 2. Détection par motif standard (ex: 1A, 1ère A, 2B, 3TT, etc.)
+  // 2. Secours : Détection par motif standard (ex: 1A, 1ère A, 2B, 3TT, etc.)
   for (const course of courses) {
     const text = `${course.section || ''} ${course.name || ''}`.trim();
     const match = text.match(/\b([1-6])[\s\-_]*(ère|ere|ème|eme)?[\s\-_]*([A-Za-z]{1,2})\b/i);
@@ -204,6 +218,38 @@ export function detectClassFromCourses(courses = [], availableClasses = []) {
   }
 
   return null;
+}
+
+/**
+ * 3b. Récupère les thèmes (Topics) d'un cours Google Classroom (Phase 9)
+ */
+export async function fetchCourseTopics(courseId) {
+  if (!courseId) return [];
+  try {
+    const data = await classroomFetch(`/courses/${courseId}/topics`);
+    return (data.topic || []).map(t => ({
+      topicId: t.topicId,
+      name: t.name
+    }));
+  } catch (err) {
+    console.warn("[Classroom] Thèmes non disponibles :", err.message);
+    return [];
+  }
+}
+
+/**
+ * 3c. Crée un nouveau thème (Topic) dans un cours Google Classroom (Phase 9)
+ */
+export async function createCourseTopic(courseId, name) {
+  if (!courseId || !name) throw new Error("Paramètres manquants pour créer le thème Classroom.");
+  const created = await classroomFetch(`/courses/${courseId}/topics`, {
+    method: 'POST',
+    body: JSON.stringify({ name: name.trim() })
+  });
+  return {
+    topicId: created.topicId,
+    name: created.name
+  };
 }
 
 /**
@@ -257,8 +303,9 @@ export async function fetchCourseWork(courseId) {
 
 /**
  * 4. Publie une activité ProfAssistant comme devoir (CourseWork) dans Classroom
+ * Supporte : date limite (`dueDate` YYYY-MM-DD), heure limite (`dueTime` HH:MM), et thème (`topicId`).
  */
-export async function publishCourseWork(courseId, { title, description, linkUrl, maxPoints = 100 }) {
+export async function publishCourseWork(courseId, { title, description, linkUrl, maxPoints = 100, dueDate = '', dueTime = '23:59', topicId = '' }) {
   if (!courseId) throw new Error("Cours Classroom non sélectionné.");
   if (!title) throw new Error("Titre du devoir requis.");
 
@@ -278,6 +325,17 @@ export async function publishCourseWork(courseId, { title, description, linkUrl,
     maxPoints: Number(maxPoints) || 100
   };
 
+  if (topicId) {
+    payload.topicId = topicId;
+  }
+
+  if (dueDate && /^\d{4}-\d{2}-\d{2}$/.test(dueDate.trim())) {
+    const [year, month, day] = dueDate.trim().split('-').map(Number);
+    const [hours, minutes] = (dueTime || '23:59').split(':').map(n => Number(n) || 0);
+    payload.dueDate = { year, month, day };
+    payload.dueTime = { hours, minutes, seconds: 0, nanos: 0 };
+  }
+
   const created = await classroomFetch(`/courses/${courseId}/courseWork`, {
     method: 'POST',
     body: JSON.stringify(payload)
@@ -287,7 +345,8 @@ export async function publishCourseWork(courseId, { title, description, linkUrl,
     id: created.id,
     title: created.title,
     alternateLink: created.alternateLink || `https://classroom.google.com/c/${courseId}/a/${created.id}/details`,
-    maxPoints: created.maxPoints
+    maxPoints: created.maxPoints,
+    topicId: created.topicId || null
   };
 }
 

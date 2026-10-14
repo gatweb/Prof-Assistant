@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>body{font-family:Plus Jakarta Sans,sans-serif}</style>
-  <script type="module" crossorigin src="/assets/index-uJMMflMN.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-C1R9UrAM.css">
+  <script type="module" crossorigin src="/assets/index-0itxZxU9.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-gioVKy2O.css">
 </head>
 <body class="h-full flex flex-col bg-slate-50 text-slate-800" x-data="profAssistantApp()">
 
@@ -3514,6 +3514,112 @@
             </div>
           </div>
 
+          <!-- ALERTE NOUVEAUX ÉLÈVES DÉTECTÉS DANS LE ROSTER CLASSROOM (PHASE 9) -->
+          <div x-show="classroomNewStudentsDetected.length > 0" class="bg-amber-50 border border-amber-300 rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+            <div class="flex items-start gap-3">
+              <span class="text-2xl">🔔</span>
+              <div>
+                <h4 class="font-black text-sm text-amber-950" x-text="classroomNewStudentsDetected.length + ' nouvel(aux) élève(s) détecté(s) dans Google Classroom !'"></h4>
+                <p class="text-xs text-amber-800 mt-0.5">
+                  Ces élèves sont inscrits dans Classroom mais pas encore dans la classe ProfAssistant correspondante.
+                </p>
+              </div>
+            </div>
+            <button
+              @click="synchroniserNouveauxElevesDetectes()"
+              :disabled="classroomImportLoading"
+              class="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-xs transition cursor-pointer shrink-0 shadow-xs">
+              ⚡ Ajouter ces <span x-text="classroomNewStudentsDetected.length"></span> élève(s) en 1 clic
+            </button>
+          </div>
+
+          <!-- VOLET 0 (PHASE 9) : LIER MES COURS CLASSROOM ↔ CLASSE & COURS PROFASSISTANT -->
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-indigo-200/80 shadow-xs space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
+                  🔗
+                </div>
+                <div>
+                  <h4 class="font-black text-base text-slate-900">Lier ce cours Classroom à une classe ProfAssistant</h4>
+                  <p class="text-xs text-slate-500">Permet de reconnaître les élèves à 100 % dès leur connexion Google et de filtrer automatiquement leurs cours.</p>
+                </div>
+              </div>
+              <template x-if="getMappingForClassroomCourse(classroomSelectedCourseId)">
+                <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black">
+                  ✓ Lié à la classe <span x-text="getMappingForClassroomCourse(classroomSelectedCourseId)?.id"></span>
+                </span>
+              </template>
+            </div>
+
+            <div x-show="classroomMappingSuccessMsg" class="p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 text-xs font-black flex items-center justify-between">
+              <span x-text="classroomMappingSuccessMsg"></span>
+              <button @click="classroomMappingSuccessMsg = ''" class="text-emerald-700 font-bold cursor-pointer">&times;</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+              <div>
+                <label class="block text-xs font-black text-slate-700 mb-1">Classe ProfAssistant :</label>
+                <select
+                  x-model="classroomMappingForm.classeId"
+                  class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:outline-none focus:border-indigo-600">
+                  <template x-for="c in availableClasses" :key="c">
+                    <option :value="c" x-text="'Classe ' + c"></option>
+                  </template>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-black text-slate-700 mb-1">Ou créer une classe :</label>
+                <input
+                  type="text"
+                  x-model="classroomMappingForm.newClasseId"
+                  placeholder="Ex: 3TT, 4G..."
+                  class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold uppercase focus:outline-none focus:border-indigo-600" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-black text-slate-700 mb-1">Cours ProfAssistant associé :</label>
+                <select
+                  x-model="classroomMappingForm.courseId"
+                  class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:outline-none focus:border-indigo-600">
+                  <template x-for="c in coursesList" :key="c.id">
+                    <option :value="c.id" x-text="(c.theme?.icon || '📚') + ' ' + c.title"></option>
+                  </template>
+                </select>
+              </div>
+
+              <div>
+                <button
+                  @click="enregistrerLiaisonClassroom()"
+                  :disabled="classroomMappingSaving || !classroomSelectedCourseId"
+                  class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs transition cursor-pointer shadow-xs disabled:opacity-50">
+                  <span x-text="classroomMappingSaving ? 'Enregistrement...' : '🔗 Enregistrer la liaison'"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Option de renvoi automatique des notes -->
+            <div class="pt-2 flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 text-xs">
+              <label class="inline-flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  x-model="classroomMappingForm.autoSyncGrades"
+                  class="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer" />
+                <span>📤 Renvoyer automatiquement la note dans Classroom dès qu'une copie est validée</span>
+              </label>
+
+              <!-- Récapitulatif des liaisons actives -->
+              <div x-show="classMappings.filter(m => m.classroom_course_id).length > 0" class="flex flex-wrap items-center gap-1.5">
+                <span class="text-[11px] font-bold text-slate-400">Liaisons actives :</span>
+                <template x-for="m in classMappings.filter(m => m.classroom_course_id)" :key="m.id">
+                  <span class="px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-800 text-[11px] font-extrabold"
+                        x-text="m.id + ' ↔ ' + (m.classroom_course_name || m.classroom_course_id)"></span>
+                </template>
+              </div>
+            </div>
+          </div>
+
           <!-- Grille des 2 Volets : Import Élèves & Publication Devoirs -->
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
@@ -3619,17 +3725,61 @@
                   <button @click="classroomPublishSuccess = ''" class="text-emerald-700 hover:text-emerald-900 text-base font-bold cursor-pointer">&times;</button>
                 </div>
 
-                <!-- Formulaire de Publication -->
+                <!-- Formulaire de Publication Enrichie (Phase 9) -->
                 <div class="space-y-4">
-                  <!-- Sélection rapide depuis les cours ProfAssistant -->
-                  <div>
-                    <label class="block text-xs font-black text-slate-700 mb-1">Pré-remplir depuis un cours ProfAssistant :</label>
-                    <select 
-                      @change="preparerDevoirClassroom($event.target.value)"
-                      class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:outline-none focus:border-emerald-600 cursor-pointer">
-                      <option value="">-- Choisir une activité du catalogue --</option>
-                      <template x-for="c in coursesList" :key="c.id">
-                        <option :value="c.id" x-text="c.icon + ' ' + c.title"></option>
+                  <!-- Mode de publication : Activité unique vs Module entier -->
+                  <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl text-xs font-extrabold">
+                    <button
+                      type="button"
+                      @click="changerModePublicationClassroom('single')"
+                      :class="classroomNewAssignment.publishMode === 'single' ? 'bg-white text-emerald-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+                      class="flex-1 py-1.5 px-3 rounded-lg transition cursor-pointer">
+                      🎯 Activité unique
+                    </button>
+                    <button
+                      type="button"
+                      @click="changerModePublicationClassroom('module')"
+                      :class="classroomNewAssignment.publishMode === 'module' ? 'bg-white text-emerald-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+                      class="flex-1 py-1.5 px-3 rounded-lg transition cursor-pointer">
+                      📦 Module entier
+                    </button>
+                  </div>
+
+                  <!-- Sélection du cours et du module/exercice ProfAssistant -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-xs font-black text-slate-700 mb-1">Cours ProfAssistant :</label>
+                      <select 
+                        x-model="classroomNewAssignment.selectedCourseId"
+                        @change="preparerDevoirClassroom($event.target.value)"
+                        class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:outline-none focus:border-emerald-600 cursor-pointer">
+                        <template x-for="c in coursesList" :key="c.id">
+                          <option :value="c.id" x-text="(c.theme?.icon || '📚') + ' ' + c.title"></option>
+                        </template>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="block text-xs font-black text-slate-700 mb-1">Module / Chapitre :</label>
+                      <select
+                        x-model="classroomNewAssignment.selectedModuleId"
+                        class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:outline-none focus:border-emerald-600 cursor-pointer">
+                        <template x-for="ch in (coursesList.find(c => c.id === classroomNewAssignment.selectedCourseId)?.chapters || [])" :key="ch.id">
+                          <option :value="ch.id" x-text="ch.title"></option>
+                        </template>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Choix de l'exercice précis (si mode single et exercices disponibles) -->
+                  <div x-show="classroomNewAssignment.publishMode === 'single' && classroomPublishExercisesList.length > 0">
+                    <label class="block text-xs font-black text-slate-700 mb-1">Mission / Exercice ciblé (Lien profond `?course=&ex=`) :</label>
+                    <select
+                      x-model="classroomNewAssignment.selectedExerciseId"
+                      @change="preparerDevoirClassroom(classroomNewAssignment.selectedCourseId, $event.target.value)"
+                      class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:outline-none focus:border-emerald-600 cursor-pointer">
+                      <template x-for="ex in classroomPublishExercisesList" :key="ex.id">
+                        <option :value="ex.id" x-text="ex.titre || ex.title"></option>
                       </template>
                     </select>
                   </div>
@@ -3648,8 +3798,42 @@
                     <textarea 
                       rows="2" 
                       x-model="classroomNewAssignment.description" 
-                      placeholder="Cliquez sur le lien ci-joint pour ouvrir votre espace de travail..."
+                      placeholder="Cliquez sur le lien ci-joint pour ouvrir directement votre activité en mode Focus..."
                       class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-emerald-600"></textarea>
+                  </div>
+
+                  <!-- Date limite & Thème Classroom (Phase 9) -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                    <div>
+                      <label class="block text-[11px] font-black text-slate-700 mb-1">📅 Date limite (optionnel) :</label>
+                      <div class="flex items-center gap-1.5">
+                        <input
+                          type="date"
+                          x-model="classroomNewAssignment.dueDate"
+                          class="flex-1 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold focus:outline-none focus:border-emerald-600" />
+                        <input
+                          type="time"
+                          x-model="classroomNewAssignment.dueTime"
+                          class="w-24 px-2 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold focus:outline-none focus:border-emerald-600" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label class="block text-[11px] font-black text-slate-700 mb-1">🏷️ Thème Classroom (Topic) :</label>
+                      <select
+                        x-model="classroomNewAssignment.topicId"
+                        class="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold focus:outline-none focus:border-emerald-600 mb-1.5">
+                        <option value="">-- Aucun thème ou créer ci-dessous --</option>
+                        <template x-for="tp in classroomTopicsList" :key="tp.topicId">
+                          <option :value="tp.topicId" x-text="tp.name"></option>
+                        </template>
+                      </select>
+                      <input
+                        type="text"
+                        x-model="classroomNewAssignment.newTopicName"
+                        placeholder="Ou nouveau thème (ex: Chapitre 1)"
+                        class="w-full px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-[11px] focus:outline-none focus:border-emerald-600" />
+                    </div>
                   </div>
 
                   <div class="flex items-center justify-between gap-4">
@@ -3665,7 +3849,7 @@
                       <span class="text-xs text-slate-400 font-bold">points</span>
                     </div>
 
-                    <span class="text-[11px] text-slate-400 font-medium">Lien direct généré automatiquement 🔗</span>
+                    <span class="text-[11px] text-emerald-700 font-bold">Lien profond `?course=&ex=` actif 🔗</span>
                   </div>
                 </div>
               </div>
