@@ -806,415 +806,6 @@
 
       </div>
 
-      <!-- ============================================== -->
-      <!-- SOUS-ONGLET 7 : COURSE STUDIO & IMPORT (PHASE 10) -->
-      <!-- ============================================== -->
-      <div x-show="activeProfSubTab === 'studio'" class="space-y-6">
-        
-        <!-- En-tête Course Studio -->
-        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-            <div class="flex items-center gap-3.5">
-              <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl font-bold border border-indigo-100">
-                🎨
-              </div>
-              <div>
-                <div class="flex items-center gap-2">
-                  <h3 class="font-black text-base text-slate-900">Course Studio Sans Code & Import IA</h3>
-                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-100 text-indigo-700">Phase 10</span>
-                </div>
-                <p class="text-xs text-slate-500 mt-0.5">Créez, importez ou modifiez vos cours, modules Markdown et missions directement dans Firestore.</p>
-              </div>
-            </div>
-
-            <div class="flex items-center gap-2 flex-wrap">
-              <button
-                @click="creerNouveauCoursStudio()"
-                class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs transition cursor-pointer shadow-xs">
-                ➕ Nouveau Cours
-              </button>
-              <button
-                @click="exporterPackCoursJSON()"
-                class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer">
-                📦 Exporter Pack JSON
-              </button>
-              <button
-                @click="migrerLes6CoursStatiquesVersFirestore()"
-                :disabled="studioMigrating"
-                class="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold text-xs transition cursor-pointer disabled:opacity-50"
-                title="Copier les 6 cours de public/cours/ vers Firestore pour les rendre éditables sans code">
-                <span x-text="studioMigrating ? '⏳ Migration...' : '🔄 Migrer les 6 cours statiques vers Firestore'"></span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Messages retour -->
-          <div x-show="studioSuccessMsg" class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black flex items-center justify-between">
-            <span x-text="studioSuccessMsg"></span>
-            <button @click="studioSuccessMsg = ''" class="text-emerald-700 font-bold cursor-pointer">&times;</button>
-          </div>
-          <div x-show="studioErrorMsg" class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center justify-between">
-            <span x-text="studioErrorMsg"></span>
-            <button @click="studioErrorMsg = ''" class="text-rose-700 font-bold cursor-pointer">&times;</button>
-          </div>
-
-          <!-- LES 5 SOURCES D'IMPORT FACILE -->
-          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div class="text-xs font-black text-slate-800 uppercase tracking-wider">⚡ Importer un cours en 1 clic (5 sources) :</div>
-              <div class="flex flex-wrap gap-1.5">
-                <button type="button" @click="studioImportSource = 'syllabus'" :class="studioImportSource === 'syllabus' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 border border-slate-200'" class="px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer">1. 📄 PDF / Syllabus (IA)</button>
-                <button type="button" @click="studioImportSource = 'gdoc'" :class="studioImportSource === 'gdoc' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 border border-slate-200'" class="px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer">2. 📝 Google Doc (IA)</button>
-                <button type="button" @click="studioImportSource = 'classroom'" :class="studioImportSource === 'classroom' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 border border-slate-200'" class="px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer">3. 🏫 Cours Classroom (IA)</button>
-                <button type="button" @click="studioImportSource = 'pack'" :class="studioImportSource === 'pack' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 border border-slate-200'" class="px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer">4. 📦 Pack de cours JSON</button>
-                <button type="button" @click="studioImportSource = 'duplicate'" :class="studioImportSource === 'duplicate' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 border border-slate-200'" class="px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer">5. 📑 Dupliquer un modèle</button>
-              </div>
-            </div>
-
-            <!-- Source 1 : Syllabus / PDF / Texte -->
-            <div x-show="studioImportSource === 'syllabus'" class="space-y-3 pt-2 border-t border-slate-200/70">
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Titre souhaité :</label>
-                  <input type="text" x-model="studioImportTitleHint" placeholder="Ex: Introduction à Python (3e)" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold" />
-                </div>
-                <div>
-                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Type d'atelier :</label>
-                  <select x-model="studioImportWorkspaceHint" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold">
-                    <option value="office">📄 Bureautique & Docs</option>
-                    <option value="coding">💻 Coding Lab (HTML/CSS/JS)</option>
-                    <option value="creative">🎨 Studio Créatif</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Charger un fichier (.txt, .md) :</label>
-                  <input type="file" accept=".txt,.md" @change="chargerFichierTexteSyllabus($event)" class="w-full text-xs text-slate-600" />
-                </div>
-              </div>
-              <textarea rows="3" x-model="studioImportRawText" placeholder="Collez ici le plan de cours, le texte de votre PDF ou votre syllabus : Gemini 2.5 va proposer les modules, la théorie Markdown et les missions..." class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs"></textarea>
-              <button @click="importerCoursDepuisSyllabusIA()" :disabled="studioImportLoading" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs transition cursor-pointer disabled:opacity-50">
-                <span x-text="studioImportLoading ? '⏳ Structuration par Gemini en cours...' : '✨ Générer la proposition de cours avec Gemini (Relecture avant publication)'"></span>
-              </button>
-            </div>
-
-            <!-- Source 2 : Google Doc -->
-            <div x-show="studioImportSource === 'gdoc'" class="space-y-3 pt-2 border-t border-slate-200/70">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Lien ou ID du Google Doc :</label>
-                  <input type="text" x-model="studioImportGDocUrl" placeholder="https://docs.google.com/document/d/..." class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-mono" />
-                </div>
-                <div>
-                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Titre du cours :</label>
-                  <input type="text" x-model="studioImportTitleHint" placeholder="Ex: Réseaux & Internet" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold" />
-                </div>
-              </div>
-              <textarea rows="2" x-model="studioImportRawText" placeholder="Optionnel : vous pouvez aussi coller directement des extraits de votre Google Doc ici..." class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs"></textarea>
-              <button @click="importerCoursDepuisGoogleDocIA()" :disabled="studioImportLoading" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs transition cursor-pointer disabled:opacity-50">
-                <span x-text="studioImportLoading ? '⏳ Conversion du Google Doc...' : '📝 Convertir ce Google Doc en modules & missions'"></span>
-              </button>
-            </div>
-
-            <!-- Source 3 : Depuis un cours Google Classroom -->
-            <div x-show="studioImportSource === 'classroom'" class="space-y-3 pt-2 border-t border-slate-200/70">
-              <div class="flex flex-col sm:flex-row sm:items-end gap-3">
-                <div class="flex-1">
-                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Cours Classroom source (supports & devoirs) :</label>
-                  <select x-model="studioImportClassroomCourseId" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold">
-                    <option value="">-- Utiliser le cours Classroom actif --</option>
-                    <template x-for="c in classroomCourses" :key="c.id">
-                      <option :value="c.id" x-text="c.name"></option>
-                    </template>
-                  </select>
-                </div>
-                <button @click="importerCoursDepuisClassroomIA()" :disabled="studioImportLoading || !classroomConnected" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition cursor-pointer disabled:opacity-50">
-                  <span x-text="studioImportLoading ? '⏳ Import Classroom en cours...' : '🏫 Importer les supports & devoirs Classroom en modules'"></span>
-                </button>
-              </div>
-              <p x-show="!classroomConnected" class="text-[11px] text-amber-700 font-bold">⚠️ Connectez d'abord Google Classroom dans l'onglet « Google Classroom ».</p>
-            </div>
-
-            <!-- Source 4 : Pack de cours JSON -->
-            <div x-show="studioImportSource === 'pack'" class="space-y-3 pt-2 border-t border-slate-200/70">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <div class="text-xs font-bold text-slate-800">Importer un fichier Pack de cours (`.json`) partagé par un collègue :</div>
-                  <input type="file" accept=".json" @change="importerPackCoursJSON($event)" class="mt-1.5 text-xs text-slate-600" />
-                </div>
-                <button @click="exporterPackCoursJSON()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs transition cursor-pointer">
-                  📤 Télécharger le Pack JSON du cours actuel
-                </button>
-              </div>
-            </div>
-
-            <!-- Source 5 : Dupliquer un cours modèle -->
-            <div x-show="studioImportSource === 'duplicate'" class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end pt-2 border-t border-slate-200/70">
-              <div>
-                <label class="block text-[11px] font-bold text-slate-600 mb-1">Cours modèle à copier :</label>
-                <select x-model="studioDuplicateSourceId" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold">
-                  <template x-for="c in coursesList" :key="c.id">
-                    <option :value="c.id" x-text="c.title"></option>
-                  </template>
-                </select>
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-600 mb-1">Nouvel ID (slug) :</label>
-                <input type="text" x-model="studioDuplicateNewId" placeholder="bureautique-3b" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-mono" />
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-600 mb-1">Nouveau titre :</label>
-                <input type="text" x-model="studioDuplicateNewTitle" placeholder="Bureautique - Groupe B" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold" />
-              </div>
-              <button @click="dupliquerCoursModele()" class="py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs transition cursor-pointer">
-                📑 Dupliquer en 1 clic
-              </button>
-            </div>
-          </div>
-
-          <!-- SÉLECTION DU COURS À ÉDITER & MÉTADONNÉES -->
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2">
-            <!-- Colonne gauche : Paramètres du cours (4 cols) -->
-            <div class="lg:col-span-4 space-y-4 bg-slate-50 p-5 rounded-2xl border border-slate-200/80">
-              <div>
-                <label class="block text-xs font-black text-slate-700 mb-1">Charger un cours existant :</label>
-                <select
-                  :value="studioSelectedCourseId"
-                  @change="chargerCoursDansStudio($event.target.value)"
-                  class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold cursor-pointer">
-                  <template x-for="c in coursesList" :key="c.id">
-                    <option :value="c.id" x-text="(c.theme?.icon || '📚') + ' ' + c.title + (c.status === 'draft' ? ' (Brouillon)' : '')"></option>
-                  </template>
-                </select>
-              </div>
-
-              <div class="grid grid-cols-3 gap-2">
-                <div class="col-span-2">
-                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Identifiant (slug) :</label>
-                  <input type="text" x-model="studioCourseForm.id" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-mono" />
-                </div>
-                <div>
-                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Icône :</label>
-                  <input type="text" x-model="studioCourseForm.icon" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-center text-base" />
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-[11px] font-bold text-slate-600 mb-1">Titre du cours :</label>
-                <input type="text" x-model="studioCourseForm.title" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold" />
-              </div>
-
-              <div>
-                <label class="block text-[11px] font-bold text-slate-600 mb-1">Description (Pitch) :</label>
-                <textarea rows="2" x-model="studioCourseForm.pitch" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs"></textarea>
-              </div>
-
-              <div class="grid grid-cols-2 gap-2">
-                <div>
-                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Atelier :</label>
-                  <select x-model="studioCourseForm.workspaceType" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold">
-                    <option value="office">📄 Office / Docs</option>
-                    <option value="coding">💻 Coding Lab</option>
-                    <option value="creative">🎨 Créatif</option>
-                    <option value="fmttn">🤖 FMTTN 1re</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Statut :</label>
-                  <select x-model="studioCourseForm.status" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold">
-                    <option value="draft">📝 Brouillon</option>
-                    <option value="published">✅ Publié</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-[11px] font-bold text-slate-600 mb-1">Prompt Système Tuteur IA (Côté serveur) :</label>
-                <textarea rows="3" x-model="studioCourseForm.systemPrompt" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-[11px]"></textarea>
-              </div>
-
-              <div class="pt-2 flex flex-col gap-2">
-                <button
-                  @click="sauvegarderCoursStudio('published')"
-                  :disabled="studioSaving"
-                  class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition cursor-pointer shadow-xs disabled:opacity-50">
-                  <span x-text="studioSaving ? '⏳ Sauvegarde...' : '✅ Enregistrer & Publier le cours'"></span>
-                </button>
-                <button
-                  @click="sauvegarderCoursStudio('draft')"
-                  :disabled="studioSaving"
-                  class="w-full py-2 px-4 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs transition cursor-pointer disabled:opacity-50">
-                  📝 Enregistrer en Brouillon
-                </button>
-              </div>
-            </div>
-
-            <!-- Colonne droite : Éditeur de Modules Markdown & Missions (8 cols) -->
-            <div class="lg:col-span-8 space-y-6">
-              <!-- Barre des modules du cours -->
-              <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
-                <div class="flex items-center justify-between gap-2 flex-wrap">
-                  <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
-                    <template x-for="(mod, idx) in studioModules" :key="mod.id || idx">
-                      <button
-                        type="button"
-                        @click="studioActiveModuleIdx = idx"
-                        :class="studioActiveModuleIdx === idx ? 'bg-indigo-600 text-white font-black' : 'bg-white text-slate-700 border border-slate-200 font-bold'"
-                        class="px-3 py-1.5 rounded-xl text-xs transition cursor-pointer shrink-0">
-                        <span x-text="'M' + (idx + 1) + ' : ' + (mod.title || 'Module')"></span>
-                      </button>
-                    </template>
-                  </div>
-                  <button
-                    type="button"
-                    @click="ajouterModuleStudio()"
-                    class="px-3 py-1.5 rounded-xl bg-indigo-100 hover:bg-indigo-200 text-indigo-800 text-xs font-extrabold transition cursor-pointer shrink-0">
-                    ➕ Ajouter un module
-                  </button>
-                </div>
-
-                <!-- Édition du module sélectionné -->
-                <template x-if="getActiveStudioModule()">
-                  <div class="space-y-3 pt-2 border-t border-slate-200/70">
-                    <div class="flex items-center justify-between gap-3">
-                      <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <div>
-                          <label class="block text-[10px] font-bold text-slate-500">ID Module :</label>
-                          <input type="text" x-model="studioModules[studioActiveModuleIdx].id" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-mono" />
-                        </div>
-                        <div class="sm:col-span-2">
-                          <label class="block text-[10px] font-bold text-slate-500">Titre du module :</label>
-                          <input type="text" x-model="studioModules[studioActiveModuleIdx].title" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold" />
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        @click="supprimerModuleStudio(studioActiveModuleIdx)"
-                        class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold cursor-pointer mt-4">
-                        🗑️
-                      </button>
-                    </div>
-
-                    <!-- Bascule Édition Markdown / Aperçu -->
-                    <div class="flex items-center justify-between">
-                      <span class="text-xs font-black text-slate-700">📖 Support théorique (Markdown) :</span>
-                      <button
-                        type="button"
-                        @click="studioMarkdownPreview = !studioMarkdownPreview"
-                        class="px-3 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold text-indigo-600 cursor-pointer">
-                        <span x-text="studioMarkdownPreview ? '✏️ Retour à l\'éditeur Markdown' : '👁️ Aperçu du rendu élève'"></span>
-                      </button>
-                    </div>
-
-                    <div x-show="!studioMarkdownPreview">
-                      <textarea
-                        rows="8"
-                        x-model="studioModules[studioActiveModuleIdx].theorie_md"
-                        placeholder="# Titre de la leçon&#10;&#10;Rédigez vos explications en Markdown..."
-                        class="w-full p-3 rounded-xl border border-slate-200 bg-white text-xs font-mono leading-relaxed focus:outline-none focus:border-indigo-600"></textarea>
-                    </div>
-
-                    <div x-show="studioMarkdownPreview" class="p-5 rounded-xl border border-slate-200 bg-white prose-custom max-h-72 overflow-y-auto text-xs" x-html="getRenderedStudioMarkdown()"></div>
-                  </div>
-                </template>
-              </div>
-
-              <!-- Missions / Exercices du cours -->
-              <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <h4 class="font-black text-sm text-slate-900">🎯 Missions & Exercices Pratiques</h4>
-                    <p class="text-[11px] text-slate-500">Rattachez chaque mission à un module et choisissez le type de remise.</p>
-                  </div>
-                  <button
-                    type="button"
-                    @click="ajouterMissionStudio()"
-                    class="px-3 py-1.5 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-extrabold transition cursor-pointer">
-                    ➕ Ajouter une mission
-                  </button>
-                </div>
-
-                <div class="space-y-3 max-h-96 overflow-y-auto pr-1">
-                  <template x-for="(mis, mIdx) in studioMissions" :key="mis.id || mIdx">
-                    <div class="p-4 rounded-xl bg-white border border-slate-200 space-y-3">
-                      <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 items-center">
-                        <div class="sm:col-span-2">
-                          <label class="block text-[10px] font-bold text-slate-400">Titre de la mission :</label>
-                          <input type="text" x-model="mis.titre" class="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-bold" />
-                        </div>
-                        <div>
-                          <label class="block text-[10px] font-bold text-slate-400">Module rattaché :</label>
-                          <select x-model="mis.module_id" class="w-full px-2 py-1 rounded-lg border border-slate-200 text-xs font-bold">
-                            <template x-for="mod in studioModules" :key="mod.id">
-                              <option :value="mod.id" x-text="mod.title"></option>
-                            </template>
-                          </select>
-                        </div>
-                        <div class="flex items-end gap-1">
-                          <div class="flex-1">
-                            <label class="block text-[10px] font-bold text-slate-400">Type remise :</label>
-                            <select x-model="mis.submission_type" class="w-full px-2 py-1 rounded-lg border border-slate-200 text-xs font-bold">
-                              <option value="drive_link">Lien Drive/Docs</option>
-                              <option value="code">Code HTML/CSS/JS</option>
-                              <option value="creative_link">Lien Créatif</option>
-                              <option value="text">Texte libre</option>
-                            </select>
-                          </div>
-                          <button type="button" @click="supprimerMissionStudio(mIdx)" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer">🗑️</button>
-                        </div>
-                      </div>
-                      <div>
-                        <label class="block text-[10px] font-bold text-slate-400">Consigne élève :</label>
-                        <textarea rows="2" x-model="mis.consigne" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs"></textarea>
-                      </div>
-                    </div>
-                  </template>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- MODALE DE RELECTURE AVANT IMPORT / PUBLICATION (PHASE 10) -->
-        <div
-          x-show="studioReviewModalOpen"
-          x-transition.opacity
-          class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
-          style="display: none;">
-          <div class="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 max-h-[85vh] flex flex-col justify-between">
-            <div class="pb-4 border-b border-slate-100 flex items-center justify-between">
-              <div>
-                <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-black uppercase">Écran de Relecture Enseignant</span>
-                <h3 class="text-lg font-black text-slate-900 mt-1" x-text="studioReviewProposal?.title || 'Proposition de cours'"></h3>
-                <p class="text-xs text-slate-500" x-text="studioReviewProposal?.pitch"></p>
-              </div>
-              <button @click="studioReviewModalOpen = false" class="text-slate-400 hover:text-slate-700 text-xl font-bold cursor-pointer">&times;</button>
-            </div>
-
-            <div class="py-4 overflow-y-auto space-y-4 text-xs">
-              <template x-for="(rmod, rIdx) in (studioReviewProposal?.modules || [])" :key="rIdx">
-                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                  <div class="font-black text-slate-900 text-sm" x-text="(rIdx + 1) + '. ' + rmod.title"></div>
-                  <div class="text-slate-600 line-clamp-3 font-mono text-[11px]" x-text="rmod.theorie_md"></div>
-                  <div class="pt-1 flex flex-wrap gap-1.5">
-                    <template x-for="(rmis, mIdx) in (rmod.missions || [])" :key="mIdx">
-                      <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-bold text-[11px]" x-text="'🎯 ' + rmis.titre"></span>
-                    </template>
-                  </div>
-                </div>
-              </template>
-            </div>
-
-            <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
-              <button @click="studioReviewModalOpen = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs cursor-pointer">Annuler</button>
-              <button @click="appliquerPropositionImportDansStudio()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs cursor-pointer shadow-xs">
-                ✅ Charger dans l'éditeur pour relecture & publication
-              </button>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
     </div>
     <!-- ======================================================= -->
     <!-- ESCAPE GAME : LES 5 DOSSIERS PERDUS                     -->
@@ -2942,6 +2533,315 @@
 
         </div>
 
+      </div>
+
+      <!-- ========================================== -->
+      <!-- 4. BLOC RÉDACTION & ARGUMENTATION (PHASE 13) -->
+      <!-- ========================================== -->
+      <div x-show="currentCourse?.workspaceType === 'redaction'" class="space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          <!-- Colonne Gauche : Sujet, Plan structuré & Connecteurs logiques (6 cols) -->
+          <div class="lg:col-span-6 space-y-5">
+            <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <span class="px-3 py-1 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800">
+                  ✍️ Rédaction & Argumentation
+                </span>
+                <button
+                  type="button"
+                  @click="lireTexteVocal((currentExercise?.titre || '') + '. ' + (currentExercise?.consigne || ''))"
+                  class="px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 text-xs font-extrabold transition cursor-pointer flex items-center gap-1">
+                  <span x-text="ttsPlaying ? '⏹️ Arrêter' : '🔊 Écouter le sujet'"></span>
+                </button>
+              </div>
+              <h3 class="text-lg font-black text-slate-900" x-text="currentExercise?.titre || 'Sujet d\'argumentation'"></h3>
+              <div class="text-slate-700 text-xs leading-relaxed" x-html="renderRichMathMarkdown(currentExercise?.consigne || 'Défendez votre thèse avec des arguments illustrés.')"></div>
+            </div>
+
+            <!-- Constructeur de plan argumentatif -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
+              <div class="flex items-center justify-between">
+                <h4 class="font-black text-sm text-slate-900">🧱 Étape 1 : Mon Plan Argumentatif</h4>
+                <button
+                  type="button"
+                  @click="assemblerPlanDansTexteRedaction()"
+                  class="px-3 py-1 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold transition cursor-pointer">
+                  Assembler dans mon texte ➔
+                </button>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">🎯 Ma Thèse (idée directrice) :</label>
+                <input type="text" x-model="redactionState.these" placeholder="Ex: L'usage encadré du numérique à l'école favorise l'autonomie..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium" />
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">💡 Argument 1 :</label>
+                  <input type="text" x-model="redactionState.argument1" placeholder="Première raison..." class="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs" />
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">📌 Exemple 1 :</label>
+                  <input type="text" x-model="redactionState.exemple1" placeholder="Fait précis ou vécu..." class="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">💡 Argument 2 :</label>
+                  <input type="text" x-model="redactionState.argument2" placeholder="Deuxième raison..." class="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs" />
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">📌 Exemple 2 :</label>
+                  <input type="text" x-model="redactionState.exemple2" placeholder="Second exemple..." class="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs" />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">🏁 Conclusion / Ouverture :</label>
+                <input type="text" x-model="redactionState.conclusion" placeholder="Synthèse finale..." class="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Colonne Droite : Rédaction finale, Connecteurs & Soumission (6 cols) -->
+          <div class="lg:col-span-6 space-y-5">
+            <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-4">
+              <div class="flex items-center justify-between">
+                <h4 class="font-black text-sm text-slate-900">📝 Étape 2 : Rédaction Finale</h4>
+                <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-extrabold" x-text="getRedactionWordCount() + ' mots'"></span>
+              </div>
+
+              <!-- Boîte à connecteurs logiques en 1 clic -->
+              <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                <div class="text-[11px] font-black text-slate-600">🔗 Insérer un connecteur logique :</div>
+                <div class="flex flex-wrap gap-1.5">
+                  <template x-for="cat in connecteursLogiques" :key="cat.categorie">
+                    <template x-for="mot in cat.mots" :key="mot">
+                      <button
+                        type="button"
+                        @click="insererConnecteurRedaction(mot)"
+                        class="px-2.5 py-1 rounded-lg bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-800 border border-slate-200 text-[11px] font-bold transition cursor-pointer"
+                        x-text="mot"></button>
+                    </template>
+                  </template>
+                </div>
+              </div>
+
+              <textarea
+                rows="10"
+                x-model="redactionState.texteComplet"
+                placeholder="Rédigez votre texte argumenté ici..."
+                class="w-full p-4 rounded-2xl border border-slate-200 text-xs sm:text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-rose-500"></textarea>
+
+              <div x-show="redactionState.feedback" class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold" x-text="redactionState.feedback"></div>
+
+              <button
+                @click="soumettreDevoirRedaction()"
+                :disabled="redactionState.submitting"
+                class="w-full py-3 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white font-extrabold text-xs transition shadow-sm cursor-pointer disabled:opacity-50">
+                <span x-text="redactionState.submitting ? '⏳ Analyse de votre argumentation...' : '🚀 Soumettre ma rédaction au professeur'"></span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- 5. BLOC LANGUES VIVANTES (JEU DE RÔLE CECRL — PHASE 13) -->
+      <!-- ========================================== -->
+      <div x-show="currentCourse?.workspaceType === 'langues'" class="space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          <!-- Colonne Gauche : Paramètres CECRL & Situation (5 cols) -->
+          <div class="lg:col-span-5 space-y-5">
+            <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="px-3 py-1 rounded-full text-xs font-extrabold bg-sky-100 text-sky-800">
+                  🗣️ Langues & Jeu de Rôle CECRL
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-xs font-black" x-text="'Niveau ' + languesState.cefrLevel"></span>
+              </div>
+
+              <h3 class="text-lg font-black text-slate-900" x-text="currentExercise?.titre || 'Mise en situation orale & écrite'"></h3>
+              <p class="text-xs text-slate-600 leading-relaxed" x-text="languesState.scenario"></p>
+
+              <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Langue cible :</label>
+                  <select
+                    :value="languesState.targetLang"
+                    @change="changerLangueRoleplay($event.target.value)"
+                    class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold">
+                    <option value="en-GB">🇬🇧 Anglais (EN)</option>
+                    <option value="nl-BE">🇧🇪 Néerlandais (NL)</option>
+                    <option value="es-ES">🇪🇸 Espagnol (ES)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Niveau CECRL :</label>
+                  <select
+                    x-model="languesState.cefrLevel"
+                    class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold">
+                    <option value="A1">A1 — Débutant</option>
+                    <option value="A2">A2 — Élémentaire</option>
+                    <option value="B1">B1 — Intermédiaire</option>
+                    <option value="B2">B2 — Avancé</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Colonne Droite : Simulateur de Dialogue CECRL avec Audio (7 cols) -->
+          <div class="lg:col-span-7 space-y-5">
+            <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-4">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="font-black text-sm text-slate-900">💬 Dialogue en Situation Authentique</div>
+                <span class="text-xs text-slate-400 font-bold">Cliquez sur 🔊 pour écouter la prononciation</span>
+              </div>
+
+              <div class="h-72 overflow-y-auto space-y-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                <template x-for="(m, idx) in languesState.messages" :key="idx">
+                  <div :class="m.role === 'model' ? 'flex items-start gap-2.5' : 'flex items-start justify-end gap-2.5'">
+                    <div
+                      :class="m.role === 'model' ? 'bg-white border border-slate-200 text-slate-800' : 'bg-sky-600 text-white font-semibold'"
+                      class="p-3 rounded-2xl max-w-[82%] text-xs leading-relaxed shadow-2xs flex items-start gap-2">
+                      <span x-text="m.text"></span>
+                      <button
+                        type="button"
+                        @click="lireMessageLangueCible(m.text)"
+                        class="text-sm opacity-75 hover:opacity-100 cursor-pointer shrink-0"
+                        title="Écouter la prononciation">
+                        🔊
+                      </button>
+                    </div>
+                  </div>
+                </template>
+                <div x-show="languesState.loading" class="text-xs text-slate-400 font-bold pl-2">⏳ L'interlocuteur répond...</div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <input
+                  type="text"
+                  x-model="languesState.studentInput"
+                  @keydown.enter="envoyerRepliqueLangues()"
+                  placeholder="Write your reply in the target language..."
+                  class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-sky-600" />
+                <button
+                  @click="envoyerRepliqueLangues()"
+                  :disabled="languesState.loading || !languesState.studentInput.trim()"
+                  class="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs transition cursor-pointer disabled:opacity-50">
+                  Répondre ➔
+                </button>
+              </div>
+
+              <div x-show="languesState.feedback" class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold" x-text="languesState.feedback"></div>
+
+              <button
+                @click="soumettreDevoirLangues()"
+                :disabled="languesState.submitting"
+                class="w-full py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs transition cursor-pointer disabled:opacity-50">
+                <span x-text="languesState.submitting ? '⏳ Évaluation CECRL en cours...' : '✅ Terminer et soumettre mon dialogue au professeur'"></span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- 6. BLOC SCIENCES & MATHS (KATEX — PHASE 13) -->
+      <!-- ========================================== -->
+      <div x-show="currentCourse?.workspaceType === 'sciences'" class="space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          <!-- Colonne Gauche : Énoncé avec KaTeX & Saisie par étapes (6 cols) -->
+          <div class="lg:col-span-6 space-y-5">
+            <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <span class="px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800">
+                  🔬 Sciences & Mathématiques (KaTeX)
+                </span>
+                <button
+                  type="button"
+                  @click="lireTexteVocal((currentExercise?.titre || '') + '. ' + (currentExercise?.consigne || ''))"
+                  class="px-2.5 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-extrabold transition cursor-pointer">
+                  🔊 Écouter l'énoncé
+                </button>
+              </div>
+              <h3 class="text-lg font-black text-slate-900" x-html="renderRichMathMarkdown(currentExercise?.titre || 'Problème scientifique')"></h3>
+              <div class="text-slate-700 text-xs sm:text-sm leading-relaxed prose-custom" x-html="renderRichMathMarkdown(currentExercise?.consigne || '')"></div>
+            </div>
+
+            <!-- Saisie structurée en 4 étapes -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3.5">
+              <h4 class="font-black text-sm text-slate-900">📐 Ma Démarche de Résolution Étape par Étape</h4>
+
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">1. Données connues (grandeurs & valeurs) :</label>
+                <input type="text" x-model="sciencesState.donneesConnues" placeholder="Ex: m = 80 kg, v = 5 m/s" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono" />
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="text-[11px] font-bold text-slate-600">2. Formule littérale (LaTeX / KaTeX) :</label>
+                  <div class="flex items-center gap-1">
+                    <template x-for="sym in ['\\frac{a}{b}', '\\sqrt{x}', 'x^2', '\\cdot', '\\Delta', '\\pi']" :key="sym">
+                      <button
+                        type="button"
+                        @click="insererSymboleLatexSciences(sym)"
+                        class="px-2 py-0.5 rounded bg-slate-100 hover:bg-emerald-50 text-slate-700 font-mono text-[10px] border border-slate-200 cursor-pointer"
+                        x-text="sym"></button>
+                    </template>
+                  </div>
+                </div>
+                <input type="text" x-model="sciencesState.formuleLatex" placeholder="Ex: E_c = \frac{1}{2} \cdot m \cdot v^2" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono" />
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">3. Développement & Calcul numérique :</label>
+                <textarea rows="2" x-model="sciencesState.developpementCalcul" placeholder="Remplace les lettres par les valeurs..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono"></textarea>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">4. Résultat numérique :</label>
+                  <input type="text" x-model="sciencesState.resultatFinal" placeholder="Ex: 1000" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-black" />
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Unité obligatoire (SI) :</label>
+                  <input type="text" x-model="sciencesState.uniteSI" placeholder="Ex: J, m/s, N, m²..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Colonne Droite : Aperçu Mathématique KaTeX en Direct & Soumission (6 cols) -->
+          <div class="lg:col-span-6 space-y-5">
+            <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-4">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h4 class="font-black text-sm text-slate-900">👁️ Rendu Mathématique & Scientifique (KaTeX)</h4>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black">Temps réel</span>
+              </div>
+
+              <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 prose-custom text-xs sm:text-sm min-h-[220px]"
+                   x-html="getRenderedSciencesPreview()"></div>
+
+              <div x-show="sciencesState.feedback" class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold" x-text="sciencesState.feedback"></div>
+
+              <button
+                @click="soumettreDevoirSciences()"
+                :disabled="sciencesState.submitting"
+                class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs transition shadow-sm cursor-pointer disabled:opacity-50">
+                <span x-text="sciencesState.submitting ? '⏳ Vérification de ta démarche...' : '🚀 Soumettre ma résolution scientifique'"></span>
+              </button>
+            </div>
+          </div>
+
+        </div>
       </div>
 
     </div>
@@ -4786,6 +4686,424 @@
             </div>
           </div>
 
+        </div>
+
+      </div>
+
+      <!-- ============================================== -->
+      <!-- SOUS-ONGLET 7 : COURSE STUDIO & IMPORT (PHASES 10 & 13) -->
+      <!-- ============================================== -->
+      <div x-show="activeProfSubTab === 'studio'" class="space-y-6">
+        
+        <!-- En-tête Course Studio -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl font-bold border border-indigo-100">
+                🎨
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-black text-base text-slate-900">Course Studio Sans Code & Import IA (Multi-Matières)</h3>
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-100 text-indigo-700">Phases 10 & 13</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">Créez, importez ou modifiez vos cours, modules Markdown/KaTeX et missions pour toutes les matières directement dans Firestore.</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 flex-wrap">
+              <button
+                @click="creerNouveauCoursStudio()"
+                class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs transition cursor-pointer shadow-xs">
+                ➕ Nouveau Cours
+              </button>
+              <button
+                @click="exporterPackCoursJSON()"
+                class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer">
+                📦 Exporter Pack JSON
+              </button>
+              <button
+                @click="migrerLes6CoursStatiquesVersFirestore()"
+                :disabled="studioMigrating"
+                class="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold text-xs transition cursor-pointer disabled:opacity-50"
+                title="Copier les 6 cours de public/cours/ vers Firestore pour les rendre éditables sans code">
+                <span x-text="studioMigrating ? '⏳ Migration...' : '🔄 Migrer les 6 cours statiques vers Firestore'"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Messages retour -->
+          <div x-show="studioSuccessMsg" class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black flex items-center justify-between">
+            <span x-text="studioSuccessMsg"></span>
+            <button @click="studioSuccessMsg = ''" class="text-emerald-700 font-bold cursor-pointer">&times;</button>
+          </div>
+          <div x-show="studioErrorMsg" class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center justify-between">
+            <span x-text="studioErrorMsg"></span>
+            <button @click="studioErrorMsg = ''" class="text-rose-700 font-bold cursor-pointer">&times;</button>
+          </div>
+
+          <!-- LES 5 SOURCES D'IMPORT FACILE -->
+          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="text-xs font-black text-slate-800 uppercase tracking-wider">⚡ Importer un cours en 1 clic (5 sources) :</div>
+              <div class="flex flex-wrap gap-1.5">
+                <button type="button" @click="studioImportSource = 'syllabus'" :class="studioImportSource === 'syllabus' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 border border-slate-200'" class="px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer">1. 📄 PDF / Syllabus (IA)</button>
+                <button type="button" @click="studioImportSource = 'gdoc'" :class="studioImportSource === 'gdoc' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 border border-slate-200'" class="px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer">2. 📝 Google Doc (IA)</button>
+                <button type="button" @click="studioImportSource = 'classroom'" :class="studioImportSource === 'classroom' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 border border-slate-200'" class="px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer">3. 🏫 Cours Classroom (IA)</button>
+                <button type="button" @click="studioImportSource = 'pack'" :class="studioImportSource === 'pack' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 border border-slate-200'" class="px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer">4. 📦 Pack de cours JSON</button>
+                <button type="button" @click="studioImportSource = 'duplicate'" :class="studioImportSource === 'duplicate' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 border border-slate-200'" class="px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer">5. 📑 Dupliquer un modèle</button>
+              </div>
+            </div>
+
+            <!-- Source 1 : Syllabus / PDF / Texte -->
+            <div x-show="studioImportSource === 'syllabus'" class="space-y-3 pt-2 border-t border-slate-200/70">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Titre souhaité :</label>
+                  <input type="text" x-model="studioImportTitleHint" placeholder="Ex: Introduction à Python (3e)" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold" />
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Type d'atelier (Multi-Matières) :</label>
+                  <select x-model="studioImportWorkspaceHint" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold">
+                    <option value="office">📄 Bureautique & Docs</option>
+                    <option value="coding">💻 Coding Lab (HTML/CSS/JS)</option>
+                    <option value="creative">🎨 Studio Créatif</option>
+                    <option value="redaction">✍️ Rédaction & Argumentation (Français/Histoire)</option>
+                    <option value="langues">🗣️ Langues Vivantes (Jeu de rôle CECRL)</option>
+                    <option value="sciences">🔬 Sciences & Maths (KaTeX)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Charger un fichier (.txt, .md) :</label>
+                  <input type="file" accept=".txt,.md" @change="chargerFichierTexteSyllabus($event)" class="w-full text-xs text-slate-600" />
+                </div>
+              </div>
+              <textarea rows="3" x-model="studioImportRawText" placeholder="Collez ici le plan de cours, le texte de votre PDF ou votre syllabus : Gemini 2.5 va proposer les modules, la théorie Markdown et les missions..." class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs"></textarea>
+              <button @click="importerCoursDepuisSyllabusIA()" :disabled="studioImportLoading" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs transition cursor-pointer disabled:opacity-50">
+                <span x-text="studioImportLoading ? '⏳ Structuration par Gemini en cours...' : '✨ Générer la proposition de cours avec Gemini (Relecture avant publication)'"></span>
+              </button>
+            </div>
+
+            <!-- Source 2 : Google Doc -->
+            <div x-show="studioImportSource === 'gdoc'" class="space-y-3 pt-2 border-t border-slate-200/70">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Lien ou ID du Google Doc :</label>
+                  <input type="text" x-model="studioImportGDocUrl" placeholder="https://docs.google.com/document/d/..." class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-mono" />
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Titre du cours :</label>
+                  <input type="text" x-model="studioImportTitleHint" placeholder="Ex: Réseaux & Internet" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold" />
+                </div>
+              </div>
+              <textarea rows="2" x-model="studioImportRawText" placeholder="Optionnel : vous pouvez aussi coller directement des extraits de votre Google Doc ici..." class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs"></textarea>
+              <button @click="importerCoursDepuisGoogleDocIA()" :disabled="studioImportLoading" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs transition cursor-pointer disabled:opacity-50">
+                <span x-text="studioImportLoading ? '⏳ Conversion du Google Doc...' : '📝 Convertir ce Google Doc en modules & missions'"></span>
+              </button>
+            </div>
+
+            <!-- Source 3 : Depuis un cours Google Classroom -->
+            <div x-show="studioImportSource === 'classroom'" class="space-y-3 pt-2 border-t border-slate-200/70">
+              <div class="flex flex-col sm:flex-row sm:items-end gap-3">
+                <div class="flex-1">
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Cours Classroom source (supports & devoirs) :</label>
+                  <select x-model="studioImportClassroomCourseId" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold">
+                    <option value="">-- Utiliser le cours Classroom actif --</option>
+                    <template x-for="c in classroomCourses" :key="c.id">
+                      <option :value="c.id" x-text="c.name"></option>
+                    </template>
+                  </select>
+                </div>
+                <button @click="importerCoursDepuisClassroomIA()" :disabled="studioImportLoading || !classroomConnected" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition cursor-pointer disabled:opacity-50">
+                  <span x-text="studioImportLoading ? '⏳ Import Classroom en cours...' : '🏫 Importer les supports & devoirs Classroom en modules'"></span>
+                </button>
+              </div>
+              <p x-show="!classroomConnected" class="text-[11px] text-amber-700 font-bold">⚠️ Connectez d'abord Google Classroom dans l'onglet « Google Classroom ».</p>
+            </div>
+
+            <!-- Source 4 : Pack de cours JSON -->
+            <div x-show="studioImportSource === 'pack'" class="space-y-3 pt-2 border-t border-slate-200/70">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div class="text-xs font-bold text-slate-800">Importer un fichier Pack de cours (`.json`) partagé par un collègue :</div>
+                  <input type="file" accept=".json" @change="importerPackCoursJSON($event)" class="mt-1.5 text-xs text-slate-600" />
+                </div>
+                <button @click="exporterPackCoursJSON()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs transition cursor-pointer">
+                  📤 Télécharger le Pack JSON du cours actuel
+                </button>
+              </div>
+            </div>
+
+            <!-- Source 5 : Dupliquer un cours modèle -->
+            <div x-show="studioImportSource === 'duplicate'" class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end pt-2 border-t border-slate-200/70">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Cours modèle à copier :</label>
+                <select x-model="studioDuplicateSourceId" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold">
+                  <template x-for="c in coursesList" :key="c.id">
+                    <option :value="c.id" x-text="c.title"></option>
+                  </template>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Nouvel ID (slug) :</label>
+                <input type="text" x-model="studioDuplicateNewId" placeholder="bureautique-3b" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-mono" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Nouveau titre :</label>
+                <input type="text" x-model="studioDuplicateNewTitle" placeholder="Bureautique - Groupe B" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold" />
+              </div>
+              <button @click="dupliquerCoursModele()" class="py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs transition cursor-pointer">
+                📑 Dupliquer en 1 clic
+              </button>
+            </div>
+          </div>
+
+          <!-- SÉLECTION DU COURS À ÉDITER & MÉTADONNÉES -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2">
+            <!-- Colonne gauche : Paramètres du cours (4 cols) -->
+            <div class="lg:col-span-4 space-y-4 bg-slate-50 p-5 rounded-2xl border border-slate-200/80">
+              <div>
+                <label class="block text-xs font-black text-slate-700 mb-1">Charger un cours existant :</label>
+                <select
+                  :value="studioSelectedCourseId"
+                  @change="chargerCoursDansStudio($event.target.value)"
+                  class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold cursor-pointer">
+                  <template x-for="c in coursesList" :key="c.id">
+                    <option :value="c.id" x-text="(c.theme?.icon || '📚') + ' ' + c.title + (c.status === 'draft' ? ' (Brouillon)' : '')"></option>
+                  </template>
+                </select>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2">
+                <div class="col-span-2">
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Identifiant (slug) :</label>
+                  <input type="text" x-model="studioCourseForm.id" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-mono" />
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Icône :</label>
+                  <input type="text" x-model="studioCourseForm.icon" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-center text-base" />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Titre du cours :</label>
+                <input type="text" x-model="studioCourseForm.title" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold" />
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Description (Pitch) :</label>
+                <textarea rows="2" x-model="studioCourseForm.pitch" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs"></textarea>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Atelier :</label>
+                  <select x-model="studioCourseForm.workspaceType" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold">
+                    <option value="office">📄 Office / Docs</option>
+                    <option value="coding">💻 Coding Lab</option>
+                    <option value="creative">🎨 Créatif</option>
+                    <option value="redaction">✍️ Rédaction & Argumentation</option>
+                    <option value="langues">🗣️ Langues (CECRL)</option>
+                    <option value="sciences">🔬 Sciences & Maths (KaTeX)</option>
+                    <option value="fmttn">🤖 FMTTN 1re</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Statut :</label>
+                  <select x-model="studioCourseForm.status" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold">
+                    <option value="draft">📝 Brouillon</option>
+                    <option value="published">✅ Publié</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Prompt Système Tuteur IA (Côté serveur) :</label>
+                <textarea rows="3" x-model="studioCourseForm.systemPrompt" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-[11px]"></textarea>
+              </div>
+
+              <div class="pt-2 flex flex-col gap-2">
+                <button
+                  @click="sauvegarderCoursStudio('published')"
+                  :disabled="studioSaving"
+                  class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition cursor-pointer shadow-xs disabled:opacity-50">
+                  <span x-text="studioSaving ? '⏳ Sauvegarde...' : '✅ Enregistrer & Publier le cours'"></span>
+                </button>
+                <button
+                  @click="sauvegarderCoursStudio('draft')"
+                  :disabled="studioSaving"
+                  class="w-full py-2 px-4 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs transition cursor-pointer disabled:opacity-50">
+                  📝 Enregistrer en Brouillon
+                </button>
+              </div>
+            </div>
+
+            <!-- Colonne droite : Éditeur de Modules Markdown & Missions (8 cols) -->
+            <div class="lg:col-span-8 space-y-6">
+              <!-- Barre des modules du cours -->
+              <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                  <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
+                    <template x-for="(mod, idx) in studioModules" :key="mod.id || idx">
+                      <button
+                        type="button"
+                        @click="studioActiveModuleIdx = idx"
+                        :class="studioActiveModuleIdx === idx ? 'bg-indigo-600 text-white font-black' : 'bg-white text-slate-700 border border-slate-200 font-bold'"
+                        class="px-3 py-1.5 rounded-xl text-xs transition cursor-pointer shrink-0">
+                        <span x-text="'M' + (idx + 1) + ' : ' + (mod.title || 'Module')"></span>
+                      </button>
+                    </template>
+                  </div>
+                  <button
+                    type="button"
+                    @click="ajouterModuleStudio()"
+                    class="px-3 py-1.5 rounded-xl bg-indigo-100 hover:bg-indigo-200 text-indigo-800 text-xs font-extrabold transition cursor-pointer shrink-0">
+                    ➕ Ajouter un module
+                  </button>
+                </div>
+
+                <!-- Édition du module sélectionné -->
+                <template x-if="getActiveStudioModule()">
+                  <div class="space-y-3 pt-2 border-t border-slate-200/70">
+                    <div class="flex items-center justify-between gap-3">
+                      <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <div>
+                          <label class="block text-[10px] font-bold text-slate-500">ID Module :</label>
+                          <input type="text" x-model="studioModules[studioActiveModuleIdx].id" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-mono" />
+                        </div>
+                        <div class="sm:col-span-2">
+                          <label class="block text-[10px] font-bold text-slate-500">Titre du module :</label>
+                          <input type="text" x-model="studioModules[studioActiveModuleIdx].title" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold" />
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        @click="supprimerModuleStudio(studioActiveModuleIdx)"
+                        class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold cursor-pointer mt-4">
+                        🗑️
+                      </button>
+                    </div>
+
+                    <!-- Bascule Édition Markdown / Aperçu -->
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-black text-slate-700">📖 Support théorique (Markdown & formules KaTeX `$...$`) :</span>
+                      <button
+                        type="button"
+                        @click="studioMarkdownPreview = !studioMarkdownPreview"
+                        class="px-3 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold text-indigo-600 cursor-pointer">
+                        <span x-text="studioMarkdownPreview ? '✏️ Retour à l\'éditeur Markdown' : '👁️ Aperçu du rendu élève'"></span>
+                      </button>
+                    </div>
+
+                    <div x-show="!studioMarkdownPreview">
+                      <textarea
+                        rows="8"
+                        x-model="studioModules[studioActiveModuleIdx].theorie_md"
+                        placeholder="# Titre de la leçon&#10;&#10;Rédigez vos explications en Markdown (et formules LaTeX entre $...$)..."
+                        class="w-full p-3 rounded-xl border border-slate-200 bg-white text-xs font-mono leading-relaxed focus:outline-none focus:border-indigo-600"></textarea>
+                    </div>
+
+                    <div x-show="studioMarkdownPreview" class="p-5 rounded-xl border border-slate-200 bg-white prose-custom max-h-72 overflow-y-auto text-xs" x-html="renderRichMathMarkdown(getActiveStudioModule()?.theorie_md || '')"></div>
+                  </div>
+                </template>
+              </div>
+
+              <!-- Missions / Exercices du cours -->
+              <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h4 class="font-black text-sm text-slate-900">🎯 Missions & Exercices Pratiques</h4>
+                    <p class="text-[11px] text-slate-500">Rattachez chaque mission à un module et choisissez le type de remise.</p>
+                  </div>
+                  <button
+                    type="button"
+                    @click="ajouterMissionStudio()"
+                    class="px-3 py-1.5 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-extrabold transition cursor-pointer">
+                    ➕ Ajouter une mission
+                  </button>
+                </div>
+
+                <div class="space-y-3 max-h-96 overflow-y-auto pr-1">
+                  <template x-for="(mis, mIdx) in studioMissions" :key="mis.id || mIdx">
+                    <div class="p-4 rounded-xl bg-white border border-slate-200 space-y-3">
+                      <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 items-center">
+                        <div class="sm:col-span-2">
+                          <label class="block text-[10px] font-bold text-slate-400">Titre de la mission :</label>
+                          <input type="text" x-model="mis.titre" class="w-full px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-bold" />
+                        </div>
+                        <div>
+                          <label class="block text-[10px] font-bold text-slate-400">Module rattaché :</label>
+                          <select x-model="mis.module_id" class="w-full px-2 py-1 rounded-lg border border-slate-200 text-xs font-bold">
+                            <template x-for="mod in studioModules" :key="mod.id">
+                              <option :value="mod.id" x-text="mod.title"></option>
+                            </template>
+                          </select>
+                        </div>
+                        <div class="flex items-end gap-1">
+                          <div class="flex-1">
+                            <label class="block text-[10px] font-bold text-slate-400">Type remise :</label>
+                            <select x-model="mis.submission_type" class="w-full px-2 py-1 rounded-lg border border-slate-200 text-xs font-bold">
+                              <option value="drive_link">Lien Drive/Docs</option>
+                              <option value="code">Code HTML/CSS/JS</option>
+                              <option value="creative_link">Lien Créatif</option>
+                              <option value="redaction">✍️ Rédaction & Argumentation</option>
+                              <option value="langues">🗣️ Langues (CECRL)</option>
+                              <option value="sciences">🔬 Sciences & Maths (KaTeX)</option>
+                              <option value="text">Texte libre</option>
+                            </select>
+                          </div>
+                          <button type="button" @click="supprimerMissionStudio(mIdx)" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer">🗑️</button>
+                        </div>
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-slate-400">Consigne élève :</label>
+                        <textarea rows="2" x-model="mis.consigne" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs"></textarea>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODALE DE RELECTURE AVANT IMPORT / PUBLICATION (PHASE 10) -->
+        <div
+          x-show="studioReviewModalOpen"
+          x-transition.opacity
+          class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
+          style="display: none;">
+          <div class="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 max-h-[85vh] flex flex-col justify-between">
+            <div class="pb-4 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-black uppercase">Écran de Relecture Enseignant</span>
+                <h3 class="text-lg font-black text-slate-900 mt-1" x-text="studioReviewProposal?.title || 'Proposition de cours'"></h3>
+                <p class="text-xs text-slate-500" x-text="studioReviewProposal?.pitch"></p>
+              </div>
+              <button @click="studioReviewModalOpen = false" class="text-slate-400 hover:text-slate-700 text-xl font-bold cursor-pointer">&times;</button>
+            </div>
+
+            <div class="py-4 overflow-y-auto space-y-4 text-xs">
+              <template x-for="(rmod, rIdx) in (studioReviewProposal?.modules || [])" :key="rIdx">
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                  <div class="font-black text-slate-900 text-sm" x-text="(rIdx + 1) + '. ' + rmod.title"></div>
+                  <div class="text-slate-600 line-clamp-3 font-mono text-[11px]" x-text="rmod.theorie_md"></div>
+                  <div class="pt-1 flex flex-wrap gap-1.5">
+                    <template x-for="(rmis, mIdx) in (rmod.missions || [])" :key="mIdx">
+                      <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-bold text-[11px]" x-text="'🎯 ' + rmis.titre"></span>
+                    </template>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+              <button @click="studioReviewModalOpen = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs cursor-pointer">Annuler</button>
+              <button @click="appliquerPropositionImportDansStudio()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs cursor-pointer shadow-xs">
+                ✅ Charger dans l'éditeur pour relecture & publication
+              </button>
+            </div>
+          </div>
         </div>
 
       </div>

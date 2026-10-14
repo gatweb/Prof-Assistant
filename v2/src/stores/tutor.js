@@ -37,6 +37,16 @@ export function createTutorStore() {
       if (ws === 'creative') {
         return `Mission Créative : ${this.currentExercise?.titre || ''}\nConsigne : ${this.currentExercise?.consigne || ''}\nProjet / Démarche de l'élève : ${this.creativeProjectUrl} ${this.creativeNotes}`.trim().slice(0, 2000);
       }
+      if (ws === 'redaction') {
+        return `Rédaction & Argumentation : ${this.currentExercise?.titre || ''}\nThèse : ${this.redactionState?.these || ''}\nTexte de l'élève :\n${this.redactionState?.texteComplet || ''}`.trim().slice(0, 2500);
+      }
+      if (ws === 'langues') {
+        const lastTurns = (this.languesState?.messages || []).slice(-4).map(m => `${m.role}: ${m.text}`).join('\n');
+        return `Jeu de rôle CECRL ${this.languesState?.cefrLevel || 'A2'} (${this.languesState?.targetLang || 'en-GB'})\nScénario : ${this.languesState?.scenario || ''}\nDialogue :\n${lastTurns}`.trim().slice(0, 2000);
+      }
+      if (ws === 'sciences') {
+        return `Sciences & Maths : ${this.currentExercise?.titre || ''}\nDonnées : ${this.sciencesState?.donneesConnues || ''}\nFormule : ${this.sciencesState?.formuleLatex || ''}\nCalcul : ${this.sciencesState?.developpementCalcul || ''}\nRésultat : ${this.sciencesState?.resultatFinal || ''} ${this.sciencesState?.uniteSI || ''}`.trim().slice(0, 2000);
+      }
       if (this.selectedModuleId === 'escape-game') {
         return `Escape Game FMTTN — Dossier actif n°${this.egState.activeDossier}`;
       }

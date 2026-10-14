@@ -186,8 +186,89 @@ button:hover {
       ],
       submission_type: "creative_link"
     }
+  ],
+  "pilote-redaction": [
+    {
+      id: "redac-ex1",
+      course_id: "pilote-redaction",
+      chapitre: "red-mod1",
+      titre: "Plaidoyer : Faut-il encadrer l'usage des smartphones à l'école ?",
+      consigne: "Rédige un texte argumentatif structuré (environ 80 à 150 mots) comprenant : une **thèse claire**, **deux arguments** illustrés chacun par un exemple concret, des **connecteurs logiques** (*d'abord, en effet, cependant, par conséquent*) et une **conclusion**.",
+      theorie_md: "### Structure d'un paragraphe argumenté\n\n1. **Thèse** : L'idée que tu défends.\n2. **Arguments** : Les raisons qui prouvent ta thèse (*D'une part..., D'autre part...*).\n3. **Exemples** : Un fait précis ou vécu (*Par exemple...*).\n4. **Conclusion** : Synthèse finale (*Ainsi, en conclusion...*).",
+      submission_type: "redaction"
+    }
+  ],
+  "pilote-langues": [
+    {
+      id: "lang-ex1",
+      course_id: "pilote-langues",
+      chapitre: "lang-mod1",
+      titre: "Roleplay CECRL A2/B1 : Commander dans un café à Londres & résoudre un imprévu",
+      consigne: "Engage la conversation en anglais (ou néerlandais) : commande une boisson et un plat, pose une question sur les ingrédients (allergie ou préférence) et réagis poliment si le serveur s'est trompé dans l'addition.",
+      theorie_md: "### Expressions clés (CECRL A2/B1)\n\n- *Could I have ..., please?*\n- *Does this dish contain ...?*\n- *Excuse me, I think there is a small mistake in the bill.*",
+      submission_type: "langues"
+    }
+  ],
+  "pilote-sciences": [
+    {
+      id: "sci-ex1",
+      course_id: "pilote-sciences",
+      chapitre: "sci-mod1",
+      titre: "Théorème de Pythagore & Énergie Cinétique ($E_c = \\frac{1}{2} m v^2$)",
+      consigne: "Un cycliste et son vélo ont une masse totale $m = 80\\text{ kg}$ et roulent à une vitesse $v = 5\\text{ m/s}$. Calcule l'énergie cinétique $E_c$ en Joules ($\\text{J}$) en détaillant : les données, la formule utilisée, le calcul et l'unité finale.",
+      theorie_md: "### Rappel Scientifique (KaTeX)\n\nL'énergie cinétique d'un corps en mouvement se calcule avec :\n\n$$E_c = \\frac{1}{2} \\cdot m \\cdot v^2$$\n\n- $m$ : masse en kilogrammes ($\\text{kg}$)\n- $v$ : vitesse en mètres par seconde ($\\text{m/s}$)\n- $E_c$ : énergie en Joules ($\\text{J}$)",
+      submission_type: "sciences"
+    }
   ]
 };
+
+export const MULTI_SUBJECT_PILOT_COURSES = [
+  {
+    id: "pilote-redaction",
+    workspaceType: "redaction",
+    title: "Français & Histoire : Rédaction & Argumentation",
+    pitch: "Pilote Multi-Matières — Structure tes idées, rédige des textes argumentés avec connecteurs logiques et reçois un guidage socratique.",
+    systemPrompt: "Tu es un professeur de français, d'histoire et d'argumentation socratique et bienveillant. Aide l'élève à structurer sa pensée (thèse, arguments, exemples précis, connecteurs logiques, conclusion) sans jamais rédiger le paragraphe à sa place.",
+    theme: { primaryColor: "#be123c", icon: "✍️" },
+    chapters: [
+      {
+        id: "red-mod1",
+        title: "Module 1 : Construire une argumentation solide",
+        theorie_md: "# Construire une argumentation solide\n\nArgumenter, c'est défendre un point de vue (**la thèse**) à l'aide de preuves logiques (**les arguments**) illustrées par des **exemples concrets**.\n\n### Les connecteurs logiques indispensables\n- **Introduire** : *Tout d'abord, en premier lieu...*\n- **Ajouter** : *De plus, par ailleurs, en outre...*\n- **Nuancer** : *Cependant, toutefois, néanmoins...*\n- **Conclure** : *En conclusion, par conséquent, ainsi...*"
+      }
+    ]
+  },
+  {
+    id: "pilote-langues",
+    workspaceType: "langues",
+    title: "Langues Vivantes : Jeux de Rôle CECRL (EN / NL)",
+    pitch: "Pilote Multi-Matières — Pratique l'anglais et le néerlandais en situation réelle (niveaux A1 à B2) avec écoute vocale et feedback communicatif.",
+    systemPrompt: "Tu es un tuteur de langues vivantes dynamique (cadre européen CECRL A1 à B2). Engage l'élève dans un jeu de rôle immersif, encourage-le à s'exprimer dans la langue cible et reformule avec douceur ses erreurs grammaticales ou lexicales.",
+    theme: { primaryColor: "#0284c7", icon: "🗣️" },
+    chapters: [
+      {
+        id: "lang-mod1",
+        title: "Module 1 : Interactions du quotidien (CECRL A2 / B1)",
+        theorie_md: "# Interactions du quotidien (CECRL A2 / B1)\n\nDans ce module, tu pratiques la langue en situation authentique.\n\n### Astuces pour réussir ton jeu de rôle\n1. Utilise des formules de politesse (*Could you..., Zou u...*).\n2. Fais des phrases complètes avec des mots de liaison (*because, however, omdat, maar*).\n3. Relis ta production à voix haute grâce au bouton 🔊."
+      }
+    ]
+  },
+  {
+    id: "pilote-sciences",
+    workspaceType: "sciences",
+    title: "Sciences & Maths : Raisonnement & Formules (KaTeX)",
+    pitch: "Pilote Multi-Matières — Résous des problèmes scientifiques et mathématiques étape par étape avec rendu de formules LaTeX/KaTeX en direct.",
+    systemPrompt: "Tu es un professeur de mathématiques et de sciences socratique et rigoureux. Guide l'élève étape par étape dans son raisonnement scientifique (données connues, formule en LaTeX/KaTeX, unités du Système International) sans donner le résultat final.",
+    theme: { primaryColor: "#059669", icon: "🔬" },
+    chapters: [
+      {
+        id: "sci-mod1",
+        title: "Module 1 : Méthode de résolution & Formules physiques",
+        theorie_md: "# Méthode de résolution en Sciences & Mathématiques\n\nChaque problème scientifique se résout en **4 étapes rigoureuses** :\n\n1. **Données connues** (converties dans le Système International).\n2. **Formule littérale** : par exemple le théorème de Pythagore $a^2 + b^2 = c^2$ ou l'énergie cinétique :\n\n$$E_c = \\frac{1}{2} \\cdot m \\cdot v^2$$\n\n3. **Calcul détaillé**.\n4. **Résultat final avec son unité** ($\\text{J}$, $\\text{m/s}$, $\\text{N}$...)."
+      }
+    ]
+  }
+];
 
 export class CourseManagerV2 {
   constructor() {
@@ -263,7 +344,8 @@ export class CourseManagerV2 {
       const allCourses = [
         fmttnCourse,
         ...normalizedLocal.filter(c => c.id !== "fmttn-1re"),
-        ...customFirestoreCourses
+        ...customFirestoreCourses,
+        ...MULTI_SUBJECT_PILOT_COURSES.filter(pc => !fsMap.has(pc.id) && !normalizedLocal.some(nl => nl.id === pc.id))
       ];
       this.courses = allCourses;
 

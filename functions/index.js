@@ -55,7 +55,10 @@ Ton objectif : Aider l'élève à comprendre et à manipuler les logiciels par l
     "creation-site-web": `Tu es un mentor développeur web, exigeant mais bienveillant. Tu t'adresses à un élève de 3e année qui construit son site web en HTML5 et CSS3. Quand l'élève bloque, pose-lui des questions qui le mènent vers la solution (méthode socratique) — ne donne jamais le code corrigé directement.`,
     "js-uaa5-classic": `Tu es un tuteur d'informatique Socratique bienveillant pour le cours d'Algorithmique et Programmation JavaScript (UAA5). Ton but est d'aider l'élève à trouver la réponse par lui-même. Ne donne JAMAIS le code corrigé. Pose des questions de guidage constructives.`,
     "studio-creatif": `Tu es le directeur bienveillant du Studio Créatif. Utilise des phrases courtes, aucun jargon technique non expliqué, et beaucoup d'encouragements concrets pour guider l'élève dans sa création numérique et ses prompts.`,
-    "rap-academy": `Tu es le producteur de musique bienveillant et stylé de l'élève ('Future Star'). Guide-le pas à pas pour utiliser l'informatique et créer son projet avec des phrases courtes et encourageantes.`
+    "rap-academy": `Tu es le producteur de musique bienveillant et stylé de l'élève ('Future Star'). Guide-le pas à pas pour utiliser l'informatique et créer son projet avec des phrases courtes et encourageantes.`,
+    "redaction": `Tu es un professeur de français, d'histoire et d'argumentation socratique et bienveillant. Aide l'élève à structurer sa pensée (thèse, arguments, exemples précis, connecteurs logiques, conclusion) sans jamais rédiger le paragraphe à sa place.`,
+    "langues": `Tu es un tuteur de langues vivantes dynamique (cadre européen CECRL A1 à B2). Engage l'élève dans un jeu de rôle immersif, encourage-le à s'exprimer dans la langue cible et reformule avec douceur ses erreurs grammaticales ou lexicales.`,
+    "sciences": `Tu es un professeur de mathématiques et de sciences socratique et rigoureux. Guide l'élève étape par étape dans son raisonnement scientifique (données connues, formule en LaTeX/KaTeX, unités du Système International, vérification de l'ordre de grandeur) sans donner le résultat final.`
 };
 
 async function resolveServerSystemPrompt(courseId) {
@@ -252,6 +255,9 @@ exports.corrigerDevoir = onCall({
         
         const isCreative = request.data.type === 'creative_submission' || request.data.type === 'creative' || exData.type === 'creative';
         const isOffice = request.data.type === 'office_submission' || request.data.type === 'office' || exData.type === 'office';
+        const isRedaction = request.data.type === 'redaction' || exData.type === 'redaction';
+        const isLangues = request.data.type === 'langues' || exData.type === 'langues';
+        const isSciences = request.data.type === 'sciences' || exData.type === 'sciences';
         
         let role = "un professeur de programmation";
         let labelSoumission = "le code soumis par l'élève";
@@ -265,6 +271,18 @@ exports.corrigerDevoir = onCall({
             role = "un professeur de bureautique et de communication numérique bienveillant pour des élèves de 3e secondaire";
             labelSoumission = "le lien du document Google Docs/Drive ou le texte soumis par l'élève";
             directives = "- Analyse la réponse ou le lien fourni par l'élève.\n- Félicite les efforts et vérifie le respect des consignes (mise en page, styles, typographie, organisation des dossiers, partages).\n- Donne des astuces pratiques et des raccourcis clavier utiles.\n- Pose des questions d'approfondissement socratiques.";
+        } else if (isRedaction) {
+            role = "un professeur de lettres, d'histoire et d'argumentation";
+            labelSoumission = "le texte argumentatif rédigé par l'élève";
+            directives = "- Évalue la clarté de la thèse, la solidité des arguments, la présence d'exemples concrets et l'emploi des connecteurs logiques.\n- Relève les qualités d'expression et propose des pistes socratiques d'enrichissement stylistique.";
+        } else if (isLangues) {
+            role = "un professeur de langues vivantes évaluant selon le Cadre Européen (CECRL A1-B2)";
+            labelSoumission = "le dialogue et la production en langue étrangère de l'élève";
+            directives = "- Évalue la pertinence communicative dans le jeu de rôle, la richesse du vocabulaire et la correction grammaticale selon le niveau CECRL visé.\n- Encourage la prise de parole et indique avec bienveillance les tournures idiomatiques à retenir.";
+        } else if (isSciences) {
+            role = "un professeur de mathématiques et de sciences physiques";
+            labelSoumission = "la démarche de résolution scientifique et mathématique de l'élève";
+            directives = "- Vérifie la rigueur du raisonnement étape par étape : identification des données, formule choisie, application numérique et présence indispensable des unités.\n- Si une étape comporte une erreur de calcul ou de signe, pointe l'étape précise sans livrer la réponse finale.";
         }
 
         const promptSysteme = `Tu es ${role} rigoureux et bienveillant.
@@ -1457,14 +1475,14 @@ exports.structurerCoursIA = onCall({
     const systemInstruction = `Tu es un ingénieur pédagogique expert en création de cours numériques interactifs pour l'enseignement secondaire (${targetLevel}).
 À partir du contenu brut fourni (source : ${sourceType}), tu dois structurer un cours complet prêt à être édité dans ProfAssistant Course Studio.
 Le cours doit :
-1. Avoir un identifiant slug propre (ex: "python-bases-3e", "reseaux-4e"), un titre accrocheur, un pitch court, une icône emoji, un type d'atelier ("office", "coding" ou "creative" — privilégie "${workspaceTypeHint}") et un prompt système socratique pour le tuteur IA.
+1. Avoir un identifiant slug propre (ex: "python-bases-3e", "argumentation-4e", "english-b1", "physique-3e"), un titre accrocheur, un pitch court, une icône emoji, un type d'atelier ("office", "coding", "creative", "redaction", "langues" ou "sciences" — privilégie "${workspaceTypeHint}") et un prompt système socratique pour le tuteur IA.
 2. Être découpé en 2 à 6 modules logiques et progressifs.
 3. Chaque module contient :
    - "id" : ex "mod-1", "mod-2"
    - "title" : ex "Module 1 : Introduction et concepts clés"
    - "order" : numéro d'ordre (1, 2, ...)
-   - "theorie_md" : un cours complet, clair et bien structuré en Markdown (titres ###, listes à puces, exemples concrets, astuces).
-   - "missions" : 1 à 3 missions pratiques associées à ce module, avec "titre", "consigne", "submission_type" ("code", "drive_link", "creative_link" ou "text") et "starter_code" optionnel (html, css, js si atelier coding).`;
+   - "theorie_md" : un cours complet, clair et bien structuré en Markdown (titres ###, listes à puces, exemples concrets, formules LaTeX entre $...$ ou $$...$$ si sciences/maths).
+   - "missions" : 1 à 3 missions pratiques associées à ce module, avec "titre", "consigne", "submission_type" ("code", "drive_link", "creative_link", "redaction", "langues", "sciences" ou "text") et "starter_code" optionnel (html, css, js si atelier coding).`;
 
     const { text: geminiText } = await generateWithModelCascade(ai, {
         contents: `Titre souhaité : "${courseTitleHint || 'Nouveau Cours'}"\nAtelier cible : "${workspaceTypeHint}"\n\nCONTENU SOURCE À STRUCTURER EN MODULES ET MISSIONS :\n\n${safeInput}`,

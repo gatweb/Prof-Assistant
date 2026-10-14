@@ -1,6 +1,7 @@
 import { marked } from 'marked';
 import { courseManagerV2, DEFAULT_EXERCISES_BY_COURSE } from '../services/courseManager.js';
 import { soumettreDevoirCloud } from '../services/firebase.js';
+import { renderMarkdownWithKatex } from './multiSubjects.js';
 
 export function createCourseStore() {
   return {
@@ -428,7 +429,7 @@ export function createCourseStore() {
       this.courseMarkdownLoading = true;
       try {
         const raw = await courseManagerV2.loadChapterMarkdown(this.currentCourse, this.currentChapter);
-        this.courseMarkdownContent = marked.parse(raw);
+        this.courseMarkdownContent = renderMarkdownWithKatex(raw);
       } catch (e) {
         console.warn("Erreur chargement Markdown :", e);
         this.courseMarkdownContent = `<div class="p-6 bg-amber-50 rounded-2xl border border-amber-200 text-amber-800">

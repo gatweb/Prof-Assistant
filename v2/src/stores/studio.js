@@ -534,7 +534,7 @@ export function createStudioStore() {
         id: cleanId,
         title: p.title || 'Nouveau Cours IA',
         pitch: p.pitch || '',
-        workspaceType: ['office', 'coding', 'creative'].includes(p.workspaceType) ? p.workspaceType : 'office',
+        workspaceType: ['office', 'coding', 'creative', 'redaction', 'langues', 'sciences'].includes(p.workspaceType) ? p.workspaceType : 'office',
         status: 'draft',
         icon: p.icon || '✨',
         primaryColor: p.primaryColor || '#4f46e5',
