@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>body{font-family:Plus Jakarta Sans,sans-serif}</style>
-  <script type="module" crossorigin src="/assets/index-ClNhQ1Pc.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-D-jHB8AY.css">
+  <script type="module" crossorigin src="/assets/index-uJMMflMN.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-C1R9UrAM.css">
 </head>
 <body class="h-full flex flex-col bg-slate-50 text-slate-800" x-data="profAssistantApp()">
 
@@ -20,20 +20,28 @@
       <!-- Logo & Titre avec Sélecteur de Cours -->
       <div class="flex items-center gap-3">
         <div 
-          @click="changerCours('fmttn-1re')"
+          @click="ouvrirHubCours()"
           class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-black text-xl shadow-sm cursor-pointer hover:opacity-90 transition shrink-0" 
-          title="Accueil ProfAssistant">
+          title="Hub Mes Cours — ProfAssistant">
           @
         </div>
         <div>
           <div class="flex items-center gap-2 flex-wrap">
-            <h1 class="font-extrabold text-lg tracking-tight text-slate-900">ProfAssistant</h1>
+            <h1 class="font-extrabold text-lg tracking-tight text-slate-900 cursor-pointer" @click="ouvrirHubCours()">ProfAssistant</h1>
+            <!-- Bouton rapide Hub Mes Cours -->
+            <button
+              @click="ouvrirHubCours()"
+              :class="studentViewMode === 'hub' && activeTab !== 'prof' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'"
+              class="text-xs font-extrabold px-2.5 py-1 border rounded-xl transition cursor-pointer flex items-center gap-1">
+              <span>🧭</span>
+              <span class="hidden sm:inline">Mes cours</span>
+            </button>
             <!-- Sélecteur de cours dynamique -->
             <div class="relative">
               <select 
                 :value="currentCourse?.id || 'fmttn-1re'"
-                @change="changerCours($event.target.value)"
-                class="text-xs font-bold px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 rounded-xl cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 transition max-w-[200px] sm:max-w-xs truncate">
+                @change="ouvrirCarteCours($event.target.value)"
+                class="text-xs font-bold px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 rounded-xl cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 transition max-w-[180px] sm:max-w-xs truncate">
                 <template x-for="c in coursesList" :key="c.id">
                   <option :value="c.id" x-text="(c.theme?.icon || '📚') + ' ' + c.title" :selected="c.id === currentCourse?.id"></option>
                 </template>
@@ -193,8 +201,82 @@
   <!-- 🚀 ESPACE PRINCIPAL DE TRAVAIL (ACCESSIBLE UNE FOIS CONNECTÉ) -->
   <div x-show="isLoggedIn || isGuestMode" class="flex-1 flex flex-col">
 
-  <!-- 📖 Bandeau Module & Navigation (FMTTN 1re) -->
-  <div x-show="!currentCourse || currentCourse.workspaceType === 'fmttn'" class="bg-slate-900 text-white border-b border-slate-800">
+  <!-- 🧭 BARRE D'ENTONNOIR & FIL D'ARIANE (HUB → CARTE DU COURS → FOCUS — PHASE 8) -->
+  <div x-show="activeTab !== 'prof'" class="bg-slate-950 text-slate-200 border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-3">
+      <!-- Fil d'Ariane cliquable -->
+      <nav class="flex items-center gap-1.5 text-xs font-bold overflow-x-auto">
+        <button
+          @click="ouvrirHubCours()"
+          :class="studentViewMode === 'hub' ? 'bg-blue-600 text-white' : 'bg-slate-900 hover:bg-slate-800 text-slate-300'"
+          class="px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1.5 shrink-0">
+          <span>🏠</span>
+          <span>Mes cours</span>
+        </button>
+
+        <template x-if="studentViewMode !== 'hub' && currentCourse">
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span class="text-slate-600">›</span>
+            <button
+              @click="ouvrirCarteCours(currentCourse.id)"
+              :class="studentViewMode === 'course' ? 'bg-indigo-600 text-white' : 'bg-slate-900 hover:bg-slate-800 text-slate-300'"
+              class="px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1.5">
+              <span x-text="currentCourse.theme?.icon || '📚'"></span>
+              <span x-text="currentCourse.title"></span>
+              <span class="text-[10px] opacity-75">(Modules)</span>
+            </button>
+          </div>
+        </template>
+
+        <template x-if="studentViewMode === 'focus'">
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span class="text-slate-600">›</span>
+            <span class="px-2.5 py-1 rounded-lg bg-emerald-600/20 border border-emerald-500/40 text-emerald-300 font-extrabold flex items-center gap-1.5">
+              <span>🎯</span>
+              <span x-text="currentCourse?.workspaceType === 'fmttn' ? (selectedModuleId === 'module-0' ? 'Module 0' : (selectedModuleId === 'escape-game' ? 'Escape Game' : (selectedModuleId === 'ch2-securite' ? 'Chapitre 2' : 'Chapitre 1'))) : (activeTab === 'pratique' && currentExercise ? (currentExercise.titre || 'Mission') : (currentChapter?.title || 'Leçon'))"></span>
+            </span>
+          </div>
+        </template>
+      </nav>
+
+      <!-- Contrôles Mode Focus : Précédent / Suivant ➔ -->
+      <div class="flex items-center gap-2 shrink-0">
+        <template x-if="studentViewMode === 'course'">
+          <button
+            @click="ouvrirModeFocus()"
+            class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold transition cursor-pointer flex items-center gap-1.5">
+            <span>🚀 Ouvrir en mode Focus</span>
+          </button>
+        </template>
+
+        <template x-if="studentViewMode === 'focus'">
+          <div class="flex items-center gap-1.5">
+            <button
+              @click="ouvrirCarteCours(currentCourse?.id)"
+              class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition cursor-pointer"
+              title="Voir le plan des modules du cours">
+              🗺️ Plan du cours
+            </button>
+            <button
+              @click="focusEtapePrecedente()"
+              class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition cursor-pointer flex items-center gap-1">
+              <span>←</span>
+              <span class="hidden sm:inline">Précédent</span>
+            </button>
+            <button
+              @click="focusEtapeSuivante()"
+              class="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold transition cursor-pointer flex items-center gap-1 shadow-xs">
+              <span>Suivant</span>
+              <span>➔</span>
+            </button>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📖 Bandeau Module & Navigation (FMTTN 1re — Mode Focus) -->
+  <div x-show="studentViewMode === 'focus' && (!currentCourse || currentCourse.workspaceType === 'fmttn')" class="bg-slate-900 text-white border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       
       <!-- Sélecteur de Module -->
@@ -328,8 +410,8 @@
     </div>
   </div>
 
-  <!-- 📖 Bandeau Cours Général (Bureautique, Web, JS, Créatif, Dactylo) -->
-  <div x-show="currentCourse && currentCourse.workspaceType !== 'fmttn'" class="bg-slate-900 text-white border-b border-slate-800">
+  <!-- 📖 Bandeau Cours Général (Bureautique, Web, JS, Créatif, Dactylo — Mode Focus) -->
+  <div x-show="studentViewMode === 'focus' && currentCourse && currentCourse.workspaceType !== 'fmttn'" class="bg-slate-900 text-white border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       
       <!-- Sélecteur de Chapitres du Cours Actif -->
@@ -378,6 +460,161 @@
 
   <!-- 🌟 Contenu Principal -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- ======================================================= -->
+    <!-- ÉTAPE 1 DE L'ENTONNOIR : HUB « MES COURS » (PHASE 8)    -->
+    <!-- ======================================================= -->
+    <div x-show="activeTab !== 'prof' && studentViewMode === 'hub'" class="space-y-8">
+      <!-- En-tête du Hub -->
+      <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <span class="px-3 py-1 bg-white/10 text-blue-200 rounded-full text-xs font-extrabold uppercase tracking-wider">
+            Hub d'Apprentissage • Classe <span x-text="user.classe || '1A'"></span>
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-black mt-2">Mes Cours & Parcours</h2>
+          <p class="text-xs sm:text-sm text-slate-300 mt-1.5 max-w-2xl leading-relaxed">
+            Choisis un cours pour explorer ses modules numérotés, consulter la théorie et réaliser tes missions interactives.
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="bg-white/10 border border-white/15 rounded-2xl px-4 py-3 text-center">
+            <div class="text-[11px] text-blue-200 font-bold uppercase">Points d'Expérience</div>
+            <div class="text-xl font-black text-amber-400" x-text="(user.xp || 0) + ' XP'"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grille des cartes de cours -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <template x-for="course in getFilteredHubCourses()" :key="course.id">
+          <div
+            @click="ouvrirCarteCours(course.id)"
+            class="bg-white rounded-3xl p-6 border border-slate-200/90 hover:border-blue-400 shadow-xs hover:shadow-xl transition-all duration-200 flex flex-col justify-between cursor-pointer group">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-slate-100 group-hover:bg-blue-50 flex items-center justify-center text-2xl transition"
+                     x-text="course.theme?.icon || '📚'"></div>
+                <div class="flex items-center gap-1.5">
+                  <span x-show="course.recommended" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">
+                    Recommandé <span x-text="user.classe"></span>
+                  </span>
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600"
+                        x-text="(course.chapters?.length || 1) + ' modules'"></span>
+                </div>
+              </div>
+
+              <h3 class="font-black text-base text-slate-900 group-hover:text-blue-600 transition" x-text="course.title"></h3>
+              <p class="text-xs text-slate-500 mt-1.5 line-clamp-3 leading-relaxed" x-text="course.pitch"></p>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-slate-100 space-y-2">
+              <div class="flex items-center justify-between text-xs font-bold">
+                <span class="text-slate-500">Progression</span>
+                <span class="text-blue-600 font-black" x-text="course.progressPercent + '%'"></span>
+              </div>
+              <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-500"
+                     :style="'width: ' + course.progressPercent + '%'"></div>
+              </div>
+              <div class="pt-2 flex items-center justify-between text-xs font-extrabold text-blue-600">
+                <span>Ouvrir la carte du cours</span>
+                <span class="group-hover:translate-x-1 transition-transform">➔</span>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- ÉTAPE 2 DE L'ENTONNOIR : CARTE DU COURS (PHASE 8)       -->
+    <!-- ======================================================= -->
+    <div x-show="activeTab !== 'prof' && studentViewMode === 'course' && currentCourse" class="space-y-8">
+      <!-- Bandeau du cours sélectionné -->
+      <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="flex items-start gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-3xl shrink-0"
+               x-text="currentCourse?.theme?.icon || '📚'"></div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2.5 py-0.5 rounded-full bg-white/15 text-blue-200 text-[11px] font-extrabold uppercase tracking-wider">
+                Carte du Cours
+              </span>
+              <span class="text-xs text-slate-300 font-bold" x-text="(currentCourse?.chapters?.length || 0) + ' modules structurés'"></span>
+            </div>
+            <h2 class="text-2xl font-black mt-1" x-text="currentCourse?.title"></h2>
+            <p class="text-xs sm:text-sm text-blue-100 mt-1 max-w-2xl leading-relaxed" x-text="currentCourse?.pitch"></p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button
+            @click="ouvrirHubCours()"
+            class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition cursor-pointer">
+            ← Tous les cours
+          </button>
+          <button
+            @click="ouvrirModeFocus()"
+            class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition cursor-pointer shadow-sm">
+            Continuer en mode Focus ➔
+          </button>
+        </div>
+      </div>
+
+      <!-- Liste des modules numérotés avec onglets 📖 Théorie et 🎯 Missions -->
+      <div class="space-y-4">
+        <template x-for="(mod, mIdx) in (currentCourse?.chapters || [])" :key="mod.id || mIdx">
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs hover:border-blue-300 transition">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs"
+                     x-text="mIdx + 1"></div>
+                <div>
+                  <span class="text-[11px] font-extrabold uppercase tracking-wider text-blue-600" x-text="'Module ' + (mIdx + 1)"></span>
+                  <h3 class="text-base sm:text-lg font-black text-slate-900" x-text="mod.title"></h3>
+                </div>
+              </div>
+
+              <!-- 2 boutons d'accès direct : 📖 Théorie | 🎯 Missions -->
+              <div class="flex items-center gap-2 flex-wrap">
+                <button
+                  @click="ouvrirModeFocus({ chapterId: mod.id, tab: currentCourse?.workspaceType === 'fmttn' ? 'cours' : 'cours' })"
+                  class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-800 hover:text-blue-700 border border-slate-200 hover:border-blue-300 text-xs font-extrabold transition cursor-pointer flex items-center gap-1.5">
+                  <span>📖</span>
+                  <span>Théorie</span>
+                </button>
+                <button
+                  @click="ouvrirModeFocus({ chapterId: mod.id, exercise: getExercisesForChapter(mod)[0] || courseExercises[0] || null, tab: currentCourse?.workspaceType === 'fmttn' ? 'decouvre' : 'pratique' })"
+                  class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold transition cursor-pointer flex items-center gap-1.5 shadow-xs">
+                  <span>🎯</span>
+                  <span>Missions & Pratique</span>
+                  <span>➔</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Aperçu des missions rattachées au module (si cours hors FMTTN) -->
+            <template x-if="currentCourse?.workspaceType !== 'fmttn' && getExercisesForChapter(mod).length > 0">
+              <div class="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-2">
+                <span class="text-[11px] font-bold text-slate-400">Missions du module :</span>
+                <template x-for="ex in getExercisesForChapter(mod)" :key="ex.id">
+                  <button
+                    @click="ouvrirModeFocus({ chapterId: mod.id, exercise: ex, tab: 'pratique' })"
+                    class="px-3 py-1 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-bold transition cursor-pointer flex items-center gap-1.5">
+                    <span>⚡</span>
+                    <span x-text="ex.titre || ex.title"></span>
+                  </button>
+                </template>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- ÉTAPE 3 DE L'ENTONNOIR : MODE FOCUS (ACTIVITÉS & LEÇONS) -->
+    <!-- ======================================================= -->
+    <div x-show="activeTab === 'prof' || studentViewMode === 'focus'" class="space-y-8">
 
     <!-- ======================================================= -->
     <!-- MODULE 0 : INTRODUCTION & CHARTE DE RENTRÉE             -->
@@ -3937,6 +4174,8 @@
 
       </div>
     </div>
+
+    </div><!-- Fin Mode Focus / Prof -->
 
   </main>
 

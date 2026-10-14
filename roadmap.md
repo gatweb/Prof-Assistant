@@ -21,18 +21,21 @@
   3. `publie` : Professeur a validé, visible par l'élève en temps réel.
 * **Collection `cours` :** Documents de référence pour le RAG (Chatbot).
 
-## 📍 4. Phase Actuelle : Plan d'Amélioration V3 — Phase 7 Terminée ✅ (En route vers Phase 8)
-* **Fusion V1/V2 (Phases 0 à 6) :** [TERMINÉ & DÉPLOYÉ ✅] Règles Firestore (24 tests), Multi-Enseignants & Custom Claims, Moteur Multi-Cours V2, Espace Professeur Unifié (`submissions` + matrice), Google Classroom, Google Forms IA, et bascule racine `/` vers la V2.
+## 📍 4. Phase Actuelle : Plan d'Amélioration V3 — Phases 7 & 8 Terminées ✅ (En route vers Phase 9)
+* **Fusion V1/V2 (Phases 0 à 6) :** [TERMINÉ & DÉPLOYÉ ✅] Règles Firestore, Multi-Enseignants & Custom Claims, Moteur Multi-Cours V2, Espace Professeur Unifié (`submissions` + matrice), Google Classroom, Google Forms IA, et bascule racine `/` vers la V2.
 * **Phase 7 (Fiabilité du Tuteur IA & Sécurité — Plan V3) :** [TERMINÉ & VALIDÉ ✅]
-  - **Serveur (`functions/index.js`)** : Connexion obligatoire, quota horaire de 40 appels/élève/h (`usage/{uid}`), résolution stricte du prompt système côté serveur par `course_id` (suppression de `system_prompt_custom`), cascade réduite à 2 modèles vérifiés (`gemini-2.5-flash`, `gemini-2.5-flash-lite`) avec timeout de 12 s par appel, budget total de 25 s, 1 retry avec backoff sur 429/503, `responseSchema` JSON strict (`corrigerDevoir`, `genererSandboxIA`, `genererQuizGoogleFormsIA`), cache mémoire 10 min, gestion des réponses vides et logs JSON structurés.
-  - **Client (`v2/`)** : Historique normalisé `role: user|model` (10 derniers messages sans doublon), 3 boutons d'action rapide (« 🤔 Je ne comprends pas la consigne », « 🔍 Explique mon erreur », « 💡 Une piste pour démarrer ») joignant automatiquement le travail/code de l'élève, messages d'erreur explicites, et repli local réservé au mode hors ligne (`navigator.onLine === false`).
-  - **Tests & Build** : Règles `usage/{uid}` testées sur émulateur (**26/26 tests passés**) et build Vite de production généré dans `public/`.
-* **Phase en cours :** Phase 8 — Navigation en entonnoir (Hub → Cours → Focus), liens profonds `?course=&ex=`, et découpage modulaire de `v2/src/main.js`.
+  - **Serveur (`functions/index.js`)** : Connexion obligatoire, quota horaire de 40 appels/élève/h (`usage/{uid}`), résolution stricte du prompt système côté serveur par `course_id`, cascade réduite à 2 modèles vérifiés (`gemini-2.5-flash`, `gemini-2.5-flash-lite`) avec timeout de 12 s par appel, budget total de 25 s, 1 retry avec backoff sur 429/503, `responseSchema` JSON strict, cache mémoire 10 min, gestion des réponses vides et logs JSON structurés.
+  - **Client (`v2/`)** : Historique normalisé `role: user|model` (10 derniers messages sans doublon), 3 boutons d'action rapide joignant automatiquement le travail/code de l'élève, messages d'erreur explicites, et repli local réservé au mode hors ligne.
+* **Phase 8 (Navigation en entonnoir, Liens profonds & Découpage modulaire) :** [TERMINÉ & VALIDÉ ✅]
+  - **Navigation en entonnoir** : Hub « Mes cours » (`studentViewMode === 'hub'`) avec cartes filtrées par classe et jauge de progression en %, Carte du cours (`studentViewMode === 'course'`) avec modules numérotés et accès rapides **📖 Théorie** / **🎯 Missions**, et Mode Focus (`studentViewMode === 'focus'`) avec fil d'Ariane cliquable et boutons **« ← Précédent »** / **« Suivant ➔ »**.
+  - **Liens profonds (`?course=&ex=&module=`)** : Lecture automatique au démarrage via `handleDeepLinkParams()` (corrige C1 pour l'ouverture directe des devoirs Classroom).
+  - **Refactorisation modulaire (corrige M1)** : `v2/src/main.js` réduit de 2 295 lignes à 33 lignes, découpé en 7 stores dans `v2/src/stores/` (`auth.js`, `course.js`, `fmttn.js`, `tutor.js`, `teacher.js`, `classroom.js`, `forms.js`).
+* **Phase en cours :** Phase 9 — Google Classroom intégré (liaison explicite `classroom_course_id`, détection fiable par ID, publication enrichie, auto-sync roster & notes).
 
 ## 🔮 5. Prochaines Étapes (Feuille de Route V3 — voir `plan_ameliorations_v3.md`)
 - [x] **Phases 0 à 6 (Fusion V1 → V2) :** [OK] Déployées en production.
-- [x] **Phase 7 : Fiabilité du Tuteur IA & Sécurité :** [OK] Implémentée, buildée et validée (26/26 tests Firestore).
-- [ ] **Phase 8 : Navigation en entonnoir & Liens profonds (`?course=&ex=`) + Refactorisation modulaire `v2/src/`**
+- [x] **Phase 7 : Fiabilité du Tuteur IA & Sécurité :** [OK] Commit `d69b1ff` (26/26 tests Firestore).
+- [x] **Phase 8 : Navigation en entonnoir & Liens profonds (`?course=&ex=`) + Refactorisation modulaire `v2/src/stores/` :** [OK] Implémentée, buildée et validée (26/26 tests Firestore).
 - [ ] **Phase 9 : Google Classroom intégré (liaison explicite `classroom_course_id`, publication enrichie, auto-sync roster & notes)**
 - [ ] **Phase 10 : Course Studio sans code & 5 sources d'import IA**
 - [ ] **Phase 11 : Outils du professeur (SpeedGrader, validation par lot, vue classe en direct avec signal « bloqué », export bulletin)**
