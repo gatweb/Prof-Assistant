@@ -447,3 +447,92 @@ export async function syncStudentGradeToClassroom({ courseId, courseWorkId, stud
     grade: numGrade
   };
 }
+
+/**
+ * 7. Phase 12 : Vérifie les permissions de partage d'un lien Google Doc / Drive avant remise
+ * Dans un domaine Google Workspace scolaire, un partage « Tout le domaine » (`domain`) ou « Toute personne disposant du lien » (`anyone`)
+ * ou avec l'enseignant (`shared: true` et > 1 permission) suffit.
+ */
+export async function verifyDriveFileSharing(rawUrl) {
+  const clean = String(rawUrl || '').trim();
+  if (!clean) {
+    return { valid: false, status: 'empty', message: 'Veuillez coller un lien Google Doc ou Drive.' };
+  }
+
+  // Extraire l'identifiant du fichier/dossier Drive
+  const idMatch = clean.match(/\/d\/([a-zA-Z0-9_-]{15,})/) ||
+                  clean.match(/\/folders\/([a-zA-Z0-9_-]{15,})/) ||
+                  clean.match(/[?&]id=([a-zA-Z0-9_-]{15,})/);
+
+  if (!idMatch) {
+    if (clean.startsWith('http://') || clean.startsWith('https://')) {
+      return { valid: true, status: 'external_url', message: 'Lien externe détecté ✓' };
+    }
+    return { valid: false, status: 'invalid_format', message: 'Ce texte ne ressemble pas à un lien Google Docs ou Google Drive valide.' };
+  }
+
+  const fileId = idMatch[1];
+  const token = getClassroomToken();
+
+  // Si pas de jeton OAuth disponible (ex: mode invité), validation syntaxique + rappel bienveillant
+  if (!token) {
+    const hasUspSharing = clean.includes('usp=sharing') || clean.includes('usp=drive_link');
+    return {
+      valid: true,
+      status: hasUspSharing ? 'shared_syntax' : 'unchecked_token',
+      fileId,
+      message: hasUspSharing
+        ? 'Lien de partage Google Drive valide ✓'
+        : 'Format Google Drive reconnu. Assure-toi d\'avoir cliqué sur « Partager > Tous les utilisateurs disposant du lien (Lecteur) ».'
+    };
+  }
+
+  try {
+    const res = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?fields=id,name,shared,permissions(type,role,domain)&supportsAllDrives=true`,
+      {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }
+    );
+
+    if (!res.ok) {
+      return {
+        valid: true,
+        status: 'api_fallback',
+        fileId,
+        message: 'Lien Google Drive détecté ✓ (Vérifie que ton professeur a bien l\'accès Lecteur).'
+      };
+    }
+
+    const fileMeta = await res.json();
+    const perms = Array.isArray(fileMeta.permissions) ? fileMeta.permissions : [];
+    const hasDomainOrAnyone = perms.some(p => p.type === 'anyone' || p.type === 'domain');
+    const hasMultipleUsers = perms.filter(p => p.type === 'user').length > 1;
+
+    if (fileMeta.shared || hasDomainOrAnyone || hasMultipleUsers) {
+      return {
+        valid: true,
+        status: 'shared_verified',
+        fileId,
+        fileName: fileMeta.name || 'Document',
+        message: `✅ Partage vérifié pour « ${fileMeta.name || 'ton document'} » ! Ton professeur pourra l'ouvrir.`
+      };
+    }
+
+    return {
+      valid: false,
+      status: 'private_file',
+      fileId,
+      fileName: fileMeta.name || 'Document',
+      message: `🔒 Attention : « ${fileMeta.name || 'Ce document'} » est encore PRIVÉ ! Dans Google Docs/Drive, clique sur le bouton bleu « Partager » en haut à droite, puis choisis « École / Tous les utilisateurs disposant du lien » en mode Lecteur.`
+    };
+  } catch (err) {
+    return {
+      valid: true,
+      status: 'network_fallback',
+      fileId,
+      message: 'Lien Google Drive prêt à être envoyé.'
+    };
+  }
+}
+

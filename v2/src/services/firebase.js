@@ -57,6 +57,7 @@ export async function loginUtilisateurGoogle() {
   try {
     const provider = new GoogleAuthProvider();
     provider.addScope('https://www.googleapis.com/auth/classroom.courses.readonly');
+    provider.addScope('https://www.googleapis.com/auth/drive.metadata.readonly');
     provider.setCustomParameters({ prompt: 'select_account' });
     const result = await signInWithPopup(auth, provider);
     const credential = GoogleAuthProvider.credentialFromResult(result);

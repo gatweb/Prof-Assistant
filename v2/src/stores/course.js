@@ -518,6 +518,7 @@ export function createCourseStore() {
       this.codingFeedback = '';
 
       const payload = `HTML:\n${this.codingFiles.html}\n\nCSS:\n${this.codingFiles.css}\n\nJS:\n${this.codingFiles.js}`;
+      const autonomyScore = typeof this.getCurrentAutonomyScore === 'function' ? this.getCurrentAutonomyScore() : 100;
       try {
         const res = await soumettreDevoirCloud({
           code_eleve: payload,
@@ -528,13 +529,14 @@ export function createCourseStore() {
           classe_id: this.user.classe,
           type: 'code',
           autonomie: {
+            score: autonomyScore,
             tutor_calls: this.studentTutorCallsCount || 0,
             hints_used: this.studentHintsUsedCount || 0
           }
         });
         const note = res?.evaluation?.note_suggeree || 85;
         const fb = res?.evaluation?.feedback_eleve || "Ton code a été analysé avec succès ! Bien joué pour la structure.";
-        this.codingFeedback = `✅ ${fb} (Note suggérée : ${note}/100)`;
+        this.codingFeedback = `✅ ${fb} (Note suggérée : ${note}/100 • Autonomie : ${autonomyScore}%)`;
         this.codingScore = note;
         this.user.xp += 30;
         this.studentTutorCallsCount = 0;
@@ -556,6 +558,17 @@ export function createCourseStore() {
         alert("Veuillez coller le lien de votre Google Doc ou dossier Drive.");
         return;
       }
+
+      // Phase 12 : Vérification automatique du partage Google Drive avant remise
+      if (this.currentExercise?.submission_type !== 'text' && typeof this.verifierPartageLienDrive === 'function') {
+        const check = await this.verifierPartageLienDrive(docUrl);
+        if (check && check.status === 'private_file') {
+          alert(check.message);
+          return;
+        }
+      }
+
+      const autonomyScore = typeof this.getCurrentAutonomyScore === 'function' ? this.getCurrentAutonomyScore() : 100;
       this.officeSubmitting = true;
       try {
         const content = `LIEN : ${docUrl}\n\nNOTES : ${this.officeNotes}`;
@@ -568,12 +581,13 @@ export function createCourseStore() {
           classe_id: this.user.classe,
           type: 'office',
           autonomie: {
+            score: autonomyScore,
             tutor_calls: this.studentTutorCallsCount || 0,
             hints_used: this.studentHintsUsedCount || 0
           }
         });
         this.officeSubmissionStatus = 'pending';
-        this.officeFeedback = "✅ Document soumis au professeur ! En attente de validation.";
+        this.officeFeedback = `✅ Document soumis au professeur ! (Score d'autonomie : ${autonomyScore}%)`;
         this.user.xp += 25;
         this.studentTutorCallsCount = 0;
         this.studentHintsUsedCount = 0;
@@ -595,6 +609,7 @@ export function createCourseStore() {
         alert("Veuillez coller le lien de votre création (Canva, Drive, Gemini, etc.).");
         return;
       }
+      const autonomyScore = typeof this.getCurrentAutonomyScore === 'function' ? this.getCurrentAutonomyScore() : 100;
       this.creativeSubmitting = true;
       try {
         const content = `PROJET : ${projUrl}\n\nDÉMARCHE : ${this.creativeNotes}`;
@@ -607,12 +622,13 @@ export function createCourseStore() {
           classe_id: this.user.classe,
           type: 'creative',
           autonomie: {
+            score: autonomyScore,
             tutor_calls: this.studentTutorCallsCount || 0,
             hints_used: this.studentHintsUsedCount || 0
           }
         });
         this.creativeStatus = 'pending';
-        this.creativeFeedback = "✨ Mission créative transmise avec brio !";
+        this.creativeFeedback = `✨ Mission créative transmise avec brio ! (Score d'autonomie : ${autonomyScore}%)`;
         this.user.xp += 30;
         this.studentTutorCallsCount = 0;
         this.studentHintsUsedCount = 0;

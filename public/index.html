@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>body{font-family:Plus Jakarta Sans,sans-serif}</style>
-  <script type="module" crossorigin src="/assets/index-C1rM2oKr.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-D351Lu0J.css">
+  <script type="module" crossorigin src="/assets/index-BRjRX2Pi.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index--ybe4qMt.css">
 </head>
 <body class="h-full flex flex-col bg-slate-50 text-slate-800" x-data="profAssistantApp()">
 
@@ -99,8 +99,33 @@
               <span class="text-[10px]">▾</span>
             </button>
 
-            <!-- Compteur XP -->
-            <div class="text-xs px-2 py-1 bg-amber-50 border border-amber-200 text-amber-700 font-black rounded-lg hidden md:block" x-text="user.xp + ' XP'"></div>
+            <!-- Bouton Mode Dyslexie (Phase 12) -->
+            <button
+              @click="basculerModeDyslexie()"
+              :class="dyslexiaMode ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'"
+              class="px-2 py-1 border rounded-lg text-xs font-extrabold transition cursor-pointer flex items-center gap-1"
+              title="Activer / Désactiver la police et l'espacement adaptés (Mode Dyslexie)">
+              <span>👓</span>
+              <span class="hidden lg:inline">Dys</span>
+            </button>
+
+            <!-- Mascotte Évolutive & Compteur XP (Phase 12) -->
+            <button
+              @click="skillTreeModalOpen = true"
+              :class="getMascotStage().badgeClass"
+              class="text-xs px-2.5 py-1 border font-black rounded-lg hidden md:flex items-center gap-1.5 cursor-pointer transition hover:scale-105"
+              :title="getMascotStage().name + ' — ' + getMascotStage().title + ' (Cliquer pour ouvrir ton Arbre de Compétences)'">
+              <span class="text-sm" x-text="getMascotStage().icon"></span>
+              <span x-text="user.xp + ' XP'"></span>
+              <span class="text-[10px] opacity-75" x-text="'Niv.' + getMascotStage().level"></span>
+            </button>
+
+            <!-- Score d'Autonomie en direct -->
+            <span
+              :class="getAutonomyBadgeInfo().color"
+              class="text-[11px] px-2 py-1 border font-extrabold rounded-lg hidden xl:inline-block"
+              title="Score d'autonomie sur la mission en cours (100 / 80 / 60 / 40)"
+              x-text="getAutonomyBadgeInfo().label"></span>
 
             <!-- Bouton Déconnexion -->
             <button 
@@ -476,11 +501,31 @@
             Choisis un cours pour explorer ses modules numérotés, consulter la théorie et réaliser tes missions interactives.
           </p>
         </div>
-        <div class="flex items-center gap-3">
-          <div class="bg-white/10 border border-white/15 rounded-2xl px-4 py-3 text-center">
-            <div class="text-[11px] text-blue-200 font-bold uppercase">Points d'Expérience</div>
-            <div class="text-xl font-black text-amber-400" x-text="(user.xp || 0) + ' XP'"></div>
+        <div class="flex items-center gap-3 flex-wrap">
+          <!-- Carte Mascotte Évolutive @lt_X (Phase 12) -->
+          <div
+            @click="skillTreeModalOpen = true"
+            class="bg-white/10 hover:bg-white/15 border border-white/20 rounded-2xl px-4 py-3 flex items-center gap-3.5 cursor-pointer transition">
+            <div class="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center text-3xl shadow-inner animate-bounce"
+                 x-text="getMascotStage().icon"></div>
+            <div class="text-left">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-black text-amber-300" x-text="getMascotStage().name"></span>
+                <span class="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-200 text-[10px] font-black" x-text="'Niv. ' + getMascotStage().level"></span>
+              </div>
+              <div class="text-[11px] text-blue-100 font-semibold" x-text="getMascotStage().title + ' • ' + (user.xp || 0) + ' XP'"></div>
+              <div class="w-36 h-1.5 bg-white/15 rounded-full overflow-hidden mt-1.5">
+                <div class="h-full bg-amber-400 rounded-full transition-all duration-500" :style="'width: ' + getMascotStage().progressInStage + '%'"></div>
+              </div>
+            </div>
           </div>
+
+          <button
+            @click="skillTreeModalOpen = true"
+            class="px-4 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition cursor-pointer shadow-sm flex items-center gap-2">
+            <span>🌳</span>
+            <span>Mon Arbre de Compétences</span>
+          </button>
         </div>
       </div>
 
@@ -2339,7 +2384,13 @@
             Consultez les notions clés, les explications étape par étape et les exemples illustrés avant de réaliser vos exercices.
           </p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 flex-wrap">
+          <button
+            type="button"
+            @click="lireTexteVocal((currentChapter?.title || '') + '. ' + courseMarkdownContent)"
+            class="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-extrabold text-xs transition flex items-center gap-2 cursor-pointer">
+            <span x-text="ttsPlaying ? '⏹️ Arrêter la lecture' : '🔊 Écouter la leçon'"></span>
+          </button>
           <button 
             @click="activeTab = 'pratique'"
             class="px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs transition shadow-sm flex items-center gap-2 cursor-pointer">
@@ -2409,11 +2460,21 @@
             
             <!-- Carte Consigne -->
             <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-4">
-              <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center justify-between gap-3 flex-wrap">
                 <span class="px-3 py-1 rounded-full text-xs font-extrabold bg-blue-100 text-blue-800">
                   <span x-text="currentCourse?.id === 'dactylo-3e' ? '⌨️ Dactylographie Pro' : '📄 Bureautique & Google Docs'"></span>
                 </span>
-                <span class="text-xs font-bold text-slate-400" x-text="currentExercise?.titre || 'Activité pratique'"></span>
+                <div class="flex items-center gap-2">
+                  <!-- Bouton Lecture Vocale Consigne (Phase 12) -->
+                  <button
+                    type="button"
+                    @click="lireTexteVocal((currentExercise?.titre || '') + '. ' + (currentExercise?.consigne || ''))"
+                    class="px-2.5 py-1 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-extrabold transition cursor-pointer flex items-center gap-1"
+                    title="Écouter la consigne à voix haute">
+                    <span x-text="ttsPlaying ? '⏹️ Arrêter' : '🔊 Écouter la consigne'"></span>
+                  </button>
+                  <span class="text-xs font-bold text-slate-400" x-text="currentExercise?.titre || 'Activité pratique'"></span>
+                </div>
               </div>
 
               <h3 class="text-xl font-black text-slate-900" x-text="currentExercise?.titre || 'Consignes du travail'"></h3>
@@ -2535,14 +2596,33 @@
                 </span>
               </div>
 
-              <!-- Champ URL Google Doc / Drive ou Score Dactylo -->
+              <!-- Champ URL Google Doc / Drive ou Score Dactylo + Vérification Partage Drive (Phase 12) -->
               <div class="space-y-1.5">
-                <label class="text-xs font-bold text-slate-700" x-text="currentExercise?.submission_type === 'text' ? '⚡ Score de frappe & statistiques :' : '🔗 Lien Google Doc ou Dossier Drive (mode Lecteur) :'"></label>
+                <div class="flex items-center justify-between">
+                  <label class="text-xs font-bold text-slate-700" x-text="currentExercise?.submission_type === 'text' ? '⚡ Score de frappe & statistiques :' : '🔗 Lien Google Doc ou Dossier Drive (mode Lecteur) :'"></label>
+                  <button
+                    x-show="currentExercise?.submission_type !== 'text' && officeDocUrl.trim()"
+                    type="button"
+                    @click="verifierPartageLienDrive(officeDocUrl)"
+                    :disabled="driveShareCheckLoading"
+                    class="text-[11px] font-extrabold text-blue-600 hover:underline cursor-pointer">
+                    <span x-text="driveShareCheckLoading ? '⏳ Vérification...' : '🔍 Vérifier le partage Drive'"></span>
+                  </button>
+                </div>
                 <input 
                   type="text" 
                   x-model="officeDocUrl"
+                  @blur="if (currentExercise?.submission_type !== 'text' && officeDocUrl.trim()) verifierPartageLienDrive(officeDocUrl)"
                   :placeholder="currentExercise?.submission_type === 'text' ? 'Ex: 24 mots/min, 96% de précision' : 'https://docs.google.com/document/d/...'"
                   class="w-full text-xs font-medium px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition" />
+
+                <!-- Résultat de la vérification du partage Drive -->
+                <div
+                  x-show="driveShareCheckResult && officeDocUrl.trim()"
+                  :class="driveShareCheckResult?.valid ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-300 text-rose-800'"
+                  class="p-2.5 rounded-xl border text-[11px] font-bold leading-relaxed"
+                  x-text="driveShareCheckResult?.message">
+                </div>
               </div>
 
               <!-- Champ Notes & Remarques -->
@@ -2596,11 +2676,19 @@
             
             <!-- Carte Énoncé -->
             <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-2">
-              <div class="flex items-center justify-between">
+              <div class="flex items-center justify-between flex-wrap gap-2">
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-orange-100 text-orange-800">
                   💻 Coding Lab
                 </span>
-                <span class="text-xs font-bold text-slate-400" x-text="currentExercise?.titre || 'Défi de programmation'"></span>
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    @click="lireTexteVocal((currentExercise?.titre || '') + '. ' + (currentExercise?.consigne || ''))"
+                    class="px-2.5 py-1 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-800 border border-orange-200 text-xs font-extrabold transition cursor-pointer flex items-center gap-1">
+                    <span x-text="ttsPlaying ? '⏹️ Arrêter' : '🔊 Écouter la consigne'"></span>
+                  </button>
+                  <span class="text-xs font-bold text-slate-400" x-text="currentExercise?.titre || 'Défi de programmation'"></span>
+                </div>
               </div>
               <h4 class="font-black text-slate-900 text-base" x-text="currentExercise?.titre || 'Mission'"></h4>
               <div class="text-slate-600 text-xs leading-relaxed" x-html="marked.parse(currentExercise?.consigne || 'Écris ton code et clique sur Exécuter.')"></div>
@@ -2760,11 +2848,19 @@
           <div class="lg:col-span-7 space-y-6">
             
             <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-4">
-              <div class="flex items-center justify-between">
+              <div class="flex items-center justify-between flex-wrap gap-2">
                 <span class="px-3 py-1 rounded-full text-xs font-extrabold bg-purple-100 text-purple-800">
                   🎬 Studio Créatif & IA
                 </span>
-                <span class="text-xs font-bold text-slate-400" x-text="currentExercise?.titre || 'Mission'"></span>
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    @click="lireTexteVocal((currentExercise?.titre || '') + '. ' + (currentExercise?.consigne || ''))"
+                    class="px-2.5 py-1 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 text-xs font-extrabold transition cursor-pointer flex items-center gap-1">
+                    <span x-text="ttsPlaying ? '⏹️ Arrêter' : '🔊 Écouter la consigne'"></span>
+                  </button>
+                  <span class="text-xs font-bold text-slate-400" x-text="currentExercise?.titre || 'Mission'"></span>
+                </div>
               </div>
 
               <h3 class="text-xl font-black text-slate-900" x-text="currentExercise?.titre || 'Brief de la Mission'"></h3>
@@ -5326,6 +5422,135 @@
           Fermer
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- 🌳 MODALE ARBRE DE COMPÉTENCES, MASCOTTE ÉVOLUTIVE @lt_X & SCORE D'AUTONOMIE (PHASE 12) -->
+  <div
+    x-show="skillTreeModalOpen"
+    x-transition.opacity
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto"
+    style="display: none;">
+    <div
+      @click.away="skillTreeModalOpen = false"
+      class="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative my-6 max-h-[90vh] overflow-y-auto space-y-6">
+
+      <button
+        @click="skillTreeModalOpen = false"
+        class="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl text-lg font-bold cursor-pointer">
+        ✕
+      </button>
+
+      <!-- Carte Mascotte Évolutive @lt_X -->
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 rounded-3xl p-6 text-white flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-4">
+          <div class="w-20 h-20 rounded-3xl bg-white/10 border border-white/20 flex items-center justify-center text-5xl shadow-lg animate-bounce"
+               x-text="getMascotStage().icon"></div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black uppercase"
+                    x-text="'Stade ' + getMascotStage().level + ' / 5'"></span>
+              <span class="text-xs font-bold text-blue-200" x-text="getMascotStage().title"></span>
+            </div>
+            <h3 class="text-2xl font-black mt-1" x-text="getMascotStage().name"></h3>
+            <p class="text-xs text-slate-300 mt-1 italic" x-text="'« ' + getMascotStage().quote + ' »'"></p>
+          </div>
+        </div>
+
+        <div class="w-full md:w-64 bg-white/10 border border-white/15 rounded-2xl p-4 space-y-2">
+          <div class="flex items-center justify-between text-xs font-bold">
+            <span class="text-blue-200">Expérience totale</span>
+            <span class="text-amber-300 font-black text-base" x-text="(user.xp || 0) + ' XP'"></span>
+          </div>
+          <div class="w-full h-2.5 bg-white/15 rounded-full overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-amber-400 to-emerald-400 rounded-full transition-all duration-500"
+                 :style="'width: ' + getMascotStage().progressInStage + '%'"></div>
+          </div>
+          <div class="text-[11px] text-slate-300 text-right" x-show="getMascotStage().level < 5">
+            Plus que <strong class="text-white" x-text="getMascotStage().xpToNext + ' XP'"></strong> avant la prochaine évolution !
+          </div>
+        </div>
+      </div>
+
+      <!-- Paliers d'évolution de la mascotte + Score d'Autonomie -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+          <div class="text-xs font-black uppercase tracking-wider text-slate-500">🐾 Évolution de ta mascotte @lt_X</div>
+          <div class="flex items-center justify-between gap-1 pt-1">
+            <div class="flex flex-col items-center p-2 rounded-xl" :class="(user.xp || 0) >= 0 ? 'bg-white shadow-2xs border border-blue-200' : 'opacity-40'">
+              <span class="text-xl">🥚</span>
+              <span class="text-[10px] font-bold mt-0.5">0 XP</span>
+            </div>
+            <span class="text-slate-300 font-bold">→</span>
+            <div class="flex flex-col items-center p-2 rounded-xl" :class="(user.xp || 0) >= 50 ? 'bg-white shadow-2xs border border-blue-200' : 'opacity-40'">
+              <span class="text-xl">🤖</span>
+              <span class="text-[10px] font-bold mt-0.5">50 XP</span>
+            </div>
+            <span class="text-slate-300 font-bold">→</span>
+            <div class="flex flex-col items-center p-2 rounded-xl" :class="(user.xp || 0) >= 150 ? 'bg-white shadow-2xs border border-indigo-200' : 'opacity-40'">
+              <span class="text-xl">🦾</span>
+              <span class="text-[10px] font-bold mt-0.5">150 XP</span>
+            </div>
+            <span class="text-slate-300 font-bold">→</span>
+            <div class="flex flex-col items-center p-2 rounded-xl" :class="(user.xp || 0) >= 300 ? 'bg-white shadow-2xs border border-purple-200' : 'opacity-40'">
+              <span class="text-xl">🚀</span>
+              <span class="text-[10px] font-bold mt-0.5">300 XP</span>
+            </div>
+            <span class="text-slate-300 font-bold">→</span>
+            <div class="flex flex-col items-center p-2 rounded-xl" :class="(user.xp || 0) >= 500 ? 'bg-amber-50 shadow-2xs border border-amber-300' : 'opacity-40'">
+              <span class="text-xl">👑</span>
+              <span class="text-[10px] font-bold mt-0.5">500 XP</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black uppercase tracking-wider text-slate-500">🧭 Score d'Autonomie Actuel</span>
+            <span :class="getAutonomyBadgeInfo().color" class="px-2.5 py-0.5 rounded-full text-xs font-black border" x-text="getAutonomyBadgeInfo().label"></span>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed mt-2">
+            Barème d'autonomie sur chaque mission : <strong>100%</strong> (sans indice), <strong>80%</strong> (1 coup de pouce), <strong>60%</strong> (2 aides), <strong>40%</strong> (guidage pas-à-pas). Demander de l'aide au tuteur est encouragé quand tu bloques !
+          </p>
+        </div>
+      </div>
+
+      <!-- Arbre de Compétences Visuel (3 branches) -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h4 class="font-black text-base text-slate-900">🌳 Mon Arbre de Compétences Numériques</h4>
+          <span class="text-xs font-bold text-slate-400">Référentiel SeGEC & Parcours Multi-Cours</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <template x-for="branch in getStudentSkillTreeBranches()" :key="branch.id">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-3">
+              <div class="font-black text-xs text-slate-900 pb-2 border-b border-slate-200 flex items-center gap-1.5">
+                <span x-text="branch.icon"></span>
+                <span x-text="branch.title"></span>
+              </div>
+
+              <div class="space-y-2">
+                <template x-for="node in branch.nodes" :key="node.code">
+                  <div
+                    :class="node.status === 'acquis' ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-white border-slate-200 text-slate-700'"
+                    class="p-2.5 rounded-xl border text-xs flex items-center justify-between gap-2">
+                    <div>
+                      <div class="text-[10px] font-black opacity-60" x-text="node.code"></div>
+                      <div class="font-bold leading-snug" x-text="node.label"></div>
+                    </div>
+                    <span
+                      :class="node.status === 'acquis' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500'"
+                      class="w-6 h-6 rounded-full text-xs font-black flex items-center justify-center shrink-0"
+                      x-text="node.status === 'acquis' ? '✓' : '•'"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
     </div>
   </div>
 
