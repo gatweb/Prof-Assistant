@@ -51,6 +51,9 @@ export function createTutorStore() {
 
     async envoyerActionRapideTuteur(action) {
       if (!action || this.tutorLoading) return;
+      if (action.id === 'piste' || action.id === 'erreur') {
+        this.studentHintsUsedCount = (this.studentHintsUsedCount || 0) + 1;
+      }
       const context = this.getStudentWorkContextForTutor();
       await this.envoyerQuestionTuteur(action.prompt, context);
     },
@@ -106,6 +109,12 @@ export function createTutorStore() {
       }
       this.tutorMood = 'thinking';
       this.tutorLoading = true;
+
+      // Phase 11 : Comptabiliser l'appel au tuteur pour la vue classe en direct (signal « bloqué »)
+      this.studentTutorCallsCount = (this.studentTutorCallsCount || 0) + 1;
+      if (typeof this.syncCurrentStudentProgress === 'function') {
+        this.syncCurrentStudentProgress();
+      }
 
       if (typeof navigator !== 'undefined' && navigator.onLine === false) {
         const localReply = this.getLocalFallbackResponse(q);

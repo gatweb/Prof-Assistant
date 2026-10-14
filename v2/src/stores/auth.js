@@ -31,6 +31,8 @@ export function createAuthStore() {
     modalClassChoiceOpen: false,
     classroomDetectedClass: null,
     studentSubmissionsHistory: [],
+    studentTutorCallsCount: 0,
+    studentHintsUsedCount: 0,
 
     user: {
       id: '',
@@ -296,7 +298,11 @@ export function createAuthStore() {
         },
         mission_secu: {
           isSubmitted: this.missionSecu.isSubmitted
-        }
+        },
+        tutor_calls_count: this.studentTutorCallsCount || 0,
+        hints_used_count: this.studentHintsUsedCount || 0,
+        active_course_id: this.currentCourse?.id || 'fmttn-1re',
+        active_exercise_id: this.currentExercise?.id || this.selectedModuleId || ''
       };
 
       await saveEleveProgression(this.user.classe, this.user.email || this.user.id || 'el_student', dataToSave);

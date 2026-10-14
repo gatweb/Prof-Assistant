@@ -526,13 +526,19 @@ export function createCourseStore() {
           course_id: this.currentCourse?.id || 'js-uaa5-classic',
           nom_eleve: this.user.nom,
           classe_id: this.user.classe,
-          type: 'code'
+          type: 'code',
+          autonomie: {
+            tutor_calls: this.studentTutorCallsCount || 0,
+            hints_used: this.studentHintsUsedCount || 0
+          }
         });
         const note = res?.evaluation?.note_suggeree || 85;
         const fb = res?.evaluation?.feedback_eleve || "Ton code a été analysé avec succès ! Bien joué pour la structure.";
         this.codingFeedback = `✅ ${fb} (Note suggérée : ${note}/100)`;
         this.codingScore = note;
         this.user.xp += 30;
+        this.studentTutorCallsCount = 0;
+        this.studentHintsUsedCount = 0;
         this.syncCurrentStudentProgress();
       } catch (err) {
         console.warn("[soumettreCodeExercice] Fallback local :", err);
@@ -560,11 +566,17 @@ export function createCourseStore() {
           course_id: this.currentCourse?.id || 'bureautique-3e',
           nom_eleve: this.user.nom,
           classe_id: this.user.classe,
-          type: 'office'
+          type: 'office',
+          autonomie: {
+            tutor_calls: this.studentTutorCallsCount || 0,
+            hints_used: this.studentHintsUsedCount || 0
+          }
         });
         this.officeSubmissionStatus = 'pending';
         this.officeFeedback = "✅ Document soumis au professeur ! En attente de validation.";
         this.user.xp += 25;
+        this.studentTutorCallsCount = 0;
+        this.studentHintsUsedCount = 0;
         this.syncCurrentStudentProgress();
       } catch (err) {
         console.warn("[soumettreOfficeDevoir] Fallback local :", err);
@@ -593,11 +605,17 @@ export function createCourseStore() {
           course_id: this.currentCourse?.id || 'studio-creatif',
           nom_eleve: this.user.nom,
           classe_id: this.user.classe,
-          type: 'creative'
+          type: 'creative',
+          autonomie: {
+            tutor_calls: this.studentTutorCallsCount || 0,
+            hints_used: this.studentHintsUsedCount || 0
+          }
         });
         this.creativeStatus = 'pending';
         this.creativeFeedback = "✨ Mission créative transmise avec brio !";
         this.user.xp += 30;
+        this.studentTutorCallsCount = 0;
+        this.studentHintsUsedCount = 0;
         this.syncCurrentStudentProgress();
       } catch (err) {
         console.warn("[soumettreCreativeDevoir] Fallback local :", err);

@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>body{font-family:Plus Jakarta Sans,sans-serif}</style>
-  <script type="module" crossorigin src="/assets/index-Cqb0TlgG.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BToGhzuC.css">
+  <script type="module" crossorigin src="/assets/index-C1rM2oKr.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-D351Lu0J.css">
 </head>
 <body class="h-full flex flex-col bg-slate-50 text-slate-800" x-data="profAssistantApp()">
 
@@ -2993,15 +2993,25 @@
             <p class="text-xs text-slate-500 mt-1">Corrigés et transmis aux élèves</p>
           </div>
           <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
-            <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Export & Rapports</div>
-            <button 
-              @click="exporterSubmissionsCSV()"
-              class="w-full mt-2 py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-xs">
-              <span>📥</span> Exporter le relevé (CSV)
-            </button>
-            <p class="text-[11px] text-slate-400 text-center mt-1">Compatible Excel / Google Sheets</p>
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Actions par Lot & Exports</div>
+            <div class="flex flex-col gap-1.5 mt-2">
+              <button 
+                @click="validerLotCopiesEligibles()"
+                :disabled="batchValidating || getBatchEligibleSubmissions().length === 0"
+                class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs">
+                <span>⚡</span>
+                <span x-text="batchValidating ? 'Validation...' : 'Valider par lot (' + getBatchEligibleSubmissions().length + ')'"></span>
+              </button>
+              <button 
+                @click="exporterSubmissionsCSV()"
+                class="w-full py-1.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs">
+                <span>📥</span> Exporter relevé (CSV)
+              </button>
+            </div>
           </div>
         </div>
+
+        <div x-show="batchFeedbackMsg" class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black text-center" x-text="batchFeedbackMsg"></div>
 
         <!-- Barre de Filtres Multi-Critères -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
@@ -3106,11 +3116,17 @@
                       <div class="text-[11px] text-slate-400" x-text="sub.course_id || sub.id_course || 'js-uaa5-classic'"></div>
                     </td>
                     <td class="py-3 px-4">
-                      <span 
-                        :class="sub.note_suggeree >= 80 ? 'bg-emerald-100 text-emerald-800' : (sub.note_suggeree >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')"
-                        class="px-2.5 py-1 rounded-full font-black text-xs inline-block">
-                        <span x-text="(sub.note_suggeree !== undefined && sub.note_suggeree !== null ? sub.note_suggeree : '--') + ' / 100'"></span>
-                      </span>
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <span 
+                          :class="sub.note_suggeree >= 80 ? 'bg-emerald-100 text-emerald-800' : (sub.note_suggeree >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')"
+                          class="px-2.5 py-1 rounded-full font-black text-xs inline-block">
+                          <span x-text="(sub.note_suggeree !== undefined && sub.note_suggeree !== null ? sub.note_suggeree : '--') + ' / 100'"></span>
+                        </span>
+                        <span
+                          :class="getMasteryLevelFromScore(sub.note_suggeree).badgeClass"
+                          class="px-2 py-0.5 rounded-full text-[10px] font-black border"
+                          x-text="getMasteryLevelFromScore(sub.note_suggeree).label"></span>
+                      </div>
                     </td>
                     <td class="py-3 px-4">
                       <span 
@@ -3166,7 +3182,7 @@
       <!-- ============================================== -->
       <div x-show="activeProfSubTab === 'matrice'" class="space-y-6">
         
-        <!-- Barre de Sélection de Cours pour la Matrice -->
+        <!-- Barre de Sélection de Cours pour la Matrice + Export Bulletin -->
         <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
@@ -3180,16 +3196,72 @@
             </div>
           </div>
 
-          <!-- Liste des cours disponibles -->
+          <!-- Liste des cours disponibles + Bouton Export Bulletin -->
           <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
             <template x-for="c in coursesList" :key="c.id">
               <button 
                 @click="changerCoursMatriceProf(c.id)"
                 :class="profSelectedCourseId === c.id ? 'bg-indigo-600 text-white shadow-xs font-black' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold'"
                 class="px-3.5 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 shrink-0 cursor-pointer">
-                <span x-text="c.icon"></span>
+                <span x-text="c.theme?.icon || c.icon || '📚'"></span>
                 <span x-text="c.title"></span>
               </button>
+            </template>
+
+            <button
+              @click="exporterBulletinCSV()"
+              class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold transition flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs">
+              <span>📋</span>
+              <span>Export Bulletin (CSV)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- VUE CLASSE EN DIRECT & SIGNAL « BLOQUÉ » (PHASE 11) -->
+        <!-- ============================================== -->
+        <div class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-2.5">
+              <span class="text-xl">📡</span>
+              <div>
+                <h3 class="font-black text-base text-slate-900">Vue Classe en Direct & Signal « Bloqué »</h3>
+                <p class="text-xs text-slate-500">Suivi en temps réel de l'état de chaque élève et échelle de maîtrise SeGEC (Non acquis / En cours / Acquis / Dépassé).</p>
+              </div>
+            </div>
+
+            <!-- Légende des 5 statuts -->
+            <div class="flex flex-wrap items-center gap-2 text-[11px] font-bold">
+              <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">⚪ Non démarré</span>
+              <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">🔵 En activité</span>
+              <span class="px-2 py-0.5 rounded-full bg-orange-100 text-orange-900 font-black">🟠 Bloqué (≥ 2 indices ou 3 appels IA)</span>
+              <span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">🟣 Soumis</span>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">🟢 Validé</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <template x-for="st in getLiveClassStatusList()" :key="st.id || st.nom">
+              <div class="p-3.5 rounded-2xl border border-slate-200 hover:border-indigo-300 transition flex flex-col justify-between gap-2 bg-slate-50/50">
+                <div class="flex items-start justify-between gap-2">
+                  <div>
+                    <div class="font-black text-xs text-slate-900" x-text="st.nom"></div>
+                    <div class="text-[10px] text-slate-400 font-mono truncate max-w-[150px]" x-text="st.email || ('XP : ' + st.xp)"></div>
+                  </div>
+                  <span
+                    :class="st.mastery.badgeClass"
+                    class="px-2 py-0.5 rounded-full text-[10px] font-black border shrink-0"
+                    x-text="st.mastery.label"></span>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                  <span :class="st.colorClass" class="px-2.5 py-0.5 rounded-full text-[11px] border inline-flex items-center gap-1">
+                    <span x-text="st.badge"></span>
+                    <span x-text="st.statusLabel"></span>
+                  </span>
+                  <span class="text-[11px] font-extrabold text-slate-600" x-text="st.avgNote + '%'"></span>
+                </div>
+              </div>
             </template>
           </div>
         </div>
@@ -4922,29 +4994,31 @@
     </div>
   </div>
 
-  <!-- 📝 MODALE DE CORRECTION DÉTAILLÉE DES COPIES (PHASE 3) -->
+  <!-- ⚡ SPEEDGRADER : MODALE DE CORRECTION RAPIDE EN DEUX VOLETS (PHASE 11) -->
   <div 
     x-show="modalCorrectionOpen" 
+    @keydown.window="handleSpeedGraderKeydown($event)"
     x-transition.opacity 
-    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-3 sm:p-5 overflow-y-auto"
     style="display: none;">
     <div 
       @click.away="modalCorrectionOpen = false"
-      class="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative my-8 max-h-[92vh] flex flex-col animate-scaleUp">
+      class="bg-white rounded-3xl max-w-6xl w-full p-5 sm:p-7 shadow-2xl border border-slate-100 relative my-4 max-h-[94vh] flex flex-col animate-scaleUp">
       
-      <!-- En-tête de la Copie -->
-      <div class="flex items-start justify-between pb-4 border-b border-slate-100 shrink-0">
+      <!-- En-tête SpeedGrader avec navigation J / K -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 shrink-0">
         <div class="flex items-center gap-3.5">
-          <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 font-black text-base flex items-center justify-center shadow-xs">
+          <div class="w-11 h-11 rounded-2xl bg-indigo-600 text-white font-black text-sm flex items-center justify-center shadow-xs">
             <span x-text="selectedSubmission?.nom_eleve ? selectedSubmission.nom_eleve.substring(0,2).toUpperCase() : '👨‍🎓'"></span>
           </div>
           <div>
             <div class="flex items-center gap-2 flex-wrap">
-              <h3 class="text-lg font-black text-slate-900" x-text="selectedSubmission?.nom_eleve || 'Élève'"></h3>
+              <span class="px-2 py-0.5 rounded-md bg-slate-900 text-white text-[10px] font-black uppercase">⚡ SpeedGrader</span>
+              <h3 class="text-base sm:text-lg font-black text-slate-900" x-text="selectedSubmission?.nom_eleve || 'Élève'"></h3>
               <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-100 text-indigo-700" x-text="'Classe ' + (selectedSubmission?.classe_id || selectedSubmission?.classe || '1A')"></span>
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700" x-text="coursesList.find(c => c.id === selectedSubmission?.course_id)?.title || selectedSubmission?.course_id || 'Cours Web'"></span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700" x-text="coursesList.find(c => c.id === selectedSubmission?.course_id)?.title || selectedSubmission?.course_id || 'Cours'"></span>
             </div>
-            <p class="text-xs text-slate-500 mt-1 flex items-center gap-2">
+            <p class="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
               <span class="font-bold text-slate-700" x-text="selectedSubmission?.titre_exercice || 'Devoir'"></span>
               <span>•</span>
               <span x-text="selectedSubmission?.date_soumission ? new Date(selectedSubmission.date_soumission).toLocaleString('fr-BE') : 'Date inconnue'"></span>
@@ -4952,162 +5026,227 @@
           </div>
         </div>
 
-        <button 
-          @click="modalCorrectionOpen = false" 
-          class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl text-lg font-bold transition cursor-pointer">
-          ✕
-        </button>
+        <div class="flex items-center gap-2">
+          <!-- Raccourcis K (Précédent) / J (Suivant) -->
+          <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold">
+            <button
+              type="button"
+              @click="speedGraderPrecedent()"
+              class="px-2.5 py-1 rounded-lg hover:bg-white text-slate-700 transition cursor-pointer flex items-center gap-1"
+              title="Copie précédente (Touche K)">
+              <span>←</span>
+              <kbd class="px-1.5 py-0.5 text-[10px] bg-slate-200 rounded font-mono">K</kbd>
+            </button>
+            <span class="px-2 text-[11px] font-extrabold text-slate-500" x-text="(getSpeedGraderCurrentIndex() + 1) + ' / ' + getFilteredSubmissions().length"></span>
+            <button
+              type="button"
+              @click="speedGraderSuivant()"
+              class="px-2.5 py-1 rounded-lg hover:bg-white text-slate-700 transition cursor-pointer flex items-center gap-1"
+              title="Copie suivante (Touche J)">
+              <kbd class="px-1.5 py-0.5 text-[10px] bg-slate-200 rounded font-mono">J</kbd>
+              <span>→</span>
+            </button>
+          </div>
+
+          <button 
+            @click="modalCorrectionOpen = false" 
+            class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl text-base font-bold transition cursor-pointer">
+            ✕
+          </button>
+        </div>
       </div>
 
-      <!-- Corps Défilable de la Modale -->
-      <div class="flex-1 overflow-y-auto py-5 space-y-6 pr-1">
+      <!-- Corps Split-Screen SpeedGrader : Copie à gauche (7 cols) | Analyse IA & Notation à droite (5 cols) -->
+      <div class="flex-1 overflow-y-auto py-4 grid grid-cols-1 lg:grid-cols-12 gap-5 pr-1">
         
-        <!-- Bloc Travail Soumis par l'Élève -->
-        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200">
-          <div class="flex items-center justify-between mb-3">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-              <span>📄</span> Travail rendu par l'élève
-            </span>
-            <div class="flex items-center gap-2">
-              <button 
-                @click="telechargerCodeEleve(selectedSubmission)"
-                class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-xs transition flex items-center gap-1 cursor-pointer">
-                <span>⬇️</span> Télécharger
-              </button>
-            </div>
-          </div>
-
-          <!-- Cas 1 : Lien externe (Google Docs, Drive, Canva, etc.) -->
-          <template x-if="selectedSubmission?.code_eleve && (selectedSubmission.code_eleve.includes('http://') || selectedSubmission.code_eleve.includes('https://'))">
-            <div class="p-4 bg-white rounded-xl border border-slate-200 space-y-3">
-              <p class="text-xs text-slate-600 font-medium">L'élève a fourni un document ou une ressource externe :</p>
-              
-              <div class="flex items-center gap-2 flex-wrap">
-                <a 
-                  :href="selectedSubmission.code_eleve.match(/https?:\/\/[^\s\n\r]+/)?.[0] || '#'" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs transition shadow-sm flex items-center gap-2 inline-flex">
-                  <span>🔗</span> Ouvrir le travail de l'élève (Google Doc / Drive) ↗
-                </a>
-              </div>
-
-              <!-- Notes d'accompagnement éventuelles -->
-              <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-700 whitespace-pre-wrap font-sans" x-text="selectedSubmission.code_eleve"></div>
-            </div>
-          </template>
-
-          <!-- Cas 2 : Code source HTML / CSS / JS ou texte brut -->
-          <template x-if="!selectedSubmission?.code_eleve || (!selectedSubmission.code_eleve.includes('http://') && !selectedSubmission.code_eleve.includes('https://'))">
-            <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono overflow-x-auto max-h-72 leading-relaxed select-all" x-text="selectedSubmission?.code_eleve || 'Aucun contenu fourni'"></pre>
-          </template>
-        </div>
-
-        <!-- Bloc Pré-évaluation IA Gemini (si disponible) -->
-        <template x-if="selectedSubmission?.feedback_ia">
-          <div class="bg-purple-50/70 border border-purple-200/80 rounded-2xl p-5 space-y-3">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="text-xl">🤖</span>
-                <span class="text-xs font-black uppercase tracking-wider text-purple-900">Analyse IA Gemini (Tuteur)</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs text-purple-700 font-bold">Note suggérée :</span>
-                <span class="px-2.5 py-0.5 rounded-full bg-purple-600 text-white text-xs font-black" x-text="(selectedSubmission.note_suggeree || 80) + '/100'"></span>
-                <button 
-                  @click="gradingNote = selectedSubmission.note_suggeree || 80"
-                  class="text-[11px] underline font-bold text-purple-700 hover:text-purple-900 cursor-pointer">
-                  Appliquer la note
-                </button>
-              </div>
-            </div>
-            <p class="text-xs text-purple-900 font-medium leading-relaxed" x-text="selectedSubmission.feedback_ia"></p>
-          </div>
-        </template>
-
-        <!-- Bloc Notation & Commentaire Enseignant -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 space-y-4">
-          <div class="flex items-center justify-between flex-wrap gap-2">
-            <label class="text-xs font-black uppercase tracking-wider text-slate-700">Barème & Note Finale (/100)</label>
-            <div class="flex items-center gap-1.5">
-              <template x-for="p in [60, 70, 80, 90, 100]" :key="p">
-                <button 
+        <!-- VOLET GAUCHE : COPIE DE L'ÉLÈVE (APERÇU /PREVIEW GOOGLE DOC OU RENDU CODE EXÉCUTÉ) -->
+        <div class="lg:col-span-7 flex flex-col space-y-3">
+          <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 flex-1 flex flex-col space-y-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-1.5">
+                <button
                   type="button"
-                  @click="gradingNote = p"
-                  :class="gradingNote === p ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
-                  class="px-2.5 py-1 rounded-lg text-xs font-extrabold transition cursor-pointer"
-                  x-text="p">
+                  @click="speedGraderViewTab = 'preview'"
+                  :class="speedGraderViewTab === 'preview' ? 'bg-indigo-600 text-white font-black' : 'bg-white text-slate-700 border border-slate-200 font-bold'"
+                  class="px-3 py-1 rounded-lg text-xs transition cursor-pointer">
+                  👁️ Rendu / Aperçu en direct
                 </button>
+                <button
+                  type="button"
+                  @click="speedGraderViewTab = 'raw'"
+                  :class="speedGraderViewTab === 'raw' ? 'bg-indigo-600 text-white font-black' : 'bg-white text-slate-700 border border-slate-200 font-bold'"
+                  class="px-3 py-1 rounded-lg text-xs transition cursor-pointer">
+                  💻 Code source / Texte brut
+                </button>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <template x-if="selectedSubmission?.code_eleve && (selectedSubmission.code_eleve.includes('http://') || selectedSubmission.code_eleve.includes('https://'))">
+                  <a 
+                    :href="selectedSubmission.code_eleve.match(/https?:\/\/[^\s\n\r]+/)?.[0] || '#'" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition flex items-center gap-1">
+                    <span>🔗 Ouvrir dans un onglet</span> ↗
+                  </a>
+                </template>
+                <button 
+                  @click="telechargerCodeEleve(selectedSubmission)"
+                  class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-xs transition flex items-center gap-1 cursor-pointer">
+                  <span>⬇️</span> Télécharger
+                </button>
+              </div>
+            </div>
+
+            <!-- Mode 1 : Aperçu interactif (/preview Google Doc ou Iframe Code exécuté) -->
+            <div x-show="speedGraderViewTab === 'preview'" class="flex-1 flex flex-col space-y-3">
+              <!-- Si lien Google Doc / Drive : Iframe /preview intégrée -->
+              <template x-if="getSpeedGraderGooglePreviewUrl(selectedSubmission)">
+                <div class="space-y-2">
+                  <iframe
+                    :src="getSpeedGraderGooglePreviewUrl(selectedSubmission)"
+                    class="w-full h-96 rounded-xl border border-slate-200 bg-white"></iframe>
+                  <div class="p-3 rounded-xl bg-white border border-slate-200 text-xs text-slate-700 whitespace-pre-wrap" x-text="selectedSubmission?.code_eleve"></div>
+                </div>
+              </template>
+
+              <!-- Si Code HTML/CSS/JS : Iframe d'exécution + code -->
+              <template x-if="!getSpeedGraderGooglePreviewUrl(selectedSubmission) && getSpeedGraderCodeSrcDoc(selectedSubmission)">
+                <div class="space-y-2">
+                  <div class="text-[11px] font-bold text-slate-500">Rendu du code exécuté :</div>
+                  <iframe
+                    :srcdoc="getSpeedGraderCodeSrcDoc(selectedSubmission)"
+                    sandbox="allow-scripts allow-same-origin"
+                    class="w-full h-64 rounded-xl border border-slate-200 bg-white"></iframe>
+                  <pre class="bg-slate-900 text-slate-100 p-3 rounded-xl text-[11px] font-mono overflow-x-auto max-h-48 leading-relaxed" x-text="selectedSubmission?.code_eleve"></pre>
+                </div>
+              </template>
+
+              <!-- Sinon : Affichage direct du contenu ou lien externe -->
+              <template x-if="!getSpeedGraderGooglePreviewUrl(selectedSubmission) && !getSpeedGraderCodeSrcDoc(selectedSubmission)">
+                <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono overflow-x-auto min-h-[260px] leading-relaxed select-all" x-text="selectedSubmission?.code_eleve || 'Aucun contenu fourni'"></pre>
               </template>
             </div>
+
+            <!-- Mode 2 : Code source / Texte brut complet -->
+            <div x-show="speedGraderViewTab === 'raw'">
+              <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono overflow-x-auto h-96 leading-relaxed select-all" x-text="selectedSubmission?.code_eleve || 'Aucun contenu fourni'"></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- VOLET DROIT : ANALYSE IA GEMINI, BARÈME, ÉCHELLE DE MAÎTRISE & COMMENTAIRE -->
+        <div class="lg:col-span-5 flex flex-col space-y-4">
+          <!-- Bloc Pré-évaluation IA Gemini -->
+          <div class="bg-purple-50/70 border border-purple-200/80 rounded-2xl p-4 space-y-2.5">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-1.5">
+                <span class="text-lg">🤖</span>
+                <span class="text-xs font-black uppercase tracking-wider text-purple-900">Diagnostic IA Gemini</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="px-2.5 py-0.5 rounded-full bg-purple-600 text-white text-xs font-black" x-text="(selectedSubmission?.note_suggeree || 80) + '/100'"></span>
+                <button 
+                  @click="gradingNote = selectedSubmission?.note_suggeree || 80"
+                  class="text-[11px] underline font-bold text-purple-700 hover:text-purple-900 cursor-pointer">
+                  Appliquer
+                </button>
+              </div>
+            </div>
+            <p class="text-xs text-purple-900 font-medium leading-relaxed" x-text="selectedSubmission?.feedback_ia || 'Aucun diagnostic IA enregistré pour cette copie.'"></p>
+
+            <!-- Erreurs détectées éventuelles -->
+            <template x-if="selectedSubmission?.erreurs_detectees?.length > 0">
+              <div class="pt-2 border-t border-purple-200/60 space-y-1">
+                <div class="text-[10px] font-black uppercase text-rose-700">Points d'attention détectés :</div>
+                <template x-for="(errItem, eIdx) in selectedSubmission.erreurs_detectees" :key="eIdx">
+                  <div class="text-[11px] text-rose-800 flex items-start gap-1">
+                    <span>•</span>
+                    <span x-text="errItem"></span>
+                  </div>
+                </template>
+              </div>
+            </template>
           </div>
 
-          <div class="flex items-center gap-4">
-            <input 
-              type="number" 
-              min="0" 
-              max="100" 
-              x-model="gradingNote" 
-              class="w-24 px-3 py-2 text-center text-lg font-black rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600" />
-            <input 
-              type="range" 
-              min="0" 
-              max="100" 
-              step="5" 
-              x-model="gradingNote" 
-              class="flex-1 accent-indigo-600 cursor-pointer" />
-          </div>
-
-          <div>
-            <label class="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">Commentaire & Conseils pour l'élève</label>
-            <textarea 
-              rows="3" 
-              x-model="gradingProfMessage" 
-              placeholder="Écrivez un mot d'encouragement ou une piste d'amélioration précise..."
-              class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600 leading-relaxed"></textarea>
-          </div>
-
-          <!-- Message de confirmation -->
-          <div x-show="gradingFeedbackSuccess" x-text="gradingFeedbackSuccess" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-black text-center"></div>
-
-          <!-- Synchronisation Google Classroom (si connecté) -->
-          <div x-show="classroomConnected" class="p-3.5 bg-emerald-50/60 rounded-2xl border border-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="flex items-center gap-2">
-              <span class="text-base">🏫</span>
-              <div>
-                <div class="text-xs font-black text-emerald-950">Synchronisation Google Classroom</div>
-                <div class="text-[11px] text-emerald-700">Transmet la note validée de cet élève vers son devoir Classroom.</div>
+          <!-- Bloc Notation & Échelle de Maîtrise -->
+          <div class="bg-white rounded-2xl p-4 border border-slate-200 space-y-3.5">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <label class="text-xs font-black uppercase tracking-wider text-slate-700">Note (/100)</label>
+                <span
+                  :class="getMasteryLevelFromScore(gradingNote).badgeClass"
+                  class="px-2.5 py-0.5 rounded-full text-[11px] font-black border"
+                  x-text="getMasteryLevelFromScore(gradingNote).label"></span>
+              </div>
+              <div class="flex items-center gap-1">
+                <template x-for="p in [50, 65, 75, 85, 95, 100]" :key="p">
+                  <button 
+                    type="button"
+                    @click="gradingNote = p"
+                    :class="Number(gradingNote) === p ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                    class="px-2 py-1 rounded-lg text-xs font-extrabold transition cursor-pointer"
+                    x-text="p">
+                  </button>
+                </template>
               </div>
             </div>
 
-            <div class="flex items-center gap-2 flex-wrap">
-              <select 
-                x-model="classroomSelectedAssignmentForSync"
-                class="px-2.5 py-1.5 rounded-xl border border-emerald-200 bg-white text-xs font-bold text-slate-800 focus:outline-none">
-                <template x-for="cw in classroomCourseWorkList" :key="cw.id">
-                  <option :value="cw.id" x-text="cw.title"></option>
-                </template>
-              </select>
-
-              <button 
-                type="button"
-                @click="synchroniserNoteVersClassroom(selectedSubmission, gradingNote)"
-                :disabled="classroomSyncGradeLoading || !classroomSelectedAssignmentForSync"
-                class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0">
-                <span x-show="classroomSyncGradeLoading" class="animate-spin">⏳</span>
-                <span x-show="!classroomSyncGradeLoading">📤</span>
-                <span>Envoyer note</span>
-              </button>
+            <div class="flex items-center gap-3">
+              <input 
+                type="number" 
+                min="0" 
+                max="100" 
+                x-model="gradingNote" 
+                class="w-20 px-2.5 py-1.5 text-center text-base font-black rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600" />
+              <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                step="5" 
+                x-model="gradingNote" 
+                class="flex-1 accent-indigo-600 cursor-pointer" />
             </div>
-          </div>
 
-          <div x-show="classroomSyncGradeFeedback" x-text="classroomSyncGradeFeedback" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-black text-center animate-fadeIn"></div>
+            <div>
+              <label class="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">Commentaire Enseignant</label>
+              <textarea 
+                rows="3" 
+                x-model="gradingProfMessage" 
+                placeholder="Mot d'encouragement ou conseil précis (Ctrl+Entrée pour valider et passer au suivant)..."
+                class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600 leading-relaxed"></textarea>
+            </div>
+
+            <div x-show="gradingFeedbackSuccess" x-text="gradingFeedbackSuccess" class="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-black text-center"></div>
+
+            <!-- Synchronisation Google Classroom -->
+            <div x-show="classroomConnected" class="p-3 bg-emerald-50/60 rounded-xl border border-emerald-100 flex items-center justify-between gap-2">
+              <span class="text-[11px] font-bold text-emerald-900">🏫 Renvoyer sur Classroom :</span>
+              <div class="flex items-center gap-1.5">
+                <select 
+                  x-model="classroomSelectedAssignmentForSync"
+                  class="px-2 py-1 rounded-lg border border-emerald-200 bg-white text-[11px] font-bold text-slate-800 max-w-[150px] truncate">
+                  <template x-for="cw in classroomCourseWorkList" :key="cw.id">
+                    <option :value="cw.id" x-text="cw.title"></option>
+                  </template>
+                </select>
+                <button 
+                  type="button"
+                  @click="synchroniserNoteVersClassroom(selectedSubmission, gradingNote)"
+                  :disabled="classroomSyncGradeLoading || !classroomSelectedAssignmentForSync"
+                  class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-extrabold text-[11px] rounded-lg transition cursor-pointer">
+                  📤 Envoyer
+                </button>
+              </div>
+            </div>
+            <div x-show="classroomSyncGradeFeedback" x-text="classroomSyncGradeFeedback" class="p-2 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-[11px] font-black text-center"></div>
+          </div>
         </div>
 
       </div>
 
-      <!-- Barre d'Actions & Décision Enseignant -->
-      <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+      <!-- Barre d'Actions SpeedGrader (Raccourci Ctrl+Entrée) -->
+      <div class="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
         <div class="flex items-center gap-2">
           <button 
             @click="supprimerCopie(selectedSubmission)"
@@ -5122,18 +5261,25 @@
           </button>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
           <button 
-            @click="validerCorrection('a_corriger')"
+            @click="validerCorrection('a_corriger', false)"
             :disabled="gradingLoading"
-            class="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-black transition shadow-xs cursor-pointer">
-            ⚠️ Demander correction
+            class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-black transition shadow-xs cursor-pointer">
+            ⚠️ À corriger
           </button>
           <button 
-            @click="validerCorrection('valide')"
+            @click="validerCorrection('valide', false)"
+            :disabled="gradingLoading"
+            class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-black transition cursor-pointer">
+            ✓ Valider
+          </button>
+          <button 
+            @click="validerCorrection('valide', true)"
             :disabled="gradingLoading"
             class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black transition shadow-sm cursor-pointer flex items-center gap-2">
-            <span>✓</span> Valider la copie
+            <span>✓ Valider & Suivant</span>
+            <kbd class="px-1.5 py-0.5 text-[10px] bg-emerald-700 rounded font-mono">Ctrl+↵</kbd>
           </button>
         </div>
       </div>

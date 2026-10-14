@@ -283,7 +283,11 @@ export async function saveEleveProgression(classeId, eleveId, data) {
       tri_donnees: data.tri_donnees || null,
       mission_secu: data.mission_secu || null,
       bilan_personnel_ch2: data.bilan_personnel_ch2 || null,
-      competences: data.competences || {}
+      competences: data.competences || {},
+      tutor_calls_count: Number(data.tutor_calls_count) || 0,
+      hints_used_count: Number(data.hints_used_count) || 0,
+      active_course_id: data.active_course_id || 'fmttn-1re',
+      active_exercise_id: data.active_exercise_id || ''
     };
 
     await setDoc(docRef, payload, { merge: true });
@@ -382,6 +386,7 @@ export function listenToClasseProgressions(classeId, onUpdate) {
 
         eleves.push({
           id: d.eleve_id,
+          email: d.eleve_email || '',
           nom: d.eleve_nom || "Élève",
           eg: egRatio,
           charte: charteEtat,
@@ -396,6 +401,10 @@ export function listenToClasseProgressions(classeId, onUpdate) {
           num2_m1,
           score: Math.min(100, score),
           xp: d.xp || 0,
+          tutor_calls_count: Number(d.tutor_calls_count) || 0,
+          hints_used_count: Number(d.hints_used_count) || 0,
+          active_course_id: d.active_course_id || 'fmttn-1re',
+          active_exercise_id: d.active_exercise_id || '',
           updated_at: d.updated_at
         });
       });
@@ -578,7 +587,7 @@ export async function interrogerTuteurIA({ question, historique = [], idExercice
 }
 
 // 10. SOUMISSION & CORRECTION AUTOMATISÉE DE DEVOIR
-export async function soumettreDevoirCloud({ code_eleve, id_exercice, titre_exercice, course_id, nom_eleve, classe_id, type }) {
+export async function soumettreDevoirCloud({ code_eleve, id_exercice, titre_exercice, course_id, nom_eleve, classe_id, type, autonomie = {} }) {
   try {
     if (!auth.currentUser) await initStudentSession();
     const fn = httpsCallable(functions, "corrigerDevoir");
@@ -589,7 +598,8 @@ export async function soumettreDevoirCloud({ code_eleve, id_exercice, titre_exer
       course_id,
       nom_eleve,
       classe_id,
-      type
+      type,
+      autonomie
     });
     return res.data;
   } catch (err) {
