@@ -4,7 +4,86 @@ import competencesData from '../data/competences-fmttn.json';
 import module0Data from '../data/module-0-introduction.json';
 import altxBank from '../data/altx-bank.json';
 import escapeGameData from '../data/escape-game-data.json';
+import { marked } from 'marked';
 import { savePresentationConfig } from '../services/firebase.js';
+
+/**
+ * Mélange de façon déterministe ou aléatoire par session un tableau d'options
+ * pour que la bonne réponse ne soit JAMAIS systématiquement en première position.
+ */
+function shuffleChoicesArray(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+// Pré-mélanger une fois par session toutes les questions de altxBank (Chapitre 1 & Chapitre 2)
+Object.values(altxBank.comm || {}).forEach(sub => {
+  (sub.questions || []).forEach(q => {
+    if (Array.isArray(q.choices) && q.choices.length > 1) {
+      q.choices = shuffleChoicesArray(q.choices);
+    }
+  });
+});
+Object.values(altxBank.secu || {}).forEach(sub => {
+  (sub.questions || []).forEach(q => {
+    if (Array.isArray(q.choices) && q.choices.length > 1) {
+      q.choices = shuffleChoicesArray(q.choices);
+    }
+  });
+});
+
+/**
+ * Convertit le texte brut `lecon` de altxBank en cartes HTML visuelles et aérées pour des élèves de 11-12 ans.
+ */
+function formatAltxLeconHtml(rawLecon) {
+  if (!rawLecon) return '';
+  const blocks = String(rawLecon).trim().split(/\n\s*\n/);
+
+  return blocks.map(block => {
+    const lines = block.trim().split('\n');
+    const firstLine = lines[0].trim();
+
+    // Si le bloc commence par un titre en **gras**
+    const titleMatch = firstLine.match(/^\*\*(.+?)\*\*$/);
+    if (titleMatch) {
+      const titleText = titleMatch[1];
+      const bodyLines = lines.slice(1);
+
+      if (bodyLines.length === 0) {
+        return `<div class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black text-xs shadow-2xs">${titleText}</div>`;
+      }
+
+      const itemsHtml = bodyLines.map(l => {
+        const clean = l.trim().replace(/^→\s*/, '');
+        const formatted = clean.replace(/\*\*(.+?)\*\*/g, '<strong class="text-slate-900 font-extrabold">$1</strong>');
+        if (l.trim().startsWith('→')) {
+          return `<li class="flex items-start gap-2 py-0.5"><span class="text-blue-600 font-black mt-0.5">▸</span><span>${formatted}</span></li>`;
+        }
+        return `<p class="text-slate-700 leading-relaxed">${formatted}</p>`;
+      }).join('');
+
+      const hasList = bodyLines.some(l => l.trim().startsWith('→'));
+      return `<div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-1.5">
+        <div class="font-black text-xs text-indigo-950 flex items-center gap-1.5 border-b border-slate-200/70 pb-1.5">
+          <span class="w-2 h-2 rounded-full bg-blue-600 shrink-0"></span>
+          <span>${titleText}</span>
+        </div>
+        ${hasList ? `<ul class="space-y-1 text-xs text-slate-700 pt-0.5">${itemsHtml}</ul>` : `<div class="text-xs text-slate-700 pt-0.5 space-y-1">${itemsHtml}</div>`}
+      </div>`;
+    }
+
+    // Bloc sur une seule ligne de type "**Terme :** définition"
+    const singleFormatted = block
+      .replace(/^\*\*(.+?)\*\*\s*(.*)$/gm, '<div class="p-3 rounded-2xl bg-blue-50/70 border border-blue-200/80 text-xs"><strong class="text-blue-950 font-black">$1</strong> <span class="text-slate-700">$2</span></div>')
+      .replace(/^→\s*(.+)$/gm, '<div class="flex items-start gap-2 text-xs text-slate-700 pl-2"><span class="text-blue-600 font-bold">▸</span><span>$1</span></div>');
+
+    return singleFormatted;
+  }).join('');
+}
 
 export function createFmttnStore() {
   return {
@@ -336,6 +415,10 @@ export function createFmttnStore() {
       return this.altxBank.comm[this.activeSubthemeKey] || this.altxBank.comm.reseaux;
     },
 
+    getFormattedActiveLecon() {
+      return formatAltxLeconHtml(this.getActiveSubtheme()?.lecon || '');
+    },
+
     getCurrentBankQuestion() {
       const st = this.getActiveSubtheme();
       return st.questions[this.bankQuestionIndex] || st.questions[0];
@@ -427,6 +510,10 @@ export function createFmttnStore() {
 
     getActiveSubthemeSecu() {
       return this.altxBank.secu[this.activeSubthemeKeySecu] || this.altxBank.secu.profil;
+    },
+
+    getFormattedActiveLeconSecu() {
+      return formatAltxLeconHtml(this.getActiveSubthemeSecu()?.lecon || '');
     },
 
     getCurrentBankQuestionSecu() {
