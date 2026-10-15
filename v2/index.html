@@ -2052,15 +2052,134 @@
             @click="selectionnerExercice(ex)"
             :class="currentExercise?.id === ex.id ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'"
             class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer">
+            <span x-text="ex.isQuizz ? '⚡' : '🎯'"></span>
             <span x-text="'Ex. ' + (idx + 1) + ' : ' + (ex.titre || 'Activité')"></span>
           </button>
         </template>
       </div>
 
       <!-- ========================================== -->
+      <!-- 0. LECTEUR DE QUIZ INTERACTIF MULTI-COURS   -->
+      <!-- ========================================== -->
+      <div x-show="isCurrentExerciseQuizz()" class="max-w-3xl mx-auto space-y-6">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100 flex-wrap gap-3">
+            <div class="flex items-center gap-2.5">
+              <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-extrabold">
+                ⚡ Quiz Interactif
+              </span>
+              <h3 class="text-lg font-black text-slate-900" x-text="currentExercise?.titre || 'Quiz d\'évaluation'"></h3>
+            </div>
+            <div class="flex items-center gap-2">
+              <span x-show="!exerciseQuizzState.finished" class="px-3 py-1 rounded-xl bg-slate-100 text-slate-700 text-xs font-black"
+                    x-text="'Question ' + (exerciseQuizzState.currentIndex + 1) + ' / ' + (exerciseQuizzState.questions.length || 1)"></span>
+              <span class="px-3 py-1 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-black"
+                    x-text="'Score : ' + exerciseQuizzState.score + ' / ' + (exerciseQuizzState.questions.length || 0)"></span>
+            </div>
+          </div>
+
+          <!-- Énoncé / Consigne éventuelle du quiz -->
+          <div x-show="currentExercise?.consigne" class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-700 prose-custom" x-html="getRenderedExerciseConsigne()"></div>
+
+          <!-- Question en cours -->
+          <template x-if="!exerciseQuizzState.finished && getCurrentExerciseQuizzQuestion()">
+            <div class="space-y-5">
+              <div class="flex items-start justify-between gap-3">
+                <h4 class="text-base sm:text-lg font-black text-slate-900 leading-snug" x-text="getCurrentExerciseQuizzQuestion().question"></h4>
+                <button
+                  type="button"
+                  @click="lireTexteVocal(getCurrentExerciseQuizzQuestion().question + '. ' + getCurrentExerciseQuizzQuestion().options.join('. '))"
+                  class="px-2.5 py-1 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold shrink-0 cursor-pointer">
+                  🔊 Écouter
+                </button>
+              </div>
+
+              <div class="grid grid-cols-1 gap-2.5">
+                <template x-for="(opt, oIdx) in getCurrentExerciseQuizzQuestion().options" :key="oIdx">
+                  <button
+                    type="button"
+                    @click="choisirOptionExerciseQuizz(oIdx)"
+                    :disabled="exerciseQuizzState.hasAnswered"
+                    :class="{
+                      'border-indigo-600 bg-indigo-50/80 text-indigo-950 font-extrabold': exerciseQuizzState.selectedOptionIdx === oIdx && !exerciseQuizzState.hasAnswered,
+                      'border-slate-200 hover:border-indigo-300 bg-white text-slate-700': exerciseQuizzState.selectedOptionIdx !== oIdx && !exerciseQuizzState.hasAnswered,
+                      'border-emerald-500 bg-emerald-50 text-emerald-900 font-extrabold': exerciseQuizzState.hasAnswered && oIdx === getCurrentExerciseQuizzQuestion().correctAnswer,
+                      'border-rose-300 bg-rose-50 text-rose-800': exerciseQuizzState.hasAnswered && exerciseQuizzState.selectedOptionIdx === oIdx && !exerciseQuizzState.isCorrect
+                    }"
+                    class="p-4 rounded-2xl border-2 text-left text-xs sm:text-sm font-semibold transition-all flex items-center justify-between cursor-pointer">
+                    <span x-text="opt"></span>
+                    <span x-show="exerciseQuizzState.selectedOptionIdx === oIdx && !exerciseQuizzState.hasAnswered" class="text-indigo-600 font-black">●</span>
+                    <span x-show="exerciseQuizzState.hasAnswered && oIdx === getCurrentExerciseQuizzQuestion().correctAnswer" class="text-emerald-600 font-black">✓ Bonne réponse</span>
+                    <span x-show="exerciseQuizzState.hasAnswered && exerciseQuizzState.selectedOptionIdx === oIdx && !exerciseQuizzState.isCorrect" class="text-rose-600 font-black">✕</span>
+                  </button>
+                </template>
+              </div>
+
+              <!-- Feedback immédiat après validation -->
+              <div x-show="exerciseQuizzState.hasAnswered"
+                   :class="exerciseQuizzState.isCorrect ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'"
+                   class="p-4 rounded-2xl border text-xs font-bold leading-relaxed"
+                   x-text="exerciseQuizzState.feedbackMsg">
+              </div>
+
+              <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <button
+                  type="button"
+                  @click="tutorOpen = true"
+                  class="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1.5 cursor-pointer">
+                  <span>🤖</span> Demander un indice au tuteur
+                </button>
+
+                <div>
+                  <button
+                    x-show="!exerciseQuizzState.hasAnswered"
+                    @click="validerReponseExerciseQuizz()"
+                    :disabled="exerciseQuizzState.selectedOptionIdx === null"
+                    class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-extrabold text-xs transition cursor-pointer shadow-xs">
+                    Valider ma réponse
+                  </button>
+                  <button
+                    x-show="exerciseQuizzState.hasAnswered"
+                    @click="questionSuivanteExerciseQuizz()"
+                    class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs transition cursor-pointer shadow-xs">
+                    <span x-text="exerciseQuizzState.currentIndex < exerciseQuizzState.questions.length - 1 ? 'Question suivante ➔' : 'Terminer le quiz 🏆'"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <!-- Écran de fin du Quiz -->
+          <template x-if="exerciseQuizzState.finished">
+            <div class="py-8 text-center space-y-4">
+              <div class="text-5xl">🏆</div>
+              <h4 class="text-2xl font-black text-slate-900">Quiz Terminé !</h4>
+              <p class="text-sm text-slate-600">
+                Tu as obtenu un score de <strong class="text-indigo-600 font-black" x-text="exerciseQuizzState.score + ' / ' + exerciseQuizzState.questions.length"></strong>
+                (<span x-text="Math.round((exerciseQuizzState.score / Math.max(1, exerciseQuizzState.questions.length)) * 100) + '%'"></span>).
+              </p>
+              <p class="text-xs text-emerald-700 font-bold">✅ Ton résultat a été enregistré et transmis à ton professeur (+20 XP).</p>
+              <div class="pt-2 flex items-center justify-center gap-3">
+                <button
+                  @click="recommencerExerciseQuizz()"
+                  class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer">
+                  🔄 Recommencer ce quiz
+                </button>
+                <button
+                  @click="focusEtapeSuivante()"
+                  class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs transition cursor-pointer">
+                  Activité suivante ➔
+                </button>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
       <!-- 1. WORKSPACE BUREAUTIQUE & DACTYLO (OFFICE) -->
       <!-- ========================================== -->
-      <div x-show="currentCourse?.workspaceType === 'office'" class="space-y-8">
+      <div x-show="!isCurrentExerciseQuizz() && currentCourse?.workspaceType === 'office'" class="space-y-8">
         
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
@@ -2089,7 +2208,7 @@
               <h3 class="text-xl font-black text-slate-900" x-text="currentExercise?.titre || 'Consignes du travail'"></h3>
 
               <!-- Énoncé Markdown -->
-              <div class="text-slate-700 text-sm leading-relaxed" x-html="marked.parse(currentExercise?.consigne || 'Consultez la consigne de votre professeur.')"></div>
+              <div class="text-slate-700 text-sm leading-relaxed prose-custom" x-html="getRenderedExerciseConsigne()"></div>
 
               <!-- Outils externes suggérés -->
               <div class="pt-4 border-t border-slate-100 flex flex-wrap items-center gap-2">
@@ -2167,7 +2286,7 @@
               <!-- Slide 2 : Théorie & Rappel de cours -->
               <div x-show="officeMemoSlide === 2" class="space-y-2">
                 <div class="text-xs font-bold text-indigo-800 uppercase tracking-wider">Rappel de cours & Notions clés</div>
-                <div class="bg-white p-4 rounded-xl border border-indigo-100 text-xs text-slate-700 leading-relaxed max-h-48 overflow-y-auto" x-html="marked.parse(currentExercise?.theorie_md || 'Appliquez les styles Titre 1 et Titre 2 pour générer une table des matières.')"></div>
+                <div class="bg-white p-4 rounded-xl border border-indigo-100 text-xs text-slate-700 leading-relaxed max-h-48 overflow-y-auto prose-custom" x-html="getRenderedExerciseTheorie()"></div>
               </div>
 
               <!-- Slide 3 : Critères de Réussite -->
@@ -2276,7 +2395,7 @@
       <!-- ========================================== -->
       <!-- 2. WORKSPACE CODING (HTML / CSS / JS)     -->
       <!-- ========================================== -->
-      <div x-show="currentCourse?.workspaceType === 'coding'" class="space-y-6">
+      <div x-show="!isCurrentExerciseQuizz() && currentCourse?.workspaceType === 'coding'" class="space-y-6">
         
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
@@ -2300,7 +2419,7 @@
                 </div>
               </div>
               <h4 class="font-black text-slate-900 text-base" x-text="currentExercise?.titre || 'Mission'"></h4>
-              <div class="text-slate-600 text-xs leading-relaxed" x-html="marked.parse(currentExercise?.consigne || 'Écris ton code et clique sur Exécuter.')"></div>
+              <div class="text-slate-600 text-xs leading-relaxed prose-custom" x-html="getRenderedExerciseConsigne()"></div>
             </div>
 
             <!-- Éditeur Onglets HTML / CSS / JS -->
@@ -2449,7 +2568,7 @@
       <!-- ========================================== -->
       <!-- 3. WORKSPACE CRÉATIF (STUDIO & RAP)        -->
       <!-- ========================================== -->
-      <div x-show="currentCourse?.workspaceType === 'creative'" class="space-y-8">
+      <div x-show="!isCurrentExerciseQuizz() && currentCourse?.workspaceType === 'creative'" class="space-y-8">
         
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
@@ -2473,7 +2592,7 @@
               </div>
 
               <h3 class="text-xl font-black text-slate-900" x-text="currentExercise?.titre || 'Brief de la Mission'"></h3>
-              <div class="text-slate-700 text-sm leading-relaxed" x-html="marked.parse(currentExercise?.consigne || 'Conçois ton projet avec les outils IA et numériques.')"></div>
+              <div class="text-slate-700 text-sm leading-relaxed prose-custom" x-html="getRenderedExerciseConsigne()"></div>
 
               <!-- Roadmap 3 Étapes -->
               <div class="pt-4 border-t border-slate-100 space-y-3">

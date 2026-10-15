@@ -493,10 +493,36 @@ export class CourseManagerV2 {
   }
 
   /**
+   * Normalise un exercice provenant de Firestore (V1 ou V2) pour que tous les champs
+   * (`titre`, `consigne`, `enonce_md`, `theorie_md`, `starter_code`, `questions`, `isQuizz`) soient toujours définis.
+   */
+  normalizeExerciseDoc(id, raw = {}) {
+    const consigneText = raw.consigne || raw.enonce_md || raw.enonce || raw.instructions || raw.description || "";
+    const titreText = raw.titre || raw.title || "Activité";
+    const starterCode = raw.starter_code || raw.code_depart || null;
+    const rawQuestions = Array.isArray(raw.questions) ? raw.questions : [];
+    const isQuizz = raw.type === 'quizz' || raw.type === 'quiz' || raw.submission_type === 'quizz' || rawQuestions.length > 0;
+
+    return {
+      ...raw,
+      id,
+      titre: titreText,
+      title: titreText,
+      consigne: consigneText,
+      enonce_md: raw.enonce_md || consigneText,
+      theorie_md: raw.theorie_md || raw.theorie || "",
+      chapitre: raw.chapitre || raw.chapitre_id || raw.module_id || "",
+      starter_code: starterCode,
+      isQuizz,
+      questions: rawQuestions
+    };
+  }
+
+  /**
    * Récupère les exercices d'un cours depuis Firestore avec repli sur la banque par défaut
    */
   async loadCourseExercisesFromDb(courseId) {
-    const defaultList = DEFAULT_EXERCISES_BY_COURSE[courseId] || [];
+    const defaultList = (DEFAULT_EXERCISES_BY_COURSE[courseId] || []).map(ex => this.normalizeExerciseDoc(ex.id, ex));
     try {
       const q = query(
         collection(db, "exercices"),
@@ -505,7 +531,10 @@ export class CourseManagerV2 {
       const snap = await getDocs(q);
       const dbExercises = [];
       snap.forEach(docSnap => {
-        dbExercises.push({ id: docSnap.id, ...docSnap.data() });
+        const d = docSnap.data();
+        if (!d.is_hidden) {
+          dbExercises.push(this.normalizeExerciseDoc(docSnap.id, d));
+        }
       });
 
       if (dbExercises.length === 0) {
@@ -515,11 +544,15 @@ export class CourseManagerV2 {
         );
         const snapFb = await getDocs(qFallback);
         snapFb.forEach(docSnap => {
-          dbExercises.push({ id: docSnap.id, ...docSnap.data() });
+          const d = docSnap.data();
+          if (!d.is_hidden) {
+            dbExercises.push(this.normalizeExerciseDoc(docSnap.id, d));
+          }
         });
       }
 
       if (dbExercises.length > 0) {
+        dbExercises.sort((a, b) => (a.id || '').localeCompare(b.id || '', undefined, { numeric: true }));
         return dbExercises;
       }
       return defaultList;

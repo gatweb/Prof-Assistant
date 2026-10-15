@@ -51,6 +51,142 @@ export function createCourseStore() {
     creativeFeedback: '',
     creativeScore: null,
 
+    // Lecteur de Quiz Interactif Multi-Cours (pour les exercices de type 'quizz')
+    exerciseQuizzState: {
+      questions: [],
+      currentIndex: 0,
+      selectedOptionIdx: null,
+      hasAnswered: false,
+      isCorrect: false,
+      feedbackMsg: '',
+      score: 0,
+      finished: false
+    },
+
+    getRenderedExerciseConsigne() {
+      const ex = this.currentExercise;
+      if (!ex) return '<p class="text-slate-500">Sélectionnez une activité.</p>';
+      const raw = ex.consigne || ex.enonce_md || ex.enonce || ex.instructions || ex.description || 'Suivez les instructions du module et réalisez la mission ci-dessous.';
+      return renderMarkdownWithKatex(raw);
+    },
+
+    getRenderedExerciseTheorie() {
+      const ex = this.currentExercise;
+      const raw = ex?.theorie_md || ex?.theorie || 'Consultez la leçon du module pour retrouver les astuces et raccourcis.';
+      return renderMarkdownWithKatex(raw);
+    },
+
+    isCurrentExerciseQuizz() {
+      const ex = this.currentExercise;
+      if (!ex) return false;
+      return Boolean(ex.isQuizz || ex.type === 'quizz' || ex.type === 'quiz' || (Array.isArray(ex.questions) && ex.questions.length > 0));
+    },
+
+    initExerciseQuizz(ex) {
+      const rawQs = Array.isArray(ex?.questions) ? ex.questions : [];
+      const prepared = rawQs.map(q => {
+        const opts = Array.isArray(q.options || q.choices) ? [...(q.options || q.choices)] : [];
+        let correctText = '';
+        if (typeof q.correctAnswer === 'number' && opts[q.correctAnswer] !== undefined) {
+          correctText = opts[q.correctAnswer];
+        } else if (typeof q.bonne_reponse === 'string') {
+          correctText = q.bonne_reponse;
+        } else if (typeof q.rep === 'string') {
+          correctText = q.rep;
+        } else {
+          correctText = opts[0] || '';
+        }
+
+        // Mélanger les options pour que la bonne réponse ne soit pas toujours au même endroit
+        for (let i = opts.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [opts[i], opts[j]] = [opts[j], opts[i]];
+        }
+        const newCorrectIdx = opts.findIndex(o => o === correctText);
+
+        return {
+          question: q.question || q.intitule || q.q || 'Question',
+          options: opts,
+          correctAnswer: newCorrectIdx !== -1 ? newCorrectIdx : 0,
+          successMessage: q.successMessage || q.explication || '✅ Bonne réponse !',
+          explanation: q.explication || q.successMessage || ''
+        };
+      });
+
+      this.exerciseQuizzState = {
+        questions: prepared,
+        currentIndex: 0,
+        selectedOptionIdx: null,
+        hasAnswered: false,
+        isCorrect: false,
+        feedbackMsg: '',
+        score: 0,
+        finished: false
+      };
+    },
+
+    getCurrentExerciseQuizzQuestion() {
+      const qs = this.exerciseQuizzState.questions || [];
+      return qs[this.exerciseQuizzState.currentIndex] || null;
+    },
+
+    choisirOptionExerciseQuizz(idx) {
+      if (this.exerciseQuizzState.hasAnswered) return;
+      this.exerciseQuizzState.selectedOptionIdx = idx;
+    },
+
+    validerReponseExerciseQuizz() {
+      const q = this.getCurrentExerciseQuizzQuestion();
+      if (!q || this.exerciseQuizzState.selectedOptionIdx === null || this.exerciseQuizzState.hasAnswered) return;
+
+      const isOk = this.exerciseQuizzState.selectedOptionIdx === q.correctAnswer;
+      this.exerciseQuizzState.hasAnswered = true;
+      this.exerciseQuizzState.isCorrect = isOk;
+
+      if (isOk) {
+        this.exerciseQuizzState.score++;
+        this.exerciseQuizzState.feedbackMsg = q.successMessage || '✅ Excellente réponse !';
+        this.user.xp += 10;
+      } else {
+        const rightText = q.options[q.correctAnswer] || '';
+        this.exerciseQuizzState.feedbackMsg = `❌ Pas tout à fait. La bonne réponse était : « ${rightText} ». ${q.explanation ? '(' + q.explanation + ')' : ''}`;
+      }
+    },
+
+    async questionSuivanteExerciseQuizz() {
+      const total = this.exerciseQuizzState.questions.length;
+      if (this.exerciseQuizzState.currentIndex < total - 1) {
+        this.exerciseQuizzState.currentIndex++;
+        this.exerciseQuizzState.selectedOptionIdx = null;
+        this.exerciseQuizzState.hasAnswered = false;
+        this.exerciseQuizzState.isCorrect = false;
+        this.exerciseQuizzState.feedbackMsg = '';
+      } else {
+        this.exerciseQuizzState.finished = true;
+        const pct = total > 0 ? Math.round((this.exerciseQuizzState.score / total) * 100) : 100;
+        this.user.xp += 20;
+        try {
+          await soumettreDevoirCloud({
+            code_eleve: `QUIZ COMPLÉTÉ : ${this.exerciseQuizzState.score} / ${total} (${pct}%)`,
+            id_exercice: this.currentExercise?.id || 'quiz-ex',
+            titre_exercice: this.currentExercise?.titre || 'Quiz',
+            course_id: this.currentCourse?.id || 'dactylo-3e',
+            nom_eleve: this.user.nom,
+            classe_id: this.user.classe,
+            type: 'quizz',
+            autonomie: { score: 100 }
+          });
+        } catch (_) {}
+        this.syncCurrentStudentProgress();
+      }
+    },
+
+    recommencerExerciseQuizz() {
+      if (this.currentExercise) {
+        this.initExerciseQuizz(this.currentExercise);
+      }
+    },
+
     async initCoursesCatalogue() {
       try {
         this.coursesList = await courseManagerV2.loadCoursesCatalogue();
@@ -449,6 +585,11 @@ export function createCourseStore() {
       this.codingConsoleLogs = [];
       this.creativeFeedback = '';
       this.creativeStatus = 'idle';
+
+      if (this.isCurrentExerciseQuizz()) {
+        this.initExerciseQuizz(ex);
+        return;
+      }
 
       if (this.currentCourse?.workspaceType === 'coding') {
         this.codingFiles = {
