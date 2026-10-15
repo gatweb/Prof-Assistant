@@ -28,12 +28,13 @@ export const ALLOWED_TEACHERS = [
 ];
 
 /**
- * Classes disponibles pour le niveau 1re FMTTN
+ * Classes actives réelles de l'établissement (1re, 2e, 3e, 4e)
  */
 export const AVAILABLE_CLASSES = [
-  "1A", "1B", "1C", "1D", "1E", "1F",
-  "2A", "2B", "2C", "2D", "2E", "2F",
-  "3A", "3B", "3C", "3D", "3GB", "3CB"
+  "1A", "1B", "1F",
+  "2B",
+  "3A", "3B", "3C", "3GB", "3CB",
+  "4GT"
 ];
 
 /**
