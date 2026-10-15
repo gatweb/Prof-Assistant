@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>body{font-family:Plus Jakarta Sans,sans-serif}</style>
-  <script type="module" crossorigin src="/assets/index-DlZpaq31.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-6aCu-iMa.css">
+  <script type="module" crossorigin src="/assets/index-D74BcV1K.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-aPZaJ9FA.css">
 </head>
 <body class="h-full flex flex-col bg-slate-50 text-slate-800" x-data="profAssistantApp()">
 
@@ -439,15 +439,18 @@
   <div x-show="studentViewMode === 'focus' && currentCourse && currentCourse.workspaceType !== 'fmttn'" class="bg-slate-900 text-white border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       
-      <!-- Sélecteur de Chapitres du Cours Actif -->
-      <div class="flex items-center gap-2 mb-3 overflow-x-auto pb-1" x-show="currentCourse?.chapters?.length">
+      <!-- Sélecteur de Modules du Cours Actif (sans barre de défilement disgracieuse + badges de progression) -->
+      <div class="flex flex-wrap items-center gap-2 mb-3" x-show="currentCourse?.chapters?.length">
         <template x-for="(ch, idx) in currentCourse.chapters" :key="ch.id || idx">
           <button 
             @click="changerChapitre(ch.id)"
-            :class="currentChapter?.id === ch.id ? 'bg-blue-600 text-white border-blue-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
-            class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer">
-            <span>📖</span>
+            :class="currentChapter?.id === ch.id ? 'bg-blue-600 text-white border-blue-400 shadow-sm ring-2 ring-blue-400/40' : (getChapterProgressState(ch) === 'completed' ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700/70 hover:bg-emerald-900' : 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white hover:bg-slate-700')"
+            class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 cursor-pointer">
+            <span x-text="getChapterProgressState(ch) === 'completed' ? '✅' : (getChapterProgressState(ch) === 'in_progress' ? '⏳' : '📖')"></span>
             <span x-text="ch.title"></span>
+            <span x-show="getExercisesForChapter(ch).length > 0"
+                  class="px-1.5 py-0.2 rounded-full text-[10px] bg-black/25 text-white/90"
+                  x-text="getExercisesForChapter(ch).length"></span>
           </button>
         </template>
       </div>
@@ -461,21 +464,24 @@
           <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl" x-text="currentCourse?.pitch || 'Modules et activités pratiques'"></p>
         </div>
 
-        <!-- Onglets du Cours (Leçon Markdown vs Atelier Pratique) -->
+        <!-- Onglets du Module Actif (1. Leçon & Théorie vs 2. Atelier & Pratique du module) -->
         <template x-if="activeTab !== 'prof'">
-          <nav class="flex bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 self-start md:self-auto gap-1">
+          <nav class="flex bg-slate-800/90 p-1 rounded-xl border border-slate-700/60 self-start md:self-auto gap-1">
             <button 
               @click="activeTab = 'cours'"
               :class="activeTab === 'cours' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-              <span>📖</span> Leçon & Théorie
+              class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer">
+              <span>📖</span>
+              <span>1. Leçon & Théorie</span>
             </button>
             <button 
-              @click="activeTab = 'pratique'"
-              :class="activeTab === 'pratique' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-              <span x-text="currentCourse?.workspaceType === 'coding' ? '💻' : (currentCourse?.workspaceType === 'creative' ? '🎨' : '📄')"></span>
-              <span>Atelier & Pratique</span>
+              @click="ouvrirAtelierDuModuleActif()"
+              :class="activeTab === 'pratique' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
+              class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer">
+              <span x-text="currentCourse?.workspaceType === 'coding' ? '💻' : (currentCourse?.workspaceType === 'creative' ? '🎨' : '🎯')"></span>
+              <span>2. Atelier & Pratique</span>
+              <span class="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-black/25 text-white"
+                    x-text="getCurrentChapterExercises().length"></span>
             </button>
           </nav>
         </template>
@@ -628,10 +634,10 @@
                   <span>Théorie</span>
                 </button>
                 <button
-                  @click="ouvrirModeFocus({ chapterId: mod.id, exercise: getExercisesForChapter(mod)[0] || courseExercises[0] || null, tab: currentCourse?.workspaceType === 'fmttn' ? 'decouvre' : 'pratique' })"
+                  @click="ouvrirModeFocus({ chapterId: mod.id, exercise: getExercisesForChapter(mod)[0] || null, tab: currentCourse?.workspaceType === 'fmttn' ? 'decouvre' : 'pratique' })"
                   class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold transition cursor-pointer flex items-center gap-1.5 shadow-xs">
                   <span>🎯</span>
-                  <span>Missions & Pratique</span>
+                  <span x-text="'Missions (' + getExercisesForChapter(mod).length + ')'"></span>
                   <span>➔</span>
                 </button>
               </div>
@@ -644,8 +650,9 @@
                 <template x-for="ex in getExercisesForChapter(mod)" :key="ex.id">
                   <button
                     @click="ouvrirModeFocus({ chapterId: mod.id, exercise: ex, tab: 'pratique' })"
-                    class="px-3 py-1 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-bold transition cursor-pointer flex items-center gap-1.5">
-                    <span>⚡</span>
+                    :class="getStudentExerciseStatus(ex) === 'valide' ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' : (getStudentExerciseStatus(ex) === 'pending' ? 'bg-amber-50 border border-amber-200 text-amber-800' : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-800')"
+                    class="px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5">
+                    <span x-text="getStudentExerciseStatus(ex) === 'valide' ? '✅' : (getStudentExerciseStatus(ex) === 'pending' ? '⏳' : (ex.isQuizz ? '⚡' : '🎯'))"></span>
                     <span x-text="ex.titre || ex.title"></span>
                   </button>
                 </template>
@@ -2001,9 +2008,9 @@
             <span x-text="ttsPlaying ? '⏹️ Arrêter la lecture' : '🔊 Écouter la leçon'"></span>
           </button>
           <button 
-            @click="activeTab = 'pratique'"
+            @click="ouvrirAtelierDuModuleActif()"
             class="px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs transition shadow-sm flex items-center gap-2 cursor-pointer">
-            <span>Passer à l'Atelier Pratique</span> <span>→</span>
+            <span>Passer à l'Atelier Pratique du Module</span> <span>→</span>
           </button>
         </div>
       </div>
@@ -2024,13 +2031,14 @@
             <!-- Bas de page d'encouragement -->
             <div class="mt-12 pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50 p-6 rounded-2xl">
               <div>
-                <h5 class="font-black text-slate-800 text-sm">Prêt pour la mise en pratique ?</h5>
-                <p class="text-xs text-slate-500 mt-0.5">Applique les notions de ce chapitre directement dans l'atelier interactif.</p>
+                <h5 class="font-black text-slate-800 text-sm">Prêt pour la mise en pratique de ce module ?</h5>
+                <p class="text-xs text-slate-500 mt-0.5">Applique les notions de ce module directement dans l'atelier interactif.</p>
               </div>
               <button 
-                @click="activeTab = 'pratique'"
+                @click="ouvrirAtelierDuModuleActif()"
                 class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs transition shadow-xs flex items-center gap-2 cursor-pointer">
-                <span>Accéder aux Exercices</span> <span>🚀</span>
+                <span x-text="getCurrentChapterExercises().length > 0 ? 'Accéder aux ' + getCurrentChapterExercises().length + ' mission(s) du module' : 'Accéder à l\'atelier du module'"></span>
+                <span>🚀</span>
               </button>
             </div>
           </div>
@@ -2044,18 +2052,57 @@
     <!-- ======================================================= -->
     <div x-show="currentCourse && currentCourse.workspaceType !== 'fmttn' && activeTab !== 'prof' && activeTab === 'pratique'" class="space-y-8">
       
-      <!-- Sélecteur d'exercices disponibles si multiples -->
-      <div class="flex items-center gap-2 overflow-x-auto pb-1" x-show="courseExercises.length > 1">
-        <span class="text-xs font-bold text-slate-400 shrink-0">Exercices :</span>
-        <template x-for="(ex, idx) in courseExercises" :key="ex.id || idx">
-          <button 
-            @click="selectionnerExercice(ex)"
-            :class="currentExercise?.id === ex.id ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'"
-            class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer">
-            <span x-text="ex.isQuizz ? '⚡' : '🎯'"></span>
-            <span x-text="'Ex. ' + (idx + 1) + ' : ' + (ex.titre || 'Activité')"></span>
+      <!-- CAS 1 : AUCUN EXERCICE POUR CE MODULE -> CARTE « EN COURS DE CONSTRUCTION » -->
+      <div x-show="getCurrentChapterExercises().length === 0" class="max-w-2xl mx-auto bg-white rounded-3xl p-8 sm:p-10 border border-slate-200 shadow-xs text-center space-y-4">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-3xl">
+          🚧
+        </div>
+        <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-extrabold uppercase tracking-wider">
+          Atelier en cours de construction
+        </span>
+        <h3 class="text-xl font-black text-slate-900" x-text="currentChapter?.title || 'Ce module'"></h3>
+        <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+          Les exercices et quiz pratiques de ce module sont en cours de préparation par ton professeur. En attendant, consulte la leçon théorique ou passe au module suivant !
+        </p>
+        <div class="pt-3 flex items-center justify-center gap-3 flex-wrap">
+          <button
+            @click="activeTab = 'cours'"
+            class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs transition cursor-pointer flex items-center gap-2 shadow-xs">
+            <span>📖</span>
+            <span>Revenir à la Leçon du module</span>
           </button>
-        </template>
+          <button
+            @click="ouvrirCarteCours(currentCourse?.id)"
+            class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer">
+            🗺️ Voir tous les modules
+          </button>
+        </div>
+      </div>
+
+      <!-- CAS 2 : EXERCICES DISPONIBLES POUR LE MODULE ACTIF -->
+      <div x-show="getCurrentChapterExercises().length > 0" class="space-y-8">
+
+      <!-- Sélecteur des exercices du module actif uniquement (avec badges de progression ✅ / ⏳) -->
+      <div class="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-extrabold text-slate-500 mr-1" x-text="'Missions du ' + (currentChapter?.title?.split(':')[0] || 'module') + ' :'"></span>
+          <template x-for="(ex, idx) in getCurrentChapterExercises()" :key="ex.id || idx">
+            <button 
+              @click="selectionnerExercice(ex)"
+              :class="currentExercise?.id === ex.id ? 'bg-slate-900 text-white shadow-xs ring-2 ring-slate-900/20' : (getStudentExerciseStatus(ex) === 'valide' ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100' : (getStudentExerciseStatus(ex) === 'pending' ? 'bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100' : 'bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100'))"
+              class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer">
+              <span x-text="getStudentExerciseStatus(ex) === 'valide' ? '✅' : (getStudentExerciseStatus(ex) === 'pending' ? '⏳' : (ex.isQuizz ? '⚡' : '🎯'))"></span>
+              <span x-text="(idx + 1) + '. ' + (ex.titre || 'Activité')"></span>
+            </button>
+          </template>
+        </div>
+
+        <button
+          @click="activeTab = 'cours'"
+          class="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-extrabold transition cursor-pointer flex items-center gap-1 shrink-0">
+          <span>📖</span>
+          <span>Relire la leçon</span>
+        </button>
       </div>
 
       <!-- ========================================== -->
@@ -2980,6 +3027,8 @@
 
         </div>
       </div>
+
+      </div><!-- Fin CAS 2 : Exercices disponibles -->
 
     </div>
 

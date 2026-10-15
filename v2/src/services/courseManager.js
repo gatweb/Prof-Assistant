@@ -391,16 +391,75 @@ export class CourseManagerV2 {
   }
 
   /**
-   * Trouve le chapitre du manifeste associé à un libellé ou id provenant de Firestore
+   * Trouve le chapitre/module du cours associé à un exercice ou un libellé Firestore
    */
-  findChapterByDbLabel(course, dbChapterLabel) {
-    if (!course || !dbChapterLabel) return null;
-    const labelLower = String(dbChapterLabel).toLowerCase();
-    return course.chapters?.find(ch => {
-      if (ch.id === dbChapterLabel) return true;
-      const titleLower = ch.title.toLowerCase();
-      return labelLower.includes(titleLower) || titleLower.includes(labelLower);
-    }) || null;
+  findChapterByDbLabel(course, dbChapterLabel, exId = "") {
+    if (!course || !Array.isArray(course.chapters) || course.chapters.length === 0) return null;
+    const rawLabel = String(dbChapterLabel || "").toLowerCase().trim();
+    const rawExId = String(exId || "").toLowerCase().trim();
+
+    // 1. Correspondance exacte d'identifiant
+    const exact = course.chapters.find(ch => String(ch.id || "").toLowerCase() === rawLabel);
+    if (exact) return exact;
+
+    // 2. Correspondance par inclusion de titre (ex: "Module 1 : La posture..." <-> "Module 1")
+    for (const ch of course.chapters) {
+      const chTitle = String(ch.title || "").toLowerCase().trim();
+      const chId = String(ch.id || "").toLowerCase().trim();
+      if (rawLabel && chTitle && (rawLabel.includes(chTitle) || chTitle.includes(rawLabel))) {
+        return ch;
+      }
+      if (rawExId && chId && rawExId.startsWith(chId)) {
+        return ch;
+      }
+    }
+
+    // 3. Correspondance par numéro de module/chapitre/niveau (ex: "CH1", "ch01", "Module 2", "Niveau 3", "dac-ch1")
+    const extractNum = (str) => {
+      const m = String(str).match(/(?:module|chapitre|ch|niveau|mod|niv)[\s\-_]*0*([1-9][0-9]*)/i);
+      return m ? Number(m[1]) : null;
+    };
+
+    const targetNum = extractNum(rawLabel) || extractNum(rawExId);
+    if (targetNum !== null) {
+      for (let i = 0; i < course.chapters.length; i++) {
+        const ch = course.chapters[i];
+        const chNum = extractNum(ch.id) || extractNum(ch.title) || (i + 1);
+        if (chNum === targetNum) {
+          return ch;
+        }
+      }
+    }
+
+    // 4. Correspondance par mots-clés significatifs du titre (ex: "ligne supérieure", "flexbox", "tableaux")
+    const stopWords = new Set(['module', 'chapitre', 'niveau', 'dans', 'avec', 'pour', 'les', 'des', 'une', 'sur', 'par', 'aux', 'introduction', 'base', 'bases']);
+    const tokenize = (s) => String(s)
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .split(/[^a-z0-9]+/)
+      .filter(w => w.length >= 4 && !stopWords.has(w));
+
+    const labelTokens = tokenize(`${rawLabel} ${rawExId}`);
+    if (labelTokens.length > 0) {
+      let bestChapter = null;
+      let bestScore = 0;
+      for (const ch of course.chapters) {
+        const chTokens = new Set(tokenize(`${ch.title} ${ch.file || ''}`));
+        let score = 0;
+        labelTokens.forEach(t => {
+          if (chTokens.has(t)) score++;
+        });
+        if (score > bestScore) {
+          bestScore = score;
+          bestChapter = ch;
+        }
+      }
+      if (bestScore > 0 && bestChapter) {
+        return bestChapter;
+      }
+    }
+
+    return null;
   }
 
   /**

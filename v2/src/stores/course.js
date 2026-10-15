@@ -378,7 +378,7 @@ export function createCourseStore() {
 
       // Si on est sur la théorie, passer à l'atelier pratique du chapitre ou au chapitre suivant
       if (this.activeTab === 'cours') {
-        const chExos = this.getExercisesForChapter(this.currentChapter);
+        const chExos = this.getCurrentChapterExercises();
         if (chExos.length > 0) {
           this.selectionnerExercice(chExos[0]);
           this.activeTab = 'pratique';
@@ -389,17 +389,18 @@ export function createCourseStore() {
         const cIdx = chapters.findIndex(c => c.id === this.currentChapter?.id);
         if (cIdx !== -1 && cIdx < chapters.length - 1) {
           await this.changerChapitre(chapters[cIdx + 1].id);
-        } else if (this.courseExercises.length > 0) {
-          this.activeTab = 'pratique';
+        } else {
+          this.ouvrirAtelierDuModuleActif();
         }
         return;
       }
 
-      // Si on est en mode pratique, passer à l'exercice suivant ou au chapitre suivant
+      // Si on est en mode pratique, passer à l'exercice suivant DU MODULE ACTIF ou au module suivant (en retombant sur sa leçon !)
       if (this.activeTab === 'pratique') {
-        const exIdx = this.courseExercises.findIndex(e => e.id === this.currentExercise?.id);
-        if (exIdx !== -1 && exIdx < this.courseExercises.length - 1) {
-          const nextEx = this.courseExercises[exIdx + 1];
+        const chExos = this.getCurrentChapterExercises();
+        const exIdx = chExos.findIndex(e => e.id === this.currentExercise?.id);
+        if (exIdx !== -1 && exIdx < chExos.length - 1) {
+          const nextEx = chExos[exIdx + 1];
           this.selectionnerExercice(nextEx);
           this.updateUrlQueryParams({ courseId: this.currentCourse?.id, exId: nextEx.id });
           return;
@@ -407,8 +408,7 @@ export function createCourseStore() {
         const chapters = this.currentCourse?.chapters || [];
         const cIdx = chapters.findIndex(c => c.id === this.currentChapter?.id);
         if (cIdx !== -1 && cIdx < chapters.length - 1) {
-          await this.changerChapitre(chapters[cIdx + 1].id);
-          this.activeTab = 'cours';
+          await this.changerChapitre(chapters[cIdx + 1].id); // Retombe automatiquement sur la Leçon du module suivant
         }
       }
     },
@@ -425,9 +425,10 @@ export function createCourseStore() {
       }
 
       if (this.activeTab === 'pratique') {
-        const exIdx = this.courseExercises.findIndex(e => e.id === this.currentExercise?.id);
+        const chExos = this.getCurrentChapterExercises();
+        const exIdx = chExos.findIndex(e => e.id === this.currentExercise?.id);
         if (exIdx > 0) {
-          const prevEx = this.courseExercises[exIdx - 1];
+          const prevEx = chExos[exIdx - 1];
           this.selectionnerExercice(prevEx);
           this.updateUrlQueryParams({ courseId: this.currentCourse?.id, exId: prevEx.id });
           return;
@@ -505,15 +506,60 @@ export function createCourseStore() {
       });
     },
 
+    /**
+     * Retourne uniquement les exercices rattachés à un chapitre/module donné
+     */
     getExercisesForChapter(chapter) {
       if (!chapter || !this.courseExercises?.length) return [];
       const matched = this.courseExercises.filter(ex => {
-        if (!ex.chapitre && !ex.module_id) return false;
-        const target = String(ex.module_id || ex.chapitre).toLowerCase();
-        return target === String(chapter.id).toLowerCase() ||
-               String(chapter.title || '').toLowerCase().includes(target);
+        const label = ex.module_id || ex.chapitre_id || ex.chapitre || '';
+        const foundCh = courseManagerV2.findChapterByDbLabel(this.currentCourse, label, ex.id);
+        if (foundCh) {
+          return foundCh.id === chapter.id;
+        }
+        // Si l'exercice n'a aucun chapitre reconnaissable et qu'on est sur le Module 1, le rattacher au Module 1 par défaut
+        return chapter.id === this.currentCourse?.chapters?.[0]?.id && !label;
       });
       return matched;
+    },
+
+    /**
+     * Exercices du module/chapitre actuellement sélectionné
+     */
+    getCurrentChapterExercises() {
+      if (!this.currentChapter) return [];
+      return this.getExercisesForChapter(this.currentChapter);
+    },
+
+    /**
+     * Statut de réalisation d'un exercice par l'élève connecté ('valide' | 'pending' | null)
+     */
+    getStudentExerciseStatus(ex) {
+      if (!ex) return null;
+      const subs = this.studentSubmissionsHistory || [];
+      const found = subs.find(s =>
+        (s.id_exercice && s.id_exercice === ex.id) ||
+        (s.exercice_id && s.exercice_id === ex.id) ||
+        (s.titre_exercice && ex.titre && s.titre_exercice.toLowerCase() === ex.titre.toLowerCase())
+      );
+      if (!found) return null;
+      if (found.status === 'valide' || found.status === 'validee' || found.status === 'publie') return 'valide';
+      return 'pending';
+    },
+
+    /**
+     * Statut d'avancement d'un module/chapitre entier ('completed' | 'in_progress' | 'todo')
+     */
+    getChapterProgressState(chapter) {
+      const exos = this.getExercisesForChapter(chapter);
+      if (exos.length === 0) return 'todo';
+      let doneCount = 0;
+      exos.forEach(ex => {
+        if (this.getStudentExerciseStatus(ex)) doneCount++;
+      });
+      if (doneCount === exos.length) return 'completed';
+      if (doneCount > 0) return 'in_progress';
+      return 'todo';
     },
 
     async changerCours(courseId, goToFocus = true) {
@@ -538,11 +584,41 @@ export function createCourseStore() {
       this.updateUrlQueryParams({ courseId: found.id, exId: null });
     },
 
-    async changerChapitre(chapterId) {
+    /**
+     * Change de module/chapitre :
+     * - Retombe TOUJOURS sur la page de la Leçon (`activeTab = 'cours'`)
+     * - Pré-sélectionne le 1er exercice de CE module (ou `null` s'il n'y en a pas encore)
+     */
+    async changerChapitre(chapterId, keepTab = false) {
       const found = courseManagerV2.selectChapter(chapterId);
       if (!found) return;
       this.currentChapter = found;
+      if (!keepTab) {
+        this.activeTab = 'cours';
+      }
       await this.chargerMarkdownChapitre();
+
+      const chExos = this.getExercisesForChapter(found);
+      if (chExos.length > 0) {
+        this.selectionnerExercice(chExos[0]);
+      } else {
+        this.currentExercise = null;
+      }
+    },
+
+    /**
+     * Ouvre l'onglet « Atelier & Pratique » du module actif en sélectionnant ses propres exercices
+     */
+    ouvrirAtelierDuModuleActif() {
+      this.activeTab = 'pratique';
+      const chExos = this.getCurrentChapterExercises();
+      if (chExos.length > 0) {
+        if (!this.currentExercise || !chExos.some(e => e.id === this.currentExercise.id)) {
+          this.selectionnerExercice(chExos[0]);
+        }
+      } else {
+        this.currentExercise = null;
+      }
     },
 
     async chargerContenuCoursActif() {
@@ -550,8 +626,9 @@ export function createCourseStore() {
       this.exerciseLoading = true;
       try {
         this.courseExercises = await courseManagerV2.loadCourseExercisesFromDb(this.currentCourse.id);
-        if (this.courseExercises.length > 0) {
-          this.selectionnerExercice(this.courseExercises[0]);
+        const chExos = this.getCurrentChapterExercises();
+        if (chExos.length > 0) {
+          this.selectionnerExercice(chExos[0]);
         } else {
           this.currentExercise = null;
         }
