@@ -3,149 +3,835 @@
   "numero": 2,
   "titre": "Sécurité & Protection des données",
   "tome": "1a",
-  "pages": "87-164",
-  "introduction": "Apprenez à maîtriser vos traces numériques, repérer les sites fiables (HTTPS), paramétrer la vie privée de vos profils et prévenir les cyberrisques.",
+  "pages": "89-163",
+  "pages_manuel": "87-161",
+  "introduction": "Apprenez à maîtriser vos traces numériques (actives et passives), décoder la signalétique PEGI et BienVu, repérer les sites chiffrés (HTTPS), paramétrer la confidentialité de vos profils, prévenir les cyberrisques (phishing, grooming, 5 formes de cyberharcèlement) et protéger votre attention face aux algorithmes.",
   "competences": {
     "je_decouvre": [
       {
         "id": "NUM-2.D1",
         "code": "NUM-2.D1",
-        "intitule": "J'utilise en contexte le vocabulaire de sécurité : identifiant, mot de passe fort, biométrie, double authentification, piratage.",
-        "mots_cles": ["identifiant", "mot de passe", "biométrie", "2FA", "piratage"]
+        "intitule": "J'utilise en contexte le vocabulaire spécifique à la protection des profils et des données (identifiant, mot de passe fort, compte public/privé, données personnelles, double authentification).",
+        "intitule_manuel": "Utiliser en contexte le vocabulaire spécifique.",
+        "pages_manuel": "88-97",
+        "mots_cles": ["identifiant", "mot de passe", "profil public", "profil privé", "2FA", "données personnelles"]
       },
       {
         "id": "NUM-2.D2",
         "code": "NUM-2.D2",
-        "intitule": "J'identifie et j'interprète la signalétique PEGI et les restrictions d'âge sur les contenus numériques.",
-        "mots_cles": ["PEGI", "âge", "violence", "langage", "achats intégrés"]
+        "intitule": "J'identifie et j'interprète une signalétique (PEGI 3/7/12/16/18, 8 pictogrammes de contenu, classification cinéma BienVu/GoedGezien).",
+        "intitule_manuel": "Identifier une signalétique.",
+        "pages_manuel": "98-105",
+        "mots_cles": ["PEGI", "BienVu", "âge", "violence", "langage", "achats intégrés", "hasard"]
       },
       {
         "id": "NUM-2.D3",
         "code": "NUM-2.D3",
-        "intitule": "Je distingue un site sécurisé (HTTPS avec cadenas) d'un site non chiffré (HTTP).",
-        "mots_cles": ["HTTP", "HTTPS", "cadenas", "chiffrement", "certificat"]
+        "intitule": "Je différencie les protocoles HTTP (texte clair non sécurisé) et HTTPS (communication chiffrée avec cadenas 🔒).",
+        "intitule_manuel": "Différencier HTTP et HTTPS.",
+        "pages_manuel": "106-109",
+        "mots_cles": ["HTTP", "HTTPS", "cadenas", "chiffrement", "interception", "pentester"]
       },
       {
         "id": "NUM-2.D4",
         "code": "NUM-2.D4",
-        "intitule": "Je différencie les données actives (publiées consciemment) des données passives (traces automatiques, cookies, géolocalisation).",
-        "mots_cles": ["données actives", "données passives", "empreinte numérique", "cookies", "traces"]
+        "intitule": "Je différencie les données actives/explicites (publiées consciemment : posts, formulaires, tags volontaires) des données passives/implicites (métadonnées, cookies, historique, géolocalisation).",
+        "intitule_manuel": "*Expliquer la différence entre les données actives (explicites) et les données passives (implicites).",
+        "nouveau_mars_2026": true,
+        "pages_manuel": "114-115",
+        "mots_cles": ["données actives", "données passives", "métadonnées", "cookies", "géolocalisation", "RGPD"]
       },
       {
         "id": "NUM-2.D5",
         "code": "NUM-2.D5",
-        "intitule": "J'identifie les mécanismes conçus pour capter l'attention (notifications, scrolling infini, dark patterns) et les bienfaits de la déconnexion.",
-        "mots_cles": ["attention", "notifications", "scrolling", "dopamine", "déconnexion"]
+        "intitule": "J'identifie les 9 techniques utilisées pour capter l'attention en ligne (défilement infini, vidéos courtes, lecture auto, gamification, FOMO, notifications) et les bienfaits de la déconnexion.",
+        "intitule_manuel": "*Identifier les techniques utilisées pour retenir l'attention en ligne et citer des bienfaits de la déconnexion.",
+        "nouveau_mars_2026": true,
+        "pages_manuel": "118-123",
+        "mots_cles": ["attention", "scrolling infini", "dopamine", "FOMO", "multitâche", "switching", "déconnexion"]
+      },
+      {
+        "id": "NUM-2.D6",
+        "code": "NUM-2.D6",
+        "intitule": "Je définis les notions de cyberattaque (phishing, malware), cyberharcèlement (5 formes, art. 442bis), cybermanipulation (grooming, fake news) et cyberdépendance.",
+        "intitule_manuel": "Définir les notions de : cyberattaque, cyberharcèlement, cybermanipulation, cyberdépendance.",
+        "pages_manuel": "134-145",
+        "mots_cles": ["cyberattaque", "cyberharcèlement", "cybermanipulation", "cyberdépendance", "phishing", "grooming"]
+      },
+      {
+        "id": "NUM-2.D7",
+        "code": "NUM-2.D7",
+        "intitule": "J'identifie l'importance de signaler un contenu ou de bloquer un contact pour se protéger et protéger les autres en ligne.",
+        "intitule_manuel": "*Identifier l'importance de signaler un contenu ou de bloquer un contact pour se protéger en ligne.",
+        "nouveau_mars_2026": true,
+        "pages_manuel": "110-111",
+        "mots_cles": ["signaler", "bloquer", "modération", "protection", "capture d'écran"]
+      },
+      {
+        "id": "NUM-2.D8",
+        "code": "NUM-2.D8",
+        "intitule": "Je reconnais que chacun a le droit et la responsabilité de gérer son identité numérique (vie privée, e-réputation, études et futur emploi).",
+        "intitule_manuel": "*Reconnaître que chacun a le droit et la responsabilité de gérer son identité numérique.",
+        "nouveau_mars_2026": true,
+        "pages_manuel": "112-113",
+        "mots_cles": ["identité numérique", "réputation", "responsabilité", "trace numérique"]
+      },
+      {
+        "id": "NUM-2.D9",
+        "code": "NUM-2.D9",
+        "intitule": "J'explique pourquoi, dans certaines situations (émotions, urgence/danger, santé, conflits, orientation), il est important de demander de l'aide à un humain plutôt qu'à l'IA.",
+        "intitule_manuel": "*Expliquer pourquoi, dans certaines situations, il est important de demander de l'aide à un humain plutôt qu'à l'IA.",
+        "nouveau_mars_2026": true,
+        "pages_manuel": "116-117",
+        "mots_cles": ["aide humaine", "IA", "empathie", "urgence", "santé", "adulte de confiance"]
       }
     ],
     "je_pratique": [
       {
         "id": "NUM-2.P1",
         "code": "NUM-2.P1",
-        "intitule": "Je configure les paramètres de confidentialité et de sécurité d'un profil ou d'une application.",
-        "mots_cles": ["paramètres", "privé", "public", "autorisations", "caméra"]
+        "intitule": "J'identifie les options de confidentialité et de sécurité d'une application et je paramètre un compte en mode privé.",
+        "intitule_manuel": "Identifier les options de confidentialité et de sécurité d'une application.",
+        "pages_manuel": "126-129",
+        "mots_cles": ["paramètres", "privé", "public", "autorisations", "géolocalisation", "2FA"]
       },
       {
         "id": "NUM-2.P2",
         "code": "NUM-2.P2",
-        "intitule": "J'applique les procédures de signalement et de blocage face à un contenu abusif ou une situation de cyberharcèlement.",
-        "mots_cles": ["signaler", "bloquer", "preuves", "capture d'écran", "aide"]
+        "intitule": "J'applique les procédures de protection face aux cyberrisques (signalement, blocage, captures d'écran, numéros d'urgence 103 / 116 000 / 107) et je désamorce les commentaires agressifs.",
+        "intitule_manuel": "Identifier et illustrer les risques liés à une utilisation inadéquate des environnements numériques (cyberattaque, cyberharcèlement, cybermanipulation, cyberdépendance).",
+        "pages_manuel": "134-145",
+        "mots_cles": ["signaler", "bloquer", "preuves", "103", "116 000", "Child Focus", "442bis"]
       },
       {
         "id": "NUM-2.P3",
         "code": "NUM-2.P3",
-        "intitule": "J'analyse mon temps d'écran et je mets en œuvre des stratégies efficaces de déconnexion volontaire.",
-        "mots_cles": ["temps d'écran", "pause", "mode silencieux", "sommeil"]
+        "intitule": "J'analyse mon temps d'écran hebdomadaire et je mets en œuvre 5 solutions concrètes de déconnexion volontaire.",
+        "intitule_manuel": "*Analyser son propre usage des écrans (temps passé, activités réalisées).",
+        "nouveau_mars_2026": true,
+        "pages_manuel": "146-147",
+        "mots_cles": ["temps d'écran", "journal de bord", "pause", "mode avion", "sommeil"]
+      },
+      {
+        "id": "NUM-2.P4",
+        "code": "NUM-2.P4",
+        "intitule": "Je distingue les données à caractère personnel et sensibles, et je prends conscience de la valeur des informations laissées en ligne.",
+        "intitule_manuel": "Distinguer les données à caractère personnel et prendre conscience de la valeur des informations laissées en ligne.",
+        "pages_manuel": "124-125",
+        "mots_cles": ["données personnelles", "données sensibles", "RGPD", "formulaire piégé"]
+      },
+      {
+        "id": "NUM-2.P5",
+        "code": "NUM-2.P5",
+        "intitule": "Je me déconnecte de ma session et je supprime les traces de navigation (Ctrl+H, Ctrl+Maj+Suppr : historique, cookies, mots de passe).",
+        "intitule_manuel": "Se déconnecter et supprimer les traces d'une navigation.",
+        "pages_manuel": "130-133",
+        "mots_cles": ["déconnexion", "historique", "cookies", "Ctrl+H", "Ctrl+Maj+Suppr"]
       }
     ],
     "je_maitrise": [
       {
         "id": "NUM-2.M1",
         "code": "NUM-2.M1",
-        "intitule": "Je conçois un guide ou une campagne citoyenne pour sensibiliser mes pairs à la sécurité numérique et à la prévention des cyberrisques.",
-        "mots_cles": ["campagne", "affiche", "sensibilisation", "cyberharcèlement", "prévention"]
+        "intitule": "J'adopte des comportements sécuritaires et préventifs en ligne (Mindmap 3P Prévenir-Protéger-Proposer, campagne citoyenne contre le cyberharcèlement).",
+        "intitule_manuel": "Adopter des comportements sécuritaires et préventifs en ligne.",
+        "pages_manuel": "153-161",
+        "mots_cles": ["Mindmap 3P", "campagne", "affiche Canva", "cyberharcèlement", "prévention"]
+      },
+      {
+        "id": "NUM-2.M2",
+        "code": "NUM-2.M2",
+        "intitule": "Je gère mon identité numérique et mes traces en appliquant les 5 questions filtres avant toute publication (Respect, Vérité, Consentement, Conséquences).",
+        "intitule_manuel": "Gérer son identité numérique et ses traces.",
+        "pages_manuel": "148-152",
+        "mots_cles": ["identité numérique", "traces", "4 règles avant publication", "Pixel Mag"]
       }
     ]
   },
   "parties": [
     {
       "id": "partie-2-1",
-      "titre": "1. Profil, Mots de Passe & Authentification",
+      "titre": "1. Vocabulaire de profil, Mots de Passe & Données personnelles",
       "pages": "88-97",
-      "resume": "Un bon mot de passe combine au moins 10 caractères (majuscules, minuscules, chiffres et symboles). La double authentification (2FA) ajoute un second verrou (code SMS ou application) pour empêcher toute intrusion."
+      "resume": "Un profil numérique rassemble les informations qui te représentent en ligne (public ou privé). Les données personnelles (nom, adresse, téléphone, localisation, horaire de course, photos d'enfants) permettent de t'identifier et ne doivent jamais être livrées en excès."
     },
     {
       "id": "partie-2-2",
-      "titre": "2. Signalétique PEGI & Classification des Jeux",
+      "titre": "2. Signalétique PEGI, Cerveau & Classification Cinéma BienVu",
       "pages": "98-105",
-      "resume": "La norme européenne PEGI classe les jeux et applications selon l'âge minimum requis (3, 7, 12, 16, 18 ans) et les descripteurs de contenu (peur, violence, drogues, achats intégrés). L'âge n'est pas une mesure de difficulté mais de protection psychologique."
+      "resume": "La norme PEGI classe les jeux selon l'âge minimum (3, 7, 12, 16, 18) et 8 pictogrammes de contenu (violence, hasard, drogue, langage, sexe, peur, discrimination, en ligne). Depuis le 1er janvier 2026, le système belge BienVu/GoedGezien harmonise la classification cinéma."
     },
     {
       "id": "partie-2-3",
-      "titre": "3. Navigation Sécurisée : HTTP vs HTTPS",
+      "titre": "3. Navigation Sécurisée : HTTP vs HTTPS & Métiers Cyber",
       "pages": "106-109",
-      "resume": "Le 'S' de HTTPS signifie 'Sécurisé' : les données échangées entre ton ordinateur et le serveur sont chiffrées. Un site en HTTP normal permet à des tiers espions sur le même réseau Wi-Fi d'intercepter tes identifiants !"
+      "resume": "HTTP transmet les données en texte clair (comme une carte postale lisible par tout pirate sur le réseau). HTTPS chiffre la connexion (cadenas 🔒). Attention : le cadenas prouve que le tunnel est chiffré, mais pas que le propriétaire du site est honnête !"
     },
     {
       "id": "partie-2-4",
-      "titre": "4. Traces Numériques : Données Actives vs Passives",
-      "pages": "114-117",
-      "resume": "Données actives = ce que tu décides de publier (stories, messages, likes). Données passives = ce que ton navigateur et ton téléphone enregistrent sans que tu tapes rien (adresse IP, temps passé, clics, géolocalisation)."
+      "titre": "4*. Signaler et Bloquer pour se protéger en ligne",
+      "pages": "110-111",
+      "resume": "Bloquer empêche un utilisateur de te contacter ou d'interagir avec toi. Signaler (via le menu « ... ») alerte les modérateurs de la plateforme pour supprimer le contenu abusif et protéger tous les utilisateurs."
     },
     {
       "id": "partie-2-5",
-      "titre": "5. Économie de l'Attention & Déconnexion",
-      "pages": "118-123",
-      "resume": "Les plateformes utilisent la 'captologie' (lumières rouges, pastilles de notifications, scrolling infini) pour déclencher de la dopamine et garder ton attention le plus longtemps possible. Savoir poser son téléphone préserve le sommeil et la concentration."
+      "titre": "5*. Identité numérique : Droits, Réputation & Responsabilité",
+      "pages": "112-113",
+      "resume": "Chacun a le droit et la responsabilité de gérer son identité numérique : protéger sa vie privée, construire une bonne réputation pour ses études ou son futur emploi, éviter les conflits et réfléchir avant de publier."
+    },
+    {
+      "id": "partie-2-6",
+      "titre": "6*. Traces Numériques : Données Actives vs Données Passives",
+      "pages": "114-115",
+      "resume": "Données actives (explicites) = ce que tu choisis de publier ou envoyer (formulaires, sondages, profils, messages, tags volontaires). Données passives (implicites) = traces collectées automatiquement (métadonnées d'une photo, cookies, historique, géolocalisation)."
+    },
+    {
+      "id": "partie-2-7",
+      "titre": "7*. Demander de l'aide à un humain plutôt qu'à l'IA",
+      "pages": "116-117",
+      "resume": "L'IA n'a ni émotions, ni empathie réelle, ni capacité d'intervention physique. Dans 5 situations clés (émotions/bien-être, urgence/harcèlement, santé physique/mentale, conflits relationnels, orientation), l'aide d'un humain de confiance est irremplaçable."
+    },
+    {
+      "id": "partie-2-8",
+      "titre": "8*. Techniques pour retenir l'attention, FOMO & Multitâche",
+      "pages": "118-121",
+      "resume": "Les plateformes exploitent 9 techniques de captologie (défilement infini, vidéos courtes, lecture auto, gamification, récompenses variables, algorithmes, titres accrocheurs, stories éphémères, notifications) et le FOMO. Le cerveau ne fait pas de vrai multitâche mais du switching coûteux en erreurs."
+    },
+    {
+      "id": "partie-2-9",
+      "titre": "9*. Bienfaits de la déconnexion & Cyberrisques (442bis, 3P)",
+      "pages": "122-161",
+      "resume": "Se déconnecter améliore le sommeil, la concentration, l'humeur et la disponibilité envers les autres. Face aux 5 formes de cyberharcèlement (punies par l'art. 442bis du Code pénal), on applique la règle : ne pas répondre, capturer les preuves, bloquer, signaler et appeler le 103 ou le 116 000."
     }
   ],
+  "je_decouvre": {
+    "partie_1_profil_protection": {
+      "titre": "PARTIE 1. Vocabulaire de profil et protection",
+      "pages_pdf": "90-99",
+      "pages_manuel": "88-97",
+      "analyse_profils": [
+        {
+          "profil": "Page Facebook Alt-x",
+          "type": "Page publique professionnelle / éducative",
+          "elements_visibles": "Logo, description du projet pédagogique, site web, publications ouvertes à tous."
+        },
+        {
+          "profil": "Xiao Liu (@LiuXiao sur Instagram)",
+          "type": "Profil personnel",
+          "elements_visibles": "Nom, photo de profil, biographie, nombre d'abonnés/abonnements, publications photos."
+        },
+        {
+          "profil": "Maya Davis (@MayaDavis sur X/Twitter)",
+          "type": "Profil de microblogging",
+          "elements_visibles": "Pseudonyme, photo, bio, localisation, date d'inscription, tweets publics."
+        }
+      ],
+      "dangers_publications_publiques": [
+        {
+          "personnage": "Carole",
+          "publication": "Partage la carte GPS précise de son parcours de course à pied avec ses jours et heures habituels.",
+          "danger_corrige": "Des personnes malveillantes connaissent son trajet exact et les heures où sa maison est vide (risque d'agression ou de cambriolage)."
+        },
+        {
+          "personnage": "ThéoCr8",
+          "publication": "Annonce publiquement qu'il part 3 semaines en vacances loin de chez lui avec toute sa famille.",
+          "danger_corrige": "Il indique clairement que son domicile est inoccupé pendant 3 semaines (risque élevé de cambriolage)."
+        },
+        {
+          "personnage": "Kylian",
+          "publication": "Publie la photo de son fils Adam (5 ans) devant son école maternelle avec le nom de l'école visible.",
+          "danger_corrige": "N'importe quel inconnu connaît le prénom, l'âge, le visage et l'école exacte de l'enfant (atteinte au droit à l'image de l'enfant et risque d'approche par un inconnu)."
+        },
+        {
+          "personnage": "Cartes bancaires sur Snapchat",
+          "publication": "Photo d'une carte bancaire publiée en story.",
+          "danger_corrige": "Usurpation et fraude bancaire immédiate (achats en ligne avec les numéros visibles)."
+        }
+      ],
+      "donnees_necessaires_vs_excessives": [
+        {
+          "scenario": "Inscription à un jeu en ligne gratuit",
+          "necessaires": ["Pseudonyme", "Adresse e-mail (ou accord parental)", "Mot de passe"],
+          "excessives_suspectes": ["Adresse postale complète", "Numéro de carte bancaire", "Copie de la carte d'identité", "Nom de l'école"]
+        },
+        {
+          "scenario": "Inscription à la cantine scolaire",
+          "necessaires": ["Nom et prénom de l'élève", "Classe", "Allergies ou régime alimentaire", "Contact des parents"],
+          "excessives_suspectes": ["Mot de passe des réseaux sociaux", "Photos de vacances", "Opinions politiques"]
+        },
+        {
+          "scenario": "Création d'un compte sur un réseau social",
+          "necessaires": ["Pseudonyme / identifiant", "Date de naissance (vérification de l'âge)", "Adresse e-mail ou téléphone", "Mot de passe"],
+          "excessives_suspectes": ["Numéro de compte bancaire", "Emploi du temps précis", "Adresse du domicile visible en public"]
+        }
+      ]
+    },
+    "partie_2_signaletique": {
+      "titre": "PARTIE 2. Signalétique (PEGI & Cinéma BienVu)",
+      "pages_pdf": "100-107",
+      "pages_manuel": "98-105",
+      "pegi_ages": [
+        { "label": "PEGI 3", "signification": "Adapté à tous les âges. Aucun son ni image susceptible d'effrayer de jeunes enfants." },
+        { "label": "PEGI 7", "signification": "Scènes ou sons pouvant potentiellement effrayer de très jeunes enfants (violence très légère/irréaliste)." },
+        { "label": "PEGI 12", "signification": "Violence légèrement plus graphique envers des personnages imaginaires ou non réaliste, langage légèrement grossier." },
+        { "label": "PEGI 16", "signification": "Violence ou activité sexuelle semblable à la réalité, langage grossier, usage de tabac/alcool/drogue." },
+        { "label": "PEGI 18", "signification": "Destiné aux adultes uniquement : violence extrême, meurtres sans motif, glorification de drogues ou contenus explicites." }
+      ],
+      "jeux_exemples_corriges": [
+        { "jeu": "Minecraft", "pegi": "PEGI 7", "descripteurs": ["Violence légère", "Peur", "Achats intégrés / En ligne"] },
+        { "jeu": "Rocket League", "pegi": "PEGI 3", "descripteurs": ["Achats intégrés", "En ligne"] },
+        { "jeu": "Fortnite", "pegi": "PEGI 12", "descripteurs": ["Violence modérée", "Achats intégrés", "En ligne"] },
+        { "jeu": "EA Sports FC (FIFA)", "pegi": "PEGI 3", "descripteurs": ["Achats intégrés (packs aléatoires)", "En ligne"] },
+        { "jeu": "GTA V (Grand Theft Auto V)", "pegi": "PEGI 18", "descripteurs": ["Violence extrême", "Langage grossier", "Drogue", "Sexe", "Jeux de hasard", "En ligne"] }
+      ],
+      "pegi_8_descripteurs": [
+        { "nom": "Violence", "icone": "Poing", "explication": "Le jeu contient des scènes de violence." },
+        { "nom": "Langage grossier", "icone": "@*!", "explication": "Le jeu contient des insultes ou jurons." },
+        { "nom": "Peur", "icone": "Araignée", "explication": "Le jeu peut effrayer ou angoisser les jeunes joueurs." },
+        { "nom": "Drogue", "icone": "Seringue / Pilule", "explication": "Le jeu fait référence ou montre la consommation de drogues, d'alcool ou de tabac." },
+        { "nom": "Sexe", "icone": "Symboles Vénus/Mars", "explication": "Le jeu comporte de la nudité ou des comportements/références à caractère sexuel." },
+        { "nom": "Discrimination", "icone": "Trois silhouettes", "explication": "Le jeu contient des représentations de stéréotypes ethniques, religieux ou susceptibles d'encourager la haine." },
+        { "nom": "Jeux de hasard", "icone": "Dés", "explication": "Le jeu contient des éléments qui encouragent ou enseignent les jeux d'argent et de hasard." },
+        { "nom": "En ligne / Achats intégrés", "icone": "Globe / Main avec carte", "explication": "Le jeu peut être joué en ligne avec d'autres personnes et/ou propose d'acheter des objets avec de l'argent réel." }
+      ],
+      "encadre_cerveau_ecrans_par_age": {
+        "type": "🧠 Cerveau",
+        "titre": "Les écrans à chaque âge & la dopamine des jeux vidéo",
+        "recommandations": [
+          { "tranche_age": "Avant 3 ans", "regle": "Totalement proscrit (l'enfant a besoin d'interagir avec son environnement réel par ses 5 sens)." },
+          { "tranche_age": "De 3 à 6 ans", "regle": "Déconseillé et exceptionnel (courtes durées, accompagné d'un adulte, jamais avant de dormir)." },
+          { "tranche_age": "De 6 à 9 ans", "regle": "Limité et encadré (règles claires de temps, contenus adaptés à l'âge)." },
+          { "tranche_age": "De 9 à 12 ans", "regle": "Modéré et encadré (dialogue avec les parents, pas de réseaux sociaux avant 13 ans)." },
+          { "tranche_age": "De 12 à 15 ans", "regle": "Autonomie encadrée avec contrôle parental et horaires définis (pas d'écran la nuit)." },
+          { "tranche_age": "De 15 à 18 ans", "regle": "Vers l'autonomie complète et l'autorégulation responsable." }
+        ],
+        "cerveau_jeux_video": "Les jeux vidéo activent les circuits de l'attention, de la prise de décision et de la coordination œil-main. Chaque victoire ou récompense libère de la dopamine (neurotransmetteur du plaisir et de la motivation), ce qui explique l'envie de rejouer et le risque de dépendance."
+      },
+      "cinema_belgique_bienvu": {
+        "type": "💡 Le savais-tu ?",
+        "titre": "Nouvelle signalétique cinéma en Belgique : BienVu / GoedGezien (1er janvier 2026)",
+        "contenu": "Depuis le 1er janvier 2026, la Belgique a remplacé l'ancien système (« Enfants admis / Non admis » datant de 1920) par le système moderne BienVu / GoedGezien (inspiré de Kijkwijzer), avec des classes d'âge (Tous publics AL, 6, 9, 12, 14, 16, 18) et des pictogrammes de contenu identiques aux écrans."
+      },
+      "mots_croises_corriges": ["18", "SIGNALÉTIQUE", "PEGI", "ÂGE", "VISUEL"]
+    },
+    "partie_3_http_https": {
+      "titre": "PARTIE 3. HTTP et HTTPS",
+      "pages_pdf": "108-111",
+      "pages_manuel": "106-109",
+      "comparatif_protocoles": {
+        "http": {
+          "acronyme": "HyperText Transfer Protocol",
+          "securite": "Non sécurisé (aucun cadenas)",
+          "fonctionnement": "Les informations circulent en texte clair sur le réseau, comme une carte postale que n'importe quel pirate connecté au même Wi-Fi peut lire.",
+          "regle": "Ne jamais saisir de mot de passe ni de numéro bancaire sur un site HTTP."
+        },
+        "https": {
+          "acronyme": "HyperText Transfer Protocol Secure",
+          "securite": "Sécurisé par chiffrement (icône cadenas 🔒 dans la barre d'adresse)",
+          "fonctionnement": "Les données échangées entre le navigateur et le serveur sont chiffrées (transformées en code secret illisible pour les espions).",
+          "piege_important": "Attention : le cadenas HTTPS garantit que le canal de communication est chiffré, mais il NE garantit PAS que le propriétaire du site est honnête (un site de phishing peut aussi utiliser HTTPS !)."
+        }
+      },
+      "encadres_metiers": [
+        {
+          "type": "💼 Métier",
+          "titre": "Pentester (Testeur·euse d'intrusion)",
+          "mission": "Hacker éthique engagé légalement par une entreprise pour attaquer son système informatique, détecter les failles de sécurité avant les cybercriminels et proposer des correctifs."
+        },
+        {
+          "type": "💼 Métier",
+          "titre": "Ingénieur·e / Consultant·e en cybersécurité",
+          "mission": "Conçoit l'architecture de protection des réseaux et des serveurs, chiffre les données sensibles et forme les équipes aux bonnes pratiques de sécurité."
+        }
+      ]
+    },
+    "partie_4_signaler_bloquer": {
+      "titre": "PARTIE 4*. Signaler et bloquer pour se protéger en ligne",
+      "pages_pdf": "112-113",
+      "pages_manuel": "110-111",
+      "nouveau_mars_2026": true,
+      "distinction_fondamentale": {
+        "bloquer": {
+          "action": "Empêche une personne précise de te contacter, de voir ton profil ou d'interagir avec tes publications.",
+          "portee": "Te protège TOI personnellement dans l'immédiat (mais ne supprime pas les messages déjà publiés publiquement et n'empêche pas la personne de nuire à d'autres)."
+        },
+        "signaler": {
+          "action": "Envoie une alerte aux modérateurs de la plateforme (via le menu « ... » → Signaler → Choisir le motif : harcèlement, haine, faux compte...).",
+          "portee": "Protège TOUT LE MONDE en permettant à la plateforme de supprimer le contenu illégal et de suspendre ou bannir le compte de l'auteur."
+        }
+      },
+      "reflexes_victime_ou_temoin": [
+        "1. Ne pas répondre aux provocations ni insulter en retour.",
+        "2. Faire une capture d'écran (preuve datée).",
+        "3. Bloquer l'auteur pour stopper les messages.",
+        "4. Signaler le contenu et le profil à la plateforme.",
+        "5. En parler immédiatement à un adulte de confiance (parents, éducateur, professeur, PMS)."
+      ]
+    },
+    "partie_5_identite_numerique": {
+      "titre": "PARTIE 5*. Identité numérique : droits et responsabilité",
+      "pages_pdf": "114-115",
+      "pages_manuel": "112-113",
+      "nouveau_mars_2026": true,
+      "etudes_de_cas": [
+        {
+          "eleve": "Noa",
+          "situation": "Publie toutes ses photos de fête en mode public sous son vrai nom.",
+          "analyse_corrige": "Noa expose sa vie privée à des inconnus et risque de nuire à sa réputation future."
+        },
+        {
+          "eleve": "Sarah",
+          "situation": "Configure son compte en privé, utilise un pseudo et trie ses abonnés.",
+          "analyse_corrige": "Sarah exerce son droit à la vie privée et maîtrise son identité numérique."
+        },
+        {
+          "eleve": "Pierre",
+          "situation": "Écrit une insulte impulsive en commentaire public sous la vidéo d'un camarade.",
+          "analyse_corrige": "Pierre engage sa responsabilité : son commentaire laisse une trace durable qui peut lui valoir une sanction et ternir son image."
+        }
+      ],
+      "quatre_benefices_gestion_identite": [
+        "1. Protéger sa vie privée et sa sécurité personnelle.",
+        "2. Construire et garder une bonne réputation en ligne (utile plus tard pour les études, un stage ou un emploi).",
+        "3. Éviter les problèmes, les conflits, le cyberharcèlement ou l'usurpation d'identité.",
+        "4. Agir comme un citoyen numérique responsable et réfléchi envers soi-même et envers les autres."
+      ]
+    },
+    "partie_6_donnees_actives_passives": {
+      "titre": "PARTIE 6*. Données actives et données passives",
+      "pages_pdf": "116-117",
+      "pages_manuel": "114-115",
+      "nouveau_mars_2026": true,
+      "comparatif_traces": {
+        "donnees_actives_explicites": {
+          "definition": "Informations que l'utilisateur choisit consciemment et volontairement d'écrire, d'envoyer ou de publier en ligne.",
+          "exemples_corriges": [
+            "Remplir un formulaire d'inscription",
+            "Répondre à un sondage en ligne",
+            "Renseigner sa biographie et son profil",
+            "Envoyer un message ou publier un commentaire",
+            "Mettre soi-même un tag / une identification sur sa publication"
+          ]
+        },
+        "donnees_passives_implicites": {
+          "definition": "Traces collectées automatiquement en arrière-plan par les appareils, les sites et les applications sans action d'écriture volontaire.",
+          "exemples_corriges": [
+            "Métadonnées (données sur les données : date, heure, modèle d'appareil et coordonnées GPS cachés dans le fichier d'une photo)",
+            "Cookies de navigation et traceurs publicitaires",
+            "Historique de navigation et temps passé sur chaque vidéo",
+            "Géolocalisation automatique et adresse IP",
+            "Tags ou identifications placés par d'autres personnes sans notre consentement"
+          ]
+        }
+      }
+    },
+    "partie_7_aide_humaine_vs_ia": {
+      "titre": "PARTIE 7*. Demander de l'aide humaine plutôt qu'à l'IA",
+      "pages_pdf": "118-119",
+      "pages_manuel": "116-117",
+      "nouveau_mars_2026": true,
+      "cinq_situations_aide_humaine": [
+        {
+          "categorie": "1. Émotions et bien-être (tristesse, solitude, angoisse)",
+          "pourquoi_humain": "Un humain ressent de l'empathie réelle, écoute sans juger, rassure sincèrement et comprend le vécu émotionnel, alors que l'IA ne fait que simuler des phrases statistiques."
+        },
+        {
+          "categorie": "2. Situations graves ou urgentes (harcèlement, menace, danger)",
+          "pourquoi_humain": "Un adulte ou un service d'urgence (103, 116 000, police, école) peut intervenir concrètement dans le monde réel pour te protéger et faire cesser le danger."
+        },
+        {
+          "categorie": "3. Santé physique et mentale (symptômes, mal-être, douleur)",
+          "pourquoi_humain": "Seul un médecin, un psychologue ou l'infirmerie/PMS peut poser un vrai diagnostic médical fiable et adapté à ta personne."
+        },
+        {
+          "categorie": "4. Relations et conflits (dispute entre amis ou en famille)",
+          "pourquoi_humain": "Un médiateur humain (éducateur, parent, ami) peut écouter les deux parties et comprendre le contexte humain."
+        },
+        {
+          "categorie": "5. Décisions importantes (orientation scolaire, projets de vie)",
+          "pourquoi_humain": "Les enseignants, conseillers PMS et parents te connaissent personnellement et t'accompagnent dans la durée."
+        }
+      ],
+      "risques_confier_secrets_ia": "Confier ses problèmes intimes à un chatbot IA comporte deux dangers : 1) la divulgation de données personnelles sensibles stockées sur des serveurs, et 2) le risque d'isolement ou de dépendance affective envers une machine qui valide toujours l'utilisateur."
+    },
+    "partie_8_techniques_attention": {
+      "titre": "PARTIE 8*. Techniques pour retenir l'attention en ligne",
+      "pages_pdf": "120-123",
+      "pages_manuel": "118-121",
+      "nouveau_mars_2026": true,
+      "statistique_belgique": "En Belgique, les jeunes passent en moyenne 3 à 5 heures par jour devant un écran en dehors du temps scolaire.",
+      "encadres_cerveau": [
+        {
+          "type": "🧠 Cerveau",
+          "titre": "Le mythe du multitâche : le « task switching »",
+          "contenu": "Le cerveau humain ne sait pas exécuter deux tâches intellectuelles exigeantes en même temps (ex. : faire ses devoirs tout en répondant à des messages). Il fait du « switching » (basculement rapide d'une tâche à l'autre). Comme le montre l'exercice 1-20 vs 1-Z-2-Y-3-X, ce basculement double le temps nécessaire, fatigue le cerveau et multiplie les erreurs."
+        },
+        {
+          "type": "🧠 Cerveau",
+          "titre": "Le coût des interruptions et notifications",
+          "contenu": "Une seule notification sonore ou visuelle suffit à briser la concentration profonde. Après une interruption (ex. : exercice « Les chaussettes de l'archiduchesse »), le cerveau met plusieurs minutes à retrouver son niveau d'attention initial."
+        }
+      ],
+      "mecanismes_psychologiques": [
+        {
+          "nom": "Conditionnement de Skinner & Dopamine (étude de Lindström)",
+          "explication": "Les récompenses variables et imprévisibles (combien de likes vais-je recevoir ?) activent fortement le circuit de la dopamine dans le cerveau, poussant à vérifier son téléphone sans arrêt."
+        },
+        {
+          "nom": "Effet miroir & Preuve sociale",
+          "explication": "Nous sommes attirés par ce qui affiche déjà beaucoup de vues ou de likes (parfois gonflés par de faux comptes ou des achats de followers)."
+        },
+        {
+          "nom": "Effet de simple exposition (Robert Zajonc)",
+          "explication": "Plus notre cerveau est exposé de façon répétée à un contenu, une musique ou un produit, plus il a tendance à le trouver familier et à l'apprécier."
+        },
+        {
+          "nom": "FOMO (Fear Of Missing Out)",
+          "explication": "La « peur de rater quelque chose » (une story éphémère, un potin, un événement de groupe) qui pousse à rester connecté en permanence par anxiété sociale."
+        }
+      ],
+      "neuf_techniques_captologie": [
+        { "numero": 1, "technique": "Défilement infini (Infinite scroll)", "description": "Pas de bas de page : le contenu se recharge sans fin pour supprimer tout signal naturel d'arrêt." },
+        { "numero": 2, "technique": "Vidéos courtes et dynamiques (Reels, TikTok, Shorts)", "description": "Formats très brefs (15 à 60 s) à rythme rapide qui enchaînent les stimulations immédiates." },
+        { "numero": 3, "technique": "Lecture automatique (Autoplay)", "description": "La vidéo ou l'épisode suivant démarre tout seul sans que l'utilisateur ait besoin de cliquer." },
+        { "numero": 4, "technique": "Gamification (Ludification : flammes Snapchat, badges, niveaux)", "description": "Transforme l'usage quotidien en jeu avec des séries (« streaks ») qu'on a peur de perdre si on ne se connecte pas chaque jour." },
+        { "numero": 5, "technique": "Systèmes de récompense variable (Likes, cœurs, vues)", "description": "Validation sociale chiffrée et imprévisible qui libère de la dopamine." },
+        { "numero": 6, "technique": "Algorithmes de recommandation personnalisée (« Pour toi »)", "description": "Analysent chaque seconde de visionnage pour servir exactement les contenus qui retiendront l'utilisateur le plus longtemps." },
+        { "numero": 7, "technique": "Titres et miniatures accrocheurs (Clickbait / Pige à clics)", "description": "Phrases chocs ou images exagérées (« Vous ne devinerez jamais... ») qui exploitent la curiosité ou l'indignation." },
+        { "numero": 8, "technique": "Contenus éphémères (Stories 24h, BeReal)", "description": "Disparaissent après 24 heures pour créer un sentiment d'urgence (FOMO)." },
+        { "numero": 9, "technique": "Notifications fréquentes et pastilles rouges", "description": "Alertes visuelles et sonores envoyées même quand l'application est fermée pour rappeler l'utilisateur sur la plateforme." }
+      ]
+    },
+    "partie_9_bienfaits_deconnexion": {
+      "titre": "PARTIE 9*. Bienfaits de la déconnexion",
+      "pages_pdf": "124-125",
+      "pages_manuel": "122-123",
+      "nouveau_mars_2026": true,
+      "exercice_feux_tricolores": {
+        "feu_rouge_a_eviter": [
+          "Envoyer un e-mail à son professeur à 22h",
+          "Dormir avec son smartphone allumé à côté de son lit",
+          "Laisser toutes les notifications activées en permanence",
+          "Faire ses devoirs avec son téléphone posé juste à côté de soi"
+        ],
+        "feu_vert_bonnes_pratiques": [
+          "Passer du temps de qualité avec ses amis ou sa famille sans téléphone",
+          "Planifier des moments quotidiens garantis sans écran (repas, 1h avant le coucher)"
+        ]
+      },
+      "bienfaits_pour_soi": [
+        "Dormir mieux et plus profondément (la lumière bleue et les notifications retardent l'endormissement)",
+        "Mieux se concentrer et mémoriser plus efficacement ses cours",
+        "Réduire le stress, l'anxiété (FOMO) et la fatigue visuelle/mentale",
+        "Avoir du temps pour le sport, la lecture, la créativité et l'ennui constructif",
+        "Reprendre le contrôle sur la gestion de son temps"
+      ],
+      "bienfaits_pour_les_autres": [
+        "Respecter le temps de repos et la vie privée des autres (ne pas envoyer de messages en continu ou tard le soir)",
+        "Être pleinement présent, attentif et à l'écoute lors des discussions en face à face",
+        "Améliorer l'ambiance familiale et les relations d'amitié réelles"
+      ]
+    }
+  },
+  "je_pratique": {
+    "partie_1_vie_privee": {
+      "titre": "PARTIE 1. Vie privée ? (Les 3 Énigmes)",
+      "pages_pdf": "126-127",
+      "pages_manuel": "124-125",
+      "enigmes": [
+        {
+          "numero": 1,
+          "titre": "Le coffre des données",
+          "corrige": "Distinguer les données banales (goûts musicaux, plat préféré) des données à caractère personnel (nom, adresse, téléphone, e-mail) et des données sensibles (mot de passe, carte bancaire, santé, localisation en temps réel, documents officiels)."
+        },
+        {
+          "numero": 2,
+          "titre": "Le formulaire piégé",
+          "corrige": "Repérer dans un formulaire de concours en ligne les champs abusifs destinés à revendre nos données à des courtiers publicitaires."
+        },
+        {
+          "numero": 3,
+          "titre": "Détective numérique : le profil de Lucas",
+          "indices_trouves": "Ville : Namur | École : Saint-Paul | Mot de passe exposé : Lucas2014 | E-mail : lucas.33@gmail.com | Téléphone : +32 432 12 34 56.",
+          "lecon_corrige": "En croisant quelques publications publiques et stories, un inconnu peut reconstituer toute la vie privée de Lucas et pirater son compte en quelques secondes."
+        }
+      ]
+    },
+    "partie_2_options_confidentialite": {
+      "titre": "PARTIE 2. Options de confidentialité",
+      "pages_pdf": "128-131",
+      "pages_manuel": "126-129",
+      "encadre_metier": {
+        "type": "💼 Métier",
+        "titre": "Analyste en cybersécurité (SOC Analyst)",
+        "mission": "Surveille en temps réel les réseaux d'une organisation, détecte les tentatives d'intrusion ou fuites de données et intervient immédiatement en cas d'alerte."
+      },
+      "huit_reflexes_securite_synthese": [
+        { "reflexe": "1. Mot de passe fort et unique", "detail": "Au moins 12 caractères variés, différent pour chaque site." },
+        { "reflexe": "2. Mettre à jour ses appareils", "detail": "Installer les mises à jour pour corriger les failles de sécurité." },
+        { "reflexe": "3. Désactiver la localisation", "detail": "Couper le GPS pour les réseaux sociaux et l'appareil photo." },
+        { "reflexe": "4. Trier sa liste d'amis / abonnés", "detail": "N'accepter que les personnes que l'on connaît réellement." },
+        { "reflexe": "5. Visibilité des publications (Compte privé)", "detail": "Paramétrer son profil en mode privé (ex. @alt_xnum)." },
+        { "reflexe": "6. Filtrer qui peut envoyer des messages", "detail": "Limiter les messages privés (DM) aux seuls amis/abonnés." },
+        { "reflexe": "7. Activer la double authentification (2FA)", "detail": "Ajouter un second verrou (code temporaire sur smartphone) en plus du mot de passe." },
+        { "reflexe": "8. Se méfier des arnaques et liens suspects", "detail": "Ne jamais cliquer sur des promesses de cadeaux gratuits ou demandes urgentes de mot de passe." }
+      ]
+    },
+    "partie_3_apprendre_deconnecter": {
+      "titre": "PARTIE 3. Apprendre à se déconnecter",
+      "pages_pdf": "132-135",
+      "pages_manuel": "130-133",
+      "raccourcis_navigateur": {
+        "historique": "Ctrl + H (ou Cmd + Y sur Mac) : ouvre l'historique des pages visitées.",
+        "effacer_donnees": "Ctrl + Maj + Suppr (Ctrl + Shift + Delete) : ouvre directement la fenêtre pour supprimer l'historique de navigation, les cookies et les mots de passe enregistrés."
+      },
+      "cas_lucas_et_julien": {
+        "histoire": "Lucas a consulté son compte Instagram sur un ordinateur de l'école et est parti en récréation en fermant simplement la fenêtre sans se déconnecter. Julien s'installe sur le même PC, ouvre le navigateur et tombe directement sur le compte de Lucas.",
+        "erreurs_lucas": "Il n'a pas cliqué sur « Se déconnecter », a peut-être coché « Rester connecté » et n'a pas fermé sa session utilisateur.",
+        "comportement_attendu_julien": "Julien ne doit RIEN publier ni lire les messages privés de Lucas ; il doit immédiatement déconnecter le compte de Lucas et prévenir son camarade ou le professeur."
+      }
+    },
+    "partie_4_cyber_risques": {
+      "titre": "PARTIE 4. Cyber... (Cyberattaque, Cyberharcèlement, Cybermanipulation)",
+      "pages_pdf": "136-147",
+      "pages_manuel": "134-145",
+      "grooming": {
+        "definition": "Manipulation psychologique exercée en ligne par un adulte malveillant (souvent caché derrière un faux profil d'adolescent) pour gagner la confiance d'un mineur afin de le piéger ou d'abuser de lui.",
+        "statistiques_child_focus_2024": "En 2024, dans les dossiers de grooming traités par Child Focus : 70 % des victimes avaient moins de 13 ans et 47 % avaient moins de 12 ans.",
+        "quatre_regles_or": [
+          "1. Ne jamais partager d'informations personnelles ni de photos intimes avec un inconnu en ligne.",
+          "2. Se rappeler qu'en ligne, n'importe qui peut mentir sur son âge, son prénom et sa photo.",
+          "3. Ne JAMAIS accepter de rencontrer seul·e dans la vraie vie une personne connue uniquement sur Internet.",
+          "4. En cas de malaise, de chantage ou de pression : couper le contact, garder les preuves et appeler immédiatement un adulte ou Child Focus (116 000)."
+        ]
+      },
+      "phishing_hameconnage": {
+        "statistique_belgique_2025": "Plus de 10 millions de messages suspects ont été signalés à Safeonweb (suspect@safeonweb.be) en Belgique.",
+        "indices_detection": [
+          "Adresse de l'expéditeur étrange ou légèrement modifiée",
+          "Ton alarmiste ou d'urgence absolue (« Votre compte sera bloqué dans 24h », « Ta sœur a eu un accident, envoie de l'argent »)",
+          "Fautes d'orthographe ou de syntaxe",
+          "Lien renvoyant vers un faux site imitant une banque, un service de colis (bpost) ou un réseau social"
+        ]
+      },
+      "cyberharcelement": {
+        "statistiques_oms": "Selon l'OMS/HBSC : environ 1 ado sur 6 (15 %) a été victime de cyberharcèlement, 1 sur 8 avoue en avoir été l'auteur, et 4 sur 10 en ont été témoins.",
+        "cinq_formes_officielles": [
+          {
+            "numero": 1,
+            "nom": "Le Flaming (Salve d'insultes)",
+            "definition": "Envoi massif et brutal de messages d'insultes, de moqueries violentes ou de menaces contre une cible."
+          },
+          {
+            "numero": 2,
+            "nom": "L'Ostracisme numérique (Exclusion sociale)",
+            "definition": "Exclure volontairement une personne d'un groupe WhatsApp/Snapchat/jeu, ou l'ignorer délibérément pour l'isoler du groupe classe."
+          },
+          {
+            "numero": 3,
+            "nom": "La Violation du droit à l'image (Happy slapping / Photos humiliantes)",
+            "definition": "Prendre et diffuser sans consentement une photo ou vidéo gênante, humiliante ou d'agression d'un élève."
+          },
+          {
+            "numero": 4,
+            "nom": "Le Revenge Porn / Cybersexisme",
+            "definition": "Diffuser ou menacer de diffuser des photos/vidéos à caractère intime sans l'accord de la personne, ou harceler quelqu'un en raison de son genre/orientation."
+          },
+          {
+            "numero": 5,
+            "nom": "La Cyber-usurpation d'identité",
+            "definition": "Créer un faux profil au nom d'une victime ou pirater son compte pour publier des messages ridicules ou méchants en son nom."
+          }
+        ],
+        "loi_belge": "Article 442bis du Code pénal belge : quiconque aura harcelé une personne alors qu'il savait ou aurait dû savoir qu'il affecterait gravement sa tranquillité est puni d'une peine d'emprisonnement de 15 jours à 2 ans et/ou d'une amende. Pour les mineurs, le Tribunal de la jeunesse peut imposer des mesures éducatives, de réparation ou de placement.",
+        "numeros_aide_belgique": [
+          { "numero": "116 000", "service": "Child Focus", "details": "Gratuit, 24h/24 et 7j/7 (disparition, exploitation sexuelle, grooming, sextorsion, retrait d'images intimes)." },
+          { "numero": "103", "service": "Écoute-Enfants", "details": "Gratuit et anonyme, tous les jours de 10h à minuit pour les enfants et ados qui ont besoin de parler." },
+          { "numero": "107", "service": "Télé-Accueil", "details": "Gratuit et anonyme, 24h/24 pour toute personne en difficulté morale." },
+          { "numero": "www.maintenantjenparle.be", "service": "Tchat & Aide en ligne", "details": "Portail officiel d'aide et de tchat anonyme pour les jeunes en Fédération Wallonie-Bruxelles." }
+        ],
+        "analyse_commentaires_exercices": {
+          "commentaires_ambigus": [2, 4, 9],
+          "commentaires_provoquant_conflit": [5, 8, 11]
+        }
+      },
+      "cyber_charte_5_reflexes": [
+        "1. Utiliser des mots de passe solides et différents pour chaque compte.",
+        "2. Faire les mises à jour régulières de ses systèmes et applications.",
+        "3. Parler le moins possible de sa vie privée en ligne.",
+        "4. Sauvegarder régulièrement ses données importantes.",
+        "5. Faire très attention aux contenus piratés ou gratuits suspects (souvent porteurs de virus/malwares)."
+      ],
+      "encadre_roblox": {
+        "type": "💡 Le savais-tu ?",
+        "titre": "Zoom sur ROBLOX : créativité et vigilance",
+        "contenu": "Roblox est une plateforme très populaire qui stimule la créativité (création de mini-jeux), mais elle comporte des risques : discussion par chat avec des inconnus (risque de grooming ou d'arnaque), achats intégrés en Robux (argent réel) et certains mini-jeux non adaptés à l'âge. Il faut activer le contrôle parental et restreindre le chat."
+      }
+    },
+    "partie_5_usage_ecrans": {
+      "titre": "PARTIE 5*. Comprendre son usage des écrans",
+      "pages_pdf": "148-149",
+      "pages_manuel": "146-147",
+      "nouveau_mars_2026": true,
+      "cinq_solutions_concretes": [
+        "1. Désactiver les notifications non essentielles (réseaux sociaux, jeux) surtout pendant les devoirs.",
+        "2. Fixer une heure limite le soir (ex. : plus d'écran 1h avant de dormir) et laisser le téléphone hors de la chambre la nuit.",
+        "3. Utiliser un minuteur ou les outils « Temps d'écran / Bien-être numérique » pour limiter les applications chronophages.",
+        "4. Remplacer le scroll automatique par une activité précise choisie à l'avance (sport, lecture, musique, voir des amis).",
+        "5. Garder les repas en famille ou entre amis 100 % sans téléphone."
+      ]
+    }
+  },
+  "je_maitrise": {
+    "partie_1_identite_et_traces": {
+      "titre": "PARTIE 1. Identité numérique et traces (Jeu des 16 cartes & Courrier des lecteurs Pixel Mag)",
+      "pages_pdf": "150-154",
+      "pages_manuel": "148-152",
+      "jeu_16_cartes": {
+        "familles": ["4 cartes PROFIL", "4 cartes TRACE", "4 cartes RISQUE", "4 cartes PROTECTION"],
+        "objectif": "Associer chaque élément de profil à la trace qu'il laisse, au risque encouru et à la protection adéquate."
+      },
+      "quatre_piliers_avant_publication": [
+        "1. RESPECT : Ce message ou cette image est-il respectueux envers moi-même et envers les autres ?",
+        "2. VÉRITÉ : Cette information est-elle vraie, vérifiée et utile ?",
+        "3. CONSENTEMENT : Toutes les personnes visibles ou citées ont-elles donné leur accord explicite ?",
+        "4. CONSÉQUENCES : Serais-je à l'aise si mes parents, mes professeurs ou un futur employeur voyaient cette publication dans 5 ans ?"
+      ],
+      "courrier_lecteurs_pixel_mag": [
+        {
+          "lecteur": "Lina (12 ans)",
+          "probleme": "Une application de lampe de poche gratuite lui demande d'accepter tous les cookies et d'autoriser l'accès à ses contacts, son micro et sa géolocalisation.",
+          "reponse_corrige": "Refuser ! Une lampe de poche n'a aucun besoin d'accéder aux contacts, au micro ni au GPS. Il faut refuser ces autorisations excessives, rejeter les cookies publicitaires ou désinstaller l'application."
+        },
+        {
+          "lecteur": "Yanis (13 ans)",
+          "probleme": "Quelqu'un a créé un faux compte TikTok avec son nom et sa photo pour poster des vidéos embarrassantes.",
+          "reponse_corrige": "C'est une cyber-usurpation d'identité (punie par la loi). Yanis doit faire des captures d'écran comme preuves, signaler le faux compte à TikTok pour usurpation d'identité, prévenir ses parents et l'école, et si nécessaire déposer plainte à la police."
+        },
+        {
+          "lecteur": "Inès (12 ans)",
+          "probleme": "Une amie a publié une photo d'Inès sans lui demander et refuse de la supprimer en disant « Mais on est amies, c'est juste pour rire ! ».",
+          "reponse_corrige": "Même entre amies, le droit à l'image s'applique : personne ne peut publier la photo d'Inès sans son consentement. Inès doit lui rappeler calmement la règle du consentement, signaler la photo à la plateforme pour atteinte à la vie privée et en parler à un adulte si son amie refuse toujours."
+        },
+        {
+          "lecteur": "Nora (13 ans)",
+          "probleme": "Un joueur inconnu lui envoie des messages désagréables et insistants dans le chat d'un jeu en ligne.",
+          "reponse_corrige": "Nora ne doit surtout pas répondre, faire une capture d'écran, bloquer immédiatement le joueur, le signaler aux modérateurs du jeu et prévenir un adulte de confiance."
+        }
+      ]
+    },
+    "partie_2_cyberdependance": {
+      "titre": "PARTIE 2. Cyberdépendance (Défi 24h, Autotest & Mindmap des 3P)",
+      "pages_pdf": "155-159",
+      "pages_manuel": "153-157",
+      "encadre_11_ans": {
+        "type": "💡 Le savais-tu ?",
+        "titre": "11 ans d'une vie devant un écran !",
+        "contenu": "Au rythme moyen actuel, un être humain passera environ 11 années entières de sa vie les yeux fixés sur un écran !"
+      },
+      "autotest_13_items_bareme": [
+        { "score": "0 à 10 points", "profil": "Usage maîtrisé : tu gardes un bon équilibre entre le numérique et tes activités réelles." },
+        { "score": "11 à 20 points", "profil": "Vigilance : les écrans prennent parfois trop de place ; pense à fixer des limites claires." },
+        { "score": "21 à 30 points", "profil": "Usage problématique : ton sommeil, ton travail scolaire ou tes relations commencent à en souffrir." },
+        { "score": "Plus de 30 points", "profil": "Alerte cyberdépendance : il est important d'en parler à un adulte ou un professionnel pour reprendre le contrôle." }
+      ],
+      "mindmap_3p_corrige": {
+        "P1_Prevenir": [
+          "Activer le mode avion ou « Ne pas déranger » dès 21h30 / 22h",
+          "Laisser le smartphone hors de la chambre à coucher la nuit (acheter un vrai réveil)",
+          "Désactiver toutes les notifications non urgentes et les pastilles rouges"
+        ],
+        "P2_Proteger": [
+          "Fixer des limites de temps d'écran par application (minuteur / contrôle parental)",
+          "Instaurer des créneaux et zones 100 % sans écran (repas en famille, bureau des devoirs)",
+          "Désactiver la lecture automatique (autoplay) sur YouTube, TikTok et les plateformes de séries"
+        ],
+        "P3_Proposer": [
+          "Pratiquer une activité sportive régulière ou un jeu en plein air",
+          "Lire, écouter de la musique, dessiner, cuisiner ou jouer à des jeux de société",
+          "Organiser des sorties et activités réelles avec ses amis ou sa famille"
+        ]
+      }
+    },
+    "partie_3_cyberharcelement_affiche": {
+      "titre": "PARTIE 3. Campagne citoyenne contre le cyberharcèlement & Expression libre",
+      "pages_pdf": "160-163",
+      "pages_manuel": "158-161",
+      "criteres_affiche_canva": [
+        "1. Un titre court, percutant et accrocheur (slogan).",
+        "2. Un message explicatif clair en 2 à 5 phrases maximum (rappeler ce qu'est le cyberharcèlement ou la loi).",
+        "3. Un visuel fort et respectueux des droits d'auteur (icônes, illustration libre de droits).",
+        "4. Un appel à l'action concret avec les numéros d'aide officiels (103 Écoute-Enfants, 116 000 Child Focus, maintenantjenparle.be)."
+      ],
+      "enquetes_stoplaviolence": [
+        { "personnage": "Leïla", "theme": "Diffusion de rumeurs et exclusion du groupe de classe (ostracisme)." },
+        { "personnage": "Hugo", "theme": "Moqueries répétées sur le physique et partage de photos humiliantes." },
+        { "personnage": "Enzo", "theme": "Harcèlement dans les jeux vidéo en ligne et menaces." },
+        { "personnage": "Antoine", "theme": "Rôle décisif du témoin : passer de témoin spectateur passif à témoin acteur qui soutient la victime et alerte un adulte." },
+        { "personnage": "Kimi", "theme": "Chantage à l'image intime et importance de ne jamais céder ni rester seul·e." }
+      ]
+    }
+  },
   "error_patterns": {
     "https_garantie_morale": {
-      "titre": "Confusion : 'Le cadenas HTTPS prouve que le site est honnête'",
-      "explication": "Faux ! Le cadenas HTTPS prouve uniquement que la communication est chiffrée. Un escroc peut très bien créer un site frauduleux en HTTPS.",
-      "conseil_tuteur": "Le cadenas protège la tuyauterie, pas l'honnêteté du commerçant !"
+      "titre": "Confusion : « Le cadenas HTTPS prouve que le site est honnête »",
+      "explication": "Faux ! Le cadenas HTTPS prouve uniquement que la communication entre ton navigateur et le site est chiffrée. Un escroc peut très bien créer un faux site de phishing en HTTPS.",
+      "conseil_tuteur": "Le cadenas protège le tuyau contre les espions sur le réseau, mais il ne garantit pas l'honnêteté de la personne à l'autre bout du tuyau !"
     },
     "donnees_actives_vs_passives": {
-      "titre": "Confusion entre traces actives et traces passives",
-      "explication": "Même sans poster de message ni créer de profil, tu laisses des traces passives (ton adresse IP, ton modèle d'ordinateur, l'heure de connexion).",
-      "conseil_tuteur": "Distingue : ce que tu écris (actif) et ce que la machine enregistre en silence (passif)."
+      "titre": "Confusion entre données actives (explicites) et données passives (implicites)",
+      "explication": "Même sans poster de message ni remplir de formulaire, tu laisses des traces passives : métadonnées de tes photos (heure, GPS, modèle d'appareil), cookies, adresse IP et historique.",
+      "conseil_tuteur": "Demande-toi : est-ce que j'ai tapé ou cliqué volontairement pour envoyer cette info (actif), ou est-ce que l'appareil l'a enregistrée en coulisses (passif) ?"
     },
     "pegi_age_vs_difficulte": {
-      "titre": "Confusion sur la signalétique PEGI",
-      "explication": "Le logo PEGI 16 ou 18 n'indique JAMAIS que le jeu est dur à finir, mais qu'il contient des scènes traumatisantes, violentes ou inadaptées avant cet âge.",
-      "conseil_tuteur": "PEGI = protection de la sensibilité, pas diplôme de gamer !"
+      "titre": "Confusion sur la signalétique PEGI (âge vs difficulté du jeu)",
+      "explication": "Le logo PEGI 16 ou 18 n'indique JAMAIS que le jeu est difficile à manier, mais qu'il contient des scènes de violence, de peur, de drogue ou de hasard inadaptées avant cet âge.",
+      "conseil_tuteur": "PEGI protège ta sensibilité et ton cerveau, ce n'est pas un niveau de difficulté !"
     },
     "bloquer_vs_signaler": {
       "titre": "Confusion entre Bloquer et Signaler",
-      "explication": "Bloquer empêche une personne de te contacter TOI. Signaler prévient les modérateurs pour protéger TOUT LE MONDE et faire sanctionner l'auteur.",
-      "conseil_tuteur": "En cas de harcèlement : fais une capture d'écran, bloque ET signale !"
+      "explication": "Bloquer empêche une personne de te contacter TOI. Signaler prévient les modérateurs de la plateforme pour supprimer le contenu illégal et protéger TOUT LE MONDE.",
+      "conseil_tuteur": "En cas de cyberharcèlement, applique le combo complet : 1) Capture d'écran, 2) Bloquer, 3) Signaler, 4) En parler à un adulte (ou 103 / 116 000)."
+    },
+    "multitache_cerveau": {
+      "titre": "Croyance au « multitâche » avec son smartphone",
+      "explication": "Faire ses devoirs avec les notifications allumées n'est pas du multitâche mais du « task switching » : le cerveau perd le fil, met plus de temps et fait beaucoup plus d'erreurs.",
+      "conseil_tuteur": "Pense au test 1-Z-2-Y-3-X du manuel : basculer entre deux tâches fatigue ton cerveau deux fois plus vite !"
     }
   },
   "support_cours": {
-    "titre": "Présentation & Support de cours : Sécurité & Données",
-    "description": "Diaporama complet du chapitre 2 et carnet de synthèse NotebookLM sur la cybersécurité, les traces et la vie privée.",
+    "titre": "Présentation & Support de cours : Sécurité & Protection des données",
+    "description": "Diaporama complet du Chapitre 2 (@lt_X Tome 1a, p. 87-161) : profils, signalétique PEGI/BienVu, HTTP vs HTTPS, traces actives/passives, économie de l'attention et prévention du cyberharcèlement.",
     "slides_url": "",
     "notebooklm_url": "https://notebooklm.google.com",
     "slides": [
       {
-        "titre": "1. Mots de Passe & Protection des Profils",
-        "contenu": "Un mot de passe solide a au moins 10 caractères mixtes. Ne jamais le réutiliser sur plusieurs sites. Activer l'authentification à deux facteurs (2FA) dès que possible."
+        "titre": "1. Profils, Mots de Passe & Données Personnelles",
+        "contenu": "Un profil public expose ta vie privée (trajet de course, dates de vacances, école). Protège tes données personnelles et sensibles avec un compte privé, un mot de passe de 12+ caractères et la double authentification (2FA)."
       },
       {
-        "titre": "2. Protocole HTTPS : Pourquoi le 'S' change tout",
-        "contenu": "HTTP transmet les données en texte clair (lisible par des pirates sur le Wi-Fi public). HTTPS chiffre la communication de bout en bout avec un certificat SSL/TLS valide."
+        "titre": "2. Signalétique PEGI & Cinéma BienVu (2026)",
+        "contenu": "5 classes d'âge PEGI (3, 7, 12, 16, 18) et 8 pictogrammes de contenu (violence, langage, peur, drogue, sexe, discrimination, hasard, achats/en ligne). Depuis janvier 2026, le système belge BienVu/GoedGezien harmonise aussi les films au cinéma."
       },
       {
-        "titre": "3. L'Empreinte Numérique : Actif vs Passif",
-        "contenu": "Tout ce qui va sur Internet y laisse une trace durable. Les traces passives (cookies, IP, historiques de clic) forment ton profilage publicitaire invisible."
+        "titre": "3. Protocole HTTPS : Pourquoi le « S » et le cadenas comptent",
+        "contenu": "HTTP envoie les données en clair (lisible comme une carte postale). HTTPS chiffre la connexion (cadenas 🔒). Mais attention : un site d'arnaque (phishing) peut aussi avoir un cadenas !"
       },
       {
-        "titre": "4. La Signalétique PEGI & Protection des Mineurs",
-        "contenu": "5 classes d'âge (3, 7, 12, 16, 18) et 8 descripteurs de contenu (peur, violence, discrimination...). Un repère légal indispensable pour protéger son bien-être mental."
+        "titre": "4. Signaler vs Bloquer & Gestion de l'Identité Numérique",
+        "contenu": "Bloquer stoppe le contact avec toi ; Signaler alerte les modérateurs pour protéger tout le monde. Avant de publier, vérifie les 4 piliers : Respect, Vérité, Consentement, Conséquences."
       },
       {
-        "titre": "5. Économie de l'Attention & Hygiène Numérique",
-        "contenu": "Les algorithmes de recommandation récompensent les émotions fortes pour prolonger le temps d'écran. Reprendre le contrôle en désactivant les notifications non vitales."
+        "titre": "5. Données Actives vs Données Passives (Métadonnées)",
+        "contenu": "Données actives (explicites) = formulaires, sondages, posts, messages. Données passives (implicites) = métadonnées cachées dans une photo (date, heure, GPS), cookies, historique et géolocalisation."
+      },
+      {
+        "titre": "6. Aide Humaine vs IA & Économie de l'Attention (FOMO)",
+        "contenu": "Face aux émotions, au danger, à la santé ou aux conflits, seul un humain peut écouter avec empathie et agir. Repère les 9 techniques de captologie (scroll infini, autoplay, flammes, FOMO) et évite le piège du « task switching »."
+      },
+      {
+        "titre": "7. Cyberrisques, Loi Belge (Art. 442bis) & Mindmap 3P",
+        "contenu": "Contre le grooming, le phishing et les 5 formes de cyberharcèlement (flaming, ostracisme, droit à l'image, revenge porn, usurpation) : capture d'écran, bloquer, signaler, parler à un adulte (103 Écoute-Enfants / 116 000 Child Focus). Adopte les 3P : Prévenir, Protéger, Proposer."
       }
     ]
   }

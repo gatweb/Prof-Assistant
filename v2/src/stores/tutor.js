@@ -8,7 +8,7 @@ export function createTutorStore() {
     tutorErrorMsg: '',
     tutorMessage: 'Salut ! Je suis ton assistant @lt_X. Pose-moi une question sur les exercices ou le cours.',
     tutorHistory: [
-      { sender: 'bot', role: 'model', text: 'Bienvenue sur ProfAssistant FMTTN ! Tu peux me poser des questions sur la charte, les adresses email, la nétiquette ou les règles de sécurité.' }
+      { sender: 'bot', role: 'model', text: 'Bienvenue sur ProfAssistant FMTTN (@lt_X Tome 1a) ! Tu peux me poser des questions sur la charte, les adresses e-mail, la nétiquette, les licences Creative Commons, la signalétique PEGI/BienVu ou la cybersécurité.' }
     ],
     studentQuestion: '',
     tutorQuickActions: [
@@ -50,11 +50,34 @@ export function createTutorStore() {
       if (this.selectedModuleId === 'escape-game') {
         return `Escape Game FMTTN — Dossier actif n°${this.egState.activeDossier}`;
       }
-      if (this.selectedModuleId === 'ch1-communication' && this.activeTab === 'pratique') {
-        return `Simulateur de courriel :\nObjet : ${this.emailSim.objet}\nDestinataire : ${this.emailSim.destinataire}\nCc : ${this.emailSim.cc}\nCci : ${this.emailSim.cci}\nCorps :\n${this.emailSim.corps}`.slice(0, 2000);
+      if (this.selectedModuleId === 'module-0') {
+        const sit = typeof this.getCurrentCharteSituation === 'function' ? this.getCurrentCharteSituation() : null;
+        return `Module 0 Introduction @lt_X (p. 9-17) — Onglet : ${this.activeTab}\nSituation Charte active : ${sit?.scenario || ''}\n[Corrigé Enseignant de référence (NE PAS donner la réponse brute, guider par questionnement)] : ${sit?.explication || ''} | Ordre de déconnexion : 1. Se déconnecter du site/mail, 2. Effacer ses traces (Ctrl+Maj+Suppr), 3. Fermer le navigateur, 4. Fermer la session de l'ordinateur.`.slice(0, 2500);
+      }
+      if (this.selectedModuleId === 'ch1-communication') {
+        if (this.activeTab === 'decouvre' && typeof this.getCurrentBankQuestion === 'function') {
+          const qObj = this.getCurrentBankQuestion();
+          return `Chapitre 1 Communication & Collaboration (@lt_X p. 19-86) — Sous-thème : ${this.activeSubthemeKey}\nQuestion active : ${qObj?.q || ''}\nChoix sélectionné par l'élève : ${this.bankUserSelection || 'aucun'}\n[Corrigé Enseignant de référence (INTERDICTION de donner la réponse exacte, poser une question socratique qui oriente l'élève)] : ${qObj?.corrige_enseignant || qObj?.rep || ''}`.slice(0, 2500);
+        }
+        if (this.activeTab === 'pratique') {
+          return `Simulateur de courriel (@lt_X p. 50-55, Checklist 22 critères) :\nObjet : ${this.emailSim.objet}\nDestinataire : ${this.emailSim.destinataire}\nCc : ${this.emailSim.cc}\nCci : ${this.emailSim.cci}\nCorps :\n${this.emailSim.corps}\n[Corrigé Enseignant de référence] : Vérifier l'adresse valide (identifiant@domaine.ext sans espace), l'usage de Cci pour protéger les adresses d'un groupe (RGPD), un objet court et précis, une formule d'appel ("Bonjour Madame/Monsieur,"), un ton poli sans MAJUSCULES (= crier), une formule de congé ("Cordialement,") et la signature (Prénom Nom Classe).`.slice(0, 2500);
+        }
+        if (this.activeTab === 'maitrise') {
+          return `Projet Je Maîtrise Chapitre 1 (@lt_X p. 85 — Inventer une application de communication éthique) :\nNom : ${this.missionApp?.nom || ''}\nPublic cible : ${this.missionApp?.cible || ''}\nFonctionnalité clé : ${this.missionApp?.fonctionUnique || ''}\nRègles éthiques : ${this.missionApp?.reglesUsage || ''}\n[Corrigé Enseignant de référence] : L'application doit définir clairement son objectif, respecter la vie privée (RGPD, pas de revente de données), prévoir un chiffrement (E2EE) et une modération bienveillante contre le cyberharcèlement.`.slice(0, 2500);
+        }
       }
       if (this.selectedModuleId === 'ch2-securite') {
-        return `Chapitre 2 Sécurité & Données personnelles — Onglet : ${this.activeTab}`;
+        if (this.activeTab === 'decouvre' && typeof this.getCurrentBankQuestionSecu === 'function') {
+          const qObj = this.getCurrentBankQuestionSecu();
+          return `Chapitre 2 Sécurité & Protection des données (@lt_X p. 87-161) — Sous-thème : ${this.activeSubthemeKeySecu}\nQuestion active : ${qObj?.q || ''}\nChoix sélectionné par l'élève : ${this.bankUserSelectionSecu || 'aucun'}\n[Corrigé Enseignant de référence (INTERDICTION de donner la réponse exacte, guider par questionnement socratique)] : ${qObj?.corrige_enseignant || qObj?.rep || ''}`.slice(0, 2500);
+        }
+        if (this.activeTab === 'pratique') {
+          const itemsSummary = (this.triDonnees?.items || []).map(i => `${i.label} -> choix élève: ${i.choixEleve || 'non classé'} (attendu: ${i.typeReel})`).join(' | ');
+          return `Chapitre 2 Je Pratique (@lt_X p. 106-147) :\nScénario HTTP/HTTPS actif : ${this.httpSim?.scenarioActif || ''}\nTri Données Actives vs Passives : ${itemsSummary}\n[Corrigé Enseignant de référence] : 1) HTTPS chiffre la connexion (cadenas 🔒) mais ne garantit JAMAIS que le propriétaire du site est honnête (un site de phishing peut être en HTTPS). 2) Données actives (explicites) = écrites/publiées volontairement (formulaires, posts, messages). Données passives (implicites) = enregistrées automatiquement en arrière-plan (métadonnées GPS/heure d'une photo, cookies, adresse IP, historique, temps d'écran).`.slice(0, 2500);
+        }
+        if (this.activeTab === 'maitrise') {
+          return `Chapitre 2 Je Maîtrise (@lt_X p. 148-161 — Campagne Citoyenne & Mindmap 3P) :\nThème : ${this.missionSecu?.typeCampagne || ''}\nSlogan : ${this.missionSecu?.slogan || ''}\nRéflexe 1 : ${this.missionSecu?.reflexe1 || ''}\nRéflexe 2 : ${this.missionSecu?.reflexe2 || ''}\nRéflexe 3 : ${this.missionSecu?.reflexe3 || ''}\n[Corrigé Enseignant de référence] : En cas de cyberharcèlement (puni par l'Art. 442bis du Code pénal belge) : 1) Ne pas répondre et faire une capture d'écran (preuve), 2) Bloquer l'auteur ET Signaler à la plateforme, 3) En parler à un adulte de confiance et appeler le 103 (Écoute-Enfants) ou le 116 000 (Child Focus). Contre la cyberdépendance : Mindmap des 3P (Prévenir, Protéger, Proposer).`.slice(0, 2500);
+        }
       }
       return `Module FMTTN : ${this.selectedModuleId} (${this.activeTab})`;
     },
@@ -73,15 +96,23 @@ export function createTutorStore() {
       const lower = q.toLowerCase();
 
       if (lower.includes('cci') || lower.includes('cc')) {
-        reponse = "Rappelle-toi de l'astuce : 'Cci' = Invisible ! Si tu écris à 25 personnes, pourquoi ne doivent-elles pas voir les adresses de tout le monde ?";
+        reponse = "Rappelle-toi de l'astuce (@lt_X p. 39) : 'Cci' = Copie carbone Invisible ! Si tu écris à 30 personnes, pourquoi ne doivent-elles pas voir les adresses e-mail de tout le monde (RGPD) ?";
       } else if (lower.includes('https') || lower.includes('http') || lower.includes('cadenas')) {
-        reponse = "Rappelle-toi : le 'S' de HTTPS = Sécurisé (la communication est chiffrée). Mais attention : un cadenas ne garantit pas que le commerçant est honnête !";
-      } else if (lower.includes('pegi')) {
-        reponse = "Attention au piège classique : le chiffre PEGI indique l'âge minimum conseillé pour la sensibilité psychologique, pas le niveau de difficulté du jeu !";
-      } else if (lower.includes('active') || lower.includes('passive') || lower.includes('trace')) {
-        reponse = "Astuce : une donnée active, c'est ce que tu tapes ou postes volontairement. Une trace passive, c'est ce que la machine enregistre en silence (ton IP, l'heure, ton temps d'écran).";
-      } else if (lower.includes('harcèlement') || lower.includes('bloquer') || lower.includes('signaler')) {
-        reponse = "La règle d'or face au cyberharcèlement : 1. Capture d'écran (preuve) 2. Bloquer & Signaler 3. En parler immédiatement à un adulte ou au 103 (gratuit).";
+        reponse = "Rappelle-toi (@lt_X p. 106) : le 'S' de HTTPS = Secure (la communication est chiffrée avec un cadenas 🔒). Mais attention au piège : un cadenas prouve-t-il que le propriétaire du site est honnête ?";
+      } else if (lower.includes('pegi') || lower.includes('bienvu') || lower.includes('goedgezien')) {
+        reponse = "Attention au piège classique (@lt_X p. 98-103) : le chiffre PEGI (3, 7, 12, 16, 18) ou BienVu au cinéma indique l'âge minimum pour protéger ta sensibilité, jamais la difficulté du jeu !";
+      } else if (lower.includes('active') || lower.includes('passive') || lower.includes('trace') || lower.includes('métadonnée') || lower.includes('metadonnee')) {
+        reponse = "Astuce (@lt_X p. 114-115) : une donnée active (explicite), c'est ce que tu tapes ou postes volontairement. Une donnée passive (implicite), c'est ce que la machine enregistre en coulisses (métadonnées d'une photo, cookies, IP, géolocalisation).";
+      } else if (lower.includes('harcèlement') || lower.includes('bloquer') || lower.includes('signaler') || lower.includes('442')) {
+        reponse = "Règle d'or @lt_X (p. 110 & 140) : Bloquer te protège TOI ; Signaler protège TOUT LE MONDE. Réflexes : 1. Capture d'écran 2. Bloquer & Signaler 3. Parler à un adulte ou appeler le 103 (Écoute-Enfants) / 116 000 (Child Focus).";
+      } else if (lower.includes('creative commons') || lower.includes('licence') || lower.includes('droit d\'auteur')) {
+        reponse = "Repère les 4 symboles Creative Commons (@lt_X p. 69) : BY = citer l'auteur, NC = pas d'usage commercial, SA = partager sous la même licence, ND = pas de modification !";
+      } else if (lower.includes('téléverser') || lower.includes('télécharger') || lower.includes('upload') || lower.includes('download')) {
+        reponse = "Pense au sens de la flèche (@lt_X p. 82) : Téléverser (Upload ⬆️) = envoyer un fichier DE ton appareil VERS Internet. Télécharger (Download ⬇️) = récupérer un fichier DEPUIS Internet VERS ton appareil.";
+      } else if (lower.includes('fomo') || lower.includes('attention') || lower.includes('multitâche') || lower.includes('switching')) {
+        reponse = "Le cerveau ne fait pas deux tâches réfléchies en même temps (@lt_X p. 119) : il fait du 'task switching' qui fatigue et augmente les erreurs. Et le FOMO, c'est la 'peur de rater quelque chose' !";
+      } else if (lower.includes('3p') || lower.includes('dépendance') || lower.includes('déconnexion')) {
+        reponse = "Pense à la Mindmap des 3P (@lt_X p. 157) : P1 Prévenir (mode avion à 22h, tél hors chambre), P2 Protéger (limites de temps, repas sans écran), P3 Proposer (sport, lecture, amis) !";
       } else if (lower.includes('2fa') || lower.includes('double')) {
         reponse = "La double authentification (2FA), c'est comme avoir une clé normale PLUS un code secret temporaire sur ton téléphone : impossible d'entrer avec seulement le mot de passe !";
       } else if (lower.includes('sommaire') || lower.includes('table des matières')) {
@@ -97,7 +128,7 @@ export function createTutorStore() {
       } else if (lower.includes('variable') || lower.includes('let') || lower.includes('const')) {
         reponse = "En JavaScript, utilise 'const' pour une valeur fixe, ou 'let' si sa valeur doit changer au cours du programme.";
       } else if (lower.includes('prompt') || lower.includes('ia') || lower.includes('image')) {
-        reponse = "Un bon prompt créatif contient : 1. Le sujet principal 2. Le style visuel (3D, photo, aquarelle) 3. L'éclairage et l'atmosphère souhaitée.";
+        reponse = "Attention avec l'IA (@lt_X p. 46 & 77) : ne mets jamais de données personnelles (nom, photo, adresse) dans un prompt, et utilise l'IA pour comprendre, jamais pour copier-coller sans réfléchir !";
       }
       return reponse;
     },

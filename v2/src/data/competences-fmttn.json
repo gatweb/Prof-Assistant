@@ -1,63 +1,64 @@
 {
-  "curriculum": "FMTTN - Tronc Commun Fédération Wallonie-Bruxelles",
+  "curriculum": "FMTTN - Tronc Commun Fédération Wallonie-Bruxelles (Ajouts Mars 2026 inclus)",
   "niveau": "1re Secondaire",
-  "source": "@lt_X : Comprendre le numérique, se questionner & agir",
+  "source": "@lt_X Tome 1a : Comprendre le numérique, se questionner & agir (Marie-Pierre Lacroix & Jaouelle Ouanassi)",
   "chapitres": [
     {
       "id": "ch1",
       "numero": 1,
       "titre": "Communication et collaboration",
       "tome": "1a",
+      "pages": "19-86 (PDF 21-88)",
       "couleur": "indigo",
       "competences": {
         "je_decouvre": [
           {
             "id": "NUM-1.D1",
             "code": "NUM-1.D1",
-            "intitule": "J'explicite des spécificités de différents réseaux socio-numériques.",
-            "mots_cles": ["réseau social", "profil", "partage", "abonnés", "flux"]
+            "intitule": "J'explicite les spécificités de différents réseaux socio-numériques.",
+            "mots_cles": ["réseau social", "profil", "partage", "abonnés", "éthique", "dopamine"]
           },
           {
             "id": "NUM-1.D2",
             "code": "NUM-1.D2",
-            "intitule": "Je cite deux applications de messagerie instantanée, une de gestion de courriel et deux de récolte de données (sondage/quiz).",
-            "mots_cles": ["messagerie", "courriel", "sondage", "quiz", "formulaires"]
+            "intitule": "Je cite deux applications de messagerie instantanée, une application de gestion de courriel et *deux applications de récolte de données ou d'informations, comme un sondage ou un quiz.",
+            "mots_cles": ["messagerie instantanée", "courriel", "sondage", "quiz", "Kahoot", "Wooclap", "Google Forms"]
           },
           {
             "id": "NUM-1.D3",
             "code": "NUM-1.D3",
-            "intitule": "Je cite un outil de partage en fonction de l'usage déterminé.",
-            "mots_cles": ["partage", "cloud", "lien", "dépôt"]
+            "intitule": "*Je cite un outil de partage en fonction de l'usage déterminé.",
+            "mots_cles": ["partage", "Google Drive", "OneDrive", "Dropbox", "Google Docs", "Proton Drive"]
           },
           {
             "id": "NUM-1.D4",
             "code": "NUM-1.D4",
-            "intitule": "J'identifie la présence, les fonctions, les bénéfices et les limites de l'IA dans des outils de collaboration numériques.",
-            "mots_cles": ["intelligence artificielle", "collaboration", "automatisation", "limites"]
+            "intitule": "*J'identifie la présence, les fonctions, les bénéfices et les limites de l'IA dans des outils de collaboration numériques.",
+            "mots_cles": ["intelligence artificielle", "collaboration", "correction", "hallucination", "vérification"]
           },
           {
             "id": "NUM-1.D5",
             "code": "NUM-1.D5",
-            "intitule": "J'utilise, en contexte, les termes de la messagerie : e-mail, expéditeur, destinataire, objet, pièce jointe, corps, boîte de réception/envoi, brouillon, dossier, spam.",
-            "mots_cles": ["expéditeur", "destinataire", "objet", "pièce jointe", "brouillon", "spam", "inbox"]
+            "intitule": "J'utilise, en contexte, les termes suivants : e-mail/courriel, expéditeur, destinataire, objet, pièce jointe, corps du message, boîte de réception, boîte d'envoi, message lu, message non lu, brouillon, dossier, courrier indésirable, spam, messagerie instantanée (chat), émoticône.",
+            "mots_cles": ["expéditeur", "destinataire", "objet", "pièce jointe", "brouillon", "spam", "boîte de réception", "émoticône"]
           },
           {
             "id": "NUM-1.D6",
             "code": "NUM-1.D6",
-            "intitule": "J'utilise, en contexte, les notions éthiques : vie privée, droit à l'oubli, droit de retrait, liberté d'expression, censure, modération, open source, droit d'auteur.",
-            "mots_cles": ["vie privée", "droit à l'oubli", "droit de retrait", "liberté d'expression", "censure", "modération", "open source"]
+            "intitule": "J'utilise, en contexte, les notions et les termes suivants : droit à la vie privée, droit à l'oubli, droit de retrait, liberté d'expression, censure, modération, licence open source, *droit d'auteur.",
+            "mots_cles": ["vie privée", "droit à l'oubli", "droit de retrait", "liberté d'expression", "censure", "modération", "open source", "droit d'auteur"]
           },
           {
             "id": "NUM-1.D7",
             "code": "NUM-1.D7",
-            "intitule": "Je cite des arguments en faveur d'une mention indiquant qu'un contenu a été généré par une IA.",
-            "mots_cles": ["transparence", "génération IA", "authenticité", "honnêteté"]
+            "intitule": "*Je cite des arguments en faveur d'une mention indiquant qu'un contenu ou un texte a été généré par une IA.",
+            "mots_cles": ["transparence", "génération IA", "honnêteté", "esprit critique", "AI Act"]
           },
           {
             "id": "NUM-1.D8",
             "code": "NUM-1.D8",
-            "intitule": "J'identifie des exemples d'enjeux éthiques et juridiques liés aux contenus permettant l'entraînement de l'IA.",
-            "mots_cles": ["entraînement IA", "données personnelles", "droits d'auteur"]
+            "intitule": "*J'identifie des exemples d'enjeux éthiques et juridiques liés aux contenus permettant l'entraînement de l'IA.",
+            "mots_cles": ["entraînement IA", "données personnelles", "droits d'auteur", "rémunération", "biais"]
           }
         ],
         "je_pratique": [
@@ -65,12 +66,12 @@
             "id": "NUM-1.P1",
             "code": "NUM-1.P1",
             "intitule": "Je sélectionne un outil d'interaction adapté selon le ou les interlocuteurs.",
-            "mots_cles": ["contexte", "choix outil", "formel", "informel"]
+            "mots_cles": ["contexte", "choix outil", "chat", "e-mail", "chiffrement de bout en bout"]
           },
           {
             "id": "NUM-1.P2",
             "code": "NUM-1.P2",
-            "intitule": "Je crée une adresse e-mail et j'utilise les fonctions Cc et Cci, « répondre, répondre à tous, transférer ».",
+            "intitule": "Je crée une adresse e-mail et j'utilise les fonctions Cc et Cci, « je réponds, je réponds à tous, je transfère ».",
             "mots_cles": ["Cc", "Cci", "répondre", "répondre à tous", "transférer", "copie cachée"]
           },
           {
@@ -82,38 +83,38 @@
           {
             "id": "NUM-1.P4",
             "code": "NUM-1.P4",
-            "intitule": "J'utilise un outil de collecte de données (sondage/quiz) et j'en traite simplement les résultats dans le respect de la protection des données.",
+            "intitule": "J'utilise un outil de collecte de données et/ou d'informations, comme un sondage ou un quiz, et j'en traite simplement les résultats dans le respect de la protection des données.",
             "mots_cles": ["sondage", "quiz", "collecte", "anonymat", "données"]
           },
           {
             "id": "NUM-1.P5",
             "code": "NUM-1.P5",
-            "intitule": "Je respecte les droits de propriété dans mes communications, y compris avec une IA.",
-            "mots_cles": ["source", "crédits", "citation", "propriété"]
+            "intitule": "Je respecte les droits de propriété dans mes communications, *y compris avec une IA.",
+            "mots_cles": ["source", "crédits", "Creative Commons", "plagiat", "propriété intellectuelle"]
           },
           {
             "id": "NUM-1.P6",
             "code": "NUM-1.P6",
             "intitule": "Je respecte une nétiquette définie dans un environnement numérique d'interaction et de communication.",
-            "mots_cles": ["nétiquette", "politesse", "majuscules", "bienveillance"]
+            "mots_cles": ["nétiquette", "politesse", "majuscules", "clarté", "courtoisie"]
           },
           {
             "id": "NUM-1.P7",
             "code": "NUM-1.P7",
-            "intitule": "Je préserve la confidentialité ou l'anonymat lors du partage de contenus, y compris avec une IA.",
-            "mots_cles": ["confidentialité", "anonymat", "données sensibles", "floutage"]
+            "intitule": "Je préserve la confidentialité ou l'anonymat lors du partage de contenus, *y compris avec une IA.",
+            "mots_cles": ["confidentialité", "anonymat", "données sensibles", "floutage", "prompt IA"]
           },
           {
             "id": "NUM-1.P8",
             "code": "NUM-1.P8",
-            "intitule": "Je respecte le droit à l'image et à la voix dans des situations de communication et de collaboration.",
-            "mots_cles": ["droit à l'image", "voix", "consentement", "autorisation"]
+            "intitule": "*Je respecte le droit à l'image et à la voix dans des situations de communication et de collaboration.",
+            "mots_cles": ["droit à l'image", "voix", "consentement", "autorisation", "deepfake"]
           },
           {
             "id": "NUM-1.P9",
             "code": "NUM-1.P9",
-            "intitule": "Je téléverse un contenu dans un environnement numérique.",
-            "mots_cles": ["téléverser", "upload", "pièce jointe", "dépôt"]
+            "intitule": "*Je téléverse un contenu dans un environnement numérique.",
+            "mots_cles": ["téléverser", "upload", "télécharger", "download", "dépôt"]
           }
         ],
         "je_maitrise": [
@@ -129,68 +130,111 @@
     {
       "id": "ch2",
       "numero": 2,
-      "titre": "Sécurité et protection des données",
+      "titre": "Sécurité",
       "tome": "1a",
+      "pages": "87-161 (PDF 89-163)",
       "couleur": "emerald",
       "competences": {
         "je_decouvre": [
           {
             "id": "NUM-2.D1",
             "code": "NUM-2.D1",
-            "intitule": "J'utilise en contexte le vocabulaire de sécurité : mot de passe fort, biométrie, double authentification (2FA), piratage.",
-            "mots_cles": ["mot de passe", "2FA", "biométrie", "piratage"]
+            "intitule": "J'utilise, en contexte, les termes suivants : profil, protection de la vie privée (pseudonyme, compte public/privé, mot de passe fort, 2FA).",
+            "mots_cles": ["profil", "vie privée", "pseudonyme", "public", "privé", "mot de passe", "2FA"]
           },
           {
             "id": "NUM-2.D2",
             "code": "NUM-2.D2",
-            "intitule": "J'identifie et j'interprète la signalétique PEGI et les restrictions d'âge sur les contenus numériques.",
-            "mots_cles": ["PEGI", "âge", "violence", "discrimination", "achats intégrés"]
+            "intitule": "Je décode une signalétique, comme le PEGI (et BienVu / GoedGezien).",
+            "mots_cles": ["PEGI", "signalétique", "BienVu", "âge", "violence", "peur", "achats intégrés"]
           },
           {
             "id": "NUM-2.D3",
             "code": "NUM-2.D3",
-            "intitule": "Je distingue un site sécurisé (HTTPS avec cadenas et certificat) d'un site non chiffré (HTTP).",
+            "intitule": "Je distingue HTTP et HTTPS.",
             "mots_cles": ["HTTP", "HTTPS", "cadenas", "chiffrement", "certificat"]
           },
           {
             "id": "NUM-2.D4",
             "code": "NUM-2.D4",
-            "intitule": "Je différencie les données actives (publiées consciemment) des données passives (traces automatiques, cookies, géolocalisation).",
-            "mots_cles": ["données actives", "données passives", "empreinte numérique", "cookies"]
+            "intitule": "*J'explique qu'il existe des collectes de données actives, comme les profils, formulaires, messages ou tags, et des collectes de données passives, comme les métadonnées, cookies ou géolocalisation.",
+            "mots_cles": ["données actives", "données passives", "métadonnées", "cookies", "géolocalisation", "RGPD"]
           },
           {
             "id": "NUM-2.D5",
             "code": "NUM-2.D5",
-            "intitule": "J'identifie les mécanismes conçus pour capter l'attention (notifications, scrolling infini) et les bienfaits de la déconnexion.",
-            "mots_cles": ["attention", "notifications", "scrolling", "déconnexion", "temps d'écran"]
+            "intitule": "*Je cite des méthodes utilisées par des plateformes en ligne ou des réseaux sociaux pour capter l'attention des utilisateurs.",
+            "mots_cles": ["attention", "scroll infini", "autoplay", "gamification", "FOMO", "notifications", "dopamine"]
+          },
+          {
+            "id": "NUM-2.D6",
+            "code": "NUM-2.D6",
+            "intitule": "*J'identifie les moyens de signaler ou de bloquer un contenu partagé de manière inappropriée en ligne.",
+            "mots_cles": ["signaler", "bloquer", "modération", "protection"]
+          },
+          {
+            "id": "NUM-2.D7",
+            "code": "NUM-2.D7",
+            "intitule": "*J'identifie et je reconnais les avantages d'une bonne gestion de l'identité numérique pour préserver mes droits et agir de manière responsable.",
+            "mots_cles": ["identité numérique", "e-réputation", "responsabilité", "droits"]
+          },
+          {
+            "id": "NUM-2.D8",
+            "code": "NUM-2.D8",
+            "intitule": "*Je cite des situations où il est préférable de demander de l'aide humaine plutôt que de se tourner vers l'IA pour le bien-être numérique, psychologique et social.",
+            "mots_cles": ["aide humaine", "IA", "émotions", "santé", "urgence", "harcèlement"]
+          },
+          {
+            "id": "NUM-2.D9",
+            "code": "NUM-2.D9",
+            "intitule": "*Je cite des avantages du droit à la déconnexion, tant pour moi-même que pour les autres.",
+            "mots_cles": ["déconnexion", "sommeil", "concentration", "bien-être", "respect du temps"]
           }
         ],
         "je_pratique": [
           {
             "id": "NUM-2.P1",
             "code": "NUM-2.P1",
-            "intitule": "Je configure les paramètres de confidentialité et de sécurité d'un profil ou d'une application.",
-            "mots_cles": ["paramètres", "privé", "public", "autorisations"]
+            "intitule": "Je paramètre les options de confidentialité d'un compte.",
+            "mots_cles": ["paramètres", "confidentialité", "compte privé", "localisation", "autorisations"]
           },
           {
             "id": "NUM-2.P2",
             "code": "NUM-2.P2",
-            "intitule": "J'applique les procédures de signalement et de blocage face à un contenu abusif ou une situation de cyberharcèlement.",
-            "mots_cles": ["signaler", "bloquer", "preuves", "capture d'écran"]
+            "intitule": "Je propose et je mets en place des actions pertinentes pour faire face à des situations de cyberattaque, de cyberharcèlement ou de cybermanipulation.",
+            "mots_cles": ["cyberattaque", "phishing", "grooming", "cyberharcèlement", "103", "116 000", "preuves"]
           },
           {
             "id": "NUM-2.P3",
             "code": "NUM-2.P3",
-            "intitule": "J'analyse mon temps d'écran et je mets en œuvre des stratégies efficaces de déconnexion volontaire.",
-            "mots_cles": ["temps d'écran", "pause", "mode nuit", "sommeil"]
+            "intitule": "*Je repère mes habitudes numériques et j'explique en quoi cette analyse peut améliorer l'organisation du temps et le bien-être.",
+            "mots_cles": ["temps d'écran", "agenda", "habitudes numériques", "sommeil", "concentration"]
+          },
+          {
+            "id": "NUM-2.P4",
+            "code": "NUM-2.P4",
+            "intitule": "Je repère les informations relatives à la vie privée lors de l'encodage de données personnelles, *y compris avec une IA.",
+            "mots_cles": ["données personnelles", "données sensibles", "formulaire", "vie privée", "IA"]
+          },
+          {
+            "id": "NUM-2.P5",
+            "code": "NUM-2.P5",
+            "intitule": "J'efface toute trace de connexion sur un équipement partagé.",
+            "mots_cles": ["déconnexion", "historique", "cookies", "Ctrl+H", "Ctrl+Maj+Suppr"]
           }
         ],
         "je_maitrise": [
           {
             "id": "NUM-2.M1",
             "code": "NUM-2.M1",
-            "intitule": "Je conçois un guide ou une campagne citoyenne pour sensibiliser mes pairs à la sécurité numérique et à la prévention des cyberrisques.",
-            "mots_cles": ["campagne", "affiche", "sensibilisation", "cyberharcèlement"]
+            "intitule": "Réagir, de manière responsable, face aux risques de « cyberattaque », de « cyberharcèlement », de « cyberdépendance ».",
+            "mots_cles": ["campagne", "affiche", "cyberharcèlement", "cyberdépendance", "prévention"]
+          },
+          {
+            "id": "NUM-2.M2",
+            "code": "NUM-2.M2",
+            "intitule": "Gérer son identité numérique, ses traces, ses données personnelles, de manière responsable.",
+            "mots_cles": ["identité numérique", "traces volontaires", "traces involontaires", "protection"]
           }
         ]
       }

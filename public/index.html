@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>body{font-family:Plus Jakarta Sans,sans-serif}</style>
-  <script type="module" crossorigin src="/assets/index-ClapQIaH.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-aPZaJ9FA.css">
+  <script type="module" crossorigin src="/assets/index-BhguIat3.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-Cz1915Ow.css">
 </head>
 <body class="h-full flex flex-col bg-slate-50 text-slate-800" x-data="profAssistantApp()">
 
@@ -786,7 +786,8 @@
             <div class="flex items-center gap-3 mb-3">
               <div class="p-2 rounded-xl bg-emerald-100 text-emerald-700 font-bold text-sm">🔑</div>
               <div>
-                <h4 class="font-extrabold text-sm text-slate-900">Choisir un mot de passe blindé (p. 12)</h4>
+                <h4 class="font-extrabold text-sm text-slate-900">Choisir un mot de passe blindé (p. 14)</h4>
+                <p class="text-[11px] text-slate-500">Min. 12 caractères : Majuscules + minuscules + chiffres + symboles</p>
               </div>
             </div>
             <div class="grid grid-cols-2 gap-3 mt-3 text-xs">
@@ -795,14 +796,14 @@
                 <ul class="mt-1 space-y-1 text-slate-600 font-mono text-xs">
                   <li>123456789</li>
                   <li>azerty</li>
-                  <li>motdepasse123</li>
+                  <li>lucas2014</li>
                 </ul>
               </div>
               <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
-                <span class="font-bold text-emerald-700">✓ Bons</span>
+                <span class="font-bold text-emerald-700">✓ Bons (@lt_X)</span>
                 <ul class="mt-1 space-y-1 text-slate-600 font-mono text-xs">
+                  <li>PommeVelo!27</li>
                   <li>MonCh4tNoir!</li>
-                  <li>!M0nCh4tN0ir6</li>
                   <li>Ch0c0lat#1C2</li>
                 </ul>
               </div>
@@ -811,6 +812,67 @@
 
         </div>
 
+      </div>
+
+      <!-- Synthèse Officielle Module 0 : Anatomie E-mail, Comparatif Webmails & Déconnexion OS (p. 11-16) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- 9 Règles de la Charte à signer -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h4 class="font-black text-sm text-slate-900">📜 Les 9 règles de la Charte (p. 12)</h4>
+            <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black">À signer</span>
+          </div>
+          <ul class="space-y-1.5 text-xs text-slate-700">
+            <template x-for="(regle, rIdx) in (module0.parties?.[1]?.regles_charte_a_signer || [])" :key="rIdx">
+              <li class="flex items-start gap-2">
+                <span class="text-emerald-600 font-black">✓</span>
+                <span x-text="regle"></span>
+              </li>
+            </template>
+          </ul>
+        </div>
+
+        <!-- Anatomie d'une adresse e-mail & Comparatif Gmail / Outlook / Proton -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h4 class="font-black text-sm text-slate-900">📧 Anatomie & Webmails (p. 13-14)</h4>
+            <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-black">Luna.13@gmail.com</span>
+          </div>
+          <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs font-mono text-center">
+            <span class="text-blue-700 font-black">lucas.dupont2</span><span class="text-rose-600 font-black">@</span><span class="text-emerald-700 font-black">icloud.com</span>
+            <div class="text-[10px] font-sans text-slate-500 mt-1">Identifiant + Arrobase (« chez ») + Domaine (sans espace ni accent)</div>
+          </div>
+          <div class="space-y-2 text-xs">
+            <template x-for="f in (module0.parties?.[2]?.comparatif_fournisseurs || [])" :key="f.service">
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                <div class="font-black text-slate-900" x-text="f.service + ' (' + f.entreprise + ')'"></div>
+                <div class="text-[11px] text-slate-600 mt-0.5" x-text="f.avantages"></div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Procédures de déconnexion Chromebook / Mac / Windows & Raccourcis -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h4 class="font-black text-sm text-slate-900">💻 Déconnexion par OS (p. 16)</h4>
+            <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-black">Ordre : 1-3-4-2</span>
+          </div>
+          <div class="space-y-2 text-xs text-slate-700">
+            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+              <strong class="text-slate-900">💻 Chromebook :</strong> Menu heure en bas à droite ➔ <strong>Se déconnecter</strong> (ou <code class="font-mono bg-white px-1 rounded">Ctrl+Maj+Q</code> x2).
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+              <strong class="text-slate-900">🍎 Mac (macOS) :</strong> Menu Pomme  en haut à gauche ➔ <strong>Fermer la session…</strong> (<code class="font-mono bg-white px-1 rounded">Cmd+Maj+Q</code>).
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+              <strong class="text-slate-900">🪟 Windows :</strong> Menu Démarrer ➔ Icône profil utilisateur ➔ <strong>Se déconnecter</strong>.
+            </div>
+            <div class="p-2.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-950 font-semibold">
+              ⌨️ Raccourcis navigateur : <code class="font-mono font-black">Ctrl + H</code> (Historique) • <code class="font-mono font-black">Ctrl + Maj + Suppr</code> (Effacer traces & cookies).
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -1083,26 +1145,26 @@
           <button 
             @click="changeSubtheme('reseaux')"
             :class="activeSubthemeKey === 'reseaux' ? 'bg-blue-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-blue-300'"
-            class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2">
-            <span>📱</span> Réseaux (21 Q)
+            class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
+            <span>📱</span> <span x-text="'Réseaux (' + (altxBank.comm.reseaux?.questions?.length || 24) + ' Q)'"></span>
           </button>
           <button 
             @click="changeSubtheme('messagerie')"
             :class="activeSubthemeKey === 'messagerie' ? 'bg-blue-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-blue-300'"
-            class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2">
-            <span>✉️</span> Messagerie (20 Q)
+            class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
+            <span>✉️</span> <span x-text="'Messagerie (' + (altxBank.comm.messagerie?.questions?.length || 23) + ' Q)'"></span>
           </button>
           <button 
             @click="changeSubtheme('ethique')"
             :class="activeSubthemeKey === 'ethique' ? 'bg-blue-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-blue-300'"
-            class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2">
-            <span>⚖️</span> Éthique (20 Q)
+            class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
+            <span>⚖️</span> <span x-text="'Éthique & IA (' + (altxBank.comm.ethique?.questions?.length || 24) + ' Q)'"></span>
           </button>
           <button 
             @click="changeSubtheme('collaboration')"
             :class="activeSubthemeKey === 'collaboration' ? 'bg-blue-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-blue-300'"
-            class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2">
-            <span>🤝</span> Outils (20 Q)
+            class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
+            <span>🤝</span> <span x-text="'Outils & Cloud (' + (altxBank.comm.collaboration?.questions?.length || 23) + ' Q)'"></span>
           </button>
         </div>
 
@@ -1164,6 +1226,16 @@
                       <span x-show="bankSubmitted && bankUserSelection === choice && !bankIsCorrect" class="text-rose-600 font-black">✕</span>
                     </button>
                   </template>
+                </div>
+
+                <!-- Corrigé Enseignant officiel @lt_X -->
+                <div x-show="bankSubmitted && getCurrentBankQuestion().corrige_enseignant"
+                     class="mt-4 p-4 rounded-2xl bg-indigo-50/80 border border-indigo-200 text-xs text-indigo-950 space-y-1">
+                  <div class="font-black flex items-center gap-1.5">
+                    <span>📘</span>
+                    <span>Explication du manuel @lt_X :</span>
+                  </div>
+                  <p class="leading-relaxed text-slate-700" x-text="getCurrentBankQuestion().corrige_enseignant"></p>
                 </div>
               </div>
             </div>
@@ -1294,6 +1366,72 @@
           </div>
         </div>
 
+        <!-- Fiches Réflexes Pratique @lt_X : Chiffrement E2EE, Creative Commons & Upload/Download (p. 48, 69, 82) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs">
+          <!-- E2EE -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <h4 class="font-black text-sm text-slate-900">🔐 Chiffrement E2EE (p. 48)</h4>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black">NUM-1.P1</span>
+            </div>
+            <div class="space-y-1.5 text-slate-700">
+              <div class="p-2 rounded-xl bg-emerald-50 border border-emerald-200">
+                <strong class="text-emerald-950">✓ Signal :</strong> Chiffré de bout en bout par défaut, open source, aucune métadonnée collectée.
+              </div>
+              <div class="p-2 rounded-xl bg-blue-50 border border-blue-200">
+                <strong class="text-blue-950">✓ WhatsApp :</strong> Contenu chiffré par défaut, mais appartient à Meta (collecte des métadonnées).
+              </div>
+              <div class="p-2 rounded-xl bg-amber-50 border border-amber-200">
+                <strong class="text-amber-950">⚠️ Telegram & Discord :</strong> Non chiffrés de bout en bout par défaut (uniquement en « échange secret » sur Telegram).
+              </div>
+            </div>
+          </div>
+
+          <!-- Creative Commons -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <h4 class="font-black text-sm text-slate-900">©️ Creative Commons (p. 69)</h4>
+              <span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-black">NUM-1.P5</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div class="font-black text-indigo-900">👤 BY (Attribution)</div>
+                <div class="text-[11px] text-slate-600">Obligation de citer l'auteur original.</div>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div class="font-black text-indigo-900">💶 NC (Non Commercial)</div>
+                <div class="text-[11px] text-slate-600">Interdiction d'en tirer un profit financier.</div>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div class="font-black text-indigo-900">🔄 SA (Share Alike)</div>
+                <div class="text-[11px] text-slate-600">Partager sous la même licence.</div>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div class="font-black text-indigo-900">🟰 ND (No Derivatives)</div>
+                <div class="text-[11px] text-slate-600">Aucune modification autorisée.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Téléverser vs Télécharger -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <h4 class="font-black text-sm text-slate-900">☁️ Upload vs Download (p. 82)</h4>
+              <span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-black">*NUM-1.P9</span>
+            </div>
+            <div class="space-y-2">
+              <div class="p-3 rounded-xl bg-blue-50 border border-blue-200">
+                <div class="font-black text-blue-950">⬆️ Téléverser (Upload)</div>
+                <p class="text-[11px] text-slate-700 mt-0.5">Envoyer un fichier <strong>DE ton appareil VERS Internet</strong> (ex. déposer un devoir sur Classroom ou joindre un PDF à un mail).</p>
+              </div>
+              <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+                <div class="font-black text-emerald-950">⬇️ Télécharger (Download)</div>
+                <p class="text-[11px] text-slate-700 mt-0.5">Récupérer un fichier <strong>DEPUIS Internet VERS ton appareil</strong> (dossier « Téléchargements »).</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- ATELIER 2 : Bilan Personnel d'Auto-Évaluation (@lt_X page 83) -->
         <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
           <div class="pb-4 border-b border-slate-100 mb-6">
@@ -1314,15 +1452,15 @@
                   <button 
                     @click="bilanPersonnel[comp.code] = 'bien'"
                     :class="bilanPersonnel[comp.code] === 'bien' ? 'bg-emerald-500 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100'"
-                    class="px-2.5 py-1 rounded-xl text-base transition">🙂</button>
+                    class="px-2.5 py-1 rounded-xl text-base transition cursor-pointer">🙂</button>
                   <button 
                     @click="bilanPersonnel[comp.code] = 'moyen'"
                     :class="bilanPersonnel[comp.code] === 'moyen' ? 'bg-amber-500 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100'"
-                    class="px-2.5 py-1 rounded-xl text-base transition">😐</button>
+                    class="px-2.5 py-1 rounded-xl text-base transition cursor-pointer">😐</button>
                   <button 
                     @click="bilanPersonnel[comp.code] = 'difficile'"
                     :class="bilanPersonnel[comp.code] === 'difficile' ? 'bg-rose-500 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100'"
-                    class="px-2.5 py-1 rounded-xl text-base transition">🙁</button>
+                    class="px-2.5 py-1 rounded-xl text-base transition cursor-pointer">🙁</button>
                 </div>
               </div>
             </template>
@@ -1364,7 +1502,7 @@
 
               <button 
                 @click="soumettreMissionApp()"
-                class="px-6 py-3 rounded-xl bg-purple-600 text-white font-extrabold text-xs hover:bg-purple-700 transition shadow-sm flex items-center gap-2">
+                class="px-6 py-3 rounded-xl bg-purple-600 text-white font-extrabold text-xs hover:bg-purple-700 transition shadow-sm flex items-center gap-2 cursor-pointer">
                 <span>🚀</span> Soumettre à mon professeur & au Tuteur IA
               </button>
             </div>
@@ -1409,8 +1547,8 @@
         <div class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs">
           <div class="flex items-center justify-between mb-6">
             <div>
-              <h3 class="font-black text-lg text-slate-900">Mon Tableau de Compétences FMTTN</h3>
-              <p class="text-xs text-slate-500 font-medium">Basé sur la grille officielle @lt_X (page 21)</p>
+              <h3 class="font-black text-lg text-slate-900">Mon Tableau de Compétences FMTTN (18 Compétences)</h3>
+              <p class="text-xs text-slate-500 font-medium">Grille intégrale officielle @lt_X Tome 1a (page 19 / PDF p. 21)</p>
             </div>
             <div class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg">
               Chapitre 1 : Communication & Collaboration
@@ -1418,15 +1556,18 @@
           </div>
 
           <div class="space-y-3">
-            <template x-for="comp in competences.je_decouvre" :key="comp.id">
+            <template x-for="comp in getAllCompetencesCh1()" :key="comp.id">
               <div class="p-3.5 rounded-xl border border-slate-200 flex items-center justify-between gap-4">
                 <div class="flex items-start gap-3">
-                  <span class="font-black text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700" x-text="comp.code"></span>
-                  <p class="text-xs text-slate-800 font-medium" x-text="comp.intitule"></p>
+                  <span class="font-black text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700 shrink-0" x-text="comp.code"></span>
+                  <div>
+                    <p class="text-xs text-slate-800 font-medium" x-text="comp.intitule"></p>
+                    <span x-show="comp.nouveau_mars_2026" class="inline-block mt-1 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-extrabold">* Nouveauté référentiel 2026</span>
+                  </div>
                 </div>
-                <div>
+                <div class="shrink-0">
                   <span x-show="eleveCompetences[comp.code] === 'acquis'" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1">✓ Acquis</span>
-                  <span x-show="eleveCompetences[comp.code] === 'en_cours'" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 flex items-center gap-1">⏳ En cours</span>
+                  <span x-show="eleveCompetences[comp.code] === 'en_cours' || !eleveCompetences[comp.code]" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 flex items-center gap-1">⏳ En cours</span>
                   <span x-show="eleveCompetences[comp.code] === 'a_renforcer'" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800 flex items-center gap-1">⚠️ À renforcer</span>
                 </div>
               </div>
@@ -1445,37 +1586,37 @@
       <!-- ==================== 1. JE DÉCOUVRE ==================== -->
       <div x-show="activeTab === 'decouvre'" class="space-y-6">
         
-        <!-- Sélecteur des 5 sous-thèmes officiels d'@lt_X (100 Questions) -->
+        <!-- Sélecteur des 5 sous-thèmes officiels d'@lt_X -->
         <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
           <button 
             @click="changeSubthemeSecu('profil')"
             :class="activeSubthemeKeySecu === 'profil' ? 'bg-emerald-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-emerald-300'"
             class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
-            <span>👤</span> Profil (20 Q)
+            <span>👤</span> <span x-text="'Profil (' + (altxBank.secu.profil?.questions?.length || 22) + ' Q)'"></span>
           </button>
           <button 
             @click="changeSubthemeSecu('signaletique')"
             :class="activeSubthemeKeySecu === 'signaletique' ? 'bg-emerald-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-emerald-300'"
             class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
-            <span>🔞</span> PEGI (20 Q)
+            <span>🔞</span> <span x-text="'PEGI & BienVu (' + (altxBank.secu.signaletique?.questions?.length || 23) + ' Q)'"></span>
           </button>
           <button 
             @click="changeSubthemeSecu('cyber')"
             :class="activeSubthemeKeySecu === 'cyber' ? 'bg-emerald-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-emerald-300'"
             class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
-            <span>🚨</span> Harcèlement (20 Q)
+            <span>🚨</span> <span x-text="'Cyberrisques (' + (altxBank.secu.cyber?.questions?.length || 25) + ' Q)'"></span>
           </button>
           <button 
             @click="changeSubthemeSecu('confidentialite')"
             :class="activeSubthemeKeySecu === 'confidentialite' ? 'bg-emerald-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-emerald-300'"
             class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
-            <span>🔒</span> Sécurité (20 Q)
+            <span>🔒</span> <span x-text="'Attention & Déco (' + (altxBank.secu.confidentialite?.questions?.length || 23) + ' Q)'"></span>
           </button>
           <button 
             @click="changeSubthemeSecu('identite')"
             :class="activeSubthemeKeySecu === 'identite' ? 'bg-emerald-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-emerald-300'"
             class="p-3.5 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
-            <span>🐾</span> Traces (20 Q)
+            <span>🐾</span> <span x-text="'Traces & 3P (' + (altxBank.secu.identite?.questions?.length || 23) + ' Q)'"></span>
           </button>
         </div>
 
@@ -1548,6 +1689,16 @@
                       <span x-show="bankSubmittedSecu && bankUserSelectionSecu === choice && !bankIsCorrectSecu" class="text-rose-600 font-black">✕</span>
                     </button>
                   </template>
+                </div>
+
+                <!-- Corrigé Enseignant officiel @lt_X -->
+                <div x-show="bankSubmittedSecu && getCurrentBankQuestionSecu().corrige_enseignant"
+                     class="mt-4 p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-xs text-emerald-950 space-y-1">
+                  <div class="font-black flex items-center gap-1.5">
+                    <span>📘</span>
+                    <span>Explication du manuel @lt_X :</span>
+                  </div>
+                  <p class="leading-relaxed text-slate-700" x-text="getCurrentBankQuestionSecu().corrige_enseignant"></p>
                 </div>
               </div>
             </div>
@@ -1727,6 +1878,64 @@
           </div>
         </div>
 
+        <!-- Fiches Réflexes Pratique Chapitre 2 @lt_X : 5 Formes de Cyberharcèlement, Art. 442bis, 103/116 000, 9 Techniques d'Attention & 3P -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs">
+          <!-- 5 Formes de Cyberharcèlement & Loi Belge Art. 442bis -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <h4 class="font-black text-sm text-slate-900">🚨 5 Formes & Loi (p. 139-140)</h4>
+              <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-black">Art. 442bis</span>
+            </div>
+            <ul class="space-y-1.5 text-slate-700">
+              <li><strong class="text-slate-900">1. Flaming :</strong> salve brutale d'insultes ou menaces.</li>
+              <li><strong class="text-slate-900">2. Ostracisme :</strong> exclusion volontaire d'un groupe en ligne.</li>
+              <li><strong class="text-slate-900">3. Droit à l'image :</strong> photo/vidéo humiliante sans accord.</li>
+              <li><strong class="text-slate-900">4. Revenge Porn / Cybersexisme :</strong> partage d'images intimes sans accord.</li>
+              <li><strong class="text-slate-900">5. Usurpation d'identité :</strong> faux profil pour nuire.</li>
+            </ul>
+            <div class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-950 text-[11px]">
+              <strong>⚖️ Art. 442bis Code pénal belge :</strong> 15 jours à 2 ans de prison et/ou amende (et mesures du Tribunal de la jeunesse).
+            </div>
+          </div>
+
+          <!-- Numéros d'Urgence Belges & Aide Humaine vs IA -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <h4 class="font-black text-sm text-slate-900">📞 Aide Humaine & Urgences (p. 116, 141)</h4>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black">*NUM-2.D9</span>
+            </div>
+            <div class="space-y-2">
+              <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200">
+                <div class="font-black text-emerald-950">📞 103 — Écoute-Enfants</div>
+                <div class="text-[11px] text-slate-700">Gratuit, anonyme, tous les jours (10h à minuit).</div>
+              </div>
+              <div class="p-2.5 rounded-xl bg-blue-50 border border-blue-200">
+                <div class="font-black text-blue-950">🛡️ 116 000 — Child Focus</div>
+                <div class="text-[11px] text-slate-700">Gratuit 24h/24 (grooming, sextorsion, retrait d'images).</div>
+              </div>
+              <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-950">
+                <strong>🤝 Humain &gt; IA :</strong> Émotions, urgence, santé, conflits ou orientation : seul un humain a de l'empathie réelle et peut agir pour te protéger.
+              </div>
+            </div>
+          </div>
+
+          <!-- 9 Techniques d'Attention, FOMO & Mindmap 3P -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <h4 class="font-black text-sm text-slate-900">🧠 Captologie, FOMO & 3P (p. 118-121, 157)</h4>
+              <span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-black">*NUM-2.D5</span>
+            </div>
+            <p class="text-[11px] text-slate-600 leading-relaxed">
+              <strong>9 techniques :</strong> Défilement infini, vidéos courtes, lecture auto, gamification (flammes), récompenses variables (dopamine), algorithmes, clickbait, stories 24h (<strong>FOMO</strong>) et notifications (<strong>task switching</strong>).
+            </p>
+            <div class="space-y-1.5 text-[11px]">
+              <div class="p-2 rounded-xl bg-purple-50 border border-purple-200"><strong class="text-purple-950">P1 Prévenir :</strong> Mode avion à 22h, tél hors chambre, couper notifs.</div>
+              <div class="p-2 rounded-xl bg-indigo-50 border border-indigo-200"><strong class="text-indigo-950">P2 Protéger :</strong> Limites de temps, repas sans écran, couper autoplay.</div>
+              <div class="p-2 rounded-xl bg-emerald-50 border border-emerald-200"><strong class="text-emerald-950">P3 Proposer :</strong> Sport, lecture, musique, sorties réelles entre amis.</div>
+            </div>
+          </div>
+        </div>
+
         <!-- ATELIER 3 : Bilan Personnel d'Auto-Évaluation (@lt_X page 147) -->
         <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
           <div class="pb-4 border-b border-slate-100 mb-6">
@@ -1737,7 +1946,7 @@
           </div>
 
           <div class="space-y-3">
-            <template x-for="comp in competencesCh2?.je_decouvre || []" :key="comp.id">
+            <template x-for="comp in getAllCompetencesCh2()" :key="comp.id">
               <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                 <div class="flex items-start gap-3">
                   <span class="font-black px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700" x-text="comp.code"></span>
@@ -1821,7 +2030,7 @@
                   <div class="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-xl">🛡️</div>
                   <div>
                     <h4 class="font-black text-emerald-950">Validation du Protocole Citoyen</h4>
-                    <p class="text-xs text-emerald-700">Conforme au protocole SeGEC / Écoute-Enfants 103</p>
+                    <p class="text-xs text-emerald-700">Conforme au protocole SeGEC / Écoute-Enfants 103 & Child Focus 116 000</p>
                   </div>
                 </div>
 
@@ -1840,7 +2049,7 @@
               </div>
 
               <div class="mt-6 pt-4 border-t border-emerald-100 text-xs text-emerald-800 font-semibold">
-                Rappel légal : En cas d'urgence en Belgique francophone, le numéro gratuit d'écoute et d'aide est le <strong>103</strong>.
+                Rappel légal : En Belgique francophone, les numéros gratuits d'aide sont le <strong>103</strong> (Écoute-Enfants) et le <strong>116 000</strong> (Child Focus).
               </div>
             </div>
 
@@ -1854,8 +2063,8 @@
         <div class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs">
           <div class="flex items-center justify-between mb-6">
             <div>
-              <h3 class="font-black text-lg text-slate-900">Mon Tableau de Compétences FMTTN</h3>
-              <p class="text-xs text-slate-500 font-medium">Référentiel officiel SeGEC — Chapitre 2</p>
+              <h3 class="font-black text-lg text-slate-900">Mon Tableau de Compétences FMTTN (16 Compétences)</h3>
+              <p class="text-xs text-slate-500 font-medium">Grille intégrale officielle @lt_X Tome 1a — Chapitre 2 (page 87 / PDF p. 89)</p>
             </div>
             <div class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
               Chapitre 2 : Sécurité & Protection des données
@@ -1863,13 +2072,16 @@
           </div>
 
           <div class="space-y-3">
-            <template x-for="comp in competencesCh2?.je_decouvre || []" :key="comp.id">
+            <template x-for="comp in getAllCompetencesCh2()" :key="comp.id">
               <div class="p-3.5 rounded-xl border border-slate-200 flex items-center justify-between gap-4">
                 <div class="flex items-start gap-3">
-                  <span class="font-black text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700" x-text="comp.code"></span>
-                  <p class="text-xs text-slate-800 font-medium" x-text="comp.intitule"></p>
+                  <span class="font-black text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700 shrink-0" x-text="comp.code"></span>
+                  <div>
+                    <p class="text-xs text-slate-800 font-medium" x-text="comp.intitule"></p>
+                    <span x-show="comp.nouveau_mars_2026" class="inline-block mt-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold">* Nouveauté référentiel 2026</span>
+                  </div>
                 </div>
-                <div>
+                <div class="shrink-0">
                   <span x-show="eleveCompetences[comp.code] === 'acquis'" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1">✓ Acquis</span>
                   <span x-show="eleveCompetences[comp.code] === 'en_cours' || !eleveCompetences[comp.code]" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 flex items-center gap-1">⏳ En cours</span>
                   <span x-show="eleveCompetences[comp.code] === 'a_renforcer'" class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800 flex items-center gap-1">⚠️ À renforcer</span>

@@ -3,51 +3,214 @@
   "numero": 1,
   "titre": "Communication et collaboration",
   "tome": "1a",
-  "introduction": "Apprends à communiquer efficacement, utiliser le courriel comme un pro et respecter les règles d'éthique sur Internet.",
+  "pages": "19-86 (PDF 21-88)",
+  "introduction": "Apprends à analyser les réseaux socio-numériques, choisir le bon outil (chat, courriel, cloud, sondage, IA), maîtriser le vocabulaire de l'e-mail et agir de manière éthique et respectueuse en ligne.",
   "je_decouvre": {
-    "titre": "Je découvre les bases",
+    "titre": "1. Je découvre (p. 20-59)",
     "parties": [
       {
         "id": "partie-1",
-        "titre": "1. Réseaux socio-numériques",
-        "resume": "Un réseau socio-numérique permet d'échanger des messages, partager des photos ou vidéos et suivre des personnes."
+        "numero": "PARTIE 1",
+        "titre": "1. Réseaux socio-numériques (p. 20-33)",
+        "pages": "20-33 (PDF 22-35)",
+        "competences_visees": ["NUM-1.D1"],
+        "resume": "Un réseau socio-numérique (RSN) est une plateforme en ligne où l'on crée un profil pour communiquer, partager des contenus (photos, vidéos, messages) et interagir avec d'autres personnes.",
+        "categories_rsn": [
+          { "categorie": "Microblogging (messages courts)", "exemples": ["Facebook", "X (Twitter)", "Mastodon"] },
+          { "categorie": "Photos & vidéos", "exemples": ["Instagram", "Pinterest", "TikTok", "Snapchat", "YouTube"] },
+          { "categorie": "Réseau professionnel", "exemples": ["LinkedIn"] },
+          { "categorie": "Forum thématique", "exemples": ["Reddit"] }
+        ],
+        "comparatif_10_rsn": [
+          { "reseau": "Instagram", "icone": "📸", "objectif": "Partager des photos et vidéos", "public": "Adolescents et jeunes adultes", "formats": "Photos, Reels, Stories, Direct", "temporalite": "Durable", "avantages": "Outil créatif, partage facile, réseau de contacts visuels", "risques": "Pression sur l'apparence, algorithme addictif, cyberharcèlement possible" },
+          { "reseau": "TikTok", "icone": "🎵", "objectif": "Créer et regarder des vidéos courtes et divertissantes", "public": "Adolescents et jeunes adultes", "formats": "Vidéos courtes, Duet, Direct", "temporalite": "Éphémère", "avantages": "Contenu varié, facile à créer, accès à une large audience", "risques": "Très addictif, données personnelles collectées, désinformation, contenu inapproprié" },
+          { "reseau": "Snapchat", "icone": "👻", "objectif": "Envoyer des messages et photos qui disparaissent rapidement", "public": "Adolescents", "formats": "Snaps, Stories, Messages", "temporalite": "Éphémère", "avantages": "Communication spontanée, sentiment de confidentialité entre amis", "risques": "Illusion de disparition (captures d'écran possibles), faux sentiment de sécurité" },
+          { "reseau": "YouTube", "icone": "▶️", "objectif": "Regarder et publier des vidéos longues (tutoriels, divertissement, infos)", "public": "Tous publics", "formats": "Vidéos longues, Shorts, Direct", "temporalite": "Durable", "avantages": "Contenu éducatif riche, vidéos accessibles longtemps, grande variété", "risques": "Publicités, contenus non vérifiés, temps d'écran élevé, recommandations algorithmiques" },
+          { "reseau": "Facebook", "icone": "📘", "objectif": "Maintenir des liens sociaux, partager des actualités et événements", "public": "Adultes et séniors", "formats": "Publications, Photos, Vidéos, Groupes, Événements", "temporalite": "Durable", "avantages": "Réseau familial, organisation d'événements, groupes communautaires", "risques": "Fake news fréquentes, données personnelles exploitées, vieillissement du public" },
+          { "reseau": "LinkedIn", "icone": "💼", "objectif": "Créer des contacts professionnels et trouver un emploi", "public": "Adultes actifs, étudiants en fin d'études", "formats": "Publications, Articles, Vidéos, CV en ligne", "temporalite": "Durable", "avantages": "Visibilité pour l'emploi et partage d'expériences professionnelles", "risques": "Réservé aux adultes, informations personnelles visibles par tous" },
+          { "reseau": "Pinterest", "icone": "📌", "objectif": "Collecter et partager des idées visuelles pour créer", "public": "Adolescents et adultes", "formats": "Épingles (images), Vidéos courtes, Tableaux", "temporalite": "Durable", "avantages": "Outil d'inspiration créative", "risques": "Idéaux de beauté irréalistes, images protégées parfois copiées sans autorisation" },
+          { "reseau": "X (Twitter)", "icone": "✖️", "objectif": "Partager des avis et suivre l'actualité en direct", "public": "Adolescents, adultes, médias et politiques", "formats": "Posts courts, Fils de discussion, Vidéos, Direct", "temporalite": "Durable", "avantages": "Infos rapides, actualités et échanges d'idées", "risques": "Désinformation fréquente, harcèlement, bulles de filtre, modération insuffisante" },
+          { "reseau": "Reddit", "icone": "👽", "objectif": "Échanger dans des groupes sur des sujets précis (forums)", "public": "Personnes intéressées par un sujet précis", "formats": "Posts texte, Images, Vidéos, Liens, Votes", "temporalite": "Durable", "avantages": "Entraide, grande variété de sujets, anonymat", "risques": "Contenu adulte accessible, désinformation dans certaines communautés" },
+          { "reseau": "Mastodon", "icone": "🦣", "objectif": "Envoyer de courts messages sans publicité ni contrôle d'entreprise", "public": "Utilisateurs soucieux de leur vie privée", "formats": "Posts courts, Images, Vidéos", "temporalite": "Durable", "avantages": "Pas de pubs et plus de respect de la vie privée (éthique)", "risques": "Peu connu, interface complexe pour débutants, communauté restreinte" }
+        ],
+        "ethique_vs_non_ethique": {
+          "ethique": [
+            "Respecte la vie privée et ne revend pas les données",
+            "Diffuse peu ou pas de publicité (financé par dons/abonnements)",
+            "Fonctionne sans algorithme manipulateur (fil chronologique)",
+            "Design simple, non addictif, où l'utilisateur garde le contrôle",
+            "Exemple : Mastodon"
+          ],
+          "non_ethique": [
+            "Utilise, revend ou exploite massivement les données personnelles",
+            "Diffuse beaucoup de publicités ciblées (« Rien n'est gratuit : si c'est gratuit, tes données paient »)",
+            "Utilise des algorithmes conçus pour garder les gens connectés le plus longtemps possible",
+            "Design fait pour rendre accro (système de récompense)",
+            "Exemples : TikTok, Instagram, Facebook"
+          ]
+        },
+        "valeur_donnees_personnelles": [
+          { "donnee": "Adresse e-mail", "prix": "1 à 3 € / an", "interet": "Envoyer des publicités et des promotions" },
+          { "donnee": "Localisation en temps réel", "prix": "5 à 15 € / an", "interet": "Afficher des pubs selon le lieu" },
+          { "donnee": "Centres d'intérêts", "prix": "10 à 20 € / an", "interet": "Cibler les bons produits" },
+          { "donnee": "Liste de contacts", "prix": "10 à 25 €", "interet": "Cibler aussi les proches" },
+          { "donnee": "Photos et vidéos publiques", "prix": "5 à 10 €", "interet": "Analyser le style de vie" },
+          { "donnee": "Likes et commentaires", "prix": "5 à 15 € / an", "interet": "Voir ce qui influence" },
+          { "donnee": "Messages privés (mots-clés)", "prix": "20 à 50 €", "interet": "Données très précieuses" }
+        ],
+        "democratie_evenements": [
+          { "date": "Décembre 2010", "evenement": "Le Printemps arabe", "role_rsn": "Mobilisation citoyenne rapide et prise de conscience mondiale grâce au partage de vidéos." },
+          { "date": "Janvier 2019", "evenement": "Youth for Climate (Belgique)", "role_rsn": "Mouvement fondé par Anuna De Wever et Kyra Gantois : visibilité et organisation de manifestations pour le climat." },
+          { "date": "Janvier 2021", "evenement": "Attaque du Capitole (États-Unis)", "role_rsn": "Suspension des comptes du président Donald Trump pour incitation à la violence." },
+          { "date": "Février 2022", "evenement": "Guerre en Ukraine", "role_rsn": "Coordination de l'aide humanitaire en Europe ; blocage de réseaux sociaux et médias en Russie pour contrôler l'information." },
+          { "date": "Septembre 2025", "evenement": "Crise politique au Népal", "role_rsn": "Manifestations géantes organisées par les jeunes via Discord contre la corruption et le blocage des réseaux." },
+          { "date": "Janvier 2026", "evenement": "Élections en Ouganda", "role_rsn": "Coupure d'Internet et des RSN par les autorités, limitant l'accès à l'information et la liberté d'expression." }
+        ],
+        "encadres": [
+          {
+            "type": "cerveau",
+            "icone": "🧠",
+            "titre": "Le système des récompenses (Expérience de Skinner, p. 22)",
+            "contenu": "Comme les pigeons de Skinner qui appuyaient sur un bouton pour espérer une graine, chaque like, commentaire ou vidéo amusante libère du plaisir (dopamine) dans le cerveau et donne envie de revenir sans cesse."
+          },
+          {
+            "type": "savais_tu",
+            "icone": "💡",
+            "titre": "TikTok ou Douyin ? & Limites d'âge (p. 25)",
+            "contenu": "En Belgique, l'âge minimum est de 13 ans (et smartphone interdit à l'école pour les moins de 13 ans dès 2025-2026 ; 15 ans en France, 16 ans en Australie/Espagne). En Chine, TikTok s'appelle Douyin et diffuse des contenus très contrôlés et éducatifs."
+          },
+          {
+            "type": "savais_tu",
+            "icone": "💡",
+            "titre": "Avatar & Identité numérique (p. 26)",
+            "contenu": "Un avatar est une image ou un personnage qui te représente en ligne sans montrer ta vraie photo. Sur le profil 'LucasGamer17' (15 ans, Namur, 5 200 abonnés, 890 abonnements, 4 photos), tout ce qui est publié construit son identité numérique."
+          }
+        ]
       },
       {
         "id": "partie-2",
-        "titre": "2. Outils pour créer, collaborer et partager",
-        "resume": "Messagerie instantanée (pour l'immédiat), courriel (pour les échanges formels) et espaces partagés (pour travailler ensemble)."
+        "numero": "PARTIE 2",
+        "titre": "2. Outils pour créer, collaborer et partager (p. 34-39)",
+        "pages": "34-39 (PDF 36-41)",
+        "competences_visees": ["NUM-1.D2", "NUM-1.D3", "NUM-1.D4"],
+        "resume": "Distinguer la messagerie instantanée (chat en temps réel : WhatsApp, Messenger, Snapchat, Discord, Telegram) du courriel formel et traçable (Gmail, Outlook, iCloud Mail, Proton), choisir ses outils de partage/sondage et comprendre le rôle de l'IA.",
+        "comparatif_chat_email": [
+          { "critere": "Est-ce urgent et court ?", "choix": "Chat (Messagerie instantanée)", "justification": "Réponse immédiate en temps réel, pratique et instantané (ex: demander à un ami s'il est arrivé devant l'école)." },
+          { "critere": "Est-ce officiel, long ou à garder ?", "choix": "E-mail (Courriel)", "justification": "Plus formel, structuré (objet, destinataire, dossiers) et traçable : garde une preuve écrite de l'envoi." },
+          { "critere": "Faut-il joindre un devoir ou un document important ?", "choix": "E-mail (Courriel)", "justification": "Permet d'envoyer une pièce jointe officielle au professeur ou à l'administration." }
+        ],
+        "classification_outils": {
+          "messagerie_instantanee": ["Snapchat", "WhatsApp", "Messenger", "Discord", "Telegram", "Signal"],
+          "application_courriel": ["Gmail", "Outlook", "iCloud Mail", "Proton Mail"],
+          "collecte_donnees_et_cloud": ["Google Forms", "Wooclap", "Dropbox", "Microsoft OneDrive", "Google Docs", "Proton Drive"],
+          "outils_quiz": ["Kahoot!", "Quizizz", "Wooclap", "Mentimeter"]
+        },
+        "ia_collaboration": {
+          "fonctions": ["Faire des recherches", "Répondre à des questions", "Aider à écrire ou reformuler", "Corriger automatiquement des fautes"],
+          "avantages": ["Gagner du temps", "Mieux comprendre certaines notions", "Mieux écrire", "Trouver des idées"],
+          "limites": ["Elle n'est pas parfaite : elle peut se tromper et inventer des informations (hallucinations)", "Elle ne réfléchit pas comme un humain et n'a pas d'émotions", "Règle d'or @lt_X : Il faut toujours vérifier ce qu'elle dit !"]
+        },
+        "encadres": [
+          {
+            "type": "savais_tu",
+            "icone": "💡",
+            "titre": "Un peu d'histoire : 1971 vs 1992 (p. 35)",
+            "contenu": "Le premier e-mail est envoyé en 1971 (apparition du symbole @ pour séparer l'utilisateur du serveur). Le premier SMS n'arrive qu'en 1992, suivi par les discussions instantanées (« chat ») dans les années 1990-2000."
+          },
+          {
+            "type": "cerveau",
+            "icone": "🧠",
+            "titre": "L'IA et le cerveau : aider sa réflexion sans devenir passif (p. 37)",
+            "contenu": "Les neurosciences montrent que si l'on utilise l'IA pour apprendre et comprendre, elle est utile. Mais si on l'utilise sans réfléchir, le cerveau travaille moins, on retient moins bien et on devient passif. Il faut utiliser l'IA pour aider sa réflexion, jamais pour réfléchir à sa place !"
+          }
+        ]
       },
       {
         "id": "partie-3",
-        "titre": "3. Vocabulaire du courriel",
+        "numero": "PARTIE 3",
+        "titre": "3. Vocabulaire de la communication numérique (p. 40-49)",
+        "pages": "40-49 (PDF 42-51)",
+        "competences_visees": ["NUM-1.D5"],
+        "resume": "Maîtriser l'anatomie d'une boîte mail (boîte de réception, boîte d'envoi, éléments envoyés, brouillon, spam, pièce jointe), les fonctions d'envoi (À, Cc, Cci, Répondre, Répondre à tous, Transférer) et le rôle des émoticônes.",
         "vocabulaire": [
-          { "terme": "Expéditeur", "definition": "La personne qui envoie le message." },
-          { "terme": "Destinataire", "definition": "La personne à qui le message est adressé directement." },
-          { "terme": "Objet", "definition": "Le titre court qui résume le sujet du message (ne pas y écrire tout le texte !)." },
-          { "terme": "Pièce jointe", "definition": "Un fichier (photo, PDF, document) attaché au message." },
-          { "terme": "Cc (Copie conforme)", "definition": "Personnes mises en copie pour information. Tout le monde voit leurs adresses." },
-          { "terme": "Cci (Copie conforme invisible)", "definition": "Personnes en copie invisible. Leurs adresses restent masquées pour protéger leur vie privée." },
-          { "terme": "Spam / Courrier indésirable", "definition": "Messages publicitaires ou malveillants non sollicités." }
+          { "terme": "Boîte de réception", "definition": "Le dossier où arrivent tous les nouveaux messages reçus.", "exemple": "Tu reçois un e-mail de ton prof." },
+          { "terme": "Boîte d'envoi", "definition": "Le dossier dans lequel les messages sont en attente / en cours d'envoi.", "exemple": "Ton e-mail attend d'être envoyé (connexion coupée)." },
+          { "terme": "Élément envoyé", "definition": "Le dossier où sont stockés tous les messages que tu as déjà envoyés.", "exemple": "Tu retrouves un e-mail envoyé hier." },
+          { "terme": "Brouillon", "definition": "Un message que tu as commencé à écrire mais que tu n'as pas encore envoyé.", "exemple": "Tu sauvegardes un e-mail pour le finir plus tard." },
+          { "terme": "Dossier", "definition": "Un espace où tu ranges tes messages par thème (cours, devoirs, famille, club).", "exemple": "Tu crées un dossier « Devoirs »." },
+          { "terme": "Spam / Courrier indésirable", "definition": "Un message publicitaire non souhaité ou suspect/dangereux à éviter.", "exemple": "Une fausse pub promettant de gagner un voyage." },
+          { "terme": "Message non lu / Message lu", "definition": "Indique si tu as déjà ouvert le message (un message non lu apparaît en gras ou avec une pastille).", "exemple": "2 messages en gras dans la boîte de Timéo." },
+          { "terme": "Expéditeur", "definition": "La personne qui envoie le message (champ De).", "exemple": "M. Martin" },
+          { "terme": "Destinataire (À)", "definition": "La ou les personnes principales à qui le message est adressé directement.", "exemple": "Mme Dupont" },
+          { "terme": "Cc (Copie carbone)", "definition": "Envoie une copie visible pour information : tous les destinataires voient l'adresse de la personne en Cc.", "exemple": "Informer un collègue sans lui demander d'agir." },
+          { "terme": "Cci (Copie carbone invisible)", "definition": "Envoie une copie cachée : les autres destinataires ne voient pas cette adresse (protège la vie privée).", "exemple": "Envoyer un mail à toute une classe ou cacher l'adresse du DJ à Alain." },
+          { "terme": "Objet", "definition": "Le titre court du message qui résume de quoi il parle (ne jamais y écrire tout son texte !).", "exemple": "Réunion pour la sortie du musée" },
+          { "terme": "Corps du message", "definition": "La zone de texte principale contenant le message complet (formule d'appel, paragraphes, salutations, signature).", "exemple": "Bonjour, je vous envoie les infos..." },
+          { "terme": "Pièce jointe", "definition": "Un fichier (photo, PDF, document) attaché au message (icône trombone 📎).", "exemple": "Musée_Francais.pdf (5 362 Ko)" },
+          { "terme": "Répondre vs Répondre à tous vs Transférer", "definition": "Répondre = écrire uniquement à l'expéditeur. Répondre à tous = envoyer sa réponse à tout le groupe. Transférer = envoyer l'e-mail reçu à une tierce personne.", "exemple": "Éviter « Répondre à tous » si la réponse ne concerne qu'une personne." }
+        ],
+        "encadres": [
+          {
+            "type": "savais_tu",
+            "icone": "💡",
+            "titre": "Attention à « Répondre à tous » & aux Émoticônes (p. 44 & 46)",
+            "contenu": "« Répondre à tous » renvoie ton mail à tout le groupe, ce qui peut déranger ou divulguer une info privée. Quant aux émojis, ils clarifient le ton en chat (« C'est bien 😊 » paraît chaleureux alors que « C'est bien. » peut sembler froid), mais certains émojis sont ambigus : ajoute une phrase courte pour clarifier ton intention !"
+          },
+          {
+            "type": "cerveau",
+            "icone": "🧠",
+            "titre": "La dépendance à la validation sociale : 6 réflexes (p. 46)",
+            "contenu": "Les likes libèrent de la dopamine. Leur absence peut créer du stress ou un manque de confiance en soi. Les 6 réflexes @lt_X : 1) Un like ne dit pas qui tu es, 2) Publie pour toi, 3) Fixe-toi une limite de temps, 4) Coupe les notifications, 5) Reviens au réel, 6) Si ça te fait du mal, parles-en à un adulte."
+          },
+          {
+            "type": "metier",
+            "icone": "💼",
+            "titre": "Idées Métiers : Webmaster, Community Manager & Administrateur de messagerie (p. 43)",
+            "contenu": "• Webmaster / Gestionnaire de site : veille au bon fonctionnement, aux mises à jour, à la sécurité et au suivi de l'audience d'un site.\n• Community Manager : gère la présence d'une organisation sur les réseaux sociaux, crée des contenus et anime la communauté.\n• Administrateur·rice de messagerie : crée, sécurise et organise les adresses e-mail d'une entreprise."
+          }
         ]
       },
       {
         "id": "partie-4",
-        "titre": "4. Éthique des médias numériques",
+        "numero": "PARTIE 4",
+        "titre": "4. Éthique des médias numériques & IA* (p. 50-59)",
+        "pages": "50-59 (PDF 52-61)",
+        "competences_visees": ["NUM-1.D6", "NUM-1.D7", "NUM-1.D8"],
+        "resume": "Connaître ses droits et devoirs en ligne (vie privée, droit de retrait, droit à l'oubli, liberté d'expression et ses limites légales, modération vs censure, open source, droit d'auteur) et les enjeux éthiques de l'IA (transparence, AI Act 2024).",
         "notions": [
-          { "notion": "Vie privée", "definition": "Le droit de garder des infos pour soi et de choisir ce que l'on partage." },
-          { "notion": "Droit de retrait", "definition": "Le droit de supprimer soi-même quelque chose qu'on regrette d'avoir posté." },
-          { "notion": "Droit à l'oubli", "definition": "Le pouvoir de demander le retrait ou le déréférencement d'anciennes infos en ligne." },
-          { "notion": "Liberté d'expression", "definition": "Le droit de donner son avis, dans le respect de la loi et des autres." },
-          { "notion": "Modération", "definition": "Le fait d'enlever les messages méchants, insultants ou dangereux." },
-          { "notion": "Censure", "definition": "Le blocage arbitraire d'un sujet sans motif de sécurité ou de loi." },
-          { "notion": "Open source", "definition": "Un programme que tout le monde peut utiliser, étudier et modifier légalement." }
+          { "notion": "Vie privée", "definition": "Le droit de garder des informations pour soi, de choisir ce que l'on partage et de demander l'accord d'un ami avant de publier sa photo." },
+          { "notion": "Droit de retrait", "definition": "Le droit de supprimer soi-même un contenu (photo, commentaire) que l'on regrette d'avoir posté." },
+          { "notion": "Droit à l'oubli", "definition": "Le droit de demander à un site ou un moteur de recherche la suppression d'anciennes informations ou photos personnelles en ligne (attention : cela ne disparaît pas toujours immédiatement)." },
+          { "notion": "Liberté d'expression", "definition": "Le droit d'exprimer librement ses opinions, de critiquer l'État, de débattre et de faire de l'humour/satire, dans le respect de la loi et des autres." },
+          { "notion": "Limites de la liberté d'expression (Interdits par la loi)", "definition": "Sont interdits : l'incitation à la haine ou à la violence, l'atteinte à la vie privée, la discrimination/racisme, le sexisme, les injures/harcèlement, le négationnisme (nier un génocide reconnu) et la diffamation (accuser sans preuve, ex: traiter quelqu'un de voleur)." },
+          { "notion": "Modération", "definition": "Le fait de signaler et d'enlever les messages insultants, haineux, méchants ou dangereux pour protéger la communauté." },
+          { "notion": "Censure", "definition": "Le fait de bloquer ou d'interdire complètement une opinion, une information ou un sujet précis même s'il n'est ni insultant ni dangereux." },
+          { "notion": "Licence open source", "definition": "Un logiciel dont le code est accessible : chacun peut l'utiliser, le modifier et l'améliorer légalement en respectant la licence (ex : Firefox, LibreOffice, VLC)." },
+          { "notion": "Droit d'auteur*", "definition": "La loi protège les créations : on ne peut pas copier un texte, une image ou une musique sans autorisation et il faut toujours citer ses sources pour reconnaître le travail des créateurs." },
+          { "notion": "Transparence IA & AI Act (2024)*", "definition": "Mentionner qu'un contenu a été généré par une IA fait preuve d'honnêteté et de transparence, et aide le lecteur à garder son esprit critique. En Europe, l'AI Act (2024) encadre l'IA et impose plus de transparence." }
+        ],
+        "triche_ou_pas_triche_ia": [
+          { "situation": "a) Demander à l'IA de traduire des phrases pour un devoir en anglais ou en néerlandais.", "verdict": "Triche", "explication": "L'IA fait l'exercice de langue à ta place au lieu de t'entraîner." },
+          { "situation": "b) Demander à l'IA des exemples et les recopier tels quels dans son devoir.", "verdict": "Triche", "explication": "Recopier sans réfléchir ni reformuler est du plagiat." },
+          { "situation": "c) Utiliser l'IA pour trouver des idées, mais écrire le devoir soi-même.", "verdict": "Pas triche", "explication": "L'IA sert d'aide au démarrage, mais tu produis ton propre travail." },
+          { "situation": "d) Demander à l'IA de faire une fiche de révision à ta place pour une évaluation.", "verdict": "Triche", "explication": "C'est en construisant soi-même sa synthèse que le cerveau mémorise !" },
+          { "situation": "e) Demander à l'IA de reformuler un texte que l'on ne comprend pas.", "verdict": "Pas triche", "explication": "Excellent usage : l'IA t'aide à mieux comprendre un passage complexe." },
+          { "situation": "f) Lire le livre mais recopier le résumé fait par l'IA.", "verdict": "Triche", "explication": "Le texte rendu n'est pas le tien." }
+        ],
+        "encadres": [
+          {
+            "type": "ia",
+            "icone": "🤖",
+            "titre": "Enjeux éthiques et juridiques de l'entraînement de l'IA* (p. 56-58)",
+            "contenu": "L'IA s'entraîne souvent sur des textes et images d'artistes sans leur accord (droits d'auteur), sans rémunération des créateurs, avec un manque de transparence sur l'origine des données, des risques pour la vie privée et des biais/injustices de représentation."
+          }
         ]
       }
     ],
     "quiz": [
       {
         "id": "q1-ethique-situations",
-        "titre": "Identifie la bonne notion éthique",
+        "titre": "Identifie la bonne notion éthique (p. 52-59)",
         "consigne": "Associe chaque situation réelle à la règle éthique correspondante.",
         "competence_id": "NUM-1.D6",
         "questions": [
@@ -56,6 +219,7 @@
             "scenario": "J'efface une photo de mon profil parce que je regrette de l'avoir publiée.",
             "options": ["Censure", "Droit de retrait", "Open source", "Modération"],
             "reponse_correcte": 1,
+            "expected_answer": "Droit de retrait : supprimer soi-même un contenu que l'on a publié et que l'on regrette.",
             "feedback_reussite": "Bravo ! Quand tu supprimes toi-même un contenu que tu as publié, tu exerces ton droit de retrait.",
             "error_pattern_key": "retrait_vs_oubli"
           },
@@ -64,30 +228,34 @@
             "scenario": "Un administrateur supprime un commentaire insultant et haineux sous une vidéo.",
             "options": ["Censure", "Modération", "Vie privée", "Droit à l'oubli"],
             "reponse_correcte": 1,
+            "expected_answer": "Modération : retirer les propos offensants, insultants ou dangereux.",
             "feedback_reussite": "Exact ! C'est de la modération : supprimer un message qui enfreint les règles ou blesse autrui.",
             "error_pattern_key": "censure_vs_moderation"
           },
           {
             "id": "q1_3",
-            "scenario": "Un site web bloque totalement les critiques constructives sur un produit sans aucune insulte.",
+            "scenario": "Un site web bloque totalement un sujet, même si ce n'est ni insultant ni dangereux.",
             "options": ["Modération", "Censure", "Open source", "Liberté d'expression"],
             "reponse_correcte": 1,
+            "expected_answer": "Censure : bloquer un sujet ou une opinion sans motif de sécurité ou de loi.",
             "feedback_reussite": "Bien vu ! Bloquer une opinion légitime sans raison légale ou de sécurité, c'est de la censure.",
             "error_pattern_key": "censure_vs_moderation"
           },
           {
             "id": "q1_4",
-            "scenario": "Avant de publier une photo de groupe prise à la récréation, je demande l'accord de mes camarades.",
-            "options": ["Droit à l'oubli", "Respect de la vie privée", "Open source", "Censure"],
+            "scenario": "Avant de publier une photo d'un ami, je lui demande son accord.",
+            "options": ["Droit à l'oubli", "Respect de la vie privée et droit à l'image", "Open source", "Censure"],
             "reponse_correcte": 1,
+            "expected_answer": "Vie privée / Droit à l'image : demander la permission avant de publier la photo de quelqu'un.",
             "feedback_reussite": "Excellent réflexe ! L'image de quelqu'un lui appartient : demander son accord respecte sa vie privée.",
             "error_pattern_key": "vie_privee_image"
           },
           {
             "id": "q1_5",
-            "scenario": "Un développeur met son code informatique à disposition de tous pour qu'on puisse l'améliorer.",
+            "scenario": "Je partage un logiciel (comme Firefox, LibreOffice ou VLC) que tout le monde peut modifier et améliorer légalement selon sa licence.",
             "options": ["Licence open source", "Droit à l'oubli", "Nétiquette", "Modération"],
             "reponse_correcte": 0,
+            "expected_answer": "Licence open source : code accessible qu'on peut utiliser, modifier et améliorer légalement.",
             "feedback_reussite": "Parfait ! Une licence open source permet le partage et la modification libre et légale.",
             "error_pattern_key": "logiciel_libre"
           }
@@ -95,23 +263,25 @@
       },
       {
         "id": "q2-courriel-champs",
-        "titre": "Les champs d'un courriel",
-        "consigne": "Choisis le champ approprié pour chaque situation d'envoi.",
+        "titre": "Les champs et fonctions d'un courriel (p. 40-49)",
+        "consigne": "Choisis le champ ou la fonction appropriée pour chaque situation d'envoi.",
         "competence_id": "NUM-1.D5",
         "questions": [
           {
             "id": "q2_1",
-            "scenario": "Tu dois envoyer une convocation aux parents de 25 élèves. Où mets-tu leurs adresses pour qu'ils ne voient pas les adresses des autres ?",
-            "options": ["À (Destinataire)", "Cc (Copie conforme)", "Cci (Copie conforme invisible)", "Objet"],
+            "scenario": "Tu dois envoyer un e-mail à toute ta classe sans que les élèves voient les adresses des autres (ou mettre un DJ en copie cachée sans qu'Alain le sache). Où écris-tu ces adresses ?",
+            "options": ["À (Destinataire)", "Cc (Copie carbone)", "Cci (Copie carbone invisible)", "Objet"],
             "reponse_correcte": 2,
-            "feedback_reussite": "Exactement ! Le champ Cci masque les adresses des autres destinataires pour protéger leur vie privée (RGPD).",
+            "expected_answer": "Cci (Copie carbone invisible) masque les adresses aux autres destinataires.",
+            "feedback_reussite": "Exactement ! Le champ Cci masque les adresses des autres destinataires pour protéger leur vie privée.",
             "error_pattern_key": "cc_vs_cci"
           },
           {
             "id": "q2_2",
-            "scenario": "Tu rédiges un email pour ton professeur. Où résumes-tu en quelques mots le sujet de ton message ?",
-            "options": ["Dans la pièce jointe", "Dans l'Objet", "Dans la signature", "Dans le champ Cc"],
+            "scenario": "Tu rédiges un e-mail pour ton professeur. Où écris-tu le titre court qui résume le sujet de ton message ?",
+            "options": ["Dans la pièce jointe", "Dans l'Objet", "Dans la boîte d'envoi", "Dans le champ Cc"],
             "reponse_correcte": 1,
+            "expected_answer": "Objet : le titre du message qui explique de quoi il parle.",
             "feedback_reussite": "Bravo ! L'Objet donne le titre et permet au destinataire de savoir tout de suite de quoi parle le mail.",
             "error_pattern_key": "objet_vs_corps"
           }
@@ -119,38 +289,237 @@
       }
     ]
   },
+  "je_pratique": {
+    "titre": "2. Je pratique (p. 60-83)",
+    "parties": [
+      {
+        "id": "pratique-1-1",
+        "numero": "PARTIE 1",
+        "titre": "1. Sélectionner un outil d'interaction & Chiffrement E2EE (p. 60-63)",
+        "pages": "60-63 (PDF 62-65)",
+        "competences_visees": ["NUM-1.P1", "NUM-1.P3"],
+        "resume": "Pour choisir le bon outil de communication, on analyse 4 critères : 1) Destinataire (à qui j'écris ?), 2) Objectif (quel message ?), 3) Délai de réponse (court/immédiat ou long), 4) Sécurité des données (chiffrement de bout en bout).",
+        "definition_e2ee": "Le chiffrement de bout en bout (E2EE) est une méthode de sécurisation où seules les personnes qui discutent ensemble (toi et ton destinataire) peuvent lire les messages : même la plateforme ne peut pas y accéder.",
+        "tableau_comparatif_messageries": [
+          { "application": "WhatsApp", "messages_ecrits_vocaux_appels": "✅ Oui", "groupes": "✅ Oui", "photos_videos": "✅ Oui", "securite_messages": "⭐ Forte", "messages_ephemeres": "✅ Oui", "travail_groupe": "⚠️ Moyen" },
+          { "application": "Signal", "messages_ecrits_vocaux_appels": "✅ Oui", "groupes": "✅ Oui", "photos_videos": "✅ Oui", "securite_messages": "⭐⭐ Très forte (la meilleure)", "messages_ephemeres": "✅ Oui", "travail_groupe": "⚠️ Moyen" },
+          { "application": "Telegram", "messages_ecrits_vocaux_appels": "✅ Oui", "groupes": "✅ Grands groupes", "photos_videos": "✅ Oui", "securite_messages": "⚠️ Seulement en mode secret", "messages_ephemeres": "⚠️ Seulement en mode secret", "travail_groupe": "⭐ Bien" },
+          { "application": "Messenger", "messages_ecrits_vocaux_appels": "✅ Oui", "groupes": "✅ Oui", "photos_videos": "✅ Oui", "securite_messages": "⚠️ Moyenne", "messages_ephemeres": "✅ Oui", "travail_groupe": "⚠️ Moyen" },
+          { "application": "Discord", "messages_ecrits_vocaux_appels": "✅ Oui", "groupes": "✅ Serveurs & salons", "photos_videos": "✅ Oui", "securite_messages": "❌ Faible", "messages_ephemeres": "⚠️ Parfois", "travail_groupe": "⭐⭐ Très bien (le meilleur)" },
+          { "application": "Snapchat", "messages_ecrits_vocaux_appels": "✅ Oui", "groupes": "✅ Simples", "photos_videos": "⭐ Très utilisé", "securite_messages": "❌ Faible", "messages_ephemeres": "⭐ Oui (par défaut)", "travail_groupe": "❌ Non" }
+        ],
+        "situations_chat_vs_email": [
+          { "situation": "1. Tu es absent(e) et tu dois demander le travail à un(e) camarade.", "outil_attendu": "Chat", "justification": "C'est rapide et informel, on peut demander directement à un camarade.", "modele_message": "Salut, j'étais absent(e) aujourd'hui. Peux-tu m'envoyer le travail à faire, stp ?" },
+          { "situation": "2. Tu dois envoyer ton motif d'absence à un éducateur.", "outil_attendu": "E-mail", "justification": "C'est plus formel et cela garde une trace écrite officielle.", "modele_message": "Bonjour, Je vous envoie mon motif d'absence. Bonne journée." },
+          { "situation": "3. Tu dois prévenir un(e) ami(e) que tu arriveras dans 5 minutes.", "outil_attendu": "Chat", "justification": "Le message doit être envoyé et lu immédiatement.", "modele_message": "J'arrive dans 5 minutes. À tout de suite !" },
+          { "situation": "4. Tu dois contacter ton professeur pour poser une question importante sur le cours.", "outil_attendu": "E-mail", "justification": "C'est plus respectueux et adapté pour une question scolaire importante.", "modele_message": "Bonjour Madame/Monsieur, J'ai une question au sujet du cours. Pouvez-vous m'expliquer l'exercice 4, s'il vous plaît ?" },
+          { "situation": "5. Tu dois partager une photo que tu veux garder en haute qualité.", "outil_attendu": "E-mail", "justification": "En pièce jointe d'un e-mail, la photo n'est pas compressée et garde sa qualité.", "modele_message": "Bonjour, Je t'envoie la photo en pièce jointe pour garder une bonne qualité. À bientôt." }
+        ]
+      },
+      {
+        "id": "pratique-1-2",
+        "numero": "PARTIE 2",
+        "titre": "2. Utiliser un outil de communication : E-mail, Sondage & Quiz* (p. 64-67)",
+        "pages": "64-67 (PDF 66-69)",
+        "competences_visees": ["NUM-1.P2", "NUM-1.P4"],
+        "resume": "Respecter la checklist complète de rédaction d'un e-mail formel, exporter au bon format (JPG, PNG, PDF standard, PDF impression) et créer un sondage/quiz respectueux de la vie privée.",
+        "checklist_email_complete": {
+          "avant_envoyer": [
+            "L'adresse e-mail est correcte et j'écris à la bonne personne.",
+            "L'objet est clair et je traite un seul sujet par e-mail.",
+            "J'ai ajouté la pièce jointe si nécessaire (Corrigé @lt_X).",
+            "Je relis mon e-mail avant de l'envoyer (Corrigé @lt_X)."
+          ],
+          "presentation": [
+            "Je saute des lignes entre les parties et les espaces sont corrects.",
+            "Majuscule en début et point en fin de phrase.",
+            "Mon message est clair et bien organisé (Corrigé @lt_X).",
+            "Je fais des phrases courtes et compréhensibles (Corrigé @lt_X)."
+          ],
+          "politesse_et_ton": [
+            "Formule d'appel polie au début (Bonjour Madame..., Bonjour Monsieur...).",
+            "Message respectueux, ton poli et calme (Corrigé @lt_X).",
+            "Je remercie la personne si nécessaire et termine par une formule de politesse (Cordialement, Bien à vous).",
+            "En bas du mail, je signe avec mon prénom, mon nom (et ma classe)."
+          ],
+          "langue_et_regles": [
+            "Le nom du destinataire est bien orthographié, sans faute d'orthographe.",
+            "Pas d'abréviation de chat (OMG, BFF, ajd, stp...).",
+            "Ne pas écrire en CAPITALES ni mettre des « !!! ».",
+            "Je vérifie la ponctuation et je n'utilise pas d'émojis dans un e-mail formel (Corrigé @lt_X)."
+          ]
+        },
+        "formats_export_canva": [
+          { "format": "JPG", "usage": "Idéal pour partager une photo légère" },
+          { "format": "PNG", "usage": "Idéal pour les images complexes, logos et illustrations nettes" },
+          { "format": "PDF standard", "usage": "Suggéré — Idéal pour les documents et les pièces jointes d'e-mails" },
+          { "format": "PDF pour impression", "usage": "Idéal pour imprimer en haute qualité" }
+        ],
+        "regles_rgpd_sondage": [
+          "Faut-il demander le nom des élèves dans un sondage de sortie scolaire ? Non, il vaut mieux éviter si ce n'est pas nécessaire (collecte minimale / anonymat).",
+          "Peut-on partager les réponses sans demander ? Non, il faut protéger les informations pour respecter la vie privée des élèves."
+        ]
+      },
+      {
+        "id": "pratique-1-3",
+        "numero": "PARTIE 3",
+        "titre": "3. Respecter les droits de propriété intellectuelle & IA* (p. 68-73)",
+        "pages": "68-73 (PDF 70-75)",
+        "competences_visees": ["NUM-1.P5"],
+        "resume": "Une image ou un texte trouvé sur Google n'est pas forcément libre ! Il appartient à son créateur. Pour l'utiliser, il faut vérifier les licences Creative Commons, demander l'autorisation ou citer la source, et ne jamais faire passer un texte d'IA pour le sien.",
+        "comment_citer_source": {
+          "site_web": "Auteur, titre de l'article, nom du site, date de publication, lien (URL).",
+          "image": "Nom du créateur/photographe, titre de l'image (si connu), site d'origine, année.",
+          "texte_livre": "Nom de l'auteur, titre du livre, éditeur, année de publication."
+        },
+        "licences_creative_commons": [
+          { "code": "Public Domain (Domaine public)", "icone": "🔓", "signification": "Utilisation libre (modifier, partager, usage commercial). Citer la source reste une bonne pratique." },
+          { "code": "BY (Icône personnage)", "icone": "👤", "signification": "Attribution obligatoire : tu dois toujours mentionner le nom de l'auteur." },
+          { "code": "NC (Icône € barré)", "icone": "🚫💶", "signification": "Pas d'usage commercial : l'œuvre ne peut pas être utilisée pour gagner de l'argent." },
+          { "code": "SA (Icône flèche circulaire)", "icone": "🔄", "signification": "Partage dans les mêmes conditions : si tu modifies ou remixes l'œuvre, tu dois la partager avec la même licence." },
+          { "code": "ND (Icône =)", "icone": "🟰", "signification": "Pas de modification : il est interdit de modifier ou remixer l'œuvre, tu la partages telle quelle." }
+        ],
+        "encadres": [
+          {
+            "type": "metier",
+            "icone": "💼",
+            "titre": "Idées Métiers : Auteur·rice, Juriste en droit du numérique, Copyright Manager (p. 73)",
+            "contenu": "• Auteur·rice·s (écrivains, photographes, musiciens) : vivent de leurs créations protégées.\n• Juriste en droit du numérique : vérifie que les sites et applis respectent la loi (RGPD, CGU, droit d'auteur).\n• Copyright Manager : gère les autorisations et les revenus liés à l'exploitation des œuvres (streaming, licences)."
+          }
+        ]
+      },
+      {
+        "id": "pratique-1-4",
+        "numero": "PARTIE 4",
+        "titre": "4. Respecter la nétiquette (p. 74-77)",
+        "pages": "74-77 (PDF 76-79)",
+        "competences_visees": ["NUM-1.P6"],
+        "resume": "La nétiquette (contraction de « net » et « étiquette ») regroupe les règles de politesse et de savoir-vivre sur Internet : Respect, Écriture soignée, Clarté, Réflexion, Vie privée et Patience.",
+        "huit_regles_netiquette": [
+          "1. Rester courtois : mêmes règles de politesse qu'en face-à-face (pas d'insulte, de harcèlement ni de spam).",
+          "2. Respecter la vie privée : ne rien divulguer sur autrui sans son consentement.",
+          "3. Adapter son langage : éviter les fautes, les mots en CAPITALES (qui reviennent à crier) et les abréviations familières.",
+          "4. Répondre dans des délais raisonnables : ne pas ignorer les messages ni relancer sans arrêt.",
+          "5. Vérifier avant de poser une question : chercher si la réponse existe déjà.",
+          "6. Être clair et concis : structurer ses messages et aller à l'essentiel.",
+          "7. Envoyer les fichiers de manière réfléchie : limiter la taille (éviter 300 Mo en pièce jointe !) et choisir un format compatible.",
+          "8. Respecter les règles propres à chaque espace (charte du forum, du groupe ou de l'école)."
+        ],
+        "exercices_reecriture": [
+          { "original": "T KI TOI??? JTE CONNAIS PAS", "probleme": "Majuscules agressives, langage SMS et absence de politesse.", "corrige": "Salut, je ne crois pas te connaître. Peux-tu me dire qui tu es ?" },
+          { "original": "Ta réponse est pourrie !", "probleme": "Irrespectueux et blessant.", "corrige": "Je ne suis pas d'accord avec ta réponse. Je pense qu'il faut la revoir." },
+          { "original": "T'as fini ton exposé ???", "probleme": "Ton impatient et familier avec triple point d'interrogation.", "corrige": "As-tu terminé ton exposé ? J'aimerais savoir où tu en es." },
+          { "original": "À : Mme Dupont | Objet : Cours de math | Madame, Je comprends rien. Paul", "probleme": "Pas de « Bonjour », négation familière, aucune formule de politesse ni demande claire.", "corrige": "Bonjour Madame, Je ne comprends pas le cours de math. Pouvez-vous m'aider ? Merci, Paul" }
+        ]
+      },
+      {
+        "id": "pratique-1-5",
+        "numero": "PARTIE 5",
+        "titre": "5. Garder la confidentialité ou l'anonymat lors de partage & IA* (p. 78-79)",
+        "pages": "78-79 (PDF 80-81)",
+        "competences_visees": ["NUM-1.P7"],
+        "resume": "Ne jamais partager ses informations personnelles (nom complet, adresse, numéro de maison, nom de l'école, habitudes quotidiennes) ni en public ni dans un prompt envoyé à une IA !",
+        "regles_confidentialite_ia": [
+          "Utilise un pseudo (ex: EmmaBruxelles123) au lieu de ton vrai nom complet.",
+          "Cache ou floute ce qui permet de te localiser (numéro de maison, panneau de rue, logo de l'école).",
+          "*Avec une IA : ne donne jamais ton nom, ton prénom, ton adresse, ton téléphone ou le nom de ton école dans un prompt. Remplace les vrais noms par des pseudonymes (ex: « Personne A »)."
+        ]
+      },
+      {
+        "id": "pratique-1-6",
+        "numero": "PARTIE 6*",
+        "titre": "6*. Respecter les droits à l'image et à la voix (p. 80-81)",
+        "pages": "80-81 (PDF 82-83)",
+        "competences_visees": ["NUM-1.P8"],
+        "resume": "Demander systématiquement l'autorisation avant de filmer quelqu'un, prendre une photo, enregistrer sa voix ou publier/partager (même en story entre amis ou via un montage IA). Si la personne dit NON, je respecte son choix et je n'insiste pas.",
+        "encadres": [
+          {
+            "type": "cerveau",
+            "icone": "🧠",
+            "titre": "Pourquoi la publication sans accord fait-elle mal ? (p. 81)",
+            "contenu": "Le cerveau a besoin de se sentir en sécurité et en contrôle. Quand une image ou une voix est diffusée sans accord (ou détournée par IA), la perte de contrôle est perçue par le cerveau comme une menace sociale (peur d'être jugé, moqué ou rejeté)."
+          }
+        ]
+      },
+      {
+        "id": "pratique-1-7",
+        "numero": "PARTIE 7*",
+        "titre": "7*. Téléverser un contenu dans un environnement numérique (p. 82-83)",
+        "pages": "82-83 (PDF 84-85)",
+        "competences_visees": ["NUM-1.P9"],
+        "resume": "Téléverser (upload ⬆️), c'est envoyer un fichier depuis son appareil (PC, tablette, smartphone) vers un espace en ligne. Télécharger (download ⬇️), c'est récupérer un fichier d'Internet vers son appareil.",
+        "etapes_televersement": [
+          "1. Ouvrir la plateforme et se connecter à l'environnement numérique.",
+          "2. Chercher l'option d'ajout (« Ajouter », « Téléverser », « Importer », « Joindre un fichier »).",
+          "3. Choisir le fichier sur son appareil (document, image, vidéo, audio).",
+          "4. Vérifier le contenu (bon fichier, bon format, taille raisonnable, respect du droit à l'image et des sources).",
+          "5. Valider l'envoi (« Ouvrir », « Envoyer », « Téléverser »).",
+          "6. Confirmer que le fichier apparaît bien sur la plateforme."
+        ]
+      }
+    ]
+  },
+  "je_maitrise": {
+    "titre": "3. Je maîtrise — Communiquer et interagir grâce aux outils numériques (p. 84-85)",
+    "pages": "84-85 (PDF 86-87)",
+    "competences_visees": ["NUM-1.M1"],
+    "projet_consolidation": {
+      "titre": "Sois créatif : invente ton application de communication !",
+      "etapes": [
+        "1. Donne un nom à ton outil (original, facile à retenir, en lien avec sa fonction, ex: ClasseConnect).",
+        "2. Présente ton outil (à quoi il sert, à qui il est destiné, dans quelles situations on l'utilise).",
+        "3. Imagine une fonction unique (ex: « Mode travail » qui bloque les messages inutiles pendant les devoirs).",
+        "4. Propose des règles de bon usage (respect des autres, sécurité, confidentialité ou droits de propriété).",
+        "5. Envoie ton travail en pièce jointe par e-mail au professeur avec l'objet « Projet – Nouvel outil numérique » et un message poli."
+      ],
+      "criteres_reussite": [
+        "Ton outil est compréhensible",
+        "Sa fonction unique est claire",
+        "Ta règle de bon usage est pertinente",
+        "Ton travail est soigné",
+        "Ton e-mail d'envoi est correctement rédigé"
+      ]
+    }
+  },
   "error_patterns": {
     "censure_vs_moderation": {
       "titre": "Confusion entre Censure et Modération",
-      "explication": "La modération protège la communauté en retirant les insultes ou menaces interdites. La censure bloque une opinion ou un sujet sans justification de sécurité.",
-      "conseil_tuteur": "Pose-toi la question : ce message était-il méchant/illégal (modération), ou était-ce juste un avis qui dérange (censure) ?"
+      "explication": "La modération protège la communauté en retirant les insultes, menaces ou propos haineux interdits par la loi. La censure bloque arbitrairement une opinion ou un sujet entier sans motif de sécurité.",
+      "conseil_tuteur": "Pose-toi la question : ce message était-il insultant/dangereux (modération), ou était-ce une opinion légitime bloquée (censure) ?"
     },
     "retrait_vs_oubli": {
       "titre": "Confusion entre Droit de retrait et Droit à l'oubli",
-      "explication": "Le droit de retrait, c'est quand tu supprimes toi-même immédiatement quelque chose que TU as posté. Le droit à l'oubli, c'est demander à Google ou un site d'effacer une ancienne trace sur toi.",
-      "conseil_tuteur": "Si c'est toi qui appuies sur 'Supprimer', c'est du retrait !"
+      "explication": "Le droit de retrait, c'est quand tu supprimes toi-même un contenu que TU as publié. Le droit à l'oubli, c'est demander à un site ou moteur de recherche de retirer une ancienne information personnelle (ex: une photo d'enfance).",
+      "conseil_tuteur": "Si c'est toi qui cliques sur la corbeille pour effacer ton propre post, c'est le droit de retrait !"
     },
     "cc_vs_cci": {
       "titre": "Confusion entre Cc et Cci",
-      "explication": "Cc = Copie visible. Tout le monde voit les adresses. Cci = Copie Invisible. Les adresses sont cachées pour protéger la vie privée.",
-      "conseil_tuteur": "Pense au 'i' de Cci comme 'Invisible' ou 'Intimité' !"
+      "explication": "Cc (Copie carbone) = copie visible par tous les destinataires. Cci (Copie carbone invisible) = copie cachée qui masque les adresses aux autres destinataires pour protéger leur vie privée.",
+      "conseil_tuteur": "Retiens le « i » de Cci comme « Invisible » ou « Intimité » !"
     },
     "objet_vs_corps": {
       "titre": "Confusion entre Objet et Corps du message",
-      "explication": "L'objet est un titre court de 3 à 6 mots (ex: 'Absence mardi - Thomas 1C2'). Le corps contient le message complet avec politesse.",
-      "conseil_tuteur": "N'écris jamais tout ton message dans la ligne Objet !"
+      "explication": "L'objet est un titre court qui résume le sujet (ex: « Réunion pour la sortie du musée »). Le corps contient le message complet avec formule de politesse et signature.",
+      "conseil_tuteur": "Si tu écris tout ton message dans l'Objet, il sera coupé et illisible !"
+    },
+    "telecharger_vs_televerser": {
+      "titre": "Confusion entre Télécharger (Download) et Téléverser (Upload)",
+      "explication": "Télécharger (flèche vers le bas ⬇️) = prendre un fichier depuis Internet vers son ordinateur. Téléverser (flèche vers le haut ⬆️) = déposer un fichier depuis son ordinateur vers un espace en ligne.",
+      "conseil_tuteur": "Quand tu envoies ton devoir vers la plateforme, le fichier « monte » vers le cloud : tu le téléverses !"
     }
   },
   "support_cours": {
-    "titre": "Présentation & Support de cours : Communication & Courriel",
-    "description": "Diaporama du chapitre et synthèses interactives NotebookLM sur les RSN, le courriel et l'éthique en ligne.",
+    "titre": "Présentation & Support de cours : Chapitre 1 — Communication & Collaboration (p. 19-86)",
+    "description": "Diaporama complet du Chapitre 1 (@lt_X Tome 1a) : RSN, système de récompense, messagerie vs courriel, IA, vocabulaire de l'e-mail, éthique, AI Act, chiffrement E2EE, Creative Commons, nétiquette et téléversement.",
     "slides_url": "",
     "notebooklm_url": "https://notebooklm.google.com",
     "slides": [
-      { "titre": "Les Réseaux Socio-Numériques (RSN)", "contenu": "Comprendre le fonctionnement des plateformes, le système de récompense (dopamine), et l'âge légal de 13 ans (RGPD)." },
-      { "titre": "Messagerie Instantanée vs Courriel", "contenu": "Quand utiliser l'un ou l'autre ? La messagerie pour l'immédiat et les amis, le courriel pour la communication formelle et officielle." },
-      { "titre": "Anatomie d'un Courriel Officiel", "contenu": "Les 6 critères essentiels : objet court, formule de politesse adaptée, corps aéré, signature complète et usage du champ Cci." },
-      { "titre": "Éthique, Droit & Nétiquette", "contenu": "Droit à l'image, respect de la vie privée, modération des contenus illégaux et différence capitale avec la censure arbitraire." }
+      { "titre": "1. Les Réseaux Socio-Numériques (RSN) & Modèle Économique (p. 20-34)", "contenu": "Microblogging (X, Mastodon), Photos/Vidéos (Instagram, TikTok, Snapchat, YouTube), Pro (LinkedIn), Forum (Reddit). « Rien n'est gratuit » : les réseaux non éthiques exploitent tes données personnelles et la dopamine (boîte de Skinner) pour te garder connecté, contrairement aux réseaux éthiques (Mastodon)." },
+      { "titre": "2. Chat vs Courriel, Outils Collaboratifs & IA* (p. 34-40)", "contenu": "Chat (WhatsApp, Signal, Discord) = urgent et court en temps réel. E-mail (Gmail, Outlook, Proton) = formel, avec pièce jointe et preuve d'envoi (1er e-mail en 1971). Sondages/Quiz : Google Forms, Wooclap, Kahoot. L'IA aide à écrire ou corriger, mais peut inventer des infos : il faut toujours vérifier et réfléchir par soi-même !" },
+      { "titre": "3. Vocabulaire du Courriel & Validation Sociale (p. 40-50)", "contenu": "Boîte de réception, boîte d'envoi, éléments envoyés, brouillon, spam, pièce jointe. À (destinataire principal), Cc (copie visible), Cci (copie carbone invisible protégeant les adresses). Attention à « Répondre à tous » ! Sur les réseaux, les likes ne définissent jamais ta valeur." },
+      { "titre": "4. Éthique, Liberté d'Expression, Droit d'Auteur & AI Act* (p. 50-60)", "contenu": "Vie privée, droit de retrait (supprimer son post) vs droit à l'oubli. Liberté d'expression (autorisé : opinion, humour ; interdit : haine, diffamation, négationnisme, harcèlement). Modération (protéger) vs Censure (bloquer un sujet). L'AI Act européen (2024) impose la transparence sur les contenus générés par IA." },
+      { "titre": "5. Chiffrement de Bout en Bout (E2EE) & Checklist E-mail (p. 60-69)", "contenu": "Le chiffrement de bout en bout garantit que seuls l'expéditeur et le destinataire peuvent lire les messages : Signal offre la sécurité la plus forte (⭐⭐) et Discord est idéal pour les travaux de groupe (⭐⭐). Avant d'envoyer un e-mail : vérifier l'objet, la pièce jointe, la politesse, l'orthographe et signer." },
+      { "titre": "6. Creative Commons, Nétiquette, Droit à l'Image & Téléversement* (p. 68-85)", "contenu": "Licences Creative Commons : BY (citer l'auteur), NC (pas d'usage commercial), SA (même licence), ND (pas de modification). Respecter les 8 règles de la nétiquette, ne jamais donner ses infos privées à une IA, toujours demander l'accord avant de filmer/publier quelqu'un, et distinguer Téléverser (upload ⬆️) de Télécharger (download ⬇️)." }
     ]
   }
 }

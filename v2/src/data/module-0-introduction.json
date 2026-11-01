@@ -1,116 +1,351 @@
 {
   "id": "module-0-introduction",
   "numero": 0,
-  "titre": "Bienvenue & Prise en main de l'ordinateur",
+  "titre": "Introduction — Bienvenue & Prise en main du numérique",
   "tome": "1a",
-  "sous_titre": "Introduction : Mon rapport au numérique, la charte et la sécurité en classe",
+  "pages": "9-17 (PDF pages 11-20)",
+  "sous_titre": "Introduction : Mon rapport au numérique, charte informatique, création d'adresse e-mail et déconnexion sécurisée",
   "parties": [
     {
       "id": "partie-0-1",
-      "titre": "1. Mon point de départ",
-      "description": "Faisons le point sur tes habitudes et ce que tu sais déjà faire avec un ordinateur.",
+      "titre": "1. Mon rapport au numérique (p. 9-11)",
+      "pages": "9-11 (PDF 11-13)",
+      "description": "Faisons connaissance avec tes usages du numérique, tes habitudes de travail pour l'école et les outils que tu utilises au quotidien.",
+      "fiche_cours": {
+        "introduction": "Le numérique est partout et chacun l'utilise à sa manière (smartphone, ordinateur portable, PC fixe, tablette, montre connectée) : jouer, échanger des messages, écouter de la musique, chercher des informations, faire ses devoirs, coder ou créer des images et vidéos.",
+        "points_cles": [
+          "Identifier son accès au numérique à la maison et son niveau d'autonomie.",
+          "Repérer ses besoins d'aide pour l'école (connexion, classement, mise en forme, envoi de pièce jointe ou export PDF).",
+          "Associer chaque appareil (PC portable, PC fixe, tablette, smartphone, montre connectée) à ses usages principaux parmi 18 activités numériques."
+        ]
+      },
       "questions_diagnostic": [
         {
           "id": "diag_1",
-          "titre": "Mon équipement à la maison",
-          "options": ["J'ai un ordinateur à moi", "J'utilise l'ordinateur de la famille", "J'utilise surtout une tablette ou un smartphone", "Je n'ai pas d'ordinateur à la maison"]
+          "titre": "1. Mon accès au numérique à la maison",
+          "options": [
+            "J'ai facilement accès à Internet et j'utilise un appareil seul(e)",
+            "J'ai accès à Internet mais je dois demander avant d'utiliser un appareil",
+            "J'utilise surtout un smartphone ou une tablette partagée",
+            "J'ai rarement ou jamais accès à un ordinateur à la maison"
+          ]
         },
         {
           "id": "diag_2",
-          "titre": "Ce que je sais déjà faire",
+          "titre": "2. Pour l'école, j'ai surtout besoin d'aide pour...",
           "multi": true,
           "options": [
-            "Allumer et éteindre correctement un PC",
-            "Créer un dossier et ranger mes fichiers",
-            "Télécharger une image ou un PDF",
-            "Envoyer un e-mail avec une pièce jointe",
-            "Faire une capture d'écran",
-            "Créer un mot de passe sécurisé"
+            "Me connecter / retrouver mes identifiants",
+            "Retrouver et ranger mes documents",
+            "Écrire et mettre en forme un texte",
+            "Envoyer / rendre un travail (e-mail, plateforme, pièce jointe, PDF)"
           ]
         },
         {
           "id": "diag_3",
-          "titre": "Mon ressenti avec l'informatique",
-          "options": ["Très à l'aise (j'adore ça)", "Plutôt à l'aise", "Un peu inquiet ou hésitant", "Je débute totalement"]
+          "titre": "3. Ce que je sais déjà faire",
+          "multi": true,
+          "options": [
+            "Chercher une info fiable sur Internet",
+            "Télécharger un fichier et le ranger dans un dossier",
+            "Créer et enregistrer un document",
+            "Envoyer un message avec une pièce jointe",
+            "Prendre une photo / capture d'écran et l'insérer dans un document",
+            "Exporter un document en PDF",
+            "Créer un mot de passe sécurisé"
+          ]
+        },
+        {
+          "id": "diag_4",
+          "titre": "4. Réflexe sécurité face à un contenu bizarre (pub, lien, message)",
+          "options": [
+            "Je ferme la fenêtre immédiatement",
+            "Je demande de l'aide à un adulte ou au professeur",
+            "Je signale ou je bloque l'expéditeur",
+            "Je clique quand même par curiosité"
+          ]
+        },
+        {
+          "id": "diag_5",
+          "titre": "5. Mon ressenti et mes objectifs cette année",
+          "multi": true,
+          "options": [
+            "Mieux m'organiser (classement, stockage)",
+            "Créer un document (texte + images)",
+            "Créer des images, des vidéos, des sons",
+            "Découvrir le codage / la programmation",
+            "Comprendre et utiliser l'IA correctement",
+            "Mieux me protéger sur Internet",
+            "Créer un site ou un blog"
+          ]
         }
+      ],
+      "activites_18_usages": [
+        { "num": 1, "label": "Faire mes devoirs", "outil_recommande": "PC portable / PC fixe" },
+        { "num": 2, "label": "Faire des achats en ligne", "outil_recommande": "PC portable / Smartphone" },
+        { "num": 3, "label": "Créer des vidéos", "outil_recommande": "Smartphone / PC portable" },
+        { "num": 4, "label": "Monter ou réparer un PC", "outil_recommande": "PC fixe" },
+        { "num": 5, "label": "Utiliser la réalité virtuelle", "outil_recommande": "PC fixe / Casque VR" },
+        { "num": 6, "label": "Envoyer des messages", "outil_recommande": "Smartphone" },
+        { "num": 7, "label": "Utiliser l'IA", "outil_recommande": "PC portable / Smartphone" },
+        { "num": 8, "label": "Rechercher des infos sur Internet, surfer", "outil_recommande": "PC portable / Tablette / Smartphone" },
+        { "num": 9, "label": "Utiliser une application pour l'école", "outil_recommande": "PC portable / Tablette" },
+        { "num": 10, "label": "Créer de la musique", "outil_recommande": "PC portable / PC fixe" },
+        { "num": 11, "label": "Faire de la robotique", "outil_recommande": "PC portable / Tablette" },
+        { "num": 12, "label": "Jouer à des jeux vidéo", "outil_recommande": "PC fixe / Console / Smartphone" },
+        { "num": 13, "label": "Utiliser les réseaux sociaux", "outil_recommande": "Smartphone" },
+        { "num": 14, "label": "M'informer", "outil_recommande": "Smartphone / Tablette / PC" },
+        { "num": 15, "label": "Jouer en réseau", "outil_recommande": "PC fixe / PC portable" },
+        { "num": 16, "label": "Coder / Programmer", "outil_recommande": "PC portable / PC fixe" },
+        { "num": 17, "label": "Respecter les règles de sécurité", "outil_recommande": "Tous les appareils" },
+        { "num": 18, "label": "Prendre des photos", "outil_recommande": "Smartphone" }
       ]
     },
     {
       "id": "partie-0-2",
-      "titre": "2. La Charte de la Salle Informatique",
-      "description": "En classe, nous partageons le matériel. Pour chaque situation, dis si le comportement est OK ou PAS OK !",
+      "titre": "2. La Charte Numérique de la Classe (p. 10)",
+      "pages": "10 (PDF 12)",
+      "description": "En classe, nous partageons le matériel informatique. Pour chaque situation, dis si le comportement est OK ou PAS OK, puis découvre les 9 engagements officiels de la charte @lt_X !",
       "situations": [
         {
           "id": "charte_1",
-          "scenario": "Théo termine son travail, se déconnecte de sa session et éteint l'écran de l'ordinateur.",
+          "scenario": "a) Théo termine son travail, ferme sa session et éteint correctement l'ordinateur.",
           "est_ok": true,
-          "explication": "Bravo ! Théo respecte le matériel et protège ses données personnelles en fermant sa session."
+          "explication": "Corrigé @lt_X : OK ! Théo respecte le matériel et protège ses données personnelles en fermant sa session avant d'éteindre le poste."
         },
         {
           "id": "charte_2",
-          "scenario": "Inès télécharge et installe un petit jeu 'parce que ça ne prend pas de place'.",
+          "scenario": "b) Inès installe un petit jeu « parce que ça ne prend pas de place ».",
           "est_ok": false,
-          "explication": "Interdit ! On ne doit jamais installer de jeu ou logiciel sur les ordinateurs de l'école sans l'accord du professeur."
+          "explication": "Corrigé @lt_X : PAS OK ! On ne doit installer aucun logiciel ou jeu sur les ordinateurs de l'école sans l'accord du professeur."
         },
         {
           "id": "charte_3",
-          "scenario": "Sami ouvre le dossier personnel d'un camarade sur le réseau pour voir son travail.",
+          "scenario": "c) Sami ouvre le dossier d'un camarade sans lui en demander l'autorisation.",
           "est_ok": false,
-          "explication": "Pas OK ! Ouvrir les fichiers d'un camarade sans son accord viole sa vie privée et son travail."
+          "explication": "Corrigé @lt_X : PAS OK ! Il faut respecter le travail et les fichiers des autres. Ouvrir le dossier d'un camarade viole sa vie privée."
         },
         {
           "id": "charte_4",
-          "scenario": "Jade change le fond d'écran de l'ordinateur et modifie la langue du clavier.",
+          "scenario": "d) Jade modifie les réglages de l'ordinateur pour changer le fond d'écran et la langue du clavier.",
           "est_ok": false,
-          "explication": "Pas OK ! Le matériel est partagé. Si tu modifies les réglages, l'élève suivant ne pourra plus travailler correctement."
+          "explication": "Corrigé @lt_X : PAS OK ! On ne modifie pas les réglages de l'ordinateur sans autorisation, car le matériel est partagé avec toute la classe."
         },
         {
           "id": "charte_5",
-          "scenario": "Sarah prend discrètement une photo d'un élève avec sa webcam dès que le professeur a le dos tourné.",
+          "scenario": "e) Sarah prend des photos dès que le professeur a le dos tourné.",
           "est_ok": false,
-          "explication": "Pas OK ! Prendre une photo sans autorisation viole le droit à l'image et la vie privée."
+          "explication": "Corrigé @lt_X : PAS OK ! Prendre des photos sans autorisation enfreint les règles de la classe et le droit à l'image."
         },
         {
           "id": "charte_6",
-          "scenario": "Clara demande le mot de passe de son ami 'pour rendre un devoir à sa place'.",
+          "scenario": "f) Clara demande à son ami son mot de passe « pour envoyer un devoir à sa place ».",
           "est_ok": false,
-          "explication": "Jamais ! Un mot de passe est strictement personnel et secret. Ne le donne jamais, même à ton meilleur ami."
+          "explication": "Corrigé @lt_X : PAS OK ! On ne communique jamais son mot de passe, même à un ami proche."
         }
+      ],
+      "regles_charte_officielle": [
+        "1. J'utilise le matériel avec soin.",
+        "2. Je respecte le travail et les fichiers des autres.",
+        "3. Je ne communique jamais mon mot de passe.",
+        "4. Je ne modifie pas les réglages de l'ordinateur sans autorisation.",
+        "5. Je n'installe aucun logiciel ou jeu sans l'accord du professeur.",
+        "6. Je respecte les personnes lorsque j'utilise Internet.",
+        "7. Je signale tout problème à l'enseignant.",
+        "8. Je ne mange et ne bois pas à côté d'un ordinateur.",
+        "9. Je ferme ma session et j'éteins correctement l'ordinateur après utilisation."
       ]
     },
     {
       "id": "partie-0-3",
-      "titre": "3. Choisir un mot de passe solide",
-      "regles": [
-        "Au moins 10 caractères avec majuscules, minuscules, chiffres et caractères spéciaux (!, ?, @, #).",
-        "Ne JAMAIS utiliser : ton prénom, ta date de naissance, '123456' ou 'azerty'.",
-        "Astuce de la phrase secrète : invente une phrase facile à retenir pour toi et prends les premières lettres !"
+      "titre": "3. Création d'une adresse e-mail & Mot de passe (p. 12-15)",
+      "pages": "12-15 (PDF 14-17)",
+      "description": "Comprendre l'anatomie d'une adresse e-mail, choisir un mot de passe robuste et comparer Gmail, Outlook et Proton Mail.",
+      "utilites_email": [
+        { "numero": 1, "titre": "Communiquer", "detail": "Envoyer et recevoir des messages écrits, des photos ou des documents (équivalent numérique du courrier postal)." },
+        { "numero": 2, "titre": "Créer des comptes en ligne", "detail": "Sert d'identifiant pour s'inscrire sur les sites, applications et plateformes scolaires." },
+        { "numero": 3, "titre": "Sécurité et récupération", "detail": "Permet de récupérer un mot de passe oublié et de recevoir des codes de vérification (2FA) ou alertes de sécurité." },
+        { "numero": 4, "titre": "Recevoir des informations", "detail": "Factures, confirmations d'achats, billets électroniques, newsletters." },
+        { "numero": 5, "titre": "Usage scolaire ou professionnel", "detail": "Outil de référence des écoles, entreprises et administrations pour les communications officielles." }
       ],
-      "exemples_mauvais": ["123456789", "azerty", "iloveyou", "motdepasse123"],
-      "exemples_bons": ["MonCh4tNoir!", "!M0nCh4tN0ir6", "J'ad0reLeCh0c0lat#12"]
+      "anatomie_adresse": {
+        "exemple": "lucas.dupont2@icloud.com",
+        "parties": [
+          { "fragment": "lucas.dupont2", "nom": "Nom d'utilisateur", "regle": "Identifie la personne (sans espace ni accent, en minuscules)." },
+          { "fragment": "@", "nom": "Arobase", "regle": "Signifie « à l'adresse de ». Il en faut un seul par adresse !" },
+          { "fragment": "icloud.com", "nom": "Nom du domaine", "regle": "Nom du service utilisé + extension (.be pour la Belgique, .com, .fr...)." }
+        ],
+        "exemples_invalides": [
+          { "adresse": "younes@@gmail.com", "raison": "Contient deux symboles @ (il ne faut qu'un seul @)." },
+          { "adresse": "zoé@outlook.fr", "raison": "Contient un accent sur le « é » (les accents peuvent bloquer)." },
+          { "adresse": "club jeunes@gmail.com", "raison": "Contient un espace (un espace rend l'adresse invalide)." },
+          { "adresse": "luna@école.be", "raison": "Le nom de domaine contient un accent." },
+          { "adresse": "lucas.hotmail", "raison": "Pas d'arobase @ ni d'extension finale (.com / .be)." }
+        ],
+        "exemple_valide": "Luna.13@gmail.com"
+      },
+      "regles": [
+        "Utilise un mot de passe différent pour chaque compte.",
+        "Utilise au minimum 10 caractères et mélange lettres (majuscules/minuscules), chiffres et caractères spéciaux (!, ?, @, #).",
+        "Évite tout ce qui se devine : prénom, date de naissance, informations personnelles, suites de nombres (123456) ou touches qui se suivent (azerty).",
+        "Astuce de la phrase secrète : utilise une phrase (chanson, poème, citation) et transforme-la avec des majuscules, des chiffres et un caractère spécial.",
+        "Ne le partage jamais, déconnecte-toi sur un ordinateur public et active la double authentification (2FA)."
+      ],
+      "exemples_mauvais": ["123456789", "abc123", "azerty", "iloveyou", "hello", "ordinateur", "motdepasse123", "bonjour", "Chien1234", "Marie2008!"],
+      "exemples_bons": ["MonCh4tNoir!", "!M0nCh4tN0ir6", "PommeVelo!27", "Pluie!Bleu7", "8MotsDePasse!", "P0mm3!V3lo27"],
+      "comparatif_messageries": [
+        {
+          "service": "Gmail (Google)",
+          "facilite": "Très facile",
+          "confidentialite": "Moyen",
+          "pub": "Oui",
+          "stockage": "15 Go",
+          "securite": "Bonne",
+          "ecologie": "Faible",
+          "url_inscription": "accounts.google.com/signup"
+        },
+        {
+          "service": "Outlook (Microsoft)",
+          "facilite": "Facile",
+          "confidentialite": "Moyen",
+          "pub": "Oui",
+          "stockage": "15 Go",
+          "securite": "Bonne",
+          "ecologie": "Moyenne",
+          "url_inscription": "www.outlook.com"
+        },
+        {
+          "service": "Proton Mail (Suisse — Éthique)",
+          "facilite": "Facile",
+          "confidentialite": "Très bonne",
+          "pub": "Non",
+          "stockage": "1 Go",
+          "securite": "Très bonne",
+          "ecologie": "Bonne",
+          "url_inscription": "proton.me/mail"
+        }
+      ],
+      "checklist_creation_email": [
+        "Mon adresse e-mail est sérieuse (adaptée à l'école).",
+        "Mon mot de passe est robuste (10+ caractères mixtes).",
+        "J'ai noté mon mot de passe dans un endroit sécurisé (ou kit de récupération).",
+        "Je sais me reconnecter seul(e).",
+        "J'ai ajouté une adresse ou un numéro de secours (facultatif)."
+      ],
+      "encadres": [
+        {
+          "type": "savais_tu",
+          "icone": "💡",
+          "titre": "Choisir un bon mot de passe : à quoi faire attention ?",
+          "contenu": "Minimum 10 caractères mélangeant majuscules, minuscules, chiffres et symboles. Un mot de passe différent par compte et activation de la double authentification (2FA) qui ajoute une deuxième preuve d'identité."
+        },
+        {
+          "type": "savais_tu",
+          "icone": "💡",
+          "titre": "Messageries éthiques",
+          "contenu": "Gmail et Outlook sont très pratiques, mais des messageries éthiques comme Proton Mail, Tutanota ou Mailfence protègent mieux les données personnelles et n'affichent aucune publicité ciblée."
+        }
+      ]
     },
     {
       "id": "partie-0-4",
-      "titre": "4. Disparaître d'un ordinateur partagé",
-      "regle_or": "Fermer l'écran ≠ Se déconnecter !",
+      "titre": "4. Disparaître d'un ordinateur partagé (p. 16)",
+      "pages": "16 (PDF 18)",
+      "regle_or": "⚠️ Fermer l'écran ≠ Se déconnecter ! Je me déconnecte comme je ferme une porte à clé avant de partir.",
+      "risques_oubli_deconnexion": [
+        "Une autre personne peut accéder à tes comptes (e-mail, réseaux sociaux, plateforme scolaire).",
+        "Elle peut lire, modifier ou supprimer tes fichiers personnels.",
+        "Elle peut envoyer des messages ou publier en ton nom (usurpation).",
+        "Elle peut voler tes données personnelles ou enregistrées."
+      ],
+      "ordre_checklist_manuel": {
+        "consigne": "Classe les 4 actions a, b, c, d dans l'ordre exact de manipulation (Corrigé p. 18 : a=1, d=2, b=3, c=4, soit l'ordre 1, 3, 4, 2) :",
+        "items": [
+          { "lettre": "a", "texte": "Je me déconnecte de tous mes comptes.", "ordre_attendu": 1 },
+          { "lettre": "b", "texte": "Je ferme toutes les pages ouvertes.", "ordre_attendu": 3 },
+          { "lettre": "c", "texte": "J'éteins correctement l'ordinateur.", "ordre_attendu": 4 },
+          { "lettre": "d", "texte": "Je ne sauvegarde pas mes mots de passe.", "ordre_attendu": 2 }
+        ]
+      },
       "etapes_deconnexion": [
-        { "ordre": 1, "action": "Je me déconnecte de tous mes comptes (Google, école, e-mail)." },
-        { "ordre": 2, "action": "Je clique sur 'Ne pas enregistrer' si le navigateur me propose de retenir mon mot de passe." },
-        { "ordre": 3, "action": "Je ferme toutes les fenêtres et onglets ouverts." },
-        { "ordre": 4, "action": "Je ferme ma session ou j'éteins l'ordinateur proprement." }
+        { "ordre": 1, "action": "Je me déconnecte de tous mes comptes (e-mail, Google, réseaux, école)." },
+        { "ordre": 2, "action": "Je ne sauvegarde JAMAIS mes mots de passe sur le navigateur (« Jamais » / « Ne pas enregistrer »)." },
+        { "ordre": 3, "action": "Je ferme toutes les pages et fenêtres ouvertes (et j'efface l'historique/cookies si besoin : Ctrl+Maj+Suppr)." },
+        { "ordre": 4, "action": "Je ferme ma session utilisateur et j'éteins correctement l'ordinateur." }
+      ],
+      "tutoriels_os": [
+        {
+          "os": "Chromebook (ChromeOS)",
+          "icone": "💻",
+          "methode_1": "Clique sur l'heure en bas à droite de l'écran → Un menu s'ouvre → Clique sur « Se déconnecter ».",
+          "raccourci": "Ctrl + Maj + Q (deux fois)"
+        },
+        {
+          "os": "Mac (macOS)",
+          "icone": "🍎",
+          "methode_1": "Clique sur la pomme  en haut à gauche → Clique sur « Fermer la session... » → Confirme.",
+          "raccourci": "Control + Command + Q (verrouiller)"
+        },
+        {
+          "os": "Windows",
+          "icone": "🪟",
+          "methode_1": "Clique sur le bouton Démarrer (en bas à gauche) → Clique sur ton nom ou ton icône → Clique sur « Se déconnecter ».",
+          "raccourci": "Ctrl + Alt + Delete → « Se déconnecter »"
+        }
+      ],
+      "encadres": [
+        {
+          "type": "savais_tu",
+          "icone": "💡",
+          "titre": "Cookies et historique sur un ordinateur partagé (p. 5 & 130)",
+          "contenu": "Un cookie est un petit fichier stocké par les sites pour garder ta connexion active ou retenir tes préférences. Sur un PC partagé, utilise Ctrl + H (Historique) ou Ctrl + Maj + Suppr pour effacer les données de navigation et les cookies !"
+        }
+      ]
+    },
+    {
+      "id": "partie-0-5",
+      "titre": "5. Prêt pour le numérique ? Les 5 Chapitres (p. 17)",
+      "pages": "17 (PDF 19)",
+      "description": "Vue d'ensemble du parcours @lt_X 1re secondaire (Tome 1a et Tome 1b).",
+      "chapitres_programme": [
+        { "numero": 1, "tome": "1a", "titre": "Communication et collaboration", "icone": "💬", "resume": "Réseaux socio-numériques, messagerie instantanée vs courriel, outils collaboratifs, IA, vocabulaire de l'e-mail, éthique et nétiquette." },
+        { "numero": 2, "tome": "1a", "titre": "Sécurité", "icone": "🛡️", "resume": "Profil et vie privée, signalétique PEGI, HTTP vs HTTPS, signaler et bloquer, identité numérique, données actives/passives, aide humaine vs IA, économie de l'attention, déconnexion et prévention du cyberharcèlement." },
+        { "numero": 3, "tome": "1b", "titre": "Intelligence artificielle", "icone": "🤖", "resume": "Comprendre comment fonctionne l'IA générative, rédiger de bons prompts, vérifier les hallucinations et respecter l'éthique." },
+        { "numero": 4, "tome": "1b", "titre": "Informations et données", "icone": "🌐", "resume": "Rechercher et vérifier l'information en ligne, organiser ses dossiers, extensions de fichiers, stockage local et cloud." },
+        { "numero": 5, "tome": "1b", "titre": "Création de contenus", "icone": "🎨", "resume": "Produire et mettre en forme des documents textes, diaporamas, visuels et supports multimédias." }
       ]
     }
   ],
   "support_cours": {
-    "titre": "Présentation & Support de cours : Prise en main & Charte",
-    "description": "Diaporama de rentrée et synthèses NotebookLM sur la prise en main du PC et les règles d'or en classe.",
+    "titre": "Présentation & Support de cours : Introduction @lt_X (p. 9-17)",
+    "description": "Diaporama complet de rentrée : rapport au numérique, charte des 9 règles, anatomie de l'e-mail, comparatif Gmail/Outlook/Proton et déconnexion par OS.",
     "slides_url": "",
     "notebooklm_url": "https://notebooklm.google.com",
     "slides": [
-      { "titre": "Bienvenue en FMTTN Numérique (SeGEC)", "contenu": "2 périodes par semaine pour devenir un citoyen numérique autonome et responsable." },
-      { "titre": "Le Matériel de la Salle Informatique", "contenu": "Matériel partagé : clavier AZERTY, souris, raccourcis essentiels et respect des équipements." },
-      { "titre": "La Charte de Bonne Conduite", "contenu": "Droits et devoirs de l'élève : respect de la vie privée, interdiction de modifier les réglages du poste." },
-      { "titre": "La Règle d'or de Déconnexion", "contenu": "Fermer l'écran ≠ Se déconnecter ! Toujours fermer ses sessions Google et déconnecter son compte école." }
+      {
+        "titre": "1. Bienvenue en FMTTN Numérique (@lt_X 1re)",
+        "contenu": "Objectif du cours : dépasser le simple « savoir-faire » pour comprendre les enjeux du numérique, développer son esprit critique et agir en citoyen responsable à travers 5 grands chapitres."
+      },
+      {
+        "titre": "2. La Charte Numérique : Les 9 Règles d'Or (p. 10)",
+        "contenu": "En salle informatique, le matériel est partagé : on prend soin du poste, on ne modifie pas les réglages, on n'installe aucun jeu sans accord, on respecte les fichiers d'autrui et on garde son mot de passe strictement secret."
+      },
+      {
+        "titre": "3. Choisir un Mot de Passe Robuste & la 2FA (p. 12-13)",
+        "contenu": "Au moins 10 caractères combinant majuscules, minuscules, chiffres et symboles (ex: PommeVelo!27). Jamais de date de naissance ni 'azerty'. La double authentification (2FA) ajoute une 2e preuve d'identité par SMS ou application."
+      },
+      {
+        "titre": "4. Anatomie d'une Adresse E-mail (p. 13)",
+        "contenu": "Une adresse e-mail comporte 3 parties sans espace ni accent : 1) Nom d'utilisateur (ex: lucas.dupont2), 2) Arobase @ (« à l'adresse de »), 3) Nom de domaine (ex: icloud.com ou gmail.com)."
+      },
+      {
+        "titre": "5. Comparatif : Gmail, Outlook ou Proton Mail ? (p. 14)",
+        "contenu": "Gmail et Outlook offrent 15 Go mais affichent de la publicité et ont une confidentialité moyenne. Proton Mail (1 Go) est une messagerie éthique sans publicité offrant une très bonne confidentialité et un meilleur bilan écologique."
+      },
+      {
+        "titre": "6. Disparaître d'un Ordinateur Partagé (p. 16)",
+        "contenu": "Fermer l'écran ≠ Se déconnecter ! Ordre impératif : 1) Se déconnecter de ses comptes, 2) Ne jamais sauvegarder son mot de passe, 3) Fermer toutes les fenêtres (Ctrl+Maj+Suppr pour effacer les traces), 4) Fermer la session (Chromebook, Mac Ctrl+Cmd+Q, Windows Ctrl+Alt+Del)."
+      }
     ]
   }
 }

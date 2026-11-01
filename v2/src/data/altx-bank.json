@@ -3,7 +3,7 @@
     "reseaux": {
       "label": "Réseaux socio-numériques",
       "icon": "📱",
-      "lecon": "**Qu'est-ce qu'un réseau socio-numérique ?**\n\nUn réseau socio-numérique (RSN) est une plateforme en ligne qui permet à des personnes de se connecter, d'échanger et de partager des contenus.\n\n**Ce qu'on y fait :**\n→ Publier (textes, photos, vidéos)\n→ Commenter et réagir (likes, partages)\n→ Suivre d'autres utilisateurs\n→ Créer des groupes ou communautés\n\n**Exemples de réseaux socio-numériques :**\n→ Instagram : photos et vidéos courtes, stories\n→ TikTok : vidéos courtes, tendances\n→ YouTube : vidéos longues\n→ Snapchat : contenus éphémères\n→ Facebook : posts, groupes, events\n→ LinkedIn : réseau professionnel\n→ X (Twitter) / Mastodon : microblogging\n→ Pinterest : inspirations visuelles\n→ Reddit : forums thématiques\n\n**Réseau éthique vs non éthique :**\n→ Non éthique : cherche à maximiser le profit via la publicité, exploite les données personnelles\n→ Éthique : respecte la vie privée, sans publicité intrusive, ouvert (open source)\n\n**Le système de récompense :**\nLes likes et commentaires activent la dopamine dans le cerveau → crée une envie de revenir (comme l'expérience de Skinner)\n\n**Âge minimum légal :** 13 ans sur la plupart des plateformes (selon la loi COPPA/RGPD)\n\n**Microblogging :** forme de blog en version courte (ex: X/Twitter — messages courts)",
+      "lecon": "**Qu'est-ce qu'un réseau socio-numérique (RSN) ? (p. 20-31)**\n→ Une plateforme en ligne qui permet de créer un profil, de se connecter, d'échanger et de partager des contenus (textes, photos, vidéos, stories).\n→ **Âge minimum légal :** 13 ans sur la plupart des plateformes (TikTok, Instagram, Snapchat, Discord, Reddit, BeReal) ; 16 ans pour WhatsApp en Europe (RGPD).\n\n**Panorama des 10 RSN du manuel @lt_X :**\n→ **Instagram** (2010) : photos, Reels, stories | **TikTok** (2016) : vidéos courtes musicales & algorithme « Pour toi »\n→ **YouTube** (2005) : vidéos longues & Shorts | **Snapchat** (2011) : messages éphémères & Snap Map\n→ **Facebook** (2004) : groupes, événements, fil d'actualité | **LinkedIn** (2003) : réseau professionnel (emploi, CV)\n→ **X / Twitter** (2006) & **Mastodon** (2016) : microblogging (messages courts)\n→ **Pinterest** (2010) : inspirations visuelles | **Reddit** (2005) : forums thématiques (subreddits) | **BeReal** (2020) : photo instantanée avant/arrière une fois par jour\n\n**Réseau non éthique vs Réseau éthique :**\n→ **Non éthique** : cherche à maximiser le temps d'écran et le profit publicitaire en revendant ou profilant les données personnelles (économies de l'attention).\n→ **Éthique (ex. Mastodon, Pixelfed, Peertube)** : respecte la vie privée (RGPD), sans publicité ciblée ni algorithme addictif, souvent **open source** et décentralisé.\n\n**Valeur marchande de tes données personnelles (p. 25) :**\n→ Adresse e-mail active : ~1 € à 5 € | Profil démographique complet : ~10 € à 25 € | Historique d'achats/santé/bancaire : jusqu'à plusieurs centaines d'euros sur le marché publicitaire ou illégal.\n\n**RSN et Démocratie (2010-2026, p. 26) :**\n→ **2010-2011** : Printemps arabe (mobilisation citoyenne) | **2016** : Scandale Cambridge Analytica (profilage politique de 87 millions de comptes Facebook) | **2017** : Mouvement #MeToo | **2021** : Assaut du Capitole | **2022-2026** : Règlements européens **DSA** (Digital Services Act) et **AI Act** contre la désinformation.\n\n**🧠 Cerveau — La boîte de Skinner & la Dopamine (p. 28) :**\n→ Comme le rat de l'expérience de B.F. Skinner qui appuie sur un levier pour obtenir une récompense aléatoire, le cerveau libère de la **dopamine** (hormone du plaisir immédiat) à chaque notification, like ou commentaire imprévisible.\n\n**💡 Le savais-tu ? TikTok vs Douyin (p. 29) :**\n→ En Chine, l'application s'appelle **Douyin** : pour les moins de 14 ans, elle est limitée à **40 minutes par jour**, fermée entre 22h et 6h, et met en avant des contenus éducatifs et scientifiques !",
       "questions": [
         {
           "q": "Qu'est-ce qu'un réseau socio-numérique ?",
@@ -13,7 +13,8 @@
             "Un logiciel pour écrire des textes",
             "Un moteur de recherche",
             "Une application de jeux vidéo"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Une plateforme pour se connecter, échanger et partager des contenus."
         },
         {
           "q": "Quel réseau social est spécialisé dans les vidéos courtes et les tendances ?",
@@ -23,7 +24,8 @@
             "LinkedIn",
             "Pinterest",
             "Reddit"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : TikTok."
         },
         {
           "q": "Qu'est-ce que le microblogging ?",
@@ -33,7 +35,8 @@
             "Un long article de blog",
             "Un réseau professionnel",
             "Un système de messagerie"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Une forme de blog en version courte (messages courts)."
         },
         {
           "q": "Pourquoi les réseaux sociaux créent-ils une envie de revenir ?",
@@ -43,7 +46,8 @@
             "Ils sont très utiles pour les devoirs",
             "Ils sont gratuits et disponibles partout",
             "Ils permettent de regarder des films"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Ils activent la dopamine dans le cerveau via un système de récompense (likes, commentaires)."
         },
         {
           "q": "Qu'est-ce qu'un réseau social 'éthique' ?",
@@ -53,7 +57,8 @@
             "Un réseau très populaire avec beaucoup d'utilisateurs",
             "Un réseau qui gagne beaucoup d'argent",
             "Un réseau qui propose des jeux"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un réseau qui respecte la vie privée, sans publicité intrusive, souvent open source."
         },
         {
           "q": "Quel est l'âge minimum légal sur la plupart des réseaux sociaux ?",
@@ -63,7 +68,8 @@
             "10 ans",
             "16 ans",
             "18 ans"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : 13 ans."
         },
         {
           "q": "LinkedIn est principalement un réseau...",
@@ -73,7 +79,8 @@
             "de photos",
             "de jeux",
             "de musique"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : professionnel."
         },
         {
           "q": "Snapchat est connu pour ses contenus...",
@@ -83,7 +90,8 @@
             "permanents",
             "professionnels",
             "musicaux"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : éphémères (qui disparaissent)."
         },
         {
           "q": "Qu'est-ce qu'un réseau non éthique cherche principalement ?",
@@ -93,7 +101,8 @@
             "Protéger la vie privée des utilisateurs",
             "Offrir un service gratuit sans conditions",
             "Permettre de travailler en équipe"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Maximiser le profit via la publicité en exploitant les données personnelles."
         },
         {
           "q": "Sur Instagram, on partage principalement...",
@@ -103,7 +112,8 @@
             "Des articles de blog longs",
             "Des offres d'emploi",
             "Des recettes de cuisine uniquement"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Des photos et vidéos courtes, des stories."
         },
         {
           "q": "X (Twitter) et Mastodon sont des exemples de...",
@@ -113,7 +123,8 @@
             "Réseau professionnel",
             "Réseau de photos",
             "Réseau de vidéos longues"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Microblogging."
         },
         {
           "q": "Qu'est-ce qu'un 'like' déclenche dans le cerveau ?",
@@ -123,7 +134,8 @@
             "Une libération d'adrénaline",
             "Un stress",
             "Rien du tout"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Une libération de dopamine (sentiment de plaisir)."
         },
         {
           "q": "Pinterest est un réseau centré sur...",
@@ -133,7 +145,8 @@
             "Les vidéos musicales",
             "Les offres d'emploi",
             "Les nouvelles politiques"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Les inspirations visuelles (images, idées)."
         },
         {
           "q": "Reddit est organisé en...",
@@ -143,7 +156,8 @@
             "Stories éphémères",
             "Vidéos courtes",
             "Profils professionnels"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Forums thématiques (subreddits)."
         },
         {
           "q": "Qu'est-ce qu'un contenu 'éphémère' ?",
@@ -153,7 +167,8 @@
             "Un contenu qui dure indéfiniment",
             "Un contenu professionnel",
             "Un contenu en haute définition"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un contenu qui disparaît après un certain temps."
         },
         {
           "q": "Qu'est-ce que RGPD ?",
@@ -163,7 +178,8 @@
             "Un réseau social européen",
             "Un système de notation des jeux",
             "Un moteur de recherche"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Règlement Général sur la Protection des Données (loi européenne sur la vie privée)."
         },
         {
           "q": "Qu'est-ce qu'un réseau open source ?",
@@ -173,7 +189,8 @@
             "Un réseau payant",
             "Un réseau réservé aux professionnels",
             "Un réseau sans utilisateurs"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un réseau dont le code est ouvert et accessible à tous."
         },
         {
           "q": "Quel réseau est le plus adapté pour trouver un emploi ?",
@@ -183,7 +200,8 @@
             "TikTok",
             "Snapchat",
             "Pinterest"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : LinkedIn."
         },
         {
           "q": "Qu'est-ce que l'algorithme d'un réseau social fait ?",
@@ -193,7 +211,8 @@
             "Il supprime les mauvais contenus uniquement",
             "Il traduit les contenus en plusieurs langues",
             "Il crée automatiquement des posts"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Il sélectionne et ordonne les contenus montrés à chaque utilisateur selon ses préférences."
         },
         {
           "q": "Que signifie 'partager' un contenu sur un réseau social ?",
@@ -203,7 +222,8 @@
             "Supprimer un contenu",
             "Signaler un contenu inapproprié",
             "Créer un nouveau contenu original"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Diffuser le contenu de quelqu'un d'autre à sa propre communauté."
         },
         {
           "q": "YouTube est principalement un réseau de...",
@@ -213,14 +233,48 @@
             "Photos",
             "Messages textes",
             "Offres d'emploi"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Vidéos longues."
+        },
+        {
+          "q": "Comment s'appelle la version chinoise de TikTok et quelle règle applique-t-elle aux moins de 14 ans (p. 29) ?",
+          "rep": "Douyin : limitée à 40 minutes par jour, fermée la nuit et orientée vers des contenus éducatifs",
+          "choices": [
+            "Douyin : limitée à 40 minutes par jour, fermée la nuit et orientée vers des contenus éducatifs",
+            "WeChat : ouverte 24h/24 sans aucune limite",
+            "Baidu : réservée uniquement aux adultes de plus de 21 ans",
+            "Mastodon : sans vidéos ni musique"
+          ],
+          "corrige_enseignant": "Dans l'encadré 'Le savais-tu ?' (p. 29), le manuel explique qu'en Chine, TikTok s'appelle Douyin et limite l'usage des moins de 14 ans à 40 min/jour avec des vidéos éducatives."
+        },
+        {
+          "q": "Quelle expérience célèbre de psychologie explique pourquoi les notifications et les likes créent une habitude dans le cerveau (p. 28) ?",
+          "rep": "La boîte de Skinner (conditionnement par récompense variable qui libère de la dopamine)",
+          "choices": [
+            "La boîte de Skinner (conditionnement par récompense variable qui libère de la dopamine)",
+            "Le chat de Schrödinger",
+            "La pyramide de Maslow",
+            "Le théorème de Pythagore"
+          ],
+          "corrige_enseignant": "L'encadré 🧠 Cerveau (p. 28) compare les récompenses aléatoires des réseaux sociaux (likes, notifications) à la boîte de Skinner : l'imprévisibilité stimule la libération de dopamine."
+        },
+        {
+          "q": "Quel scandale de 2016 a révélé l'utilisation abusive des données personnelles de 87 millions d'utilisateurs Facebook à des fins politiques (p. 26) ?",
+          "rep": "Le scandale Cambridge Analytica",
+          "choices": [
+            "Le scandale Cambridge Analytica",
+            "La création de Wikipedia",
+            "Le lancement de BeReal",
+            "Le bogue de l'an 2000"
+          ],
+          "corrige_enseignant": "Page 26 (RSN et démocratie) : en 2016, l'affaire Cambridge Analytica a montré comment le profilage psychologique sur Facebook pouvait manipuler des électeurs."
         }
       ]
     },
     "messagerie": {
       "label": "Messagerie & Communication",
       "icon": "📧",
-      "lecon": "**Les outils de communication numérique**\n\n**Messagerie instantanée (chat) :**\n→ Échanges rapides, en temps réel\n→ Exemples : WhatsApp, Messenger, Telegram, Signal\n→ Idéale pour : conversations rapides, groupes d'amis\n→ Messages souvent éphémères ou non formels\n\n**Courriel / E-mail :**\n→ Plus formel, avec structure claire\n→ Exemples : Gmail, Outlook, Proton Mail, Yahoo Mail\n→ Idéal pour : démarches officielles, pièces jointes importantes\n\n**Vocabulaire essentiel de la messagerie :**\n→ **Expéditeur** : personne qui envoie le message\n→ **Destinataire** : personne qui reçoit le message\n→ **Objet** : titre du message (sujet)\n→ **Corps du message** : contenu du message\n→ **Pièce jointe** : fichier attaché au message\n→ **Boîte de réception** : dossier où arrivent les nouveaux messages\n→ **Boîte d'envoi** : dossier des messages en attente d'envoi\n→ **Éléments envoyés** : messages déjà envoyés\n→ **Brouillon** : message commencé mais pas encore envoyé\n→ **Spam / Courrier indésirable** : message non souhaité ou dangereux\n→ **Message lu / non lu** : indiqué par une icône ou un texte en gras\n→ **Cc (Copie carbone)** : envoyer une copie à quelqu'un d'autre (tout le monde voit qui est en copie)\n→ **Cci (Copie carbone invisible)** : copie cachée (le destinataire ne sait pas qui est en copie)\n\n**Choisir le bon outil :**\n→ Message urgent et informel → messagerie instantanée\n→ Demande officielle (école, employeur) → e-mail\n→ Partager un document important → e-mail avec pièce jointe\n→ Discussion de groupe entre amis → messagerie instantanée",
+      "lecon": "**Courriel (E-mail) vs Messagerie instantanée (Chat) (p. 38-55)**\n→ **Messagerie instantanée (WhatsApp, Signal, Telegram, Messenger, Discord)** : échanges rapides en temps réel, ton plus spontané, discussions de groupe.\n→ **Courriel / E-mail (Gmail, Outlook, Proton Mail)** : communication formelle et structurée (école, stage, administration), idéale pour les **pièces jointes** officielles et garder une trace écrite durable.\n\n**Anatomie d'une adresse e-mail (p. 13) :**\n→ `lucas.dupont2@icloud.com` = **Identifiant** (`lucas.dupont2`) + **Arrobase** (`@` = « chez ») + **Nom de domaine du fournisseur** (`icloud.com`). Jamais d'espace ni d'accent !\n\n**Les 15 mots du vocabulaire officiel de la messagerie (p. 39-40) :**\n→ **Expéditeur** (celui qui envoie) | **Destinataire** (celui qui reçoit)\n→ **Objet** : titre court résumant le sujet du mail (toujours obligatoire dans un mail formel !)\n→ **Corps du message** : texte principal structuré (Formule d'appel → Message → Formule de politesse → Signature)\n→ **Cc (Copie carbone)** : copie visible par tous les destinataires\n→ **Cci (Copie carbone invisible)** : copie cachée qui protège l'adresse e-mail des autres destinataires (obligatoire pour un envoi groupé RGPD)\n→ **Pièce jointe (PJ)** : fichier attaché (icône trombone 📎)\n→ **Boîte de réception** | **Boîte d'envoi** | **Éléments envoyés** | **Brouillons** | **Corbeille** | **Spam (Courrier indésirable)**\n→ **Répondre** vs **Répondre à tous** vs **Transférer**\n\n**Chiffrement de bout en bout (E2EE, p. 48) :**\n→ **Par défaut :** **Signal** (open source, ne collecte aucune métadonnée) et **WhatsApp** (mais appartient à Meta qui collecte les métadonnées).\n→ **Non chiffré de bout en bout par défaut :** **Telegram** (uniquement dans les « échanges secrets ») et **Discord** (modération serveur).\n\n**Validation sociale & 3 Métiers du numérique (p. 41-43) :**\n→ **💼 Community Manager** : anime les réseaux sociaux et modère une communauté.\n→ **💼 Créateur·rice de contenu** : conçoit des vidéos/articles en respectant ses sources et sa communauté.\n→ **💼 Spécialiste en marketing digital** : analyse les audiences dans le respect du RGPD.",
       "questions": [
         {
           "q": "Qu'est-ce qu'un expéditeur ?",
@@ -230,7 +284,8 @@
             "La personne qui reçoit le message",
             "Le titre du message",
             "Le fichier attaché"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : La personne qui envoie le message."
         },
         {
           "q": "Qu'est-ce qu'un brouillon ?",
@@ -240,7 +295,8 @@
             "Un message envoyé par erreur",
             "Un message reçu et lu",
             "Un message indésirable"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un message commencé mais pas encore envoyé."
         },
         {
           "q": "Qu'est-ce que le Spam ?",
@@ -250,7 +306,8 @@
             "Un message important de l'école",
             "Un message avec une pièce jointe",
             "Un brouillon non envoyé"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un message non souhaité ou dangereux (courrier indésirable)."
         },
         {
           "q": "WhatsApp est une application de...",
@@ -260,7 +317,8 @@
             "Courriel",
             "Réseau professionnel",
             "Partage de photos"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Messagerie instantanée."
         },
         {
           "q": "Gmail est une application de...",
@@ -270,7 +328,8 @@
             "Messagerie instantanée",
             "Réseau social",
             "Stockage de fichiers"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Courriel (e-mail)."
         },
         {
           "q": "Qu'est-ce que la Cci (Copie carbone invisible) ?",
@@ -280,7 +339,8 @@
             "Une copie visible de tous",
             "Un message transféré",
             "Un message supprimé"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Une copie envoyée à quelqu'un sans que les autres destinataires le sachent."
         },
         {
           "q": "Dans quel dossier arrivent les nouveaux messages ?",
@@ -290,7 +350,8 @@
             "Les éléments envoyés",
             "Le brouillon",
             "La boîte d'envoi"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : La boîte de réception."
         },
         {
           "q": "Qu'est-ce qu'une pièce jointe ?",
@@ -300,7 +361,8 @@
             "Le titre du message",
             "L'adresse e-mail du destinataire",
             "Le contenu principal du message"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un fichier attaché au message (document, photo, vidéo...)."
         },
         {
           "q": "Pour quelle situation choisit-on de préférence un e-mail ?",
@@ -310,7 +372,8 @@
             "Un message rapide à un ami",
             "Une blague entre copains",
             "Un jeu en ligne"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Une demande officielle (école, employeur, administration)."
         },
         {
           "q": "Qu'est-ce que l'objet d'un e-mail ?",
@@ -320,7 +383,8 @@
             "L'adresse de l'expéditeur",
             "Le contenu principal",
             "La pièce jointe"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Le titre du message qui résume son sujet."
         },
         {
           "q": "Proton Mail se distingue des autres services d'e-mail par...",
@@ -330,7 +394,8 @@
             "Sa rapidité de livraison",
             "Ses nombreuses publicités",
             "Son grand nombre d'utilisateurs"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Sa sécurité renforcée et le respect de la vie privée."
         },
         {
           "q": "La Cc (Copie carbone) permet de...",
@@ -340,7 +405,8 @@
             "Cacher une copie à quelqu'un",
             "Supprimer un message",
             "Transférer un e-mail"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Envoyer une copie à quelqu'un d'autre, visible par tous les destinataires."
         },
         {
           "q": "'Transférer' un e-mail signifie...",
@@ -350,7 +416,8 @@
             "Répondre à l'expéditeur uniquement",
             "Supprimer l'e-mail",
             "Archiver l'e-mail"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Renvoyer l'e-mail reçu à une autre personne."
         },
         {
           "q": "Un message en gras dans la boîte de réception indique...",
@@ -360,7 +427,8 @@
             "Un message important",
             "Un message avec pièce jointe",
             "Un spam"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un message non lu."
         },
         {
           "q": "Signal et Telegram sont des exemples de...",
@@ -370,7 +438,8 @@
             "Services d'e-mail",
             "Réseaux sociaux professionnels",
             "Moteurs de recherche"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Applications de messagerie instantanée."
         },
         {
           "q": "Quel dossier contient les messages en attente d'envoi ?",
@@ -380,7 +449,8 @@
             "La boîte de réception",
             "Les éléments envoyés",
             "Le brouillon"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : La boîte d'envoi."
         },
         {
           "q": "Pour une conversation de groupe entre amis, quel outil est le plus adapté ?",
@@ -390,7 +460,8 @@
             "L'e-mail",
             "Le courrier postal",
             "Un réseau professionnel"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : La messagerie instantanée (WhatsApp, Messenger...)."
         },
         {
           "q": "Quel dossier contient les messages que tu as effacés ?",
@@ -400,7 +471,8 @@
             "Le brouillon",
             "La boîte d'envoi",
             "Le spam"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Les éléments supprimés / Corbeille."
         },
         {
           "q": "'Écran fermé ≠ déconnecté' signifie que...",
@@ -410,7 +482,8 @@
             "Ton ordinateur est éteint",
             "Tes données sont effacées",
             "Ta session est terminée"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Fermer l'écran ne signifie pas que tu t'es déconnecté de tes comptes."
         },
         {
           "q": "Pourquoi est-il important d'écrire un objet clair dans un e-mail ?",
@@ -420,14 +493,48 @@
             "Pour que le message arrive plus vite",
             "Pour économiser de l'espace",
             "Parce que c'est obligatoire techniquement"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Pour que le destinataire comprenne de quoi parle le message avant de l'ouvrir."
+        },
+        {
+          "q": "Quelles applications de messagerie activent le chiffrement de bout en bout (E2EE) PAR DÉFAUT sur toutes les discussions (p. 48) ?",
+          "rep": "Signal et WhatsApp",
+          "choices": [
+            "Signal et WhatsApp",
+            "Telegram et Discord",
+            "SMS classiques et Discord",
+            "Snapchat et les commentaires publics Instagram"
+          ],
+          "corrige_enseignant": "Tableau comparatif p. 48 : Signal et WhatsApp chiffrent les messages de bout en bout par défaut (mais Signal est open source et ne collecte pas les métadonnées, contrairement à WhatsApp/Meta). Telegram ne chiffre de bout en bout que dans les 'échanges secrets' activés manuellement."
+        },
+        {
+          "q": "Tu dois envoyer un e-mail à 30 parents d'élèves qui ne se connaissent pas. Quel champ dois-tu utiliser pour respecter le RGPD (p. 39, 53) ?",
+          "rep": "Cci (Copie carbone invisible), pour cacher les adresses e-mail des destinataires entre eux",
+          "choices": [
+            "Cci (Copie carbone invisible), pour cacher les adresses e-mail des destinataires entre eux",
+            "Cc (Copie carbone), pour que tout le monde voie toutes les adresses",
+            "Le champ Objet",
+            "La Corbeille"
+          ],
+          "corrige_enseignant": "En Cci (Copie carbone invisible), aucun destinataire ne voit l'adresse e-mail des autres, ce qui protège leurs données personnelles conformément au RGPD."
+        },
+        {
+          "q": "Parmi ces adresses e-mail, laquelle est syntaxiquement VALIDE selon les règles du manuel (p. 13) ?",
+          "rep": "Luna.13@gmail.com",
+          "choices": [
+            "Luna.13@gmail.com",
+            "lucas dupont@gmail.com",
+            "marie.dupont.outlook.com",
+            "élodie@écoles.be"
+          ],
+          "corrige_enseignant": "Page 13 : une adresse e-mail valide contient exactement un '@', un identifiant sans espace ni accent, et un nom de domaine avec extension (ex: Luna.13@gmail.com)."
         }
       ]
     },
     "ethique": {
       "label": "Éthique & Droits numériques",
       "icon": "⚖️",
-      "lecon": "**L'éthique des médias numériques**\n\n**Principaux droits numériques :**\n→ **Droit à la vie privée** : choisir ce qu'on partage sur soi\n→ **Droit à l'oubli** : demander la suppression de données personnelles\n→ **Droit de retrait** : retirer son consentement à l'utilisation de ses données\n→ **Liberté d'expression** : pouvoir s'exprimer librement dans les limites de la loi\n→ **Droit à l'image** : contrôler l'utilisation de ses photos/vidéos\n\n**Censure vs Modération :**\n→ **Censure** : suppression arbitraire de contenus (sans justification légale)\n→ **Modération** : contrôle des contenus pour respecter des règles (légale)\n\n**Licences open source :**\n→ Permettent d'utiliser, modifier et redistribuer librement un logiciel\n→ Ex : Linux, LibreOffice, Firefox\n\n**La nétiquette (netiquette) :**\n→ Règles de politesse sur Internet\n→ Ne pas écrire EN MAJUSCULES (= crier)\n→ Respecter les autres, ne pas insulter\n→ Ne pas partager des informations privées sans permission\n→ Vérifier les informations avant de les partager\n→ Respecter la vie privée de chacun\n\n**Droits de propriété intellectuelle :**\n→ Les œuvres (textes, images, musiques, vidéos) sont protégées par le droit d'auteur\n→ Copier sans autorisation = violation du droit d'auteur\n→ Pour utiliser légalement : demander l'autorisation, citer la source, utiliser des contenus sous licence Creative Commons\n\n**Confidentialité et anonymat :**\n→ Anonymat : cacher son identité réelle\n→ Pseudonyme : utiliser un nom fictif\n→ Avatar : image qui représente un utilisateur en ligne",
+      "lecon": "**Éthique des médias numériques, Droits & IA (p. 44-84)**\n\n**Les 10 notions éthiques fondamentales (p. 44) :**\n→ **Droit à la vie privée (RGPD)** : contrôler qui accède à ses données personnelles.\n→ **Droit à l'image** : personne ne peut diffuser ta photo, ta vidéo ou ta voix sans ton **consentement explicite** (avant 13 ans : accord des parents requis).\n→ **Droit de retrait** (retirer son consentement ou supprimer une publication) vs **Droit à l'oubli** (demander le déréférencement d'informations anciennes sur les moteurs de recherche).\n→ **Liberté d'expression** : s'exprimer librement **dans les limites de la loi** (interdiction absolue de la diffamation, des insultes, du harcèlement, de l'incitation à la haine et du négationnisme).\n→ **Modération** (contrôle légal et légitime selon une charte) vs **Censure** (suppression arbitraire du pouvoir pour faire taire une opinion).\n→ **Anonymat** vs **Pseudonymat** (un pseudo protège vis-à-vis du public, mais la justice peut toujours identifier l'auteur via son adresse IP).\n\n**Propriété intellectuelle & Licences Creative Commons (p. 67-71) :**\n→ **Droit d'auteur** : protège automatiquement toute œuvre originale dès sa création.\n→ **Domaine public** : œuvres libres de droits (70 ans après le décès de l'auteur en Belgique/UE).\n→ **Les 4 symboles Creative Commons :**\n  • **BY (Attribution)** : obligation de citer l'auteur original (présent dans toutes les licences CC).\n  • **NC (Non Commercial)** : interdiction de faire un usage commercial / gagner de l'argent.\n  • **SA (Share Alike / Partage dans les mêmes conditions)** : les modifications doivent garder la même licence.\n  • **ND (No Derivatives / Pas de modification)** : interdiction de modifier, recadrer ou remixer l'œuvre.\n→ **💼 Métiers (p. 71)** : Juriste en propriété intellectuelle, Photographe / Illustrateur·rice, Éditeur·rice.\n\n**La Nétiquette (8 règles d'or, p. 73-75) :**\n→ Ne jamais écrire **EN MAJUSCULES** (= crier), saluer, rester poli, vérifier ses sources, respecter la confidentialité d'un message privé.\n\n**🤖 IA, Intégrité scolaire & AI Act européen (p. 46-47, 77) :**\n→ **Usage honnête de l'IA** : demander d'expliquer une leçon, générer un quiz d'entraînement, corriger ses fautes après avoir rédigé soi-même.\n→ **Triche avec l'IA** : faire rédiger son devoir à sa place et le copier-coller sans réflexion personnelle.\n→ **Confidentialité IA** : ne **JAMAIS** envoyer de nom complet, adresse, photo ou secret médical dans un prompt IA (anonymiser !).\n→ **AI Act (2024)** : premier règlement européen qui classe les IA par niveau de risque et interdit la notation sociale ou la manipulation cognitive.",
       "questions": [
         {
           "q": "Qu'est-ce que le droit à l'oubli ?",
@@ -437,7 +544,8 @@
             "Le droit d'oublier ses mots de passe",
             "Le droit de ne pas utiliser Internet",
             "Le droit d'effacer ses messages privés"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Le droit de demander la suppression de ses données personnelles d'une plateforme."
         },
         {
           "q": "Qu'est-ce que la nétiquette ?",
@@ -447,7 +555,8 @@
             "Un logiciel de sécurité",
             "Un type de réseau social",
             "Un langage de programmation"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Les règles de politesse et de bon comportement sur Internet."
         },
         {
           "q": "Écrire EN MAJUSCULES dans un message signifie...",
@@ -457,7 +566,8 @@
             "Que le message est important",
             "Que tu parles à quelqu'un de sourd",
             "Un style particulier"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Crier (considéré comme impoli en ligne)."
         },
         {
           "q": "Qu'est-ce que la licence open source ?",
@@ -467,7 +577,8 @@
             "Une licence payante pour les entreprises",
             "Un brevet protégeant un logiciel",
             "Une règle interdisant la copie"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Une licence qui permet d'utiliser, modifier et redistribuer librement un logiciel."
         },
         {
           "q": "Qu'est-ce que le droit à la vie privée numérique ?",
@@ -477,7 +588,8 @@
             "L'obligation de tout partager",
             "L'interdiction d'utiliser Internet",
             "Le droit à une connexion gratuite"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Le droit de choisir ce qu'on partage sur soi et de garder des informations pour soi."
         },
         {
           "q": "Quelle est la différence entre censure et modération ?",
@@ -487,7 +599,8 @@
             "Ce sont deux mots synonymes",
             "La modération est illégale ; la censure est légale",
             "Aucune différence"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : La censure est arbitraire et injuste ; la modération applique des règles légales."
         },
         {
           "q": "Qu'est-ce qu'un avatar en ligne ?",
@@ -497,7 +610,8 @@
             "Un vrai portrait photo",
             "Un logiciel de sécurité",
             "Un type de virus informatique"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Une image ou un personnage qui représente un utilisateur sur Internet."
         },
         {
           "q": "Le droit d'auteur protège...",
@@ -507,7 +621,8 @@
             "Les mots de passe uniquement",
             "Les données personnelles uniquement",
             "Les logiciels open source uniquement"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Les œuvres créatives (textes, musiques, images, vidéos)."
         },
         {
           "q": "Qu'est-ce que Creative Commons ?",
@@ -517,7 +632,8 @@
             "Un réseau social pour artistes",
             "Un logiciel de retouche photo",
             "Une loi gouvernementale"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un système de licences permettant de partager des œuvres avec certaines conditions définies par l'auteur."
         },
         {
           "q": "Utiliser une photo trouvée sur Internet sans autorisation est...",
@@ -527,7 +643,8 @@
             "Tout à fait légal si c'est pour un usage personnel",
             "Légal si la photo est gratuite",
             "Légal si on cite le site"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Une violation du droit d'auteur."
         },
         {
           "q": "Qu'est-ce que l'anonymat sur Internet ?",
@@ -537,7 +654,8 @@
             "Utiliser son vrai nom sur tous les sites",
             "Partager toutes ses informations personnelles",
             "Bloquer tous les sites web"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Cacher son identité réelle pour interagir sans être identifié."
         },
         {
           "q": "Qu'est-ce qu'un pseudonyme ?",
@@ -547,7 +665,8 @@
             "Son vrai prénom seulement",
             "Un nom de domaine",
             "Un identifiant chiffré"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un nom fictif utilisé à la place de son vrai nom."
         },
         {
           "q": "Que faut-il faire avant de partager une information trouvée en ligne ?",
@@ -557,7 +676,8 @@
             "La partager le plus vite possible",
             "La traduire dans une autre langue",
             "L'imprimer d'abord"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Vérifier que l'information est fiable et vraie."
         },
         {
           "q": "Qu'est-ce que le droit à l'image ?",
@@ -567,7 +687,8 @@
             "Le droit de regarder des films gratuitement",
             "L'obligation de mettre sa photo sur les réseaux",
             "Le droit de prendre des photos partout"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Le droit de contrôler l'utilisation de ses propres photos et vidéos."
         },
         {
           "q": "Éthique signifie...",
@@ -577,7 +698,8 @@
             "Suivre la loi uniquement",
             "Faire ce que tout le monde fait",
             "Protéger uniquement ses propres intérêts"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Réfléchir à ce qui est bien ou mal, et agir de façon juste et responsable envers les autres."
         },
         {
           "q": "Linux, LibreOffice et Firefox sont des exemples de logiciels...",
@@ -587,7 +709,8 @@
             "Payants et propriétaires",
             "Créés par des gouvernements",
             "Illégaux"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Open source (code ouvert, librement modifiable)."
         },
         {
           "q": "Qu'est-ce que le droit de retrait ?",
@@ -597,7 +720,8 @@
             "Le droit de retirer de l'argent en ligne",
             "Le droit de quitter un réseau social",
             "Le droit de supprimer tous ses messages"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Le droit de retirer son consentement à l'utilisation de ses données personnelles."
         },
         {
           "q": "Peut-on partager une photo d'un(e) ami(e) sans sa permission ?",
@@ -607,7 +731,8 @@
             "Oui, si la photo est belle",
             "Oui, si on est amis sur le réseau",
             "Oui, si c'est une blague"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Non, c'est une violation de son droit à l'image."
         },
         {
           "q": "Qu'est-ce que la 'liberté d'expression' sur Internet ?",
@@ -617,7 +742,8 @@
             "Le droit de dire absolument n'importe quoi",
             "L'obligation de s'exprimer en public",
             "Le droit de copier les œuvres des autres"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Le droit de s'exprimer librement, dans les limites de la loi (pas d'insultes, de menaces, de discrimination)."
         },
         {
           "q": "Comment doit-on citer une source trouvée sur Internet ?",
@@ -627,14 +753,59 @@
             "Copier-coller sans rien indiquer",
             "Mettre juste l'URL",
             "Mettre juste le nom du site"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Indiquer l'auteur, le titre, le site et la date de consultation."
+        },
+        {
+          "q": "Que signifie la licence Creative Commons « CC BY-NC-SA » (p. 69-70) ?",
+          "rep": "Citer l'auteur (BY), pas d'utilisation commerciale (NC), partager dans les mêmes conditions (SA)",
+          "choices": [
+            "Citer l'auteur (BY), pas d'utilisation commerciale (NC), partager dans les mêmes conditions (SA)",
+            "Aucune condition, on peut vendre l'œuvre sans citer l'auteur",
+            "Interdiction totale de partager l'œuvre",
+            "Obligation de payer des droits d'auteur à chaque lecture"
+          ],
+          "corrige_enseignant": "Pages 69-70 : BY = Attribution (citer l'auteur), NC = Non Commercial (pas de profit), SA = Share Alike (partager sous la même licence), ND = No Derivatives (pas de modification)."
+        },
+        {
+          "q": "Quelle est la différence entre le droit de retrait et le droit à l'oubli (p. 44) ?",
+          "rep": "Le droit de retrait retire son consentement/une publication ; le droit à l'oubli demande le déréférencement d'infos anciennes dans les moteurs de recherche",
+          "choices": [
+            "Le droit de retrait retire son consentement/une publication ; le droit à l'oubli demande le déréférencement d'infos anciennes dans les moteurs de recherche",
+            "Ce sont deux synonymes exacts du droit d'auteur",
+            "Le droit de retrait concerne les banques uniquement",
+            "Le droit à l'oubli permet d'effacer ses dettes"
+          ],
+          "corrige_enseignant": "Page 44 : le droit de retrait permet de retirer son consentement ou de supprimer un contenu qu'on a publié ; le droit à l'oubli (RGPD) permet de demander la suppression ou le déréférencement de données personnelles qui nuisent à la personne."
+        },
+        {
+          "q": "Dans quel cas l'utilisation d'une IA générative pour l'école est-elle honnête et autorisée (p. 46-47) ?",
+          "rep": "Lui demander de réexpliquer une notion difficile ou de me poser des questions de révision",
+          "choices": [
+            "Lui demander de réexpliquer une notion difficile ou de me poser des questions de révision",
+            "Copier-coller directement la rédaction écrite par l'IA en faisant croire que c'est la mienne",
+            "Envoyer la photo et le nom complet de mes camarades dans le prompt IA",
+            "Générer un faux certificat médical"
+          ],
+          "corrige_enseignant": "Pages 46-47 (*IA et éthique) : utiliser l'IA comme tuteur d'explication ou de révision est une aide à l'apprentissage ; copier-coller un devoir généré sans réflexion personnelle est une triche."
+        },
+        {
+          "q": "Qu'est-ce que l'AI Act adopté par l'Union européenne en 2024 (p. 47) ?",
+          "rep": "La première loi européenne qui encadre l'intelligence artificielle selon son niveau de risque pour protéger les citoyens",
+          "choices": [
+            "La première loi européenne qui encadre l'intelligence artificielle selon son niveau de risque pour protéger les citoyens",
+            "Un jeu vidéo sur les robots",
+            "Une application de messagerie américaine",
+            "Une licence pour vendre des photos"
+          ],
+          "corrige_enseignant": "Page 47 : l'AI Act européen (2024) réglemente les systèmes d'IA par niveau de risque et interdit les pratiques dangereuses comme la notation sociale des citoyens."
         }
       ]
     },
     "collaboration": {
       "label": "Outils de collaboration",
       "icon": "🤝",
-      "lecon": "**Les outils numériques pour créer, collaborer et partager**\n\n**Suites bureautiques en ligne (gratuites) :**\n→ **Google Workspace** : Docs, Sheets, Slides, Drive (Google)\n→ **Microsoft 365** : Word, Excel, PowerPoint, OneDrive\n→ **LibreOffice** : alternative open source locale\n→ **Framasoft** : outils libres et éthiques (Framapad, Framadate...)\n\n**Plateformes de collaboration scolaire :**\n→ **Google Classroom** : devoirs, cours, échanges avec les profs\n→ **Microsoft Teams** : visioconférence, travail en équipe\n→ **Moodle** : plateforme d'apprentissage en ligne (open source)\n→ **ENT (Espace Numérique de Travail)** : portail scolaire\n\n**Outils de communication en ligne :**\n→ Visioconférence : Google Meet, Zoom, Teams, Jitsi Meet\n→ Messagerie d'équipe : Slack, Teams, Discord\n→ Partage de fichiers : Google Drive, OneDrive, Nextcloud\n\n**Avantages de la collaboration numérique :**\n→ Travailler ensemble sans être au même endroit\n→ Modifier un document en temps réel à plusieurs\n→ Historique des modifications (on peut revenir en arrière)\n→ Accès depuis n'importe quel appareil\n\n**Bonnes pratiques :**\n→ Toujours nommer clairement ses fichiers\n→ Organiser ses documents dans des dossiers\n→ Faire des sauvegardes régulières\n→ Partager uniquement avec les personnes concernées",
+      "lecon": "**Outils de collaboration, Création & Transfert de fichiers (p. 32-37, 63-66, 82-84)**\n\n**Choisir le bon outil collaboratif (p. 33-35) :**\n→ **Traitement de texte collaboratif** : Google Docs, Microsoft Word Online, **Framapad** (libre/éthique), LibreOffice.\n→ **Tableur (calculs & graphiques)** : Google Sheets, Microsoft Excel, Calc.\n→ **Présentation & Design** : Google Slides, PowerPoint, **Canva** (affiches, infographies).\n→ **Sondages & Quiz** : Google Forms, **Framadate** (planifier une date), **Kahoot! / Wooclap** (quiz interactifs).\n→ **Stockage Cloud & Partage** : Google Drive, OneDrive, **Nextcloud** (open source).\n\n**Formats d'exportation dans Canva (p. 63-64) :**\n→ **PDF Standard** : documents écrits à lire ou envoyer par mail | **PDF pour impression** : haute résolution pour imprimer.\n→ **PNG** : image haute qualité (gère la transparence) | **JPG** : photo légère | **MP4** : vidéo | **GIF** : petite animation sans son.\n\n**🧠 Cerveau — Pourquoi collaborer avec l'IA sans réfléchir affaiblit le cerveau (p. 36) :**\n→ Si tu délègues toute la réflexion à une IA générative dès le départ, ton cerveau ne crée pas les connexions neuronales nécessaires à la mémoire à long terme et à l'esprit critique. Utilise d'abord ton cerveau, puis l'outil !\n\n**Téléverser (Upload) vs Télécharger (Download) (p. 82-84) :**\n→ **Téléverser (Upload ⬆️)** : envoyer un fichier **DEPUIS** ton appareil (ordinateur/téléphone) **VERS** Internet / un serveur Cloud (ex. déposer un devoir sur Classroom ou ajouter une pièce jointe dans un mail).\n→ **Télécharger (Download ⬇️)** : récupérer un fichier **DEPUIS** Internet / un serveur **VERS** la mémoire de ton appareil (dossier « Téléchargements »).",
       "questions": [
         {
           "q": "Google Docs, Sheets et Slides font partie de...",
@@ -644,7 +815,8 @@
             "Microsoft 365",
             "LibreOffice",
             "Framasoft"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Google Workspace."
         },
         {
           "q": "Quel outil est open source et gratuit, alternatif à Microsoft Office ?",
@@ -654,7 +826,8 @@
             "Google Docs",
             "Microsoft Word",
             "Pages (Apple)"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : LibreOffice."
         },
         {
           "q": "Google Classroom est principalement utilisé pour...",
@@ -664,7 +837,8 @@
             "Regarder des vidéos éducatives",
             "Jouer à des jeux éducatifs",
             "Stocker des photos"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Gérer les devoirs, cours et échanges entre élèves et professeurs."
         },
         {
           "q": "Un ENT (Espace Numérique de Travail) est...",
@@ -674,7 +848,8 @@
             "Un réseau social pour élèves",
             "Un logiciel de dessin",
             "Une application de géographie"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un portail numérique de l'école qui centralise les ressources et communications."
         },
         {
           "q": "Quel avantage principal offre la collaboration en ligne sur un document partagé ?",
@@ -684,7 +859,8 @@
             "Le document s'écrit tout seul",
             "Le document est automatiquement traduit",
             "Le document ne peut jamais être supprimé"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Plusieurs personnes peuvent modifier le document en même temps."
         },
         {
           "q": "Jitsi Meet est un outil de...",
@@ -694,7 +870,8 @@
             "Messagerie instantanée uniquement",
             "Partage de photos",
             "Réseau social"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Visioconférence open source et gratuit."
         },
         {
           "q": "Discord est principalement utilisé pour...",
@@ -704,7 +881,8 @@
             "Les devoirs scolaires",
             "Les e-mails professionnels",
             "Le partage de documents"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : La messagerie vocale et textuelle, populaire chez les gamers et communautés."
         },
         {
           "q": "Nextcloud est un outil de...",
@@ -714,7 +892,8 @@
             "Réseau social",
             "Messagerie instantanée",
             "Création de sites web"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Stockage et partage de fichiers (alternative open source à Google Drive)."
         },
         {
           "q": "Framasoft propose des outils...",
@@ -724,7 +903,8 @@
             "Payants et professionnels",
             "Créés par Google",
             "Pour la sécurité informatique"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Libres et éthiques, respectueux de la vie privée."
         },
         {
           "q": "Quelle bonne pratique s'applique à la gestion de ses fichiers numériques ?",
@@ -734,7 +914,8 @@
             "Mettre tous les fichiers sur le bureau",
             "Ne jamais supprimer de fichiers",
             "Toujours travailler sans sauvegarder"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Nommer clairement ses fichiers et les organiser dans des dossiers."
         },
         {
           "q": "OneDrive est le service de stockage en ligne de...",
@@ -744,7 +925,8 @@
             "Google",
             "Apple",
             "Amazon"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Microsoft."
         },
         {
           "q": "Moodle est une plateforme d'apprentissage...",
@@ -754,7 +936,8 @@
             "Payante créée par Google",
             "Réservée aux entreprises",
             "Uniquement pour la visioconférence"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Open source utilisée dans beaucoup d'écoles et universités."
         },
         {
           "q": "Quel outil permet de faire une visioconférence avec plusieurs personnes ?",
@@ -764,7 +947,8 @@
             "Gmail uniquement",
             "WhatsApp uniquement",
             "LinkedIn"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Google Meet, Zoom, Teams ou Jitsi Meet."
         },
         {
           "q": "Slack est un outil de...",
@@ -774,7 +958,8 @@
             "Réseau social grand public",
             "Visioconférence uniquement",
             "Gestion de fichiers"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Messagerie d'équipe professionnelle."
         },
         {
           "q": "Pourquoi est-il important de faire des sauvegardes régulières ?",
@@ -784,7 +969,8 @@
             "Pour libérer de l'espace disque",
             "Pour partager son travail automatiquement",
             "Parce que la loi l'oblige"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Pour ne pas perdre son travail en cas de panne ou d'erreur."
         },
         {
           "q": "Qu'est-ce qu'un historique des modifications ?",
@@ -794,7 +980,8 @@
             "Un résumé automatique du document",
             "Une liste des personnes ayant lu le document",
             "Un système de traduction"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un enregistrement de toutes les versions précédentes d'un document."
         },
         {
           "q": "Avec qui partager un document de travail en ligne ?",
@@ -804,7 +991,8 @@
             "Avec tous ses contacts",
             "Avec tout Internet (lien public)",
             "Avec personne pour plus de sécurité"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Uniquement avec les personnes concernées par le projet."
         },
         {
           "q": "Microsoft Teams combine...",
@@ -814,7 +1002,8 @@
             "Uniquement la messagerie",
             "Uniquement le partage de fichiers",
             "Uniquement les e-mails"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Visioconférence, messagerie et partage de documents."
         },
         {
           "q": "Framapad est un outil pour...",
@@ -824,7 +1013,8 @@
             "Créer des présentations",
             "Gérer ses e-mails",
             "Faire de la visioconférence"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Écrire un document texte collaboratif en ligne (alternative éthique à Google Docs)."
         },
         {
           "q": "Google Drive est un service de...",
@@ -834,7 +1024,41 @@
             "Messagerie instantanée",
             "Réseau social",
             "Création de sites web"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Stockage en ligne et partage de fichiers."
+        },
+        {
+          "q": "Quelle est la différence exacte entre « Téléverser » (Upload) et « Télécharger » (Download) (p. 82-84) ?",
+          "rep": "Téléverser = envoyer un fichier DE son appareil VERS Internet ; Télécharger = récupérer un fichier DEPUIS Internet VERS son appareil",
+          "choices": [
+            "Téléverser = envoyer un fichier DE son appareil VERS Internet ; Télécharger = récupérer un fichier DEPUIS Internet VERS son appareil",
+            "Téléverser = supprimer un fichier ; Télécharger = l'imprimer",
+            "Téléverser est réservé aux vidéos et télécharger aux photos",
+            "Il n'y a aucune différence entre les deux"
+          ],
+          "corrige_enseignant": "Pages 82-84 (*Téléverser vs Télécharger) : Téléverser (Upload ⬆️) envoie un fichier local vers un serveur distant (ex. remettre un devoir sur Classroom) ; Télécharger (Download ⬇️) enregistre un fichier d'Internet sur son appareil."
+        },
+        {
+          "q": "Sur Canva, quel format d'exportation dois-tu choisir pour envoyer une affiche statique par e-mail afin qu'elle s'affiche parfaitement sans pouvoir être déformée (p. 63-64) ?",
+          "rep": "PDF Standard (ou PNG pour une image)",
+          "choices": [
+            "PDF Standard (ou PNG pour une image)",
+            "MP4 (vidéo avec son)",
+            "MP3 (fichier audio)",
+            "EXE (programme exécutable)"
+          ],
+          "corrige_enseignant": "Pages 63-64 : le format PDF fige la mise en page des documents multi-pages ou affiches, tandis que PNG est idéal pour une image fixe de haute qualité."
+        },
+        {
+          "q": "Que se passe-t-il dans ton cerveau si tu laisses l'IA faire tout le travail de groupe à ta place (🧠 Cerveau, p. 36) ?",
+          "rep": "Le cerveau s'engage moins, mémorise moins bien et perd son esprit critique par manque d'effort cognitif",
+          "choices": [
+            "Le cerveau s'engage moins, mémorise moins bien et perd son esprit critique par manque d'effort cognitif",
+            "Le cerveau devient deux fois plus musclé automatiquement",
+            "La mémoire photographique s'active toute seule",
+            "Rien ne change dans l'apprentissage"
+          ],
+          "corrige_enseignant": "Encadré 🧠 Cerveau (p. 36) : apprendre nécessite un effort actif de réflexion ; déléguer la pensée à l'IA empêche la consolidation de la mémoire et affaiblit l'esprit critique."
         }
       ]
     }
@@ -843,7 +1067,7 @@
     "profil": {
       "label": "Profil & Vie privée",
       "icon": "👤",
-      "lecon": "**Profil numérique et protection de la vie privée**\n\n**Qu'est-ce qu'un profil ?**\n→ Un profil est un ensemble d'informations qui te représentent sur une plateforme\n→ Il peut être : public (visible par tous) ou privé (visible uniquement par tes contacts)\n\n**Informations personnelles à protéger :**\n→ Nom complet, prénom\n→ Date de naissance\n→ Adresse (domicile, école)\n→ Numéro de téléphone\n→ Mot de passe\n→ Localisation en temps réel\n→ Photos personnelles\n\n**Données personnelles (RGPD) :**\n→ Toute information permettant d'identifier une personne\n→ Droit à la protection, à l'accès, à la rectification et à l'effacement\n\n**Créer un bon mot de passe :**\n→ Au moins 12 caractères\n→ Mélange : majuscules, minuscules, chiffres, caractères spéciaux (!@#$...)\n→ Ne pas utiliser : prénom, date de naissance, \"123456\", \"password\"\n→ Un mot de passe différent par compte\n→ Utiliser un gestionnaire de mots de passe\n\n**Compte public vs privé :**\n→ Public : tout le monde peut voir tes publications et informations\n→ Privé : seuls tes abonnés approuvés peuvent voir ton contenu\n\n**Trace numérique :**\n→ Chaque action en ligne laisse une trace (clics, recherches, localisation)\n→ Ces traces peuvent persister longtemps\n→ Sur un ordinateur partagé : toujours fermer sa session et effacer l'historique",
+      "lecon": "**Profil numérique, Mots de passe & Données personnelles (p. 88-97, 124-125)**\n\n**Compte public vs Compte privé :**\n→ **Public** : n'importe quel inconnu sur Internet peut voir tes photos, tes stories, tes abonnés et tes habitudes.\n→ **Privé** : seules les personnes que tu as **approuvées** peuvent voir tes publications.\n\n**Les dangers concrets des publications publiques (Corrigé @lt_X, p. 93-95) :**\n→ **Partager sa carte GPS de jogging et ses horaires (Carole)** : révèle son trajet isolé et les heures où son domicile est vide (risque d'agression ou cambriolage).\n→ **Annoncer 3 semaines de vacances (ThéoCr8)** : prévient les cambrioleurs que la maison est inoccupée.\n→ **Publier la photo d'un enfant devant son école (Kylian & Adam)** : permet à un inconnu d'identifier l'enfant, son prénom et son école (atteinte au droit à l'image et sécurité physique).\n→ **Publier sa carte bancaire en story** : fraude et achats illégaux immédiats.\n\n**Données personnelles vs Données sensibles (RGPD, p. 96, 124) :**\n→ **Donnée à caractère personnel** : toute information permettant d'identifier directement ou indirectement une personne (nom, prénom, e-mail, téléphone, photo, adresse IP).\n→ **Donnée sensible / critique** : mot de passe, numéro bancaire, données de santé, localisation en temps réel, documents d'identité.\n→ **Principe de minimisation** : lors d'une inscription (jeu, cantine, réseau), ne fournir **que** les données strictement nécessaires !\n\n**Créer un mot de passe robuste (p. 14, 91, 129) :**\n→ Minimum **12 caractères** combinant **majuscules, minuscules, chiffres et symboles** (ex. `PommeVelo!27` ou `Tr0ub4dor&3!`).\n→ Unique pour chaque compte + activer la **double authentification (2FA)**.",
       "questions": [
         {
           "q": "Qu'est-ce qu'un profil numérique ?",
@@ -853,7 +1077,8 @@
             "Ton vrai passeport numérique",
             "Ton relevé bancaire",
             "Une photo de profil uniquement"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un ensemble d'informations qui te représentent sur une plateforme."
         },
         {
           "q": "Qu'est-ce qu'un compte 'privé' sur un réseau social ?",
@@ -863,7 +1088,8 @@
             "Un compte visible par tout le monde",
             "Un compte payant",
             "Un compte sans photo"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un compte visible uniquement par les abonnés que tu as approuvés."
         },
         {
           "q": "Quelle est la longueur minimale recommandée pour un bon mot de passe ?",
@@ -873,7 +1099,8 @@
             "4 caractères",
             "6 caractères",
             "8 caractères"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : 12 caractères minimum."
         },
         {
           "q": "Lequel de ces mots de passe est le plus sécurisé ?",
@@ -883,7 +1110,8 @@
             "123456",
             "motdepasse",
             "prénom2005"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Tr0ub4dor&3!."
         },
         {
           "q": "Qu'est-ce qu'une trace numérique ?",
@@ -893,7 +1121,8 @@
             "Un tatouage digital",
             "Une empreinte digitale physique",
             "Un document imprimé"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Toute donnée laissée par tes actions en ligne (clics, recherches, localisation...)."
         },
         {
           "q": "Sur un ordinateur partagé (école, bibliothèque), que faut-il faire en partant ?",
@@ -903,7 +1132,8 @@
             "Éteindre juste l'écran",
             "Ne rien faire, c'est automatique",
             "Seulement supprimer ses fichiers"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Fermer sa session et effacer l'historique de navigation."
         },
         {
           "q": "Quelles informations sont considérées comme 'personnelles' et à protéger ?",
@@ -913,7 +1143,8 @@
             "Couleur préférée, genre musical aimé",
             "Nom d'un personnage fictif",
             "Le titre d'un film regardé"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Nom, adresse, date de naissance, numéro de téléphone, localisation."
         },
         {
           "q": "Que signifie RGPD ?",
@@ -923,7 +1154,8 @@
             "Réseau Global de Protection Digitale",
             "Règles Générales de Partage de Données",
             "Réseau Général pour la Prévention des Dangers"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Règlement Général sur la Protection des Données."
         },
         {
           "q": "Pourquoi faut-il un mot de passe différent pour chaque compte ?",
@@ -933,7 +1165,8 @@
             "Pour s'en souvenir plus facilement",
             "Parce que la loi l'oblige",
             "Pour avoir plus de stockage"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Si un compte est piraté, les autres restent protégés."
         },
         {
           "q": "Qu'est-ce qu'un gestionnaire de mots de passe ?",
@@ -943,7 +1176,8 @@
             "Un carnet papier pour noter ses mots de passe",
             "Un ami de confiance",
             "Un service en ligne gratuit toujours sécurisé"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un logiciel qui stocke et génère des mots de passe sécurisés."
         },
         {
           "q": "Quelle information NE doit-on PAS partager publiquement en ligne ?",
@@ -953,7 +1187,8 @@
             "Sa couleur préférée",
             "Son film favori",
             "Son animal de compagnie"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Son adresse personnelle."
         },
         {
           "q": "Les données personnelles incluent...",
@@ -963,7 +1198,8 @@
             "Uniquement le nom et prénom",
             "Uniquement les photos",
             "Uniquement les mots de passe"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Toute information permettant d'identifier une personne."
         },
         {
           "q": "Pourquoi est-il risqué d'utiliser '123456' comme mot de passe ?",
@@ -973,7 +1209,8 @@
             "Il contient des chiffres interdits",
             "Il est trop long",
             "Il n'est pas en français"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : C'est trop simple et les hackers le testent en premier."
         },
         {
           "q": "Qu'est-ce que le droit à la rectification (RGPD) ?",
@@ -983,7 +1220,8 @@
             "Le droit d'utiliser Internet",
             "Le droit de changer de nom",
             "Le droit de copier des données"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Le droit de corriger des informations incorrectes te concernant."
         },
         {
           "q": "Qu'est-ce que le phishing (hameçonnage) ?",
@@ -993,7 +1231,8 @@
             "Un type de jeu vidéo",
             "Un virus informatique",
             "Un réseau social"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Une tentative de voler tes données personnelles via un faux message ou site."
         },
         {
           "q": "Un compte public sur un réseau social signifie que...",
@@ -1003,7 +1242,8 @@
             "Seuls tes amis peuvent te voir",
             "Seule ta famille peut te voir",
             "Personne ne peut te voir"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : N'importe qui sur Internet peut voir tes publications."
         },
         {
           "q": "Pourquoi ne faut-il pas utiliser son prénom et sa date de naissance dans un mot de passe ?",
@@ -1013,7 +1253,8 @@
             "Parce que ça fait un mot de passe trop long",
             "Parce que les accents posent problème",
             "Parce que c'est interdit par la loi"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Ces informations sont facilement trouvables par d'autres (réseaux sociaux, etc.)."
         },
         {
           "q": "Qu'est-ce que la 'localisation en temps réel' peut révéler ?",
@@ -1023,7 +1264,8 @@
             "Ton adresse e-mail uniquement",
             "Tes préférences musicales",
             "Tes contacts"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Où tu es à chaque instant (domicile, école, trajets habituels)."
         },
         {
           "q": "Comment effacer ses traces sur un navigateur partagé ?",
@@ -1033,7 +1275,8 @@
             "Éteindre juste l'ordinateur",
             "Changer la langue du navigateur",
             "Supprimer le bureau"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Supprimer l'historique, les cookies et les données de navigation."
         },
         {
           "q": "Qu'est-ce qu'un cookie dans un navigateur web ?",
@@ -1043,14 +1286,37 @@
             "Un gâteau numérique",
             "Un virus",
             "Un type de mot de passe"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un petit fichier qui enregistre des informations sur ta navigation (préférences, connexion...)."
+        },
+        {
+          "q": "Carole publie publiquement la carte GPS de son parcours de course à pied avec ses jours et heures habituels. Quel est le risque principal (p. 93) ?",
+          "rep": "Des inconnus connaissent son trajet exact et les heures où sa maison est vide (risque d'agression ou de cambriolage)",
+          "choices": [
+            "Des inconnus connaissent son trajet exact et les heures où sa maison est vide (risque d'agression ou de cambriolage)",
+            "Sa montre GPS va consommer plus de batterie",
+            "Ses chaussures vont s'user plus vite",
+            "Aucun risque car c'est du sport"
+          ],
+          "corrige_enseignant": "Corrigé p. 93 : publier son itinéraire GPS régulier et ses horaires permet à des personnes malveillantes de savoir exactement où la trouver seule ou quand cambrioler son domicile."
+        },
+        {
+          "q": "Pour t'inscrire à un jeu vidéo gratuit en ligne, le site te demande ton pseudo, ton e-mail, mais aussi le numéro de carte bancaire et la copie de ta carte d'identité. Que dois-tu conclure (p. 96) ?",
+          "rep": "Ces données sont excessives et suspectes : il ne faut pas les donner (principe de minimisation RGPD)",
+          "choices": [
+            "Ces données sont excessives et suspectes : il ne faut pas les donner (principe de minimisation RGPD)",
+            "C'est obligatoire pour tous les jeux gratuits",
+            "Il faut tout remplir pour gagner un bonus",
+            "Il faut envoyer la carte bancaire d'un ami"
+          ],
+          "corrige_enseignant": "Page 96 : un jeu gratuit n'a besoin que d'un pseudo et d'une adresse e-mail. Demander une carte bancaire ou une pièce d'identité est excessif et suspect (risque de phishing/fraude)."
         }
       ]
     },
     "signaletique": {
       "label": "Signalétique & PEGI",
       "icon": "🎮",
-      "lecon": "**La signalétique numérique — décoder les symboles**\n\n**Qu'est-ce qu'une signalétique ?**\n→ Un système de symboles et d'icônes pour informer rapidement\n→ Permet de comprendre les caractéristiques d'un produit sans lire tout le texte\n\n**PEGI (Pan European Game Information) :**\n→ Classification européenne des jeux vidéo\n→ Indique l'âge minimum recommandé : PEGI 3, 7, 12, 16, 18\n→ PEGI 3 : pour tous | PEGI 7 : peut faire peur à très jeunes | PEGI 12 : violence légère | PEGI 16 : violence, thèmes adultes | PEGI 18 : adultes uniquement\n→ Des pictogrammes indiquent aussi le type de contenu : violence, langage grossier, peur, jeux de hasard, contenu en ligne, drogue, discrimination, sexe\n\n**Recommandations temps d'écran :**\n→ Avant 3 ans : proscrit\n→ 3 à 6 ans : déconseillé, exceptionnel\n→ 6 à 9 ans : limité et encadré\n→ 9 à 12 ans : modéré et encadré\n→ 12 à 15 ans : autonomie avec contrôle parental\n→ 15 à 18 ans : vers l'autonomie complète\n\n**Le cerveau et les jeux vidéo :**\n→ Activent des zones liées à l'attention, réaction, prise de décision\n→ Les victoires libèrent de la dopamine (plaisir, motivation)\n→ Ce mécanisme peut pousser à jouer plus (risque de dépendance)\n→ Les jeux d'action peuvent améliorer rapidité de réaction\n\n**Signalétique web — HTTP vs HTTPS :**\n→ HTTP : protocole non sécurisé\n→ HTTPS : protocole sécurisé (données chiffrées) — icône cadenas dans le navigateur",
+      "lecon": "**Signalétique PEGI, Cinéma BienVu & Protocoles HTTP/HTTPS (p. 98-109)**\n\n**PEGI (Pan European Game Information, p. 98-102) :**\n→ Indique l'**âge minimum recommandé** pour protéger la sensibilité psychologique du jeune (et **JAMAIS** le niveau de difficulté du jeu !) :\n  • **PEGI 3** (ex. *Rocket League*, *EA Sports FC*) : pour tous.\n  • **PEGI 7** (ex. *Minecraft*) : sons ou scènes pouvant effrayer les tout-petits.\n  • **PEGI 12** (ex. *Fortnite*) : violence légère/irréaliste envers des personnages, langage légèrement grossier.\n  • **PEGI 16** : violence réaliste, tabac/drogue, langage grossier.\n  • **PEGI 18** (ex. *GTA V*) : adultes uniquement (violence extrême, crimes, drogues, sexe).\n→ **Les 8 descripteurs de contenu PEGI :** Violence (poing), Langage grossier (`@*!`), Peur (araignée), Drogue, Sexe, Discrimination, Jeux de hasard (dés), Achats intégrés / En ligne.\n\n**🧠 Cerveau — Les écrans à chaque âge (p. 101) :**\n→ **Avant 3 ans** : totalement proscrit | **3-6 ans** : déconseillé et très exceptionnel | **6-9 ans** : limité et encadré | **9-12 ans** : modéré et encadré (pas de RSN avant 13 ans) | **12-15 ans** : autonomie encadrée avec contrôle parental | **15-18 ans** : vers l'autonomie responsable.\n\n**💡 Le savais-tu ? Signalétique cinéma BienVu / GoedGezien (p. 103) :**\n→ Depuis le **1er janvier 2026**, la Belgique utilise le système **BienVu / GoedGezien** au cinéma avec 7 classes d'âge (**AL / Tous publics, 6, 9, 12, 14, 16, 18**) et des pictogrammes clairs.\n\n**HTTP vs HTTPS & Métiers de la Cybersécurité (p. 106-109) :**\n→ **HTTP** : non sécurisé, les données circulent en **texte clair** (lisible comme une carte postale sur le Wi-Fi).\n→ **HTTPS** : sécurisé par **chiffrement** (icône cadenas 🔒).\n→ **⚠️ Piège @lt_X :** Le cadenas HTTPS prouve que la connexion est chiffrée, mais **NE garantit PAS que le site est honnête** (un site de phishing peut avoir un cadenas !).\n→ **💼 Métiers :** **Pentester** (testeur·euse d'intrusion éthique) & **Ingénieur·e / Analyste en cybersécurité**.",
       "questions": [
         {
           "q": "Que signifie PEGI ?",
@@ -1060,7 +1326,8 @@
             "Protection Européenne des Gamers Intelligents",
             "Programme Européen de Gestion Informatique",
             "Portail Européen de Gestion d'Internet"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Pan European Game Information (classification européenne des jeux vidéo)."
         },
         {
           "q": "Un jeu classé PEGI 18 est destiné à...",
@@ -1070,7 +1337,8 @@
             "Les enfants de 18 mois",
             "Tout le monde dès 8 ans",
             "Les adolescents de 13 ans"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Les adultes uniquement (18 ans et plus)."
         },
         {
           "q": "Qu'est-ce qu'une signalétique ?",
@@ -1080,7 +1348,8 @@
             "Un texte explicatif détaillé",
             "Un logo de marque",
             "Une publicité"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un système de symboles pour informer rapidement sur les caractéristiques d'un produit."
         },
         {
           "q": "PEGI 3 signifie que le jeu est...",
@@ -1090,7 +1359,8 @@
             "Interdit aux moins de 3 ans",
             "Réservé aux adultes",
             "Pour les 3-7 ans uniquement"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Adapté à tous les âges à partir de 3 ans."
         },
         {
           "q": "Selon les recommandations, un enfant de 4 ans doit avoir une utilisation des écrans...",
@@ -1100,7 +1370,8 @@
             "Libre et sans limite",
             "Limitée à 8h par jour",
             "Totalement proscrite"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Déconseillée et exceptionnelle."
         },
         {
           "q": "Pourquoi les jeux vidéo peuvent-ils créer une dépendance ?",
@@ -1110,7 +1381,8 @@
             "Parce qu'ils sont gratuits",
             "Parce qu'ils se jouent seul",
             "Parce qu'ils sont interdits"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Parce qu'ils libèrent de la dopamine (plaisir) lors des victoires, créant l'envie de rejouer."
         },
         {
           "q": "L'icône cadenas dans la barre d'adresse d'un navigateur indique...",
@@ -1120,7 +1392,8 @@
             "Que le site est interdit",
             "Que le site est payant",
             "Que le site est hors ligne"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Que la connexion est sécurisée (HTTPS)."
         },
         {
           "q": "Quelle est la différence entre HTTP et HTTPS ?",
@@ -1130,7 +1403,8 @@
             "HTTPS est plus lent que HTTP",
             "HTTP est plus sécurisé",
             "Aucune différence pratique"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : HTTPS chiffre les données échangées, HTTP non (non sécurisé)."
         },
         {
           "q": "Un jeu PEGI 12 peut contenir...",
@@ -1140,7 +1414,8 @@
             "Du contenu pour adultes uniquement",
             "Aucun contenu problématique",
             "Des drogues et violence extrême"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Violence légère, thèmes légèrement effrayants."
         },
         {
           "q": "Selon les recommandations, à partir de quel âge l'enfant peut-il avoir une autonomie complète avec les écrans ?",
@@ -1150,7 +1425,8 @@
             "À partir de 5 ans",
             "À partir de 10 ans",
             "Jamais, il faut toujours contrôler"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : 15 à 18 ans (avec un accompagnement progressif)."
         },
         {
           "q": "Que libère le cerveau lors d'une victoire dans un jeu vidéo ?",
@@ -1160,7 +1436,8 @@
             "De l'adrénaline uniquement",
             "Du cortisol (stress)",
             "Rien de particulier"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : De la dopamine (substance liée au plaisir et à la motivation)."
         },
         {
           "q": "Les pictogrammes PEGI indiquent...",
@@ -1170,7 +1447,8 @@
             "Le prix du jeu",
             "La durée du jeu",
             "Le nombre de joueurs"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Le type de contenu (violence, langage grossier, peur, jeux de hasard...)."
         },
         {
           "q": "Un jeu PEGI 16 peut contenir...",
@@ -1180,7 +1458,8 @@
             "Contenu pour tous les âges",
             "Uniquement des jeux de hasard",
             "Contenu éducatif uniquement"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Violence importante, thèmes adultes, langage grossier."
         },
         {
           "q": "Pourquoi est-il conseillé d'encadrer l'usage des écrans pour les enfants ?",
@@ -1190,7 +1469,8 @@
             "Parce que les écrans consomment trop d'électricité",
             "Parce que c'est trop cher",
             "Parce que les écrans cassent facilement"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un usage excessif peut nuire à la santé physique, mentale, à la concentration et aux relations."
         },
         {
           "q": "Comment reconnaît-on qu'un site web est sécurisé ?",
@@ -1200,7 +1480,8 @@
             "Le site est en couleur",
             "Le site charge rapidement",
             "Le site est gratuit"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : L'URL commence par 'https://' et il y a un cadenas dans la barre d'adresse."
         },
         {
           "q": "Les jeux d'action peuvent améliorer...",
@@ -1210,7 +1491,8 @@
             "Les résultats scolaires dans toutes les matières",
             "La mémoire à long terme uniquement",
             "La santé physique comme le sport"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : La rapidité de réaction et la coordination œil-main."
         },
         {
           "q": "Avant 3 ans, l'usage des écrans est...",
@@ -1220,7 +1502,8 @@
             "Recommandé pour apprendre à parler",
             "Limité à 1h par jour",
             "Autorisé avec un adulte"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Totalement proscrit (fortement déconseillé par les experts)."
         },
         {
           "q": "PEGI 7 est recommandé pour...",
@@ -1230,7 +1513,8 @@
             "Les adultes de 7 ans d'expérience",
             "Les tout-petits uniquement",
             "Les adolescents de 7ème année"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Les enfants à partir de 7 ans (peut légèrement faire peur aux très jeunes)."
         },
         {
           "q": "Pourquoi faut-il faire attention à la signalétique PEGI ?",
@@ -1240,7 +1524,8 @@
             "Pour payer le bon prix",
             "Pour télécharger plus vite",
             "Pour avoir de meilleures performances"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Pour choisir des jeux adaptés à son âge et éviter des contenus inappropriés."
         },
         {
           "q": "Entre 12 et 15 ans, l'usage des écrans doit être...",
@@ -1250,14 +1535,48 @@
             "Totalement interdit",
             "Sans aucune limite",
             "Identique à celui des adultes"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Autonome mais avec un contrôle parental."
+        },
+        {
+          "q": "Comment s'appelle le nouveau système belge de signalétique au cinéma entré en vigueur le 1er janvier 2026 (p. 103) ?",
+          "rep": "BienVu / GoedGezien (avec classes d'âge AL, 6, 9, 12, 14, 16, 18 et pictogrammes)",
+          "choices": [
+            "BienVu / GoedGezien (avec classes d'âge AL, 6, 9, 12, 14, 16, 18 et pictogrammes)",
+            "Enfants Admis / Enfants Non Admis (loi de 1920)",
+            "Hollywood Rating System",
+            "Ciné-Pass 2000"
+          ],
+          "corrige_enseignant": "Page 103 : depuis le 1er janvier 2026, la Belgique utilise BienVu (en Wallonie/Bruxelles) / GoedGezien (en Flandre) pour informer sur l'âge et le contenu des films."
+        },
+        {
+          "q": "Quel est le rôle d'un « Pentester » (testeur·euse d'intrusion) présenté dans l'encadré 💼 Métier (p. 107) ?",
+          "rep": "Tester légalement la sécurité informatique d'une entreprise en simulant des cyberattaques pour trouver et corriger les failles",
+          "choices": [
+            "Tester légalement la sécurité informatique d'une entreprise en simulant des cyberattaques pour trouver et corriger les failles",
+            "Pirater illégalement des banques pour voler de l'argent",
+            "Vendre des stylos connectés",
+            "Supprimer les commentaires sur Instagram"
+          ],
+          "corrige_enseignant": "Encadré 💼 Métier p. 107 : le pentester est un hacker éthique mandaté par une organisation pour détecter ses vulnérabilités avant que des criminels ne les exploitent."
+        },
+        {
+          "q": "Un site web commence par « https:// » avec un cadenas 🔒. Est-il certain à 100 % que ce site est honnête et sans arnaque (p. 106-107) ?",
+          "rep": "Non ! Le cadenas prouve que la connexion est chiffrée, mais un escroc peut aussi créer un faux site de phishing en HTTPS",
+          "choices": [
+            "Non ! Le cadenas prouve que la connexion est chiffrée, mais un escroc peut aussi créer un faux site de phishing en HTTPS",
+            "Oui, le cadenas garantit que le vendeur est 100 % honnête",
+            "Oui, la police vérifie chaque site HTTPS tous les matins",
+            "Non, car HTTPS est moins sécurisé que HTTP"
+          ],
+          "corrige_enseignant": "Piège fondamental du Chapitre 2 (p. 106-107) : HTTPS chiffre le canal entre l'ordinateur et le serveur, mais ne certifie pas l'honnêteté morale du propriétaire du site."
         }
       ]
     },
     "cyber": {
       "label": "Cybersécurité & Cyberrisques",
       "icon": "🛡️",
-      "lecon": "**Les risques numériques et comment s'en protéger**\n\n**Cyberharcèlement :**\n→ Harcèlement qui se passe en ligne (insultes, menaces, exclusion, partage de photos humiliantes)\n→ Peut être anonyme mais les auteurs peuvent être identifiés\n→ Que faire : ne pas répondre, faire des captures d'écran, bloquer, signaler, en parler à un adulte\n→ En Belgique : numéro d'aide → Child Focus, police, école\n\n**Cyberattaque :**\n→ Virus : programme malveillant qui infecte un ordinateur\n→ Ransomware : bloque l'ordinateur et demande une rançon\n→ Phishing (hameçonnage) : faux site ou message pour voler des données\n→ Spyware : logiciel espion qui surveille ton activité\n\n**Cybermanipulation :**\n→ Fake news : fausses informations diffusées volontairement\n→ Deepfake : vidéo ou image truquée de façon réaliste\n→ Grooming : manipulation d'un enfant par un adulte malveillant en ligne\n\n**Cyberdépendance :**\n→ Usage excessif et incontrôlable d'Internet, jeux vidéo, réseaux sociaux\n→ Symptômes : irritabilité quand déconnecté, négliger les activités réelles, mentir sur le temps passé\n→ Se protéger : fixer des limites de temps, modes hors-ligne, activités alternatives\n\n**Se protéger :**\n→ Mettre à jour régulièrement son système et ses applications\n→ Utiliser un antivirus\n→ Ne jamais cliquer sur des liens suspects\n→ Ne jamais partager son mot de passe\n→ Activer la double authentification (2FA)\n→ Signaler tout contenu ou comportement suspect\n\n**Identité numérique :**\n→ Ce que les autres voient de toi en ligne (profils, publications, commentaires)\n→ Peut influencer ta réputation scolaire et professionnelle future",
+      "lecon": "**Cyberrisques, Signaler/Bloquer, Aide Humaine vs IA & Loi Belge (p. 110-111, 116-117, 134-145)**\n\n**Signaler vs Bloquer (p. 110-111) :**\n→ **Bloquer** : empêche la personne de te contacter **TOI** personnellement.\n→ **Signaler** (menu `...` → Signaler) : alerte les modérateurs de la plateforme pour supprimer le contenu illégal et protéger **TOUT LE MONDE**.\n\n**Les 5 formes officielles du cyberharcèlement (p. 139-140) :**\n1. **Le Flaming** : salve brutale d'insultes, moqueries ou menaces en ligne.\n2. **L'Ostracisme numérique** : exclusion volontaire d'un groupe WhatsApp/Snapchat/jeu pour isoler une victime.\n3. **La Violation du droit à l'image** : diffuser une photo ou vidéo humiliante sans consentement.\n4. **Le Revenge Porn / Cybersexisme** : diffuser des images intimes sans accord ou harceler selon le genre.\n5. **La Cyber-usurpation d'identité** : créer un faux compte ou pirater un profil pour nuire au nom de la victime.\n\n**Loi belge & Numéros d'urgence gratuits (p. 140-141) :**\n→ **Article 442bis du Code pénal belge** : punit le harcèlement de **15 jours à 2 ans de prison** et/ou d'une amende (et mesures du Tribunal de la jeunesse pour les mineurs).\n→ **116 000 (Child Focus)** : gratuit 24h/24 (grooming, sextorsion, retrait de photos intimes, disparition).\n→ **103 (Écoute-Enfants)** : écoute gratuite et anonyme tous les jours pour les jeunes.\n→ **107 (Télé-Accueil)** & **www.maintenantjenparle.be**.\n\n**Cyberattaque (Phishing, Malware) & Grooming (p. 134-138) :**\n→ **Grooming** : adulte malveillant qui manipule un mineur en ligne (70 % des victimes ont moins de 13 ans selon Child Focus). Ne jamais rencontrer seul·e un inconnu du net !\n→ **Phishing** : plus de 10 millions de messages suspects signalés à `suspect@safeonweb.be`.\n→ **💡 ROBLOX (p. 145)** : créatif mais vigilance sur le chat avec des inconnus et les achats en Robux.\n\n**Demander de l'aide à un humain plutôt qu'à l'IA (p. 116-117) :**\n→ Dans 5 situations (**1. Émotions/bien-être, 2. Urgence/harcèlement, 3. Santé physique/mentale, 4. Conflits relationnels, 5. Orientation**), seul un humain offre une vraie empathie, un diagnostic médical ou une protection réelle.",
       "questions": [
         {
           "q": "Qu'est-ce que le cyberharcèlement ?",
@@ -1267,7 +1586,8 @@
             "Un jeu vidéo agressif",
             "Une cyberattaque contre des entreprises",
             "Un virus informatique"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Du harcèlement qui se passe en ligne (insultes, menaces, exclusion, photos humiliantes...)."
         },
         {
           "q": "Que faire si on est victime de cyberharcèlement ?",
@@ -1277,7 +1597,8 @@
             "Répondre avec des insultes",
             "Supprimer son compte immédiatement",
             "Ne rien faire et ignorer"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Ne pas répondre, faire des captures d'écran, bloquer, signaler et en parler à un adulte."
         },
         {
           "q": "Qu'est-ce qu'un ransomware ?",
@@ -1287,7 +1608,8 @@
             "Un virus qui efface les fichiers",
             "Un logiciel espion",
             "Une fausse mise à jour"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un logiciel malveillant qui bloque l'ordinateur et demande une rançon pour le débloquer."
         },
         {
           "q": "Qu'est-ce que le phishing (hameçonnage) ?",
@@ -1297,7 +1619,8 @@
             "Un type de jeu de pêche en ligne",
             "Un virus qui détruit l'ordinateur",
             "Un réseau social dangereux"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Une tentative de voler tes données via un faux site ou message semblant officiel."
         },
         {
           "q": "Qu'est-ce qu'une fake news ?",
@@ -1307,7 +1630,8 @@
             "Une nouvelle internationale",
             "Un article de journal",
             "Une information ancienne"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Une fausse information diffusée volontairement pour tromper."
         },
         {
           "q": "Qu'est-ce qu'un deepfake ?",
@@ -1317,7 +1641,8 @@
             "Un faux profil sur les réseaux",
             "Un virus informatique",
             "Un email de spam"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Une vidéo ou image truquée de façon très réaliste grâce à l'IA."
         },
         {
           "q": "Qu'est-ce que la double authentification (2FA) ?",
@@ -1327,7 +1652,8 @@
             "Avoir deux mots de passe différents",
             "Se connecter depuis deux appareils",
             "Un antivirus double"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un système qui demande une deuxième vérification en plus du mot de passe (ex: code SMS)."
         },
         {
           "q": "Qu'est-ce qu'un spyware ?",
@@ -1337,7 +1663,8 @@
             "Un jeu d'espionnage",
             "Un service de surveillance légal",
             "Un antivirus"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un logiciel espion qui surveille et collecte ton activité en ligne sans que tu le saches."
         },
         {
           "q": "Qu'est-ce que le grooming ?",
@@ -1347,7 +1674,8 @@
             "Un jeu de rôle en ligne",
             "Un type de cyberharcèlement entre pairs",
             "Un réseau de partage de musique"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : La manipulation en ligne d'un enfant par un adulte malveillant pour l'exploiter."
         },
         {
           "q": "Qu'est-ce que la cyberdépendance ?",
@@ -1357,7 +1685,8 @@
             "Une allergie aux écrans",
             "Un manque d'accès à Internet",
             "Un problème de connexion"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un usage excessif et incontrôlable d'Internet, jeux ou réseaux sociaux."
         },
         {
           "q": "Comment reconnaître un lien suspect dans un e-mail ?",
@@ -1367,7 +1696,8 @@
             "Le lien est en rouge",
             "Le message est trop long",
             "Le message est en anglais"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : URL étrange, fautes d'orthographe, demande d'informations personnelles, expéditeur inconnu."
         },
         {
           "q": "Pourquoi faut-il mettre à jour régulièrement son système et ses applications ?",
@@ -1377,7 +1707,8 @@
             "Pour avoir de nouvelles fonctionnalités uniquement",
             "Pour libérer de l'espace disque",
             "Pour changer l'interface"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Pour corriger les failles de sécurité que les pirates pourraient exploiter."
         },
         {
           "q": "Qu'est-ce que l'identité numérique ?",
@@ -1387,7 +1718,8 @@
             "Ton vrai passeport",
             "Ton identifiant bancaire",
             "Ton numéro de téléphone uniquement"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : L'ensemble de ce que les autres voient de toi en ligne (profils, posts, commentaires...)."
         },
         {
           "q": "Un antivirus sert à...",
@@ -1397,7 +1729,8 @@
             "Accélérer l'ordinateur",
             "Créer des mots de passe",
             "Filtrer les e-mails uniquement"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Détecter et supprimer les logiciels malveillants (virus, malwares...)."
         },
         {
           "q": "Si tu reçois un message suspect d'un inconnu en ligne, que fais-tu ?",
@@ -1407,7 +1740,8 @@
             "Tu réponds pour avoir plus d'informations",
             "Tu partages le message avec tes amis",
             "Tu cliques sur les liens pour vérifier"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Tu ne réponds pas, tu bloques l'expéditeur et tu en parles à un adulte de confiance."
         },
         {
           "q": "Ton identité numérique peut influencer...",
@@ -1417,7 +1751,8 @@
             "Uniquement tes amis en ligne",
             "Rien dans la vraie vie",
             "Seulement tes résultats scolaires actuels"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Ta réputation scolaire et professionnelle future."
         },
         {
           "q": "Qu'est-ce qu'un virus informatique ?",
@@ -1427,7 +1762,8 @@
             "Une maladie qui touche les utilisateurs d'ordinateur",
             "Un bug normal du système",
             "Un e-mail non voulu"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un programme malveillant qui infecte un ordinateur et peut se propager."
         },
         {
           "q": "Un signe de cyberdépendance est...",
@@ -1437,7 +1773,8 @@
             "Passer 30 minutes par jour en ligne",
             "Utiliser Internet pour faire ses devoirs",
             "Avoir plusieurs comptes sur des réseaux différents"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Être très irritable quand on est déconnecté et négliger les activités réelles."
         },
         {
           "q": "Pourquoi ne faut-il JAMAIS partager son mot de passe ?",
@@ -1447,7 +1784,8 @@
             "Parce que les mots de passe sont secrets par définition légale",
             "Parce que ça ralentit la connexion",
             "Parce que c'est difficile à taper"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Même une personne de confiance pourrait l'utiliser à mauvais escient ou se le faire voler."
         },
         {
           "q": "En cas de cyberharcèlement, à qui peut-on s'adresser en Belgique ?",
@@ -1457,14 +1795,70 @@
             "Uniquement à ses amis en ligne",
             "Aux créateurs du réseau social uniquement",
             "À personne, on gère seul"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Child Focus, la police, l'école, un adulte de confiance."
+        },
+        {
+          "q": "Quelle est la différence entre « Bloquer » et « Signaler » sur un réseau social (p. 110-111) ?",
+          "rep": "Bloquer empêche la personne de te contacter TOI ; Signaler alerte les modérateurs pour supprimer le contenu et protéger TOUT LE MONDE",
+          "choices": [
+            "Bloquer empêche la personne de te contacter TOI ; Signaler alerte les modérateurs pour supprimer le contenu et protéger TOUT LE MONDE",
+            "Bloquer supprime le compte du harceleur de tout Internet",
+            "Signaler envoie un message d'excuse au harceleur",
+            "Ce sont deux boutons qui font exactement la même chose"
+          ],
+          "corrige_enseignant": "Pages 110-111 (*Signaler et bloquer) : Bloquer te protège individuellement ; Signaler déclenche l'intervention de la plateforme pour protéger l'ensemble des utilisateurs."
+        },
+        {
+          "q": "Quelles sont les 5 formes officielles de cyberharcèlement décrites dans le manuel @lt_X (p. 139-140) ?",
+          "rep": "Flaming, Ostracisme numérique, Violation du droit à l'image, Revenge Porn/Cybersexisme, Cyber-usurpation d'identité",
+          "choices": [
+            "Flaming, Ostracisme numérique, Violation du droit à l'image, Revenge Porn/Cybersexisme, Cyber-usurpation d'identité",
+            "Spamming, Gaming, Streaming, Blogging, Coding",
+            "HTTP, HTTPS, HTML, CSS, JavaScript",
+            "Cookies, Cache, Historique, Favoris, Téléchargements"
+          ],
+          "corrige_enseignant": "Pages 139-140 : les 5 formes sont le Flaming (insultes massives), l'Ostracisme (exclusion volontaire), la Violation du droit à l'image, le Revenge Porn/Cybersexisme et la Cyber-usurpation d'identité."
+        },
+        {
+          "q": "Que prévoit l'article 442bis du Code pénal belge contre le harcèlement (p. 140) ?",
+          "rep": "Une peine de prison de 15 jours à 2 ans et/ou une amende (et des mesures du Tribunal de la jeunesse pour les mineurs)",
+          "choices": [
+            "Une peine de prison de 15 jours à 2 ans et/ou une amende (et des mesures du Tribunal de la jeunesse pour les mineurs)",
+            "Aucune sanction si cela se passe sur Internet",
+            "Une simple coupure de Wi-Fi pendant 24 heures",
+            "Une amende uniquement à partir de 25 ans"
+          ],
+          "corrige_enseignant": "Page 140 : le cyberharcèlement est un délit puni par l'article 442bis du Code pénal belge (15 jours à 2 ans d'emprisonnement et/ou amende)."
+        },
+        {
+          "q": "Quels sont les deux numéros d'urgence gratuits à connaître en Belgique en cas de cyberharcèlement, de grooming ou de mal-être (p. 137, 141) ?",
+          "rep": "103 (Écoute-Enfants) et 116 000 (Child Focus)",
+          "choices": [
+            "103 (Écoute-Enfants) et 116 000 (Child Focus)",
+            "999 et 000",
+            "404 et 500",
+            "1234 et 5678"
+          ],
+          "corrige_enseignant": "Pages 137 et 141 : le 116 000 (Child Focus, 24h/24) et le 103 (Écoute-Enfants, gratuit et anonyme) ainsi que le 107 (Télé-Accueil) et maintenantjenparle.be."
+        },
+        {
+          "q": "Pourquoi faut-il demander de l'aide à un humain plutôt qu'à une IA en cas de détresse émotionnelle, de conflit ou de danger (p. 116-117) ?",
+          "rep": "Parce qu'un humain ressent une vraie empathie, garde le secret professionnel et peut intervenir concrètement pour te protéger",
+          "choices": [
+            "Parce qu'un humain ressent une vraie empathie, garde le secret professionnel et peut intervenir concrètement pour te protéger",
+            "Parce que l'IA est fermée le week-end",
+            "Parce que l'IA ne sait pas lire le français",
+            "Parce que les humains répondent en moins d'une milliseconde"
+          ],
+          "corrige_enseignant": "Pages 116-117 (*Demander de l'aide humaine plutôt qu'à l'IA) : l'IA simule du texte sans ressentir d'émotions et ne peut ni poser de diagnostic médical fiable ni intervenir physiquement en cas de danger."
         }
       ]
     },
     "confidentialite": {
       "label": "Confidentialité & Paramètres",
       "icon": "⚙️",
-      "lecon": "**Gérer sa confidentialité et ses paramètres en ligne**\n\n**Paramètres de confidentialité :**\n→ Accessible dans les réglages de chaque application/réseau social\n→ Permettent de contrôler qui voit quoi\n→ À vérifier régulièrement (les plateformes changent leurs paramètres)\n\n**Ce qu'on peut contrôler :**\n→ Visibilité du profil (public/privé)\n→ Qui peut te contacter (tout le monde, abonnés, personne)\n→ Géolocalisation (activer/désactiver le partage de localisation)\n→ Accès aux contacts, micro, caméra (pour chaque app)\n→ Notifications (quand et comment être notifié)\n→ Historique et données collectées\n\n**Effacer ses traces :**\n→ Supprimer l'historique de navigation\n→ Supprimer les cookies et données du site\n→ Se déconnecter de tous les comptes\n→ Désactiver la synchronisation automatique\n→ Utiliser la navigation privée (ne sauvegarde pas l'historique localement)\n\n**Navigation privée ≠ anonymat total :**\n→ La navigation privée n'empêche pas les sites, ton fournisseur d'accès ou ton école de voir tes activités\n→ Elle empêche juste que l'historique soit sauvegardé sur l'appareil\n\n**Droits RGPD sur ses données :**\n→ Droit d'accès : voir quelles données sont collectées\n→ Droit de rectification : corriger des informations incorrectes\n→ Droit à l'effacement (oubli) : demander la suppression\n→ Droit d'opposition : s'opposer à l'utilisation de ses données\n→ Droit à la portabilité : récupérer ses données dans un format utilisable",
+      "lecon": "**Options de confidentialité, Déconnexion & Économie de l'attention (p. 118-133, 146-147)**\n\n**Les 8 réflexes de confidentialité (p. 126-129) :**\n1. Mot de passe fort (12+ caractères) et unique | 2. Mises à jour régulières | 3. Couper la géolocalisation | 4. Trier sa liste d'amis | 5. Passer son compte en **Privé** (ex. `@alt_xnum`) | 6. Limiter qui peut envoyer des messages privés | 7. Activer la **double authentification (2FA)** | 8. Refuser les autorisations abusives (ex. une appli lampe de poche qui demande accès aux contacts et au micro !).\n\n**Se déconnecter et effacer ses traces sur un PC partagé (p. 16, 130-133) :**\n→ **Écran fermé ≠ déconnecté !** (Cas de Lucas qui laisse son Instagram ouvert à l'école).\n→ **Ordre exact avant de quitter un poste :** 1. Se déconnecter du site/mail → 2. Effacer les traces si nécessaire → 3. Fermer le navigateur → 4. Fermer la session de l'ordinateur (Chromebook / Mac  / Windows).\n→ **Raccourcis clavier à connaître :**\n  • **Ctrl + H** : ouvrir l'historique de navigation.\n  • **Ctrl + Maj + Suppr** : ouvrir la fenêtre pour supprimer l'historique, les cookies et les mots de passe.\n\n**🧠 Cerveau — Le mythe du multitâche (« Task Switching ») & le FOMO (p. 118-121) :**\n→ Le cerveau ne fait pas deux tâches réfléchies en même temps : il bascule (**switching**, test `1-Z-2-Y-3-X`), ce qui double le temps et multiplie les erreurs.\n→ **FOMO (Fear Of Missing Out)** : peur anxieuse de rater une information ou une story.\n→ **Effet de simple exposition (Zajonc)** : plus on voit un contenu, plus on l'apprécie.\n\n**Les 9 techniques pour capter ton attention en ligne (p. 121) :**\n1. Défilement infini (*infinite scroll*) | 2. Vidéos courtes et dynamiques | 3. Lecture automatique (*autoplay*) | 4. Gamification (flammes Snapchat, badges) | 5. Récompenses variables (likes/dopamine) | 6. Algorithmes de recommandation | 7. Titres accrocheurs (*clickbait*) | 8. Contenus éphémères (stories 24h) | 9. Notifications fréquentes.\n\n**Bienfaits de la déconnexion (p. 122-123) :**\n→ **Pour soi** : meilleur sommeil, concentration retrouvée, moins de stress, temps pour le sport/lecture.\n→ **Pour les autres** : respecter leur repos (pas de mail à 22h !), être vraiment présent et à l'écoute en face à face.",
       "questions": [
         {
           "q": "Où trouve-t-on les paramètres de confidentialité sur un réseau social ?",
@@ -1474,7 +1868,8 @@
             "Dans les messages privés",
             "Dans le profil public",
             "Dans les publicités"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Dans les réglages ou paramètres de l'application/site."
         },
         {
           "q": "Que permet la navigation privée (mode incognito) ?",
@@ -1484,7 +1879,8 @@
             "Être complètement anonyme sur Internet",
             "Accéder à des sites bloqués",
             "Être protégé des virus"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Ne pas sauvegarder l'historique sur l'appareil utilisé."
         },
         {
           "q": "La navigation privée rend-elle totalement anonyme ?",
@@ -1494,7 +1890,8 @@
             "Oui, personne ne peut te voir",
             "Oui, si tu utilises un VPN en plus",
             "Oui, uniquement sur les réseaux sociaux"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Non, les sites, ton fournisseur d'accès et l'école peuvent toujours voir tes activités."
         },
         {
           "q": "Le droit à l'effacement (RGPD) permet de...",
@@ -1504,7 +1901,8 @@
             "Effacer tous tes messages",
             "Supprimer ton compte sans conditions",
             "Corriger des informations incorrectes"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Demander à une plateforme de supprimer tes données personnelles."
         },
         {
           "q": "Pourquoi faut-il vérifier régulièrement ses paramètres de confidentialité ?",
@@ -1514,7 +1912,8 @@
             "Pour trouver de nouvelles fonctionnalités",
             "Parce que les paramètres changent seuls",
             "Pour améliorer les performances de l'app"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Les plateformes modifient parfois leurs paramètres par défaut, ce qui peut réduire ta confidentialité."
         },
         {
           "q": "Que signifie désactiver la géolocalisation d'une application ?",
@@ -1524,7 +1923,8 @@
             "Éteindre le GPS de l'appareil",
             "Supprimer l'application",
             "Désactiver Internet"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Empêcher l'application d'accéder à ta position géographique."
         },
         {
           "q": "Qu'est-ce que le droit d'accès (RGPD) ?",
@@ -1534,7 +1934,8 @@
             "Le droit d'accéder à Internet",
             "Le droit de corriger ses données",
             "Le droit de supprimer ses données"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Le droit de savoir quelles données sont collectées par une plateforme à ton sujet."
         },
         {
           "q": "Qu'est-ce que le droit à la portabilité (RGPD) ?",
@@ -1544,7 +1945,8 @@
             "Le droit de se déplacer librement avec ses données",
             "Le droit de copier les données des autres",
             "Le droit d'utiliser Internet partout"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Le droit de récupérer ses données dans un format réutilisable pour les transférer."
         },
         {
           "q": "Sur un ordinateur partagé, que faut-il faire après avoir utilisé un compte en ligne ?",
@@ -1554,7 +1956,8 @@
             "Seulement fermer l'onglet",
             "Éteindre l'ordinateur",
             "Changer le mot de passe"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Se déconnecter et effacer l'historique de navigation."
         },
         {
           "q": "Pourquoi limiter l'accès d'une application à tes contacts ?",
@@ -1564,7 +1967,8 @@
             "Pour économiser la batterie",
             "Pour aller plus vite sur Internet",
             "Pour recevoir moins de notifications"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Pour ne pas partager les données de tes contacts sans leur consentement."
         },
         {
           "q": "Qu'est-ce qu'un cookie (dans un navigateur web) ?",
@@ -1574,7 +1978,8 @@
             "Un virus malveillant",
             "Un système de publicité interactif",
             "Un type de mot de passe"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un fichier stocké sur l'appareil qui mémorise des informations sur ta navigation."
         },
         {
           "q": "La synchronisation automatique d'un compte signifie que...",
@@ -1584,7 +1989,8 @@
             "Ton compte se connecte automatiquement",
             "Tes messages s'envoient automatiquement",
             "Ton appareil se met à jour seul"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Tes données sont automatiquement sauvegardées et partagées sur tous tes appareils."
         },
         {
           "q": "Quel droit RGPD permet de corriger une information incorrecte sur soi ?",
@@ -1594,7 +2000,8 @@
             "Le droit d'accès",
             "Le droit à l'effacement",
             "Le droit de portabilité"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Le droit de rectification."
         },
         {
           "q": "Supprimer les cookies sur un navigateur permet de...",
@@ -1604,7 +2011,8 @@
             "Supprimer tes fichiers personnels",
             "Désinstaller le navigateur",
             "Changer ton adresse IP"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Effacer les informations sauvegardées par les sites sur ton appareil."
         },
         {
           "q": "Pourquoi est-il important de contrôler qui peut te contacter en ligne ?",
@@ -1614,7 +2022,8 @@
             "Pour avoir moins de messages à lire",
             "Pour économiser de l'espace de stockage",
             "Pour améliorer la qualité de la connexion"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Pour éviter les contacts indésirables, le harcèlement ou la manipulation."
         },
         {
           "q": "Qu'est-ce que le droit d'opposition (RGPD) ?",
@@ -1624,7 +2033,8 @@
             "Le droit de refuser les lois",
             "Le droit de bloquer des utilisateurs",
             "Le droit de ne pas avoir de compte en ligne"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Le droit de s'opposer à l'utilisation de ses données personnelles à des fins commerciales."
         },
         {
           "q": "Un profil mis en 'privé' sur Instagram signifie que...",
@@ -1634,7 +2044,8 @@
             "Ton profil est totalement invisible",
             "Seuls tes amis Facebook peuvent te voir",
             "Personne ne peut te retrouver dans les recherches"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Seuls les abonnés que tu as approuvés peuvent voir tes publications."
         },
         {
           "q": "Pourquoi limiter les notifications d'une application ?",
@@ -1644,7 +2055,8 @@
             "Pour économiser la batterie uniquement",
             "Pour cacher son activité",
             "Pour recevoir plus de messages"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Pour ne pas être constamment interrompu et mieux contrôler son temps d'écran."
         },
         {
           "q": "Qu'est-ce que la collecte de données par une application ?",
@@ -1654,7 +2066,8 @@
             "Le fait de télécharger des fichiers",
             "Le fait de créer un profil utilisateur",
             "Le fait de mettre à jour l'application"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Le fait de rassembler des informations sur tes usages, préférences et comportements."
         },
         {
           "q": "Si une application demande accès à ta caméra pour une fonction qui n'en a pas besoin, tu devrais...",
@@ -1664,14 +2077,48 @@
             "Accepter pour que l'app fonctionne mieux",
             "Désinstaller l'app immédiatement",
             "Ne rien faire"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Refuser l'accès et signaler le problème."
+        },
+        {
+          "q": "Quel raccourci clavier ouvre directement la fenêtre permettant d'effacer l'historique, les cookies et les données de navigation (p. 16, 131) ?",
+          "rep": "Ctrl + Maj + Suppr (Ctrl + Shift + Delete)",
+          "choices": [
+            "Ctrl + Maj + Suppr (Ctrl + Shift + Delete)",
+            "Ctrl + C puis Ctrl + V",
+            "Alt + F4",
+            "Ctrl + Z"
+          ],
+          "corrige_enseignant": "Pages 16 et 131 : Ctrl + H ouvre l'historique, et Ctrl + Maj + Suppr ouvre directement le menu d'effacement des données de navigation (historique, cookies, cache)."
+        },
+        {
+          "q": "Que démontre l'expérience du cerveau « 1-20 vs 1-Z-2-Y-3-X » sur le multitâche numérique (🧠 Cerveau, p. 119) ?",
+          "rep": "Le cerveau ne fait pas deux tâches réfléchies en même temps : il fait du « task switching », ce qui rallonge le temps et augmente les erreurs",
+          "choices": [
+            "Le cerveau ne fait pas deux tâches réfléchies en même temps : il fait du « task switching », ce qui rallonge le temps et augmente les erreurs",
+            "Faire ses devoirs en répondant à des snaps permet d'aller deux fois plus vite",
+            "Les notifications améliorent la mémoire à long terme",
+            "Le cerveau humain possède 8 processeurs indépendants"
+          ],
+          "corrige_enseignant": "Encadré 🧠 Cerveau (p. 119) : basculer sans cesse entre ses devoirs et son téléphone (switching) fatigue le cerveau, fait perdre le fil et multiplie les erreurs."
+        },
+        {
+          "q": "Que signifie l'acronyme FOMO exploité par les stories éphémères et les notifications (p. 120-121) ?",
+          "rep": "Fear Of Missing Out (la peur de rater quelque chose)",
+          "choices": [
+            "Fear Of Missing Out (la peur de rater quelque chose)",
+            "Fast Online Message Option",
+            "Fichier Ouvert sur Mobile Ordinateur",
+            "Force Of Modern Objects"
+          ],
+          "corrige_enseignant": "Pages 120-121 : le FOMO (Fear Of Missing Out) est l'anxiété de manquer une publication, une story 24h ou une discussion de groupe, utilisée pour retenir l'utilisateur en ligne."
         }
       ]
     },
     "identite": {
       "label": "Identité numérique & Traces",
       "icon": "🌐",
-      "lecon": "**Gérer son identité numérique de façon responsable**\n\n**Qu'est-ce que l'identité numérique ?**\n→ L'ensemble de ce qui te représente en ligne\n→ Profils sur les réseaux, pseudonymes, avatars, publications, commentaires, photos\n→ Ce que les moteurs de recherche trouvent sur toi\n\n**Les traces numériques :**\n→ Toute action laisse une trace : clics, recherches, achats, localisation, messages\n→ Ces traces peuvent rester des années\n→ Elles peuvent être utilisées par les entreprises, les recruteurs, les administrations\n\n**Impact de l'identité numérique :**\n→ Peut influencer ton accès à l'université ou à un emploi\n→ Un employeur peut chercher un candidat sur Google\n→ Des publications inappropriées peuvent nuire à ta réputation des années plus tard\n\n**Gérer son image en ligne :**\n→ Googler son propre nom régulièrement\n→ Paramétrer ses comptes en privé\n→ Réfléchir avant de publier : \"Est-ce que je voudrais que mon prof / mes parents / un futur employeur voie ça ?\"\n→ Signaler des contenus inappropriés te concernant\n\n**Effacer ses traces :**\n→ Demander la suppression de contenus (droit à l'oubli)\n→ Désactiver les comptes inutilisés\n→ Vérifier les autorisations accordées aux applications\n→ Supprimer l'historique régulièrement\n\n**Cyberdépendance — reconnaître et agir :**\n→ Difficile de décrocher, irritabilité, mensonges sur le temps passé\n→ Négliger amis, famille, école\n→ Solution : fixer des règles claires, activités alternatives, désactiver les notifications",
+      "lecon": "**Identité numérique, Traces Actives vs Passives & Mindmap 3P (p. 112-115, 148-161)**\n\n**Données actives (explicites) vs Données passives (implicites) (p. 114-115) :**\n→ **Données actives (explicites)** : informations que tu fournis **volontairement et consciemment** (remplir un formulaire, répondre à un sondage, créer ton profil, envoyer un message, ajouter toi-même un tag).\n→ **Données passives (implicites)** : traces collectées **automatiquement en arrière-plan** sans que tu les écrives :\n  • **Métadonnées** (« données sur les données », ex. : date, heure, modèle de téléphone et coordonnées GPS enregistrés automatiquement dans le fichier d'une photo).\n  • **Cookies** publicitaires et de session.\n  • **Historique de navigation**, adresse IP et géolocalisation automatique.\n  • **Tags / identifications** placés par d'autres personnes sur une photo sans ton accord.\n\n**Les 4 bénéfices d'une identité numérique maîtrisée (p. 112-113) :**\n1. Protéger sa vie privée | 2. Avoir une bonne réputation en ligne (études, stage, futur emploi) | 3. Éviter les conflits et usurpations | 4. Être un citoyen numérique responsable.\n\n**Les 4 piliers à vérifier AVANT toute publication (p. 150) :**\n1. **RESPECT** (est-ce bienveillant ?) | 2. **VÉRITÉ** (est-ce vrai et vérifié ?) | 3. **CONSENTEMENT** (les personnes visibles ont-elles dit oui ?) | 4. **CONSÉQUENCES** (serais-je fier si mes parents, mon prof ou un employeur le voyaient dans 5 ans ?).\n\n**💡 Le savais-tu ? 11 ans devant un écran & La Mindmap des 3P contre la cyberdépendance (p. 153-157) :**\n→ Au rythme actuel, nous passons environ **11 ans de notre vie** devant un écran !\n→ **La méthode des 3P (Corrigé @lt_X, p. 157) :**\n  • **P1 — PRÉVENIR** : mode avion dès 22h, téléphone hors de la chambre la nuit, couper les notifications.\n  • **P2 — PROTÉGER** : fixer des limites de temps d'écran, instaurer des créneaux sans écran (repas, devoirs), couper la lecture automatique.\n  • **P3 — PROPOSER** : sport, lecture, musique, jeux de société, sorties réelles avec ses amis.",
       "questions": [
         {
           "q": "Qu'est-ce que l'identité numérique ?",
@@ -1681,7 +2128,8 @@
             "Ton numéro de carte d'identité",
             "Ton adresse e-mail uniquement",
             "Ton pseudo sur un seul réseau"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : L'ensemble de ce qui te représente en ligne (profils, publications, commentaires, photos...)."
         },
         {
           "q": "Combien de temps peut rester une trace numérique ?",
@@ -1691,7 +2139,8 @@
             "24 heures maximum",
             "Une semaine",
             "Jusqu'à la fermeture du compte"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Des années, parfois indéfiniment si elle n'est pas supprimée."
         },
         {
           "q": "Un futur employeur peut-il voir tes publications sur les réseaux sociaux ?",
@@ -1701,7 +2150,8 @@
             "Non, c'est illégal",
             "Non, jamais",
             "Seulement si tu le lui envoies"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Oui, si tes comptes sont publics ou si les publications sont partagées."
         },
         {
           "q": "Avant de publier quelque chose en ligne, quelle question faut-il se poser ?",
@@ -1711,7 +2161,8 @@
             "Est-ce que j'ai suffisamment de batterie ?",
             "Est-ce que j'ai assez d'abonnés ?",
             "Est-ce que le contenu est en haute définition ?"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Est-ce que je voudrais que mes parents, mon prof ou un futur employeur voie ça ?."
         },
         {
           "q": "Comment vérifier ce que les autres trouvent sur toi en ligne ?",
@@ -1721,7 +2172,8 @@
             "Vérifier uniquement ses DM",
             "Consulter son historique de navigation",
             "Compter ses followers"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Googler son propre nom et prénom."
         },
         {
           "q": "Le droit à l'oubli permet de...",
@@ -1731,7 +2183,8 @@
             "Oublier légalement ses actes passés",
             "Changer son identité légale",
             "Supprimer l'historique de son navigateur"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Demander la suppression de contenus ou données te concernant sur une plateforme."
         },
         {
           "q": "Quelle action contribue à gérer son identité numérique ?",
@@ -1741,7 +2194,8 @@
             "Publier le plus souvent possible",
             "Avoir le plus d'abonnés possible",
             "Utiliser toujours son vrai nom"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Paramétrer ses comptes en privé et réfléchir avant de publier."
         },
         {
           "q": "Pourquoi désactiver les comptes inutilisés est-il une bonne pratique ?",
@@ -1751,7 +2205,8 @@
             "Pour libérer de l'espace sur le téléphone",
             "Pour avoir un meilleur débit Internet",
             "Pour respecter les conditions d'utilisation"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Cela réduit l'exposition de tes données personnelles et les risques de piratage."
         },
         {
           "q": "Qu'est-ce que la cyberdépendance ?",
@@ -1761,7 +2216,8 @@
             "Une passion normale pour le numérique",
             "Un métier lié au numérique",
             "Une allergie aux écrans"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Une difficulté à contrôler son usage d'Internet, jeux ou réseaux sociaux, avec des conséquences négatives."
         },
         {
           "q": "Quel comportement peut indiquer une cyberdépendance ?",
@@ -1771,7 +2227,8 @@
             "Utiliser Internet pour faire ses devoirs",
             "Regarder une vidéo après les cours",
             "Envoyer des messages à ses amis"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Mentir sur le temps passé en ligne et négliger ses amis, famille et école."
         },
         {
           "q": "Pourquoi vérifier les autorisations accordées aux applications ?",
@@ -1781,7 +2238,8 @@
             "Pour améliorer les performances",
             "Pour avoir plus de fonctionnalités",
             "Parce que la loi l'impose"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Certaines applications accèdent à plus de données que nécessaire (micro, contacts, localisation...)."
         },
         {
           "q": "Les traces numériques peuvent être utilisées par...",
@@ -1791,7 +2249,8 @@
             "Uniquement tes amis proches",
             "Uniquement les gouvernements",
             "Personne, elles sont protégées automatiquement"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Les entreprises, les recruteurs, les administrations et même les pirates informatiques."
         },
         {
           "q": "Quelle est la meilleure solution contre la cyberdépendance ?",
@@ -1801,7 +2260,8 @@
             "S'arrêter totalement d'utiliser Internet",
             "Acheter un nouvel appareil",
             "Changer de réseau social"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Fixer des règles claires, désactiver les notifications, pratiquer des activités alternatives."
         },
         {
           "q": "Peut-on demander à Google de supprimer des résultats de recherche te concernant ?",
@@ -1811,7 +2271,8 @@
             "Non, c'est impossible",
             "Oui, mais seulement si tu paies",
             "Non, car Google n'est pas soumis au RGPD"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Oui, via le formulaire de droit à l'oubli (RGPD en Europe)."
         },
         {
           "q": "Une publication inappropriée publiée aujourd'hui peut-elle affecter ton futur ?",
@@ -1821,7 +2282,8 @@
             "Non, Internet oublie tout en 24h",
             "Non, les recruteurs ne regardent pas les réseaux",
             "Seulement si tu as beaucoup de followers"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Oui, elle peut nuire à ta réputation scolaire et professionnelle des années plus tard."
         },
         {
           "q": "Qu'est-ce qu'un pseudonyme et quand l'utiliser ?",
@@ -1831,7 +2293,8 @@
             "Son vrai prénom en abrégé",
             "Un surnom donné par ses amis",
             "Un nom de marque"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Un nom fictif pour protéger sa vraie identité sur certaines plateformes."
         },
         {
           "q": "Signaler un contenu te concernant que tu n'as pas approuvé est un acte de...",
@@ -1841,7 +2304,8 @@
             "Censure illégale",
             "Harcèlement",
             "Violation de la liberté d'expression"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Gestion responsable de son identité numérique."
         },
         {
           "q": "Quels risques présente le fait de partager sa localisation en temps réel sur les réseaux ?",
@@ -1851,7 +2315,8 @@
             "Consommer plus de batterie",
             "Ralentir ta connexion",
             "Perdre des abonnés"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Permettre à n'importe qui de savoir où tu es (risque pour ta sécurité physique)."
         },
         {
           "q": "Qu'est-ce que le 'doxing' ?",
@@ -1861,7 +2326,8 @@
             "Un type de virus informatique",
             "Une technique de protection de données",
             "Un réseau social"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : La publication en ligne d'informations personnelles sur quelqu'un sans son consentement."
         },
         {
           "q": "Comment le cyberharcèlement se différencie-t-il du harcèlement classique ?",
@@ -1871,7 +2337,41 @@
             "Il est toujours moins grave",
             "Il est toujours physique aussi",
             "Il ne peut viser que les adultes"
-          ]
+          ],
+          "corrige_enseignant": "Réponse attendue (@lt_X Tome 1a) : Il peut être anonyme, disponible 24h/24 et se diffuse rapidement à grande échelle."
+        },
+        {
+          "q": "Quelle est la différence entre une donnée ACTIVE (explicite) et une donnée PASSIVE (implicite) (p. 114-115) ?",
+          "rep": "Donnée active = publiée ou écrite volontairement (formulaire, post) ; Donnée passive = collectée automatiquement (métadonnées, cookies, GPS, historique)",
+          "choices": [
+            "Donnée active = publiée ou écrite volontairement (formulaire, post) ; Donnée passive = collectée automatiquement (métadonnées, cookies, GPS, historique)",
+            "Donnée active = sur téléphone ; Donnée passive = sur ordinateur",
+            "Donnée active = publique ; Donnée passive = supprimée",
+            "Il n'y a aucune différence"
+          ],
+          "corrige_enseignant": "Pages 114-115 (*Données actives et passives) : les données actives sont fournies consciemment (formulaires, sondages, posts, messages), tandis que les données passives sont enregistrées en arrière-plan (métadonnées d'une photo, cookies, historique, géolocalisation)."
+        },
+        {
+          "q": "Qu'est-ce qu'une « métadonnée » (p. 114-115) ?",
+          "rep": "Une « donnée sur la donnée » enregistrée automatiquement (ex. la date, l'heure, l'appareil et le lieu GPS cachés dans le fichier d'une photo)",
+          "choices": [
+            "Une « donnée sur la donnée » enregistrée automatiquement (ex. la date, l'heure, l'appareil et le lieu GPS cachés dans le fichier d'une photo)",
+            "Un message publié uniquement sur les applications du groupe Meta",
+            "Un mot de passe très long",
+            "Un commentaire écrit en majuscules"
+          ],
+          "corrige_enseignant": "Page 115 : une métadonnée est une trace passive attachée à un fichier ou un message (heure, géolocalisation, modèle d'appareil) sans que l'utilisateur l'ait écrite dans le texte."
+        },
+        {
+          "q": "Que signifient les « 3P » de la Mindmap contre la cyberdépendance (p. 157) ?",
+          "rep": "Prévenir (mode avion à 22h, tél hors chambre), Protéger (limites de temps, créneaux sans écran), Proposer (sport, lecture, sorties avec amis)",
+          "choices": [
+            "Prévenir (mode avion à 22h, tél hors chambre), Protéger (limites de temps, créneaux sans écran), Proposer (sport, lecture, sorties avec amis)",
+            "Publier, Partager, Pirater",
+            "Payer, Jouer, Recommencer",
+            "Profil, Pseudo, Photo"
+          ],
+          "corrige_enseignant": "Page 157 (Mindmap 3P) : P1 Prévenir (couper notifications, tél hors de la chambre à 22h), P2 Protéger (limites de temps d'écran, repas sans écran), P3 Proposer (sport, lecture, musique, amis)."
         }
       ]
     }

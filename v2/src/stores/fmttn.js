@@ -37,7 +37,8 @@ Object.values(altxBank.secu || {}).forEach(sub => {
 });
 
 /**
- * Convertit le texte brut `lecon` de altxBank en cartes HTML visuelles et aérées pour des élèves de 11-12 ans.
+ * Convertit le texte brut `lecon` de altxBank en cartes HTML visuelles et aérées pour des élèves de 11-12 ans,
+ * avec mise en évidence des encadrés officiels @lt_X : 🧠 Cerveau, 💡 Le savais-tu ?, 💼 Métier, 🤖 IA.
  */
 function formatAltxLeconHtml(rawLecon) {
   if (!rawLecon) return '';
@@ -57,19 +58,54 @@ function formatAltxLeconHtml(rawLecon) {
         return `<div class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black text-xs shadow-2xs">${titleText}</div>`;
       }
 
+      // Détection des encadrés pédagogiques officiels @lt_X
+      const isCerveau = titleText.includes('🧠') || titleText.toLowerCase().includes('cerveau');
+      const isSavaisTu = titleText.includes('💡') || titleText.toLowerCase().includes('savais-tu');
+      const isMetier = titleText.includes('💼') || titleText.toLowerCase().includes('métier');
+      const isIA = titleText.includes('🤖') || titleText.toLowerCase().includes('ia');
+
+      let cardClasses = 'bg-slate-50 border-slate-200/90';
+      let headerClasses = 'text-indigo-950 border-slate-200/70';
+      let dotColor = 'bg-blue-600';
+      let bulletColor = 'text-blue-600';
+
+      if (isCerveau) {
+        cardClasses = 'bg-purple-50/80 border-purple-200';
+        headerClasses = 'text-purple-950 border-purple-200/70';
+        dotColor = 'bg-purple-600';
+        bulletColor = 'text-purple-600';
+      } else if (isSavaisTu) {
+        cardClasses = 'bg-amber-50/80 border-amber-200';
+        headerClasses = 'text-amber-950 border-amber-200/70';
+        dotColor = 'bg-amber-500';
+        bulletColor = 'text-amber-600';
+      } else if (isMetier) {
+        cardClasses = 'bg-emerald-50/80 border-emerald-200';
+        headerClasses = 'text-emerald-950 border-emerald-200/70';
+        dotColor = 'bg-emerald-600';
+        bulletColor = 'text-emerald-600';
+      } else if (isIA) {
+        cardClasses = 'bg-indigo-50/80 border-indigo-200';
+        headerClasses = 'text-indigo-950 border-indigo-200/70';
+        dotColor = 'bg-indigo-600';
+        bulletColor = 'text-indigo-600';
+      }
+
       const itemsHtml = bodyLines.map(l => {
-        const clean = l.trim().replace(/^→\s*/, '');
-        const formatted = clean.replace(/\*\*(.+?)\*\*/g, '<strong class="text-slate-900 font-extrabold">$1</strong>');
-        if (l.trim().startsWith('→')) {
-          return `<li class="flex items-start gap-2 py-0.5"><span class="text-blue-600 font-black mt-0.5">▸</span><span>${formatted}</span></li>`;
+        const clean = l.trim().replace(/^(→|•)\s*/, '');
+        const formatted = clean
+          .replace(/\*\*(.+?)\*\*/g, '<strong class="text-slate-900 font-extrabold">$1</strong>')
+          .replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-white/90 border border-slate-200 font-mono text-[11px] text-indigo-900">$1</code>');
+        if (l.trim().startsWith('→') || l.trim().startsWith('•')) {
+          return `<li class="flex items-start gap-2 py-0.5"><span class="${bulletColor} font-black mt-0.5">▸</span><span>${formatted}</span></li>`;
         }
         return `<p class="text-slate-700 leading-relaxed">${formatted}</p>`;
       }).join('');
 
-      const hasList = bodyLines.some(l => l.trim().startsWith('→'));
-      return `<div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-1.5">
-        <div class="font-black text-xs text-indigo-950 flex items-center gap-1.5 border-b border-slate-200/70 pb-1.5">
-          <span class="w-2 h-2 rounded-full bg-blue-600 shrink-0"></span>
+      const hasList = bodyLines.some(l => l.trim().startsWith('→') || l.trim().startsWith('•'));
+      return `<div class="p-3.5 rounded-2xl border space-y-1.5 ${cardClasses}">
+        <div class="font-black text-xs flex items-center gap-1.5 border-b pb-1.5 ${headerClasses}">
+          <span class="w-2 h-2 rounded-full ${dotColor} shrink-0"></span>
           <span>${titleText}</span>
         </div>
         ${hasList ? `<ul class="space-y-1 text-xs text-slate-700 pt-0.5">${itemsHtml}</ul>` : `<div class="text-xs text-slate-700 pt-0.5 space-y-1">${itemsHtml}</div>`}
@@ -110,26 +146,56 @@ export function createFmttnStore() {
 
     eleveCompetences: {
       'NUM-1.D1': 'en_cours',
+      'NUM-1.D2': 'en_cours',
+      'NUM-1.D3': 'en_cours',
+      'NUM-1.D4': 'en_cours',
       'NUM-1.D5': 'en_cours',
       'NUM-1.D6': 'en_cours',
+      'NUM-1.D7': 'en_cours',
+      'NUM-1.D8': 'en_cours',
+      'NUM-1.P1': 'en_cours',
       'NUM-1.P2': 'en_cours',
+      'NUM-1.P3': 'en_cours',
+      'NUM-1.P4': 'en_cours',
+      'NUM-1.P5': 'en_cours',
+      'NUM-1.P6': 'en_cours',
+      'NUM-1.P7': 'en_cours',
+      'NUM-1.P8': 'en_cours',
+      'NUM-1.P9': 'en_cours',
+      'NUM-1.M1': 'en_cours',
       'NUM-2.D1': 'en_cours',
       'NUM-2.D2': 'en_cours',
       'NUM-2.D3': 'en_cours',
       'NUM-2.D4': 'en_cours',
       'NUM-2.D5': 'en_cours',
+      'NUM-2.D6': 'en_cours',
+      'NUM-2.D7': 'en_cours',
+      'NUM-2.D8': 'en_cours',
+      'NUM-2.D9': 'en_cours',
       'NUM-2.P1': 'en_cours',
       'NUM-2.P2': 'en_cours',
       'NUM-2.P3': 'en_cours',
-      'NUM-2.M1': 'en_cours'
+      'NUM-2.P4': 'en_cours',
+      'NUM-2.P5': 'en_cours',
+      'NUM-2.M1': 'en_cours',
+      'NUM-2.M2': 'en_cours'
     },
 
     bilanPersonnel: {
       'NUM-1.D1': 'bien',
+      'NUM-1.D2': 'bien',
+      'NUM-1.D3': 'moyen',
+      'NUM-1.D4': 'bien',
       'NUM-1.D5': 'moyen',
       'NUM-1.D6': 'bien',
+      'NUM-1.D7': 'bien',
+      'NUM-1.D8': 'moyen',
+      'NUM-1.P1': 'bien',
       'NUM-1.P2': 'moyen',
-      'NUM-1.P9': 'moyen'
+      'NUM-1.P5': 'bien',
+      'NUM-1.P7': 'bien',
+      'NUM-1.P9': 'moyen',
+      'NUM-1.M1': 'moyen'
     },
 
     charteState: {
@@ -197,7 +263,7 @@ export function createFmttnStore() {
           protocole: 'HTTP',
           statut: 'Non sécurisé ⚠️',
           couleur: 'rose',
-          explication: 'Alerte ! Ce site utilise HTTP sans chiffrement. Si tu te connectes sur le Wi-Fi de l\'école ou un hotspot public, ton mot de passe passe en texte clair et peut être intercepté par n\'importe qui !'
+          explication: 'Alerte ! Ce site utilise HTTP sans chiffrement. Si tu te connectes sur le Wi-Fi de l\'école ou un hotspot public, ton mot de passe passe en texte clair (comme une carte postale) et peut être intercepté par n\'importe qui !'
         },
         banque: {
           titre: 'Espace Bancaire & Scolaire',
@@ -206,7 +272,7 @@ export function createFmttnStore() {
           protocole: 'HTTPS',
           statut: 'Chiffré & Certifié 🔒',
           couleur: 'emerald',
-          explication: 'Excellent ! Le cadenas vert et le "S" de HTTPS confirment que la communication est chiffrée avec un certificat SSL/TLS. Les données sont illisibles pendant le transport.'
+          explication: 'Excellent ! Le cadenas et le "S" de HTTPS confirment que la communication est chiffrée avec un certificat SSL/TLS. Les données sont illisibles pendant le transport.'
         },
         piege: {
           titre: 'Site Promo Cadeaux Gratuits',
@@ -215,19 +281,19 @@ export function createFmttnStore() {
           protocole: 'HTTPS',
           statut: 'Chiffré mais frauduleux ⚠️',
           couleur: 'amber',
-          explication: 'Attention au piège classique ! Le cadenas HTTPS prouve que personne n\'intercepte les données en route, mais cela ne prouve PAS que le site est honnête ! Un escroc peut très bien obtenir un certificat HTTPS gratuit pour son site d\'arnaque.'
+          explication: 'Attention au piège classique (@lt_X p. 106-107) ! Le cadenas HTTPS prouve que personne n\'intercepte les données en route, mais cela ne prouve PAS que le site est honnête ! Un escroc peut très bien obtenir un certificat HTTPS gratuit pour son site de phishing.'
         }
       }
     },
 
     triDonnees: {
       items: [
-        { id: 1, label: "Une photo de mon chat postée en story publique", typeReel: "active", choixEleve: null, icone: "📸" },
-        { id: 2, label: "Mon adresse IP et mon modèle de smartphone", typeReel: "passive", choixEleve: null, icone: "🌐" },
-        { id: 3, label: "Mon commentaire sous la vidéo d'un streamer", typeReel: "active", choixEleve: null, icone: "💬" },
-        { id: 4, label: "Le temps exact (14 secondes) passé à regarder une pub", typeReel: "passive", choixEleve: null, icone: "⏱️" },
-        { id: 5, label: "La liste de mes recherches Google Maps de la journée", typeReel: "passive", choixEleve: null, icone: "📍" },
-        { id: 6, label: "Le message privé envoyé à mon binôme de classe", typeReel: "active", choixEleve: null, icone: "✉️" }
+        { id: 1, label: "Une photo de mon chat postée en story publique ou un formulaire rempli", typeReel: "active", choixEleve: null, icone: "📸" },
+        { id: 2, label: "Les métadonnées cachées d'une photo (heure, GPS, modèle de smartphone)", typeReel: "passive", choixEleve: null, icone: "🌐" },
+        { id: 3, label: "Mon commentaire ou ma réponse à un sondage en ligne", typeReel: "active", choixEleve: null, icone: "💬" },
+        { id: 4, label: "Les cookies publicitaires et le temps exact passé sur une vidéo", typeReel: "passive", choixEleve: null, icone: "⏱️" },
+        { id: 5, label: "Mon historique de navigation et ma géolocalisation en arrière-plan", typeReel: "passive", choixEleve: null, icone: "📍" },
+        { id: 6, label: "Le message privé envoyé volontairement à mon binôme de classe", typeReel: "active", choixEleve: null, icone: "✉️" }
       ],
       score: 0,
       valide: false,
@@ -240,9 +306,17 @@ export function createFmttnStore() {
       'NUM-2.D3': 'moyen',
       'NUM-2.D4': 'moyen',
       'NUM-2.D5': 'bien',
+      'NUM-2.D6': 'bien',
+      'NUM-2.D7': 'bien',
+      'NUM-2.D8': 'moyen',
+      'NUM-2.D9': 'bien',
       'NUM-2.P1': 'bien',
       'NUM-2.P2': 'moyen',
-      'NUM-2.P3': 'moyen'
+      'NUM-2.P3': 'moyen',
+      'NUM-2.P4': 'bien',
+      'NUM-2.P5': 'bien',
+      'NUM-2.M1': 'moyen',
+      'NUM-2.M2': 'moyen'
     },
 
     missionSecu: {
@@ -250,9 +324,19 @@ export function createFmttnStore() {
       slogan: 'L\'écran n\'est pas un masque : ce que tu ne dirais pas en face, ne l\'écris pas en ligne !',
       reflexe1: 'Faire une capture d\'écran immédiate comme preuve avant toute suppression.',
       reflexe2: 'Bloquer le compte harceleur et signaler le comportement aux modérateurs.',
-      reflexe3: 'En parler immédiatement à un adulte de confiance ou appeler le 103 (Écoute-Enfants FWB).',
+      reflexe3: 'En parler immédiatement à un adulte de confiance ou appeler le 103 (Écoute-Enfants) / 116 000 (Child Focus).',
       isSubmitted: false,
       aiFeedback: ''
+    },
+
+    getAllCompetencesCh1() {
+      const c = this.competences || {};
+      return [...(c.je_decouvre || []), ...(c.je_pratique || []), ...(c.je_maitrise || [])];
+    },
+
+    getAllCompetencesCh2() {
+      const c = this.competencesCh2 || {};
+      return [...(c.je_decouvre || []), ...(c.je_pratique || []), ...(c.je_maitrise || [])];
     },
 
     getCurrentCharteSituation() {
@@ -439,6 +523,27 @@ export function createFmttnStore() {
         this.bankScore += 10;
         this.user.xp += 10;
         this.tutorMood = 'happy';
+
+        if (this.activeSubthemeKey === 'reseaux') {
+          this.eleveCompetences['NUM-1.D1'] = 'acquis';
+          this.eleveCompetences['NUM-1.D2'] = 'acquis';
+        }
+        if (this.activeSubthemeKey === 'messagerie') {
+          this.eleveCompetences['NUM-1.D5'] = 'acquis';
+          this.eleveCompetences['NUM-1.P1'] = 'acquis';
+        }
+        if (this.activeSubthemeKey === 'ethique') {
+          this.eleveCompetences['NUM-1.D6'] = 'acquis';
+          this.eleveCompetences['NUM-1.D7'] = 'acquis';
+          this.eleveCompetences['NUM-1.D8'] = 'acquis';
+          this.eleveCompetences['NUM-1.P5'] = 'acquis';
+          this.eleveCompetences['NUM-1.P7'] = 'acquis';
+        }
+        if (this.activeSubthemeKey === 'collaboration') {
+          this.eleveCompetences['NUM-1.D3'] = 'acquis';
+          this.eleveCompetences['NUM-1.D4'] = 'acquis';
+          this.eleveCompetences['NUM-1.P9'] = 'acquis';
+        }
       } else {
         this.tutorMood = 'thinking';
       }
@@ -488,6 +593,8 @@ export function createFmttnStore() {
 
       if (results.scoreGlobal >= 5) {
         this.eleveCompetences['NUM-1.P2'] = 'acquis';
+        this.eleveCompetences['NUM-1.P6'] = 'acquis';
+        this.eleveCompetences['NUM-1.P8'] = 'acquis';
         this.user.xp += 20;
       } else {
         this.eleveCompetences['NUM-1.P2'] = 'en_cours';
@@ -503,7 +610,8 @@ export function createFmttnStore() {
 
     soumettreMissionApp() {
       this.missionApp.isSubmitted = true;
-      this.missionApp.aiFeedback = `Excellente proposition pour ton outil "${this.missionApp.nom}" ! L'idée du ${this.missionApp.fonctionUnique} répond parfaitement à l'objectif de concentration numérique. Tes règles d'éthique sont claires et conformes à la nétiquette @lt_X. Ton professeur a reçu ton travail pour validation.`;
+      this.missionApp.aiFeedback = `Excellente proposition pour ton outil "${this.missionApp.nom}" ! L'idée du ${this.missionApp.fonctionUnique} répond parfaitement à l'objectif de concentration numérique. Tes règles d'éthique sont claires et conformes à la nétiquette @lt_X. Compétence NUM-1.M1 validée !`;
+      this.eleveCompetences['NUM-1.M1'] = 'acquis';
       this.user.xp += 30;
       this.syncCurrentStudentProgress();
     },
@@ -537,11 +645,31 @@ export function createFmttnStore() {
         this.user.xp += 10;
         this.tutorMood = 'happy';
 
-        if (this.activeSubthemeKeySecu === 'profil') this.eleveCompetences['NUM-2.D1'] = 'acquis';
-        if (this.activeSubthemeKeySecu === 'signaletique') this.eleveCompetences['NUM-2.D2'] = 'acquis';
-        if (this.activeSubthemeKeySecu === 'cyber') this.eleveCompetences['NUM-2.P2'] = 'acquis';
-        if (this.activeSubthemeKeySecu === 'confidentialite') this.eleveCompetences['NUM-2.P1'] = 'acquis';
-        if (this.activeSubthemeKeySecu === 'identite') this.eleveCompetences['NUM-2.D5'] = 'acquis';
+        if (this.activeSubthemeKeySecu === 'profil') {
+          this.eleveCompetences['NUM-2.D1'] = 'acquis';
+          this.eleveCompetences['NUM-2.P4'] = 'acquis';
+        }
+        if (this.activeSubthemeKeySecu === 'signaletique') {
+          this.eleveCompetences['NUM-2.D2'] = 'acquis';
+          this.eleveCompetences['NUM-2.D3'] = 'acquis';
+        }
+        if (this.activeSubthemeKeySecu === 'cyber') {
+          this.eleveCompetences['NUM-2.D6'] = 'acquis';
+          this.eleveCompetences['NUM-2.D7'] = 'acquis';
+          this.eleveCompetences['NUM-2.D9'] = 'acquis';
+          this.eleveCompetences['NUM-2.P2'] = 'acquis';
+        }
+        if (this.activeSubthemeKeySecu === 'confidentialite') {
+          this.eleveCompetences['NUM-2.D5'] = 'acquis';
+          this.eleveCompetences['NUM-2.P1'] = 'acquis';
+          this.eleveCompetences['NUM-2.P3'] = 'acquis';
+          this.eleveCompetences['NUM-2.P5'] = 'acquis';
+        }
+        if (this.activeSubthemeKeySecu === 'identite') {
+          this.eleveCompetences['NUM-2.D4'] = 'acquis';
+          this.eleveCompetences['NUM-2.D8'] = 'acquis';
+          this.eleveCompetences['NUM-2.M2'] = 'acquis';
+        }
       } else {
         this.tutorMood = 'thinking';
       }
@@ -604,11 +732,11 @@ export function createFmttnStore() {
       this.triDonnees.score = score;
       this.triDonnees.valide = true;
       if (score === 6) {
-        this.triDonnees.feedback = 'Bravo ! 6/6 sans faute ! Tu distingues parfaitement ce que tu publies (données actives) des traces automatiques (données passives). Compétence NUM-2.D4 validée ! 🎉';
+        this.triDonnees.feedback = 'Bravo ! 6/6 sans faute ! Tu distingues parfaitement ce que tu publies (données actives / explicites) des traces automatiques (données passives / implicites : métadonnées, cookies, GPS). Compétence NUM-2.D4 validée ! 🎉';
         this.user.xp += 25;
         this.eleveCompetences['NUM-2.D4'] = 'acquis';
       } else {
-        this.triDonnees.feedback = `Score : ${score}/6. Rappel : les données passives sont celles récoltées automatiquement sans que tu tapes du texte (IP, temps d'écran, modèle de smartphone).`;
+        this.triDonnees.feedback = `Score : ${score}/6. Rappel (@lt_X p. 114-115) : les données passives sont celles récoltées automatiquement sans que tu tapes du texte (métadonnées GPS/heure d'une photo, cookies, adresse IP, temps d'écran).`;
         this.eleveCompetences['NUM-2.D4'] = 'en_cours';
       }
       this.syncCurrentStudentProgress();
@@ -621,9 +749,10 @@ export function createFmttnStore() {
 
     soumettreMissionSecu() {
       this.missionSecu.isSubmitted = true;
-      this.missionSecu.aiFeedback = `Excellente campagne citoyenne ! Ton slogan "${this.missionSecu.slogan}" est percutant et responsabilisant pour des élèves de 1re. Tes 3 réflexes (conserver la preuve, bloquer & signaler, alerter un adulte ou le 103) respectent exactement le protocole de prévention FWB / SeGEC. Compétence NUM-2.M1 validée !`;
+      this.missionSecu.aiFeedback = `Excellente campagne citoyenne ! Ton slogan "${this.missionSecu.slogan}" est percutant et responsabilisant pour des élèves de 1re. Tes 3 réflexes (conserver la preuve par capture d'écran, bloquer & signaler, alerter un adulte ou le 103 Écoute-Enfants / 116 000 Child Focus) respectent exactement le protocole de prévention FWB / SeGEC et l'article 442bis du Code pénal belge. Compétences NUM-2.M1 et NUM-2.M2 validées !`;
       this.user.xp += 30;
       this.eleveCompetences['NUM-2.M1'] = 'acquis';
+      this.eleveCompetences['NUM-2.M2'] = 'acquis';
       this.syncCurrentStudentProgress();
     },
 
