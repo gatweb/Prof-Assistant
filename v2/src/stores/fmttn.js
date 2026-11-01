@@ -330,136 +330,187 @@ export function createFmttnStore() {
     },
 
     // 🎨 SCHÉMAS INTERACTIFS & EXPLORATEURS VISUELS (@lt_X Tome 1a)
-    activeEmailAnatomyKey: 'cci',
+    activeEmailAnatomyKey: 'champ_cci',
     emailAnatomyZones: {
       identifiant: {
         badge: '1. Identifiant',
-        titre: 'Identifiant personnel (ex. lucas.dupont2)',
+        exemple: 'lucas.dupont2',
+        titre: 'Identifiant personnel (Nom d\'utilisateur)',
         couleur: 'blue',
-        explication: 'C\'est la partie avant le @ qui désigne la boîte précise de l\'utilisateur. Pas d\'espace, pas d\'accent (é, è, à), uniquement lettres, chiffres, points ou tirets (@lt_X p. 13).'
+        explication: 'C\'est la partie avant le @ qui désigne la boîte précise de l\'utilisateur. Pas d\'espace, pas d\'accent (é, è, à), uniquement lettres, chiffres, points ou tirets (@lt_X p. 13).',
+        piege: '⚠️ Piège : « zoé@outlook.fr » ou « club jeunes@gmail.com » sont invalides (accent ou espace interdit) !'
       },
       arrobase: {
         badge: '2. Symbole @',
-        titre: 'L\'arrobase (@) — « chez » (at)',
+        exemple: '@ (« chez » / at)',
+        titre: 'L\'arrobase (@) — Séparateur universel',
         couleur: 'rose',
-        explication: 'Indispensable dans toute adresse e-mail : il sépare le nom de l\'utilisateur du serveur (domaine) qui héberge sa boîte aux lettres numérique.'
+        explication: 'Indispensable dans toute adresse e-mail : il sépare le nom de l\'utilisateur du serveur (domaine) qui héberge sa boîte aux lettres numérique.',
+        piege: '⚠️ Piège : Il faut un seul et unique @ par adresse (« younes@@gmail.com » est invalide).'
       },
       domaine: {
         badge: '3. Domaine',
-        titre: 'Nom de domaine & extension (ex. ecole.be / proton.me)',
+        exemple: 'ecole-segec.be / proton.me',
+        titre: 'Nom de domaine & extension géographique',
         couleur: 'emerald',
-        explication: 'Indique l\'organisation ou le service webmail (gmail.com, outlook.com, icloud.com, proton.me) suivi de l\'extension géographique (.be pour la Belgique) ou générique (.com).'
+        explication: 'Indique l\'organisation ou le service webmail (gmail.com, outlook.com, icloud.com, proton.me) suivi d\'un point et de l\'extension (.be pour la Belgique, .com, .org).',
+        piege: '⚠️ Piège : Vérifie toujours le vrai domaine après le @ pour déjouer les mails de phishing !'
       },
-      destinataire_a: {
-        badge: 'Champ [ À ]',
-        titre: 'Destinataire principal (Pour / À)',
-        couleur: 'blue',
-        explication: 'La ou les personnes directement concernées de qui tu attends une action ou une réponse.'
-      },
-      cc: {
-        badge: 'Champ [ Cc ]',
-        titre: 'Copie Carbone (visible par tous)',
+      champ_a_cc: {
+        badge: 'Champs [ À ] et [ Cc ]',
+        exemple: 'professeur@ecole.be',
+        titre: 'Destinataire principal (À) & Copie Carbone visible (Cc)',
         couleur: 'indigo',
-        explication: 'Pour informer quelqu\'un en transparence (ex. ton binôme d\'exposé). Attention : toutes les adresses en Cc sont visibles par tous les destinataires !'
+        explication: 'Le champ [ À ] désigne la personne de qui tu attends une action. Le champ [ Cc ] informe un tiers en transparence (ex. ton binôme d\'exposé).',
+        piege: '⚠️ Attention : Toutes les adresses placées dans [ À ] et [ Cc ] sont visibles par tous les destinataires !'
+      },
+      champ_cci: {
+        badge: 'Champ [ Cci ] 🛡️ RGPD',
+        exemple: '28 parents ou élèves en Cci',
+        titre: 'Copie Carbone Invisible (Protection de la vie privée)',
+        couleur: 'amber',
+        explication: 'Règle d\'or @lt_X (p. 37 & 64) : obligatoire dès que tu envoies un e-mail groupé à plusieurs personnes qui ne se connaissent pas, afin de masquer leurs adresses.',
+        piege: '⚠️ Oublier le Cci lors d\'un envoi groupé expose les adresses privées de tout le monde au spam et viole le RGPD.'
       },
       cci: {
-        badge: 'Champ [ Cci ] 🛡️',
-        titre: 'Copie Carbone Invisible (Protection RGPD)',
-        couleur: 'emerald',
-        explication: 'Règle d\'or @lt_X (p. 37 & 64) : obligatoire dès que tu envoies un mail groupé à toute une classe ou à des personnes qui ne se connaissent pas, pour masquer leurs adresses et empêcher le spam.'
+        badge: 'Champ [ Cci ] 🛡️ RGPD',
+        exemple: '28 parents ou élèves en Cci',
+        titre: 'Copie Carbone Invisible (Protection de la vie privée)',
+        couleur: 'amber',
+        explication: 'Règle d\'or @lt_X (p. 37 & 64) : obligatoire dès que tu envoies un e-mail groupé à plusieurs personnes qui ne se connaissent pas, afin de masquer leurs adresses.',
+        piege: '⚠️ Oublier le Cci lors d\'un envoi groupé expose les adresses privées de tout le monde au spam et viole le RGPD.'
       },
       objet: {
-        badge: 'Objet',
-        titre: 'Objet du courriel (court et précis)',
-        couleur: 'amber',
-        explication: 'C\'est le titre du message (ex. « Question exposé Histoire - Classe 1A »). On n\'écrit JAMAIS tout son message dans l\'objet et on ne le laisse jamais vide !'
+        badge: 'Objet du courriel',
+        exemple: 'Question exposé Histoire - 1A',
+        titre: 'Objet court, précis et informatif',
+        couleur: 'purple',
+        explication: 'C\'est le titre qui résume le sujet du message en quelques mots pour que le destinataire comprenne immédiatement son contenu avant même de l\'ouvrir.',
+        piege: '⚠️ Piège : Ne laisse jamais l\'objet vide (« Sans objet ») et n\'écris JAMAIS tout ton message dans le champ Objet !'
       },
       piece_jointe: {
-        badge: '📎 Pièce jointe',
-        titre: 'Trombone (Téléverser un fichier ≤ 25 Mo)',
-        couleur: 'purple',
-        explication: 'Permet de téléverser (Upload ⬆️) un document depuis ton ordinateur vers le mail. Au-delà de 25 Mo, on partage un lien Cloud (Drive/WeTransfer).'
+        badge: '📎 Pièce jointe (≤ 25 Mo)',
+        exemple: 'Exposé_Histoire_Lucas.pdf',
+        titre: 'Trombone : Téléverser (Upload ⬆️) un fichier',
+        couleur: 'teal',
+        explication: 'Permet de joindre un fichier (préfère le format PDF pour figer la mise en page). Mentionne toujours la pièce jointe dans le texte de ton message.',
+        piege: '⚠️ Au-delà de 25 Mo, la pièce jointe est bloquée : utilise alors un lien de partage Cloud (Google Drive, OneDrive).'
       }
     },
 
+    selectEmailAnatomy(key) {
+      this.activeEmailAnatomyKey = key;
+    },
+
+    getActiveEmailAnatomy() {
+      return this.emailAnatomyZones[this.activeEmailAnatomyKey] || this.emailAnatomyZones.champ_cci;
+    },
+
     e2eeVisualMode: 'e2ee', // 'e2ee' | 'plain'
+    toggleE2eeMode(mode) {
+      this.e2eeVisualMode = mode;
+    },
+
     activeCcLicenseKey: 'BY',
     ccLicensesData: {
       BY: {
         code: 'BY',
         icon: '👤',
+        icone: '👤',
         nom: 'Attribution (Obligatoire dans toutes les licences CC)',
         regle: 'Tu dois TOUJOURS citer le nom de l\'auteur original, le titre de l\'œuvre et le lien vers la licence.',
+        desc: 'Tu dois TOUJOURS citer le nom de l\'auteur original, le titre de l\'œuvre et le lien vers la licence.',
         exemple: 'Tu utilises une photo de Wikimedia Commons dans ton diaporama d\'histoire : tu ajoutes « Photo : M. Peeters (CC BY) » en bas de la diapo.'
       },
       NC: {
         code: 'NC',
         icon: '💶🚫',
+        icone: '💶🚫',
         nom: 'Non Commercial (Pas d\'utilisation commerciale)',
-        regle: 'Tu peux utiliser l\'œuvre gratuitement pour l\'école ou ton usage personnel, mais INTERDICTION de la vendre ou de gagner de l\'argent avec (ex. vidéo monétisée ou t-shirt vendu).',
+        regle: 'Tu peux utiliser l\'œuvre gratuitement pour l\'école ou ton usage personnel, mais INTERDICTION de la vendre ou de gagner de l\'argent avec.',
+        desc: 'Tu peux utiliser l\'œuvre gratuitement pour l\'école ou ton usage personnel, mais INTERDICTION de la vendre ou de gagner de l\'argent avec.',
         exemple: 'Une musique CC BY-NC peut illustrer ton exposé en classe, mais pas une publicité payante.'
       },
       SA: {
         code: 'SA',
         icon: '🔄',
+        icone: '🔄',
         nom: 'Share Alike (Partage dans les mêmes conditions)',
         regle: 'Si tu modifies ou remixes l\'œuvre, tu dois obligatoirement publier ta nouvelle création sous la MÊME licence libre.',
+        desc: 'Si tu modifies ou remixes l\'œuvre, tu dois obligatoirement publier ta nouvelle création sous la MÊME licence libre.',
         exemple: 'Si tu traduis ou améliores un schéma CC BY-SA, ton nouveau schéma reste libre en CC BY-SA.'
       },
       ND: {
         code: 'ND',
         icon: '🟰',
+        icone: '🟰',
         nom: 'No Derivatives (Pas de modification)',
         regle: 'Tu peux partager l\'œuvre telle quelle (en citant l\'auteur), mais tu n\'as PAS le droit de la recadrer, la retoucher ou la modifier.',
+        desc: 'Tu peux partager l\'œuvre telle quelle (en citant l\'auteur), mais tu n\'as PAS le droit de la recadrer, la retoucher ou la modifier.',
         exemple: 'Interdit d\'ajouter un filtre ou de couper une illustration sous licence CC BY-ND.'
       }
     },
 
+    selectCcLicense(key) {
+      this.activeCcLicenseKey = key;
+    },
+
+    getActiveCcLicense() {
+      return this.ccLicensesData[this.activeCcLicenseKey] || this.ccLicensesData.BY;
+    },
+
     activeIcebergLayer: 'passive', // 'active' | 'passive'
+    selectIcebergLayer(layer) {
+      this.activeIcebergLayer = layer;
+    },
+
     activePegiBienvuTab: 'pegi', // 'pegi' | 'bienvu'
     selectedPictoCode: 'pegi-12',
     pegiPictosData: [
-      { code: 'pegi-3', label: 'PEGI 3', color: 'bg-emerald-600', desc: 'Convient à tous les âges. Aucun son ou image susceptible d\'effrayer de jeunes enfants.' },
-      { code: 'pegi-7', label: 'PEGI 7', color: 'bg-emerald-500', desc: 'Scènes ou sons pouvant effrayer les plus jeunes (violence très légère / non réaliste type cartoon).' },
-      { code: 'pegi-12', label: 'PEGI 12', color: 'bg-amber-500', desc: 'Violence légèrement plus graphique envers des personnages imaginaires ou langage grossier léger.' },
-      { code: 'pegi-16', label: 'PEGI 16', color: 'bg-orange-600', desc: 'Violence ou activité sexuelle semblable à la réalité, langage grossier, tabac/alcool ou jeux de hasard.' },
-      { code: 'pegi-18', label: 'PEGI 18', color: 'bg-rose-700', desc: 'Réservé aux adultes : violence crue ou motivée par la cruauté, réservé aux 18 ans et plus.' },
-      { code: 'pegi-inapp', label: '💳 Achats intégrés', color: 'bg-indigo-700', desc: 'Attention piège : le jeu permet de dépenser du VRAI argent (skins, lootboxes, V-Bucks, gemmes) !' },
-      { code: 'pegi-peur', label: '🕷️ Peur / Violence', color: 'bg-slate-800', desc: 'Descripteur de contenu précisant pourquoi la limite d\'âge a été attribuée (peur, violence, langage, en ligne).' }
+      { id: 'pegi-3', code: 'pegi-3', icone: '🟢', nom: 'PEGI 3', label: 'PEGI 3', color: 'bg-emerald-600', desc: 'Convient à tous les âges. Aucun son ou image susceptible d\'effrayer de jeunes enfants.' },
+      { id: 'pegi-7', code: 'pegi-7', icone: '🟢', nom: 'PEGI 7', label: 'PEGI 7', color: 'bg-emerald-500', desc: 'Scènes ou sons pouvant effrayer les plus jeunes (violence très légère / cartoon).' },
+      { id: 'pegi-12', code: 'pegi-12', icone: '🟠', nom: 'PEGI 12', label: 'PEGI 12', color: 'bg-amber-500', desc: 'Violence plus graphique envers des personnages imaginaires ou langage grossier léger.' },
+      { id: 'pegi-16', code: 'pegi-16', icone: '🟠', nom: 'PEGI 16', label: 'PEGI 16', color: 'bg-orange-600', desc: 'Violence réaliste, langage grossier, tabac/alcool ou jeux de hasard.' },
+      { id: 'pegi-18', code: 'pegi-18', icone: '🔴', nom: 'PEGI 18', label: 'PEGI 18', color: 'bg-rose-700', desc: 'Réservé aux adultes : violence crue, réservé aux 18 ans et plus.' },
+      { id: 'pegi-inapp', code: 'pegi-inapp', icone: '💳', nom: 'Achats intégrés (In-Game)', label: '💳 Achats intégrés', color: 'bg-indigo-700', desc: 'Attention piège : permet de dépenser du VRAI argent (skins, lootboxes, V-Bucks) !' }
     ],
     bienvuPictosData: [
-      { code: 'bv-tous', label: 'Tous publics', color: 'bg-emerald-600', desc: 'Signalétique belge BienVu (mars 2026) : programme TV/cinéma adapté à tous les spectateurs.' },
-      { code: 'bv-6', label: 'BienVu 6', color: 'bg-emerald-500', desc: 'Déconseillé aux moins de 6 ans (peut troubler les tout-petits).' },
-      { code: 'bv-9', label: 'BienVu 9', color: 'bg-teal-600', desc: 'Déconseillé aux moins de 9 ans (thèmes ou scènes demandant un premier recul).' },
-      { code: 'bv-12', label: 'BienVu 12', color: 'bg-amber-500', desc: 'Déconseillé aux moins de 12 ans (âge d\'entrée en 1re secondaire).' },
-      { code: 'bv-14', label: 'BienVu 14', color: 'bg-orange-500', desc: 'Déconseillé aux moins de 14 ans (tensions psychologiques ou violence marquée).' },
-      { code: 'bv-16', label: 'BienVu 16', color: 'bg-rose-600', desc: 'Déconseillé aux moins de 16 ans.' },
-      { code: 'bv-18', label: 'BienVu 18', color: 'bg-rose-800', desc: 'Déconseillé aux moins de 18 ans (contenus réservés aux adultes).' }
+      { id: 'bv-tous', code: 'bv-tous', icone: '🇧🇪', nom: 'AL — Tous publics', label: 'Tous publics', color: 'bg-emerald-600', desc: 'Signalétique belge BienVu (mars 2026) : programme TV/cinéma adapté à tous.' },
+      { id: 'bv-6', code: 'bv-6', icone: '6️⃣', nom: 'BienVu 6 ans', label: 'BienVu 6', color: 'bg-emerald-500', desc: 'Déconseillé aux moins de 6 ans.' },
+      { id: 'bv-9', code: 'bv-9', icone: '9️⃣', nom: 'BienVu 9 ans', label: 'BienVu 9', color: 'bg-teal-600', desc: 'Déconseillé aux moins de 9 ans.' },
+      { id: 'bv-12', code: 'bv-12', icone: '🔞', nom: 'BienVu 12 ans', label: 'BienVu 12', color: 'bg-amber-500', desc: 'Déconseillé aux moins de 12 ans (âge d\'entrée en 1re secondaire).' },
+      { id: 'bv-14', code: 'bv-14', icone: '⚠️', nom: 'BienVu 14 ans', label: 'BienVu 14', color: 'bg-orange-500', desc: 'Déconseillé aux moins de 14 ans (tensions psychologiques ou violence).' },
+      { id: 'bv-16', code: 'bv-16', icone: '🚫', nom: 'BienVu 16 / 18 ans', label: 'BienVu 16/18', color: 'bg-rose-600', desc: 'Déconseillé aux moins de 16 ou 18 ans (+ 6 descripteurs : violence, peur, sexe, drogues, discrimination, langage).' }
     ],
 
     // 🎮 MINI-DÉFIS LUDIQUES & PÉDAGOGIQUES (@lt_X Tome 1a — 1 seule récompense XP par défi maîtrisé)
     defisLudiques: {
       // Défi 1 (Ch.1) : Le Traducteur Nétiquette & Citoyenneté (p. 43 & 59)
       netiquette: {
-        choices: { s1: null, s2: null, s3: null },
+        currentIndex: 0,
+        selectedChoice: null,
+        completed: false,
         validated: false,
         score: 0,
         feedback: ''
       },
       // Défi 2 (Ch.2) : Inspecteur de Profil — Le compte de Lucas (p. 125)
       lucasProfil: {
-        fixedFlaws: [], // ['visibilite', 'photo_ecole', 'date_naissance', 'telephone', 'statut_absent']
-        completed: false
+        foundFlaws: [],
+        fixedFlaws: [],
+        completed: false,
+        lastFeedback: ''
       },
       // Défi 3 (Ch.2) : Révélateur de Permissions — L'appli Lampe de poche de Lina (p. 114)
       linaPermissions: {
-        perms: {
-          flash_led: true,
-          microphone: true,
-          contacts: true,
-          gps: true,
-          galerie: true
-        },
+        items: [
+          { id: 'flash_led', icone: '🔦', nom: 'Flash LED de l\'appareil photo', justification: 'Allumer la lumière du flash pour éclairer dans le noir.', autorise: true, legitime: true },
+          { id: 'gps', icone: '📍', nom: 'Position GPS précise en arrière-plan', justification: 'Suivre tous les déplacements de Lina 24h/24.', autorise: true, legitime: false },
+          { id: 'contacts', icone: '📒', nom: 'Carnet d\'adresses & Contacts', justification: 'Copier les numéros de téléphone des amis et parents de Lina.', autorise: true, legitime: false },
+          { id: 'microphone', icone: '🎙️', nom: 'Microphone & Enregistrement vocal', justification: 'Écouter les conversations autour du téléphone.', autorise: true, legitime: false },
+          { id: 'galerie', icone: '🖼️', nom: 'Accès complet aux photos privées', justification: 'Lire toutes les photos et vidéos stockées dans le téléphone.', autorise: true, legitime: false }
+        ],
+        completed: false,
         validated: false,
         isCorrect: false,
         feedback: ''
@@ -469,32 +520,32 @@ export function createFmttnStore() {
     netiquetteScenarios: [
       {
         id: 's1',
-        contexte: 'Il est 22h30 et Yassine n\'arrive pas à ouvrir le PDF de l\'exercice. Il veut écrire à son professeur :',
-        messageToxique: '« HÉ MONSIEUR LE FICHIER MARCHE PAS C\'EST QUOI CE TRUC ?? RÉPONDEZ VITE SVP !! »',
+        contexte: 'Situation 1/3 • Courriel tardif au professeur (p. 43 & 64)',
+        messageBrut: '« HÉ MONSIEUR LE FICHIER MARCHE PAS C\'EST QUOI CE TRUC ?? RÉPONDEZ VITE SVP !! »',
         options: [
-          { id: 'a', label: 'Renvoyer le même message 5 fois d\'affilée pour faire sonner son téléphone.', correct: false },
-          { id: 'b', label: 'Objet précis + « Bonjour Monsieur, je n\'arrive pas à ouvrir le PDF de la p. 14. Pourriez-vous m\'aider demain en classe ? Cordialement, Yassine (1A) ».', correct: true },
-          { id: 'c', label: 'Écrire uniquement dans l\'objet : « Monsieur le fichier est cassé aidez-moi » sans texte ni signature.', correct: false }
+          { id: 'a', texte: 'Renvoyer le même message 5 fois d\'affilée en MAJUSCULES pour faire sonner son téléphone.', correct: false, explication: 'En nétiquette, écrire en MAJUSCULES équivaut à CRIER, et harceler de messages le soir ne respecte pas le droit à la déconnexion.' },
+          { id: 'b', texte: 'Objet précis + « Bonjour Monsieur, je n\'arrive pas à ouvrir le PDF de la p. 14. Pourriez-vous m\'aider demain en classe ? Cordialement, Yassine (1A) ».', correct: true, explication: 'Parfait ! Objet clair, formule d\'appel polie, question précise et signature complète.' },
+          { id: 'c', texte: 'Écrire uniquement dans le champ Objet : « Monsieur le fichier est cassé aidez-moi » sans texte ni signature.', correct: false, explication: 'On n\'écrit jamais son message entier dans la ligne Objet, et on signe toujours son courriel.' }
         ]
       },
       {
         id: 's2',
-        contexte: 'Sur le groupe WhatsApp de la classe 1B, un élève poste une photo floue et embarrassante d\'un camarade prise à la cantine :',
-        messageToxique: '« 😂😂 Regardez sa tête à midi, partagez à toute l\'école !! »',
+        contexte: 'Situation 2/3 • Groupe de classe & Droit à l\'image (p. 59 & 66)',
+        messageBrut: '« 😂😂 Regardez sa tête à la cantine sur cette photo floue, partagez à toute l\'école !! »',
         options: [
-          { id: 'a', label: 'Mettre un émoji 😂 et transférer au groupe d\'une autre classe (effet boule de neige).', correct: false },
-          { id: 'b', label: 'Refuser de partager (droit à l\'image), demander le retrait bienveillant du message et soutenir le camarade.', correct: true },
-          { id: 'c', label: 'Insulter violemment l\'auteur en MAJUSCULES sur le groupe public (Flaming).', correct: false }
+          { id: 'a', texte: 'Mettre un émoji 😂 et transférer au groupe d\'une autre classe (effet boule de neige).', correct: false, explication: 'Partager ou liker une photo humiliante amplifie le cyberharcèlement et viole le droit à l\'image.' },
+          { id: 'b', texte: 'Refuser de relayer la photo (droit à l\'image), demander calmement son retrait et soutenir le camarade.', correct: true, explication: 'Bravo ! En Belgique, le droit à l\'image exige l\'accord de la personne avant toute prise ET avant toute publication.' },
+          { id: 'c', texte: 'Insulter violemment l\'auteur en MAJUSCULES sur le groupe public (Flaming).', correct: false, explication: 'Répondre par des insultes (Flaming) envenime le conflit au lieu de protéger la victime.' }
         ]
       },
       {
         id: 's3',
-        contexte: 'La déléguée de classe doit envoyer le lien du sondage de fin d\'année à 28 parents d\'élèves qui ne se connaissent pas :',
-        messageToxique: 'Elle met les 28 adresses e-mail privées dans le champ [ À ] visible par tout le monde.',
+        contexte: 'Situation 3/3 • Envoi groupé & Protection RGPD (p. 37 & 62)',
+        messageBrut: 'La déléguée veut envoyer un sondage à 28 parents d\'élèves en mettant les 28 adresses dans le champ [ À ] visible par tous.',
         options: [
-          { id: 'a', label: 'Placer les 28 adresses dans le champ [ Cci ] (Copie Carbone Invisible) pour protéger la vie privée (RGPD).', correct: true },
-          { id: 'b', label: 'Placer les 28 adresses dans le champ [ Cc ] (Copie Carbone).', correct: false },
-          { id: 'c', label: 'Publier la liste des 28 adresses e-mail en story publique sur Instagram.', correct: false }
+          { id: 'a', texte: 'Placer les 28 adresses dans le champ [ Cci ] (Copie Carbone Invisible) pour masquer les adresses personnelles (RGPD).', correct: true, explication: 'Exactement ! Le champ Cci protège la confidentialité des destinataires qui ne se connaissent pas.' },
+          { id: 'b', texte: 'Placer les 28 adresses dans le champ [ Cc ] (Copie Carbone).', correct: false, explication: 'Le champ Cc laisse toutes les adresses visibles par tout le monde !' },
+          { id: 'c', texte: 'Publier la liste des 28 adresses e-mail en story publique sur les réseaux.', correct: false, explication: 'Une adresse e-mail est une donnée personnelle protégée par le RGPD.' }
         ]
       }
     ],
@@ -502,124 +553,149 @@ export function createFmttnStore() {
     lucasProfileFlawsData: [
       {
         id: 'visibilite',
-        icon: '🌍',
-        dangerLabel: 'Compte en mode PUBLIC (Tout Internet peut voir ses photos)',
-        safeLabel: '🔒 Compte basculé en mode PRIVÉ (Amis proches uniquement)',
-        explication: 'Sur un réseau social, un profil public permet à de parfaits inconnus, des recruteurs ou des personnes malveillantes de collecter tes photos et informations (@lt_X p. 94 & 125).'
+        zone: '1. Paramètre du compte',
+        texte: '🌍 Compte en mode PUBLIC (Tout Internet peut voir ses photos et stories)',
+        explication: 'Bascule le compte en mode PRIVÉ (Amis uniquement) pour empêcher des inconnus de collecter tes photos (@lt_X p. 94 & 125).'
       },
       {
         id: 'photo_ecole',
-        icon: '🏫',
-        dangerLabel: 'Photo de profil devant le panneau « Collège Saint-Jean - Bruxelles » avec son badge',
-        safeLabel: '🎨 Avatar illustré neutre sans nom d\'école ni uniforme identifiable',
-        explication: 'Afficher le nom exact de ton école ou de ton club de sport permet à un inconnu de savoir exactement où te trouver dans la vie réelle.'
+        zone: '2. Photo de profil',
+        texte: '🏫 Selfie devant le panneau « Collège Saint-Jean - Bruxelles » avec son badge scolaire',
+        explication: 'Ne montre jamais le nom exact de ton école ou ton uniforme : un inconnu saurait immédiatement où te trouver.'
       },
       {
         id: 'date_naissance',
-        icon: '🎂',
-        dangerLabel: 'Bio : « Né le 14/05/2013 • Mot de passe préféré : Lucas2013 »',
-        safeLabel: '🛡️ Date complète et indice de mot de passe supprimés de la bio',
-        explication: 'Ta date de naissance complète facilite l\'usurpation d\'identité et permet de deviner tes mots de passe faibles en 1 seconde !'
+        zone: '3. Biographie publique',
+        texte: '🎂 « Né le 14/05/2013 • Mot de passe préféré : Lucas2013 »',
+        explication: 'Ta date de naissance complète facilite l\'usurpation d\'identité et permet de deviner un mot de passe faible en 1 seconde.'
       },
       {
         id: 'telephone',
-        icon: '📱',
-        dangerLabel: 'Contact public : « Mon GSM : 0470 / 12 34 56 — Ajoutez-moi ! »',
-        safeLabel: '📵 Numéro de téléphone personnel masqué',
-        explication: 'Ne publie jamais ton numéro de GSM ou ton adresse postale en public : risque de spam, d\'arnaques (smishing) et de harcèlement.'
+        zone: '4. Coordonnées affichées',
+        texte: '📱 « Mon GSM : 0470 / 12 34 56 — Ajoutez-moi tous ! »',
+        explication: 'Ne publie jamais ton numéro de GSM personnel en public (risques de spam, smishing et harcèlement).'
       },
       {
         id: 'statut_absent',
-        icon: '🏠',
-        dangerLabel: 'Story publique : « Seul à la maison tout le week-end au 12 rue des Lilas ! 🎉 »',
-        safeLabel: '🔕 Adresse domicile et absence supprimées',
-        explication: 'Annoncer publiquement son adresse et qu\'on est seul chez soi (ou en vacances) est une invitation directe aux cambriolages et aux risques physiques.'
+        zone: '5. Story géolocalisée',
+        texte: '🏠 « Seul à la maison tout le week-end au 12 rue des Lilas ! 🎉 »',
+        explication: 'Annoncer publiquement son adresse postale et qu\'on est seul chez soi est un danger physique direct.'
       }
     ],
 
     getAltxMasteryBadges() {
       const c = this.eleveCompetences || {};
-      const badges = [
+      return [
         {
           id: 'badge-charte',
           icon: '📜',
-          title: 'Citoyen de la Charte',
-          subtitle: 'Module 0 • Règles & Déconnexion',
+          title: 'Gardien du Poste',
+          desc: 'Module 0 • Charte & Déconnexion 1-3-4-2',
           unlocked: Boolean(this.charteState?.finished && this.charteState?.score >= 40)
         },
         {
           id: 'badge-eg',
           icon: '🕵️',
           title: 'Détective des 5 Dossiers',
-          subtitle: 'Escape Game • Serveur restauré',
+          desc: 'Escape Game • Serveur restauré (5/5)',
           unlocked: Boolean(this.egState?.finished)
         },
         {
           id: 'badge-ch1',
           icon: '✉️',
-          title: 'Maître de la Com\' & E2EE',
-          subtitle: 'Chapitre 1 • Courriel, Nétiquette & Cloud',
-          unlocked: Boolean(c['NUM-1.P2'] === 'acquis' && (this.defisLudiques?.netiquette?.validated || c['NUM-1.M1'] === 'acquis'))
+          title: 'Maître Courriel & Cci',
+          desc: 'Chapitre 1 • Nétiquette, Cci & E2EE',
+          unlocked: Boolean(c['NUM-1.P2'] === 'acquis' || this.defisLudiques?.netiquette?.completed || c['NUM-1.M1'] === 'acquis')
         },
         {
           id: 'badge-ch2',
           icon: '🛡️',
-          title: 'Gardien Cyber & 3P',
-          subtitle: 'Chapitre 2 • HTTPS, Traces & Protection',
+          title: 'Citoyen Cyber-Responsable',
+          desc: 'Chapitre 2 • Traces, Profil & 103/116 000',
           unlocked: Boolean(
-            c['NUM-2.D4'] === 'acquis' &&
-            (this.defisLudiques?.lucasProfil?.completed || this.defisLudiques?.linaPermissions?.isCorrect || c['NUM-2.M1'] === 'acquis')
+            c['NUM-2.D4'] === 'acquis' ||
+            this.defisLudiques?.lucasProfil?.completed ||
+            this.defisLudiques?.linaPermissions?.completed ||
+            c['NUM-2.M1'] === 'acquis'
           )
         }
       ];
-      return badges;
     },
 
     getUnlockedAltxBadgesIds() {
       return this.getAltxMasteryBadges().filter(b => b.unlocked).map(b => b.id);
     },
 
-    choisirReponseDefiNetiquette(scenarioId, optionId) {
-      if (!this.defisLudiques?.netiquette) return;
-      this.defisLudiques.netiquette.choices[scenarioId] = optionId;
+    getCurrentNetiquetteScenario() {
+      const idx = Number(this.defisLudiques?.netiquette?.currentIndex || 0);
+      return this.netiquetteScenarios[idx] || this.netiquetteScenarios[0];
     },
 
-    validerDefiNetiquette() {
-      const ch = this.defisLudiques.netiquette.choices;
-      if (!ch.s1 || !ch.s2 || !ch.s3) {
-        alert('Réponds aux 3 situations avant de valider ton défi Nétiquette !');
-        return;
+    choisirOptionNetiquette(oIdx) {
+      if (!this.defisLudiques.netiquette || typeof this.defisLudiques.netiquette.currentIndex !== 'number') {
+        this.defisLudiques.netiquette = { currentIndex: 0, selectedChoice: null, completed: false, validated: false, score: 0, feedback: '' };
       }
-      let score = 0;
-      this.netiquetteScenarios.forEach(sc => {
-        const picked = sc.options.find(o => o.id === ch[sc.id]);
-        if (picked?.correct) score++;
-      });
-      this.defisLudiques.netiquette.score = score;
-      this.defisLudiques.netiquette.validated = (score === 3);
-      if (score === 3) {
-        this.defisLudiques.netiquette.feedback = '🎉 Sans-faute (3/3) ! Tu maîtrises la Nétiquette, le respect du droit à l\'image et le champ Cci (RGPD) !';
+      this.defisLudiques.netiquette.selectedChoice = oIdx;
+      const sc = this.getCurrentNetiquetteScenario();
+      const opt = sc.options[oIdx];
+      if (opt?.correct) {
+        this.defisLudiques.netiquette.feedback = `✅ ${opt.explication}`;
+      } else {
+        this.defisLudiques.netiquette.feedback = `❌ ${opt?.explication || 'Ce choix ne respecte pas la Nétiquette @lt_X. Réessaie !'}`;
+      }
+    },
+
+    questionSuivanteNetiquette() {
+      const net = this.defisLudiques.netiquette;
+      if ((net.currentIndex || 0) < this.netiquetteScenarios.length - 1) {
+        net.currentIndex = (net.currentIndex || 0) + 1;
+        net.selectedChoice = null;
+        net.feedback = '';
+      } else {
+        net.completed = true;
+        net.validated = true;
+        net.feedback = '🎉 Sans-faute (3/3) ! Tu maîtrises la Nétiquette, le droit à l\'image et le champ Cci (RGPD) !';
         this.eleveCompetences['NUM-1.D6'] = 'acquis';
         this.eleveCompetences['NUM-1.P6'] = 'acquis';
         this.eleveCompetences['NUM-1.P7'] = 'acquis';
         if (typeof this.attribuerXpUnique === 'function') {
           this.attribuerXpUnique('defi:netiquette-ch1', 25, 'Défi Nétiquette & Citoyenneté');
         }
-      } else {
-        this.defisLudiques.netiquette.feedback = `Score : ${score}/3. Relis bien chaque situation : évite les MAJUSCULES agressives, refuse de relayer une photo humiliante et protège les adresses e-mail avec le champ Cci.`;
+        this.syncCurrentStudentProgress();
       }
-      this.syncCurrentStudentProgress();
     },
 
-    corrigerFailleProfilLucas(flawId) {
-      if (!this.defisLudiques?.lucasProfil) return;
-      const arr = this.defisLudiques.lucasProfil.fixedFlaws || [];
-      if (!arr.includes(flawId)) {
-        arr.push(flawId);
-        this.defisLudiques.lucasProfil.fixedFlaws = [...arr];
+    reinitialiserDefiNetiquette() {
+      this.defisLudiques.netiquette = {
+        currentIndex: 0,
+        selectedChoice: null,
+        completed: false,
+        validated: true,
+        score: 3,
+        feedback: ''
+      };
+    },
+
+    hasFoundLucasFlaw(flawId) {
+      const list = this.defisLudiques?.lucasProfil?.foundFlaws || this.defisLudiques?.lucasProfil?.fixedFlaws || [];
+      return Array.isArray(list) && list.includes(flawId);
+    },
+
+    cliquerFailleLucas(flawId) {
+      if (!this.defisLudiques.lucasProfil || !Array.isArray(this.defisLudiques.lucasProfil.foundFlaws)) {
+        this.defisLudiques.lucasProfil = { foundFlaws: [], fixedFlaws: [], completed: false, lastFeedback: '' };
       }
-      if (this.defisLudiques.lucasProfil.fixedFlaws.length >= 5 && !this.defisLudiques.lucasProfil.completed) {
+      const flaw = this.lucasProfileFlawsData.find(f => f.id === flawId);
+      if (!this.defisLudiques.lucasProfil.foundFlaws.includes(flawId)) {
+        this.defisLudiques.lucasProfil.foundFlaws.push(flawId);
+      }
+      this.defisLudiques.lucasProfil.lastFeedback = flaw
+        ? `🔍 ${flaw.zone} sécurisée : ${flaw.explication}`
+        : 'Faille corrigée !';
+
+      if (this.defisLudiques.lucasProfil.foundFlaws.length >= 5 && !this.defisLudiques.lucasProfil.completed) {
         this.defisLudiques.lucasProfil.completed = true;
+        this.defisLudiques.lucasProfil.lastFeedback = '🎉 Bravo ! Les 5 failles du profil de Lucas sont corrigées : son compte est maintenant privé et sécurisé !';
         this.eleveCompetences['NUM-2.D1'] = 'acquis';
         this.eleveCompetences['NUM-2.P4'] = 'acquis';
         if (typeof this.attribuerXpUnique === 'function') {
@@ -629,29 +705,30 @@ export function createFmttnStore() {
       this.syncCurrentStudentProgress();
     },
 
-    isLucasFlawFixed(flawId) {
-      return Boolean(this.defisLudiques?.lucasProfil?.fixedFlaws?.includes(flawId));
+    basculerPermissionLina(permId) {
+      const items = this.defisLudiques?.linaPermissions?.items || [];
+      const item = items.find(i => i.id === permId);
+      if (item) {
+        item.autorise = !item.autorise;
+      }
     },
 
-    basculerPermissionLina(permKey) {
-      if (!this.defisLudiques?.linaPermissions?.perms) return;
-      this.defisLudiques.linaPermissions.perms[permKey] = !this.defisLudiques.linaPermissions.perms[permKey];
-    },
-
-    validerDefiPermissionsLina() {
-      const p = this.defisLudiques.linaPermissions.perms;
-      const isOk = Boolean(p.flash_led && !p.microphone && !p.contacts && !p.gps && !p.galerie);
+    validerPermissionsLina() {
+      const items = this.defisLudiques?.linaPermissions?.items || [];
+      const allCorrect = items.every(i => i.autorise === i.legitime);
       this.defisLudiques.linaPermissions.validated = true;
-      this.defisLudiques.linaPermissions.isCorrect = isOk;
-      if (isOk) {
-        this.defisLudiques.linaPermissions.feedback = '🎉 Bravo ! Une application « Lampe de poche » n\'a besoin QUE du Flash LED de l\'appareil photo. Tu as coupé le micro, le GPS, les contacts et la galerie : tes données passives sont protégées !';
+      this.defisLudiques.linaPermissions.completed = allCorrect;
+      this.defisLudiques.linaPermissions.isCorrect = allCorrect;
+
+      if (allCorrect) {
+        this.defisLudiques.linaPermissions.feedback = '🎉 Bravo ! Une lampe de poche n\'a besoin QUE du Flash LED (ON) : tu as bloqué le GPS, les contacts, le micro et la galerie (OFF) !';
         this.eleveCompetences['NUM-2.D4'] = 'acquis';
         this.eleveCompetences['NUM-2.P4'] = 'acquis';
         if (typeof this.attribuerXpUnique === 'function') {
           this.attribuerXpUnique('defi:lina-permissions', 25, 'Révélateur de Permissions (Lina)');
         }
       } else {
-        this.defisLudiques.linaPermissions.feedback = '⚠️ Attention ! Réfléchis : de quel unique composant matériel une simple lampe de poche a-t-elle vraiment besoin pour éclairer ? Coupe tous les autres capteurs espions !';
+        this.defisLudiques.linaPermissions.feedback = '⚠️ Attention : laisse uniquement le « Flash LED » sur AUTORISÉ (ON) et bascule les 4 permissions espionnes (GPS, Contacts, Micro, Photos) sur BLOQUÉ (OFF) !';
       }
       this.syncCurrentStudentProgress();
     },

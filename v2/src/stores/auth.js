@@ -268,7 +268,27 @@ export function createAuthStore() {
             if (p.escape_game) this.egState = { ...this.egState, ...p.escape_game };
             if (p.email_sim) this.emailSim = { ...this.emailSim, ...p.email_sim };
             if (p.defis_ludiques && this.defisLudiques) {
-              this.defisLudiques = { ...this.defisLudiques, ...p.defis_ludiques };
+              if (p.defis_ludiques.netiquette) {
+                this.defisLudiques.netiquette = { ...this.defisLudiques.netiquette, ...p.defis_ludiques.netiquette };
+              }
+              if (p.defis_ludiques.lucasProfil) {
+                const savedFlaws = p.defis_ludiques.lucasProfil.foundFlaws || p.defis_ludiques.lucasProfil.fixedFlaws || [];
+                this.defisLudiques.lucasProfil = {
+                  ...this.defisLudiques.lucasProfil,
+                  ...p.defis_ludiques.lucasProfil,
+                  foundFlaws: Array.isArray(savedFlaws) ? savedFlaws : []
+                };
+              }
+              if (p.defis_ludiques.linaPermissions) {
+                const defaultItems = this.defisLudiques.linaPermissions.items || [];
+                this.defisLudiques.linaPermissions = {
+                  ...this.defisLudiques.linaPermissions,
+                  ...p.defis_ludiques.linaPermissions,
+                  items: Array.isArray(p.defis_ludiques.linaPermissions.items) && p.defis_ludiques.linaPermissions.items.length
+                    ? p.defis_ludiques.linaPermissions.items
+                    : defaultItems
+                };
+              }
             }
             if (Array.isArray(p.rewarded_activities)) {
               this.rewardedActivities = Array.from(new Set([...this.rewardedActivities, ...p.rewarded_activities]));
