@@ -249,8 +249,87 @@ exports.corrigerDevoir = onCall({
 
     const safeCode = String(code_eleve).slice(0, 12000);
     const safeExId = String(id_exercice).slice(0, 120);
+    const uidEleve = request.auth ? request.auth.uid : "anonyme";
+    const emailEleve = (request.auth?.token?.email || "anonyme@eleve.local").toLowerCase();
 
     try {
+        const db = admin.firestore();
+
+        // 🛡️ BOUCLIER ANTI-SPAM & UNICITÉ (1 élève + 1 exercice = 1 seule copie dans SpeedGrader)
+        let existingDocs = [];
+        if (emailEleve && emailEleve !== "anonyme@eleve.local") {
+            const snapByEmail = await db.collection("submissions")
+                .where("email_eleve", "==", emailEleve)
+                .where("id_exercice", "==", safeExId)
+                .get();
+            snapByEmail.forEach(d => existingDocs.push({ id: d.id, ref: d.ref, data: d.data() }));
+        }
+        if (existingDocs.length === 0 && uidEleve !== "anonyme") {
+            const snapByUid = await db.collection("submissions")
+                .where("uid_eleve", "==", uidEleve)
+                .where("id_exercice", "==", safeExId)
+                .get();
+            snapByUid.forEach(d => existingDocs.push({ id: d.id, ref: d.ref, data: d.data() }));
+        }
+
+        // Trier : copie validée en premier, sinon la plus récente
+        existingDocs.sort((a, b) => {
+            if (a.data.status === "valide" && b.data.status !== "valide") return -1;
+            if (b.data.status === "valide" && a.data.status !== "valide") return 1;
+            return new Date(b.data.date_soumission || 0) - new Date(a.data.date_soumission || 0);
+        });
+
+        const primaryExisting = existingDocs[0] || null;
+
+        // Nettoyage automatique si d'anciens doublons existent déjà pour ce couple (élève, exercice)
+        if (existingDocs.length > 1) {
+            const batch = db.batch();
+            existingDocs.slice(1).forEach(dup => batch.delete(dup.ref));
+            await batch.commit().catch(() => {});
+        }
+
+        if (primaryExisting) {
+            const prev = primaryExisting.data;
+            const prevTime = new Date(prev.date_soumission || 0).getTime();
+            const elapsedSec = (Date.now() - prevTime) / 1000;
+            const prevAttempts = Number(prev.submission_count) || 1;
+            const prevSpam = Number(prev.spam_attempts) || 0;
+
+            // Cas 1 : Copie déjà validée par le professeur -> Verrouillée définitivement
+            if (prev.status === "valide") {
+                return {
+                    docId: primaryExisting.id,
+                    alreadyValidated: true,
+                    xpGranted: false,
+                    evaluation: {
+                        feedback_eleve: "🔒 Ce devoir a déjà été validé par ton professeur. Aucune nouvelle copie ni point d'XP supplémentaire n'est généré.",
+                        note_suggeree: prev.note_suggeree || 85,
+                        erreurs_detectees: prev.erreurs_detectees || []
+                    }
+                };
+            }
+
+            // Cas 2 : Clic répété en moins de 45s ou contenu strictement identique -> Anti-Spam déclenché (pas d'appel Gemini ni de doublon)
+            if (elapsedSec < 45 || (prev.code_eleve && prev.code_eleve.trim() === safeCode.trim())) {
+                await primaryExisting.ref.update({
+                    spam_attempts: prevSpam + 1,
+                    last_spam_at: new Date().toISOString()
+                }).catch(() => {});
+
+                return {
+                    docId: primaryExisting.id,
+                    rateLimited: true,
+                    xpGranted: false,
+                    spamAttempts: prevSpam + 1,
+                    evaluation: {
+                        feedback_eleve: "⚠️ Copie déjà transmise au professeur ! Inutile de cliquer plusieurs fois : une seule soumission et une seule récompense XP sont comptabilisées par exercice.",
+                        note_suggeree: prev.note_suggeree || 85,
+                        erreurs_detectees: prev.erreurs_detectees || []
+                    }
+                };
+            }
+        }
+
         const exData = (await getCachedDoc("exercices", safeExId)) || {};
 
         const ai = new GoogleGenAI({ apiKey: geminiApiKey.value() });
@@ -349,19 +428,35 @@ ${directives}
             classe_id: String(request.data.classe_id || request.data.classe || "1A").slice(0, 30),
             classe: String(request.data.classe_id || request.data.classe || "1A").slice(0, 30),
             prof_id: request.data.prof_id || null,
-            uid_eleve: request.auth ? request.auth.uid : "anonyme",
-            email_eleve: request.auth?.token?.email || "anonyme@eleve.local",
+            uid_eleve: uidEleve,
+            email_eleve: emailEleve,
             nom_eleve: String(nom_eleve || request.auth?.token?.name || request.auth?.token?.email?.split('@')[0] || "Élève").slice(0, 120),
             status: "a_valider",
             feedback_ia: jsonEvaluation.feedback_eleve,
             note_suggeree: Number(jsonEvaluation.note_suggeree) || 80,
             erreurs_detectees: Array.isArray(jsonEvaluation.erreurs_detectees) ? jsonEvaluation.erreurs_detectees : [],
             date_soumission: new Date().toISOString(),
-            autonomie: request.data.autonomie || {}
+            autonomie: request.data.autonomie || {},
+            submission_count: primaryExisting ? ((Number(primaryExisting.data.submission_count) || 1) + 1) : 1,
+            spam_attempts: primaryExisting ? (Number(primaryExisting.data.spam_attempts) || 0) : 0
         };
         
-        const docRef = await admin.firestore().collection("submissions").add(submissionData);
-        return { docId: docRef.id, evaluation: jsonEvaluation };
+        if (primaryExisting) {
+            await primaryExisting.ref.set(submissionData, { merge: true });
+            return {
+                docId: primaryExisting.id,
+                updatedExisting: true,
+                xpGranted: false,
+                evaluation: jsonEvaluation
+            };
+        }
+
+        const safeStudentKey = (emailEleve && emailEleve !== "anonyme@eleve.local" ? emailEleve : uidEleve)
+            .replace(/[^a-zA-Z0-9_-]/g, "_");
+        const deterministicId = `${safeStudentKey}__${safeExId.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
+        const docRef = db.collection("submissions").doc(deterministicId);
+        await docRef.set(submissionData, { merge: true });
+        return { docId: docRef.id, xpGranted: true, evaluation: jsonEvaluation };
 
     } catch (error) {
         console.error("[corrigerDevoir] Erreur critique Firestore:", error);

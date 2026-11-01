@@ -8,7 +8,9 @@ import {
   supprimerEnseignantCloud,
   listenToTeacherSubmissions,
   updateTeacherSubmission,
-  deleteTeacherSubmission
+  deleteTeacherSubmission,
+  purgerDoublonsSubmissionsFirestore,
+  appliquerSanctionEtAvertissementEleve
 } from '../services/firebase.js';
 import { courseManagerV2 } from '../services/courseManager.js';
 
@@ -36,6 +38,11 @@ export function createTeacherStore() {
     speedGraderViewTab: 'preview', // 'preview' | 'raw'
     batchValidating: false,
     batchFeedbackMsg: '',
+    deduplicateSpeedGrader: true,
+    antiSpamCleaning: false,
+    antiSpamFeedbackMsg: '',
+    showSpammerRadar: true,
+    customWarningMessage: "Nous avons constaté un envoi répétitif d'exercices identiques (spam de clics) visant à accumuler artificiellement des points d'XP. Tes copies en doublon ont été supprimées et ton solde d'XP a été ramené à tes réussites réelles uniques. Merci d'utiliser la plateforme avec fair-play et respect du travail scolaire.",
 
     profSelectedCourseId: 'fmttn-1c',
     profCourseExercises: [],
@@ -244,7 +251,7 @@ export function createTeacherStore() {
     },
 
     getFilteredSubmissions() {
-      return this.teacherSubmissions.filter(sub => {
+      const filtered = this.teacherSubmissions.filter(sub => {
         if (this.submissionFilterStatus !== 'tous') {
           if (this.submissionFilterStatus === 'a_valider') {
             if (sub.status !== 'a_valider' && sub.status !== 'pending') return false;
@@ -273,10 +280,241 @@ export function createTeacherStore() {
 
         return true;
       });
+
+      if (!this.deduplicateSpeedGrader) {
+        return filtered;
+      }
+
+      // Déduplication intelligente : 1 seule copie par couple (élève, exercice)
+      const groups = new Map();
+      for (const sub of filtered) {
+        const studentKey = (sub.email_eleve || sub.uid_eleve || sub.nom_eleve || 'anonyme').toLowerCase().trim();
+        const exKey = (sub.id_exercice || sub.titre_exercice || 'exo').toLowerCase().trim();
+        const key = `${studentKey}::${exKey}`;
+        if (!groups.has(key)) {
+          groups.set(key, { best: sub, count: 1 });
+        } else {
+          const entry = groups.get(key);
+          entry.count += 1;
+          // Priorité au statut 'valide' si présent, sinon le plus récent (filtered est déjà trié du plus récent au plus ancien)
+          if (sub.status === 'valide' && entry.best.status !== 'valide') {
+            entry.best = sub;
+          }
+        }
+      }
+
+      return Array.from(groups.values()).map(entry => ({
+        ...entry.best,
+        _duplicateCount: entry.count
+      }));
     },
 
     getPendingSubmissionsCount() {
-      return this.teacherSubmissions.filter(s => s.status === 'a_valider' || s.status === 'pending').length;
+      const list = this.deduplicateSpeedGrader ? this.getFilteredSubmissions() : this.teacherSubmissions;
+      return list.filter(s => s.status === 'a_valider' || s.status === 'pending').length;
+    },
+
+    // ==========================================
+    // CONSOLE ANTI-SPAM, DÉDUPLICATION & AVERTISSEMENT ÉLÈVE
+    // ==========================================
+    calculerXpLegitimeEleve(eleve, duplicateSubmissionsCount = 0) {
+      if (!eleve) return 0;
+      const rewarded = Array.isArray(eleve.rewarded_activities) ? eleve.rewarded_activities : [];
+      if (rewarded.length > 0) {
+        return Math.min(rewarded.length * 20, 650);
+      }
+      const compCount = Object.values(eleve.competences || {}).filter(v => v === 'acquis').length;
+      const egFolders = parseInt(String(eleve.eg || '1/5').split('/')[0], 10) || 1;
+      const validSubs = new Set(
+        this.teacherSubmissions
+          .filter(s => {
+            const matchEmail = eleve.email && s.email_eleve && s.email_eleve.toLowerCase() === eleve.email.toLowerCase();
+            const matchNom = eleve.nom && s.nom_eleve && s.nom_eleve.toLowerCase() === eleve.nom.toLowerCase();
+            return (matchEmail || matchNom) && (s.status === 'valide' || Number(s.note_suggeree || 0) >= 60);
+          })
+          .map(s => s.id_exercice || s.titre_exercice)
+      ).size;
+
+      const estimated = (compCount * 15) + (Math.max(0, egFolders - 1) * 25) + (validSubs * 30);
+      return Math.max(20, Math.min(estimated || 50, 600));
+    },
+
+    getDuplicateSubmissionsStats() {
+      const pairCounts = new Map();
+      const studentStats = new Map();
+
+      for (const sub of this.teacherSubmissions) {
+        const email = (sub.email_eleve || '').toLowerCase().trim();
+        const nom = (sub.nom_eleve || 'Élève').trim();
+        const classe = (sub.classe_id || sub.classe || this.selectedTeacherClass || '1A').trim();
+        const studentKey = email || (sub.uid_eleve || nom).toLowerCase().trim();
+        const exKey = (sub.id_exercice || sub.titre_exercice || 'exo').toLowerCase().trim();
+        const pairKey = `${studentKey}::${exKey}`;
+
+        pairCounts.set(pairKey, (pairCounts.get(pairKey) || 0) + 1);
+
+        if (!studentStats.has(studentKey)) {
+          studentStats.set(studentKey, {
+            studentKey,
+            nom,
+            email,
+            classe,
+            totalSubmissions: 0,
+            uniqueExercises: new Set(),
+            duplicateSubmissions: 0
+          });
+        }
+        const st = studentStats.get(studentKey);
+        st.totalSubmissions += 1;
+        if (st.uniqueExercises.has(exKey)) {
+          st.duplicateSubmissions += 1;
+        } else {
+          st.uniqueExercises.add(exKey);
+        }
+      }
+
+      let duplicateCount = 0;
+      for (const count of pairCounts.values()) {
+        if (count > 1) duplicateCount += (count - 1);
+      }
+
+      // Croiser avec les élèves de la classe (pour détecter aussi les XP gonflés sur les QCM)
+      const spammersMap = new Map();
+
+      for (const [key, st] of studentStats.entries()) {
+        if (st.duplicateSubmissions >= 2) {
+          const matchingEleve = (this.classeEleves || []).find(
+            e => (e.email && e.email.toLowerCase() === st.email) || (e.nom && e.nom.toLowerCase() === st.nom.toLowerCase())
+          );
+          const currentXp = matchingEleve ? (matchingEleve.xp || 0) : 0;
+          const legitXp = matchingEleve ? this.calculerXpLegitimeEleve(matchingEleve, st.duplicateSubmissions) : 50;
+          spammersMap.set(key, {
+            ...st,
+            docKey: matchingEleve?.docKey || st.email || st.nom,
+            classe: matchingEleve?.classe || st.classe || this.selectedTeacherClass,
+            currentXp,
+            legitXp,
+            spamAttempts: matchingEleve?.spam_attempts || st.duplicateSubmissions,
+            spamWarning: matchingEleve?.spam_warning || null,
+            reason: `${st.duplicateSubmissions} copie(s) en doublon (${st.totalSubmissions} envois pour ${st.uniqueExercises.size} exo)`
+          });
+        }
+      }
+
+      for (const el of (this.classeEleves || [])) {
+        const key = (el.email || el.docKey || el.nom || '').toLowerCase().trim();
+        if (!key) continue;
+        const legitXp = this.calculerXpLegitimeEleve(el, 0);
+        const currentXp = Number(el.xp || 0);
+        const isXpInflated = currentXp > legitXp + 180 || currentXp >= 750;
+        const hasSpamAttempts = Number(el.spam_attempts || 0) >= 2;
+        const hasActiveWarning = Boolean(el.spam_warning);
+
+        if ((isXpInflated || hasSpamAttempts || hasActiveWarning) && !spammersMap.has(key)) {
+          spammersMap.set(key, {
+            studentKey: key,
+            docKey: el.docKey || el.email || el.nom,
+            nom: el.nom || 'Élève',
+            email: el.email || '',
+            classe: el.classe || this.selectedTeacherClass,
+            totalSubmissions: 0,
+            duplicateSubmissions: Number(el.spam_attempts || 0),
+            currentXp,
+            legitXp,
+            spamAttempts: Number(el.spam_attempts || 0),
+            spamWarning: el.spam_warning || null,
+            reason: isXpInflated
+              ? `XP anormalement élevé (${currentXp} XP vs ~${legitXp} XP légitimes)`
+              : `${el.spam_attempts || 0} tentative(s) de spam détectée(s)`
+          });
+        }
+      }
+
+      const spammersList = Array.from(spammersMap.values()).sort(
+        (a, b) => (b.duplicateSubmissions * 20 + b.currentXp) - (a.duplicateSubmissions * 20 + a.currentXp)
+      );
+
+      return {
+        totalSubmissions: this.teacherSubmissions.length,
+        uniqueCount: this.teacherSubmissions.length - duplicateCount,
+        duplicateCount,
+        spammersList
+      };
+    },
+
+    async nettoyerDoublonsSubmissions() {
+      const stats = this.getDuplicateSubmissionsStats();
+      if (stats.duplicateCount === 0) {
+        this.antiSpamFeedbackMsg = '✅ Aucun doublon à supprimer : la boîte de correction est déjà propre !';
+        return;
+      }
+
+      this.antiSpamCleaning = true;
+      this.antiSpamFeedbackMsg = `⏳ Suppression de ${stats.duplicateCount} copie(s) en doublon en cours...`;
+      try {
+        const res = await purgerDoublonsSubmissionsFirestore(this.teacherSubmissions);
+        this.antiSpamFeedbackMsg = `🧹 Nettoyage terminé : ${res.deletedCount} copie(s) en doublon supprimée(s) définitivement de Firestore !`;
+      } catch (err) {
+        console.error('[AntiSpam] Erreur purge doublons :', err);
+        alert('Erreur lors de la purge des doublons : ' + err.message);
+      } finally {
+        this.antiSpamCleaning = false;
+      }
+    },
+
+    async recalculerXpEtAvertirEleve(spammer, { resetToZero = false, sendWarning = true } = {}) {
+      if (!spammer) return;
+      const newXp = resetToZero ? 0 : Number(spammer.legitXp || 50);
+      this.antiSpamCleaning = true;
+      try {
+        await appliquerSanctionEtAvertissementEleve({
+          classeId: spammer.classe || this.selectedTeacherClass || '1A',
+          studentDocKey: spammer.docKey || spammer.email || spammer.nom,
+          nom: spammer.nom,
+          email: spammer.email,
+          newXp,
+          warningMessage: sendWarning ? this.customWarningMessage : '',
+          duplicatesRemoved: spammer.duplicateSubmissions || 0
+        });
+        this.antiSpamFeedbackMsg = `⚖️ ${spammer.nom} : XP ajusté à ${newXp} XP ${sendWarning ? '+ Avertissement bloquant envoyé sur son écran' : ''}.`;
+      } catch (err) {
+        console.error('[AntiSpam] Erreur sanction élève :', err);
+        alert('Erreur lors de la sanction : ' + err.message);
+      } finally {
+        this.antiSpamCleaning = false;
+      }
+    },
+
+    async assainirClasseAntiSpam1Clic() {
+      const stats = this.getDuplicateSubmissionsStats();
+      this.antiSpamCleaning = true;
+      this.antiSpamFeedbackMsg = '⏳ Assainissement complet en cours (Purge des doublons + Recalcul XP + Avertissements)...';
+      try {
+        let deleted = 0;
+        if (stats.duplicateCount > 0) {
+          const res = await purgerDoublonsSubmissionsFirestore(this.teacherSubmissions);
+          deleted = res.deletedCount;
+        }
+        let warned = 0;
+        for (const spammer of stats.spammersList) {
+          await appliquerSanctionEtAvertissementEleve({
+            classeId: spammer.classe || this.selectedTeacherClass || '1A',
+            studentDocKey: spammer.docKey || spammer.email || spammer.nom,
+            nom: spammer.nom,
+            email: spammer.email,
+            newXp: Number(spammer.legitXp || 50),
+            warningMessage: this.customWarningMessage,
+            duplicatesRemoved: spammer.duplicateSubmissions || 0
+          });
+          warned += 1;
+        }
+        this.antiSpamFeedbackMsg = `✅ Assainissement réussi : ${deleted} doublon(s) supprimé(s), ${warned} élève(s) recalculé(s) et averti(s) !`;
+      } catch (err) {
+        console.error('[AntiSpam] Erreur assainissement global :', err);
+        alert('Erreur : ' + err.message);
+      } finally {
+        this.antiSpamCleaning = false;
+      }
     },
 
     // ==========================================

@@ -14,6 +14,7 @@ import {
   setDoc, 
   updateDoc, 
   deleteDoc,
+  writeBatch,
   collection, 
   query, 
   where, 
@@ -285,11 +286,19 @@ export async function saveEleveProgression(classeId, eleveId, data) {
       mission_secu: data.mission_secu || null,
       bilan_personnel_ch2: data.bilan_personnel_ch2 || null,
       competences: data.competences || {},
+      rewarded_activities: Array.isArray(data.rewarded_activities) ? data.rewarded_activities : [],
+      defis_ludiques: data.defis_ludiques || null,
+      badges_altx: Array.isArray(data.badges_altx) ? data.badges_altx : [],
+      spam_attempts: Number(data.spam_attempts) || 0,
       tutor_calls_count: Number(data.tutor_calls_count) || 0,
       hints_used_count: Number(data.hints_used_count) || 0,
       active_course_id: data.active_course_id || 'fmttn-1re',
       active_exercise_id: data.active_exercise_id || ''
     };
+
+    if (data.spam_warning !== undefined) {
+      payload.spam_warning = data.spam_warning;
+    }
 
     await setDoc(docRef, payload, { merge: true });
     console.log(`[Firestore] Progression synchronisée pour ${nom} (${email || eleveId} - ${classeId})`);
@@ -297,6 +306,24 @@ export async function saveEleveProgression(classeId, eleveId, data) {
   } catch (err) {
     console.warn("[Firestore] Mode local actif :", err.message);
     return false;
+  }
+}
+
+// 5c. Écoute temps réel du profil de l'élève connecté (pour recevoir les avertissements anti-spam et recalculs XP en direct)
+export function subscribeToStudentOwnProgression(classeId, email, uid, onUpdate) {
+  try {
+    const normalizedEmail = (email || '').toLowerCase().trim();
+    const keySource = normalizedEmail || uid;
+    if (!classeId || !keySource) return () => {};
+    const docKey = `${classeId}_${keySource}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const docRef = doc(db, "progressions_v2", docKey);
+    return onSnapshot(docRef, (snap) => {
+      if (snap.exists()) {
+        onUpdate(snap.data());
+      }
+    }, () => {});
+  } catch (_) {
+    return () => {};
   }
 }
 
@@ -386,7 +413,10 @@ export function listenToClasseProgressions(classeId, onUpdate) {
         if (num2_d4 === "acquis") score += 5;
 
         eleves.push({
+          docKey: docSnap.id,
           id: d.eleve_id,
+          uid: d.uid || '',
+          classe_id: d.classe_id || classeId,
           email: d.eleve_email || '',
           nom: d.eleve_nom || "Élève",
           eg: egRatio,
@@ -402,6 +432,18 @@ export function listenToClasseProgressions(classeId, onUpdate) {
           num2_m1,
           score: Math.min(100, score),
           xp: d.xp || 0,
+          rewarded_activities: Array.isArray(d.rewarded_activities) ? d.rewarded_activities : [],
+          spam_warning: d.spam_warning || null,
+          spam_attempts: Number(d.spam_attempts) || 0,
+          competences: d.competences || {},
+          escape_game: d.escape_game || null,
+          charte_obj: d.charte || null,
+          email_sim: d.email_sim || null,
+          mission_app: d.mission_app || null,
+          http_sim: d.http_sim || null,
+          tri_donnees: d.tri_donnees || null,
+          mission_secu: d.mission_secu || null,
+          defis_ludiques: d.defis_ludiques || null,
           tutor_calls_count: Number(d.tutor_calls_count) || 0,
           hints_used_count: Number(d.hints_used_count) || 0,
           active_course_id: d.active_course_id || 'fmttn-1re',
@@ -857,6 +899,155 @@ export async function deleteCourseFromFirestore(courseId) {
   if (!courseId) return false;
   await deleteDoc(doc(db, "cours", courseId));
   return true;
+}
+
+// 15. BOUCLIER ANTI-SPAM : PURGE DES DOUBLONS EN LOT, RECALCUL XP & AVERTISSEMENTS OFFICIELS
+export async function purgerDoublonsSubmissionsFirestore(submissionsList = []) {
+  const groups = {};
+  for (const sub of submissionsList) {
+    if (!sub || !sub.id) continue;
+    const studentKey = (sub.email_eleve && sub.email_eleve !== 'anonyme@eleve.local')
+      ? sub.email_eleve.toLowerCase().trim()
+      : (sub.uid_eleve && sub.uid_eleve !== 'anonyme' ? sub.uid_eleve : (sub.nom_eleve || 'inconnu').toLowerCase().trim());
+    const exKey = (sub.id_exercice || sub.exercice_id || sub.titre_exercice || 'exo').trim();
+    const pairKey = `${studentKey}__${exKey}`;
+    if (!groups[pairKey]) groups[pairKey] = [];
+    groups[pairKey].push(sub);
+  }
+
+  const idsToDelete = [];
+  const spammerStats = {};
+
+  Object.values(groups).forEach(list => {
+    if (list.length <= 1) return;
+    // Trier : garder en priorité une copie déjà validée, sinon la meilleure note / la plus récente
+    list.sort((a, b) => {
+      if (a.status === 'valide' && b.status !== 'valide') return -1;
+      if (b.status === 'valide' && a.status !== 'valide') return 1;
+      const noteDiff = (Number(b.note_suggeree) || 0) - (Number(a.note_suggeree) || 0);
+      if (noteDiff !== 0) return noteDiff;
+      return new Date(b.date_soumission || 0) - new Date(a.date_soumission || 0);
+    });
+
+    const kept = list[0];
+    const duplicates = list.slice(1);
+    duplicates.forEach(d => idsToDelete.push(d.id));
+
+    const stKey = (kept.email_eleve || kept.uid_eleve || kept.nom_eleve || 'inconnu').toLowerCase();
+    if (!spammerStats[stKey]) {
+      spammerStats[stKey] = {
+        nom: kept.nom_eleve || 'Élève',
+        email: kept.email_eleve || '',
+        uid: kept.uid_eleve || '',
+        classe: kept.classe_id || kept.classe || '1A',
+        duplicatesRemoved: 0
+      };
+    }
+    spammerStats[stKey].duplicatesRemoved += duplicates.length;
+  });
+
+  // Suppression par lots de 400 documents (limite Firestore = 500 opérations/batch)
+  const chunkSize = 400;
+  for (let i = 0; i < idsToDelete.length; i += chunkSize) {
+    const chunk = idsToDelete.slice(i, i + chunkSize);
+    const batch = writeBatch(db);
+    chunk.forEach(docId => {
+      batch.delete(doc(db, "submissions", docId));
+    });
+    await batch.commit();
+  }
+
+  return {
+    deletedCount: idsToDelete.length,
+    spammers: Object.values(spammerStats)
+  };
+}
+
+export async function appliquerSanctionEtAvertissementEleve({
+  docKey,
+  classeId = '1A',
+  eleveId = '',
+  email = '',
+  nom = 'Élève',
+  newXp = null,
+  rewardedActivities = null,
+  sendWarning = false,
+  warningMessage = '',
+  teacherName = 'Ton professeur',
+  duplicateCount = 0
+}) {
+  const normalizedEmail = (email || '').toLowerCase().trim();
+  const resolvedDocKey = docKey || (normalizedEmail
+    ? `${classeId}_${normalizedEmail}`.replace(/[^a-zA-Z0-9_-]/g, '_')
+    : `${classeId}_${eleveId || nom}`.replace(/[^a-zA-Z0-9_-]/g, '_'));
+
+  const progRef = doc(db, "progressions_v2", resolvedDocKey);
+  const updatePayload = {
+    updated_at: new Date().toISOString(),
+    timestamp: serverTimestamp()
+  };
+
+  if (newXp !== null && newXp !== undefined) {
+    updatePayload.xp = Math.max(0, Number(newXp) || 0);
+  }
+  if (Array.isArray(rewardedActivities)) {
+    updatePayload.rewarded_activities = rewardedActivities;
+  }
+  if (sendWarning) {
+    updatePayload.spam_warning = {
+      active: true,
+      message: warningMessage || `Un comportement de spam (${duplicateCount > 0 ? duplicateCount + ' soumissions/clics en double' : 'clics répétés pour gonfler artificiellement les XP'}) a été détecté sur ton compte. Tes points d'XP illégitimes ont été supprimés et tes copies en double ont été purgées.`,
+      sent_at: new Date().toISOString(),
+      sent_by: teacherName,
+      duplicate_count: Number(duplicateCount) || 0,
+      acknowledged_at: null
+    };
+  }
+
+  await setDoc(progRef, updatePayload, { merge: true });
+
+  // Mettre aussi à jour la collection 'users' si un document correspondant existe
+  if (normalizedEmail) {
+    try {
+      const qU = query(collection(db, "users"), where("email", "==", normalizedEmail));
+      const snapU = await getDocs(qU);
+      for (const d of snapU.docs) {
+        const uUpd = {};
+        if (newXp !== null && newXp !== undefined) uUpd.xp = Math.max(0, Number(newXp) || 0);
+        if (sendWarning) uUpd.spam_warning = updatePayload.spam_warning;
+        if (Object.keys(uUpd).length > 0) {
+          await updateDoc(d.ref, uUpd);
+        }
+      }
+    } catch (_) {}
+  }
+
+  return { success: true, docKey: resolvedDocKey, payload: updatePayload };
+}
+
+export async function acquitterAvertissementSpamEleve({ classeId = '1A', eleveId = '', email = '' }) {
+  try {
+    const normalizedEmail = (email || '').toLowerCase().trim();
+    const keySource = normalizedEmail || eleveId;
+    if (!keySource) return false;
+    const docKey = `${classeId}_${keySource}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const progRef = doc(db, "progressions_v2", docKey);
+    const snap = await getDoc(progRef);
+    const prevWarn = snap.exists() ? (snap.data().spam_warning || {}) : {};
+
+    await setDoc(progRef, {
+      spam_warning: {
+        ...prevWarn,
+        active: false,
+        acknowledged_at: new Date().toISOString()
+      },
+      updated_at: new Date().toISOString()
+    }, { merge: true });
+    return true;
+  } catch (err) {
+    console.warn("[acquitterAvertissementSpamEleve] Erreur :", err.message);
+    return false;
+  }
 }
 
 

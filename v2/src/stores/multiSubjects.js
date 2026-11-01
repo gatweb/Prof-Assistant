@@ -93,6 +93,11 @@ export function createMultiSubjectsStore() {
         this.assemblerPlanDansTexteRedaction();
       }
 
+      const exId = this.currentExercise?.id || 'redac-ex1';
+      if (typeof this.verifierCooldownSoumission === 'function' && !this.verifierCooldownSoumission(exId, 35)) {
+        return;
+      }
+
       const autonomyScore = typeof this.getCurrentAutonomyScore === 'function' ? this.getCurrentAutonomyScore() : 100;
       this.redactionState.submitting = true;
       this.redactionState.feedback = '';
@@ -102,7 +107,7 @@ export function createMultiSubjectsStore() {
       try {
         const res = await soumettreDevoirCloud({
           code_eleve: payload,
-          id_exercice: this.currentExercise?.id || 'redac-ex1',
+          id_exercice: exId,
           titre_exercice: this.currentExercise?.titre || 'Rédaction & Argumentation',
           course_id: this.currentCourse?.id || 'pilote-redaction',
           nom_eleve: this.user.nom,
@@ -118,13 +123,17 @@ export function createMultiSubjectsStore() {
         const fb = res?.evaluation?.feedback_eleve || "Texte argumentatif bien structuré et transmis au professeur !";
         this.redactionState.feedback = `✅ ${fb} (Note suggérée : ${note}/100 • Autonomie : ${autonomyScore}%)`;
         this.redactionState.score = note;
-        this.user.xp += 30;
+        if (!res?.rateLimited && !res?.alreadyValidated && typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(`exo:${exId}`, 30, 'Rédaction & Argumentation');
+        }
         this.studentTutorCallsCount = 0;
         this.studentHintsUsedCount = 0;
         this.syncCurrentStudentProgress();
       } catch (err) {
         this.redactionState.feedback = "✅ Rédaction enregistrée et transmise au professeur !";
-        this.user.xp += 20;
+        if (typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(`exo:${exId}`, 20, 'Rédaction & Argumentation');
+        }
         this.syncCurrentStudentProgress();
       } finally {
         this.redactionState.submitting = false;
@@ -218,6 +227,11 @@ export function createMultiSubjectsStore() {
         return;
       }
 
+      const exId = this.currentExercise?.id || 'lang-ex1';
+      if (typeof this.verifierCooldownSoumission === 'function' && !this.verifierCooldownSoumission(exId, 35)) {
+        return;
+      }
+
       const autonomyScore = typeof this.getCurrentAutonomyScore === 'function' ? this.getCurrentAutonomyScore() : 100;
       this.languesState.submitting = true;
       this.languesState.feedback = '';
@@ -230,7 +244,7 @@ export function createMultiSubjectsStore() {
       try {
         const res = await soumettreDevoirCloud({
           code_eleve: payload,
-          id_exercice: this.currentExercise?.id || 'lang-ex1',
+          id_exercice: exId,
           titre_exercice: this.currentExercise?.titre || `Jeu de rôle CECRL ${this.languesState.cefrLevel}`,
           course_id: this.currentCourse?.id || 'pilote-langues',
           nom_eleve: this.user.nom,
@@ -246,11 +260,15 @@ export function createMultiSubjectsStore() {
         const fb = res?.evaluation?.feedback_eleve || "Excellent dialogue CECRL !";
         this.languesState.feedback = `✅ ${fb} (Note suggérée : ${note}/100 • Autonomie : ${autonomyScore}%)`;
         this.languesState.score = note;
-        this.user.xp += 30;
+        if (!res?.rateLimited && !res?.alreadyValidated && typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(`exo:${exId}`, 30, 'Jeu de rôle CECRL');
+        }
         this.syncCurrentStudentProgress();
       } catch (_) {
         this.languesState.feedback = "✅ Dialogue enregistré et transmis au professeur !";
-        this.user.xp += 20;
+        if (typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(`exo:${exId}`, 20, 'Jeu de rôle CECRL');
+        }
         this.syncCurrentStudentProgress();
       } finally {
         this.languesState.submitting = false;
@@ -287,6 +305,11 @@ export function createMultiSubjectsStore() {
         return;
       }
 
+      const exId = this.currentExercise?.id || 'sci-ex1';
+      if (typeof this.verifierCooldownSoumission === 'function' && !this.verifierCooldownSoumission(exId, 35)) {
+        return;
+      }
+
       const autonomyScore = typeof this.getCurrentAutonomyScore === 'function' ? this.getCurrentAutonomyScore() : 100;
       this.sciencesState.submitting = true;
       this.sciencesState.feedback = '';
@@ -297,7 +320,7 @@ export function createMultiSubjectsStore() {
       try {
         const res = await soumettreDevoirCloud({
           code_eleve: payload,
-          id_exercice: this.currentExercise?.id || 'sci-ex1',
+          id_exercice: exId,
           titre_exercice: this.currentExercise?.titre || 'Résolution Sciences & Maths',
           course_id: this.currentCourse?.id || 'pilote-sciences',
           nom_eleve: this.user.nom,
@@ -313,11 +336,15 @@ export function createMultiSubjectsStore() {
         const fb = res?.evaluation?.feedback_eleve || "Démarche scientifique claire et rigoureuse !";
         this.sciencesState.feedback = `✅ ${fb} (Note suggérée : ${note}/100 • Autonomie : ${autonomyScore}%)`;
         this.sciencesState.score = note;
-        this.user.xp += 30;
+        if (!res?.rateLimited && !res?.alreadyValidated && typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(`exo:${exId}`, 30, 'Sciences & Maths');
+        }
         this.syncCurrentStudentProgress();
       } catch (_) {
         this.sciencesState.feedback = "✅ Résolution enregistrée et transmise au professeur !";
-        this.user.xp += 20;
+        if (typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(`exo:${exId}`, 20, 'Sciences & Maths');
+        }
         this.syncCurrentStudentProgress();
       } finally {
         this.sciencesState.submitting = false;

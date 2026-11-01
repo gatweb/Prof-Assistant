@@ -7,6 +7,8 @@ import {
   subscribeToAuthState, 
   saveEleveProgression, 
   chargerProgressionEleveReelle,
+  subscribeToStudentOwnProgression,
+  acquitterAvertissementSpamEleve,
   getClassMappings
 } from '../services/firebase.js';
 import { AVAILABLE_CLASSES } from '../services/teachers-config.js';
@@ -33,6 +35,19 @@ export function createAuthStore() {
     studentSubmissionsHistory: [],
     studentTutorCallsCount: 0,
     studentHintsUsedCount: 0,
+
+    // 🛡️ BOUCLIER ANTI-SPAM & SUIVI D'UNICITÉ DES XP
+    rewardedActivities: [],
+    submissionCooldowns: {},
+    studentSpamAttempts: 0,
+    studentSpamWarning: null,
+    spamWarningCommitmentChecked: false,
+    unsubscribeOwnProgression: null,
+    xpToast: {
+      visible: false,
+      message: '',
+      type: 'xp' // 'xp' | 'already' | 'warn'
+    },
 
     user: {
       id: '',
@@ -232,18 +247,39 @@ export function createAuthStore() {
     async chargerProgressionEleveReelleDepuisDb() {
       if (!this.user.email && !this.user.id) return;
       try {
+        const storageKey = `profassistant_rewarded_${this.user.email || this.user.id}`;
+        try {
+          const cachedRewards = JSON.parse(localStorage.getItem(storageKey) || '[]');
+          if (Array.isArray(cachedRewards)) {
+            this.rewardedActivities = cachedRewards;
+          }
+        } catch (_) {}
+
         const data = await chargerProgressionEleveReelle(this.user.classe, this.user.email, this.user.id);
         if (data) {
           if (data.progression) {
             const p = data.progression;
             if (p.classe_id) this.user.classe = p.classe_id;
-            if (p.xp) this.user.xp = p.xp;
+            if (typeof p.xp === 'number') this.user.xp = p.xp;
             if (p.competences) this.eleveCompetences = { ...this.eleveCompetences, ...p.competences };
             if (p.bilan_personnel) this.bilanPersonnel = { ...this.bilanPersonnel, ...p.bilan_personnel };
             if (p.bilan_personnel_ch2) this.bilanPersonnelCh2 = { ...this.bilanPersonnelCh2, ...p.bilan_personnel_ch2 };
             if (p.charte) this.charteState = { ...this.charteState, ...p.charte };
             if (p.escape_game) this.egState = { ...this.egState, ...p.escape_game };
             if (p.email_sim) this.emailSim = { ...this.emailSim, ...p.email_sim };
+            if (p.defis_ludiques && this.defisLudiques) {
+              this.defisLudiques = { ...this.defisLudiques, ...p.defis_ludiques };
+            }
+            if (Array.isArray(p.rewarded_activities)) {
+              this.rewardedActivities = Array.from(new Set([...this.rewardedActivities, ...p.rewarded_activities]));
+              localStorage.setItem(storageKey, JSON.stringify(this.rewardedActivities));
+            }
+            if (p.spam_warning) {
+              this.studentSpamWarning = p.spam_warning;
+            }
+            if (typeof p.spam_attempts === 'number') {
+              this.studentSpamAttempts = p.spam_attempts;
+            }
           }
           if (data.submissions?.length) {
             this.studentSubmissionsHistory = data.submissions;
@@ -251,9 +287,113 @@ export function createAuthStore() {
             console.log(`[Progression] ${data.submissions.length} travaux trouvés (${validated} validés)`);
           }
         }
+
+        // Activer l'écoute temps réel du profil élève pour recevoir en direct les recalculs d'XP et avertissements prof
+        if (this.unsubscribeOwnProgression) {
+          this.unsubscribeOwnProgression();
+        }
+        this.unsubscribeOwnProgression = subscribeToStudentOwnProgression(
+          this.user.classe,
+          this.user.email,
+          this.user.id,
+          (liveProg) => {
+            if (!liveProg) return;
+            if (typeof liveProg.xp === 'number' && liveProg.xp !== this.user.xp) {
+              this.user.xp = liveProg.xp;
+            }
+            if (Array.isArray(liveProg.rewarded_activities)) {
+              this.rewardedActivities = liveProg.rewarded_activities;
+              localStorage.setItem(storageKey, JSON.stringify(this.rewardedActivities));
+            }
+            if (liveProg.spam_warning) {
+              this.studentSpamWarning = liveProg.spam_warning;
+            }
+          }
+        );
       } catch (e) {
         console.warn("[chargerProgressionEleveReelleDepuisDb] Erreur :", e);
       }
+    },
+
+    // 🛡️ RÈGLE D'OR XP : 1 Activité = 1 seule récompense XP à vie
+    isActivityRewarded(activityKey) {
+      if (!activityKey) return false;
+      return Array.isArray(this.rewardedActivities) && this.rewardedActivities.includes(String(activityKey));
+    },
+
+    afficherToastXp(message, type = 'xp') {
+      this.xpToast = { visible: true, message, type };
+      if (this._xpToastTimer) clearTimeout(this._xpToastTimer);
+      this._xpToastTimer = setTimeout(() => {
+        this.xpToast.visible = false;
+      }, 3600);
+    },
+
+    attribuerXpUnique(activityKey, amount = 10, label = '') {
+      const cleanKey = String(activityKey || '').trim();
+      if (!cleanKey) return false;
+
+      if (!Array.isArray(this.rewardedActivities)) {
+        this.rewardedActivities = [];
+      }
+
+      if (this.rewardedActivities.includes(cleanKey)) {
+        this.afficherToastXp(
+          `✅ Déjà validé (+0 XP — Entraînement libre${label ? ' : ' + label : ''})`,
+          'already'
+        );
+        return false;
+      }
+
+      this.rewardedActivities.push(cleanKey);
+      this.user.xp = (Number(this.user.xp) || 0) + (Number(amount) || 0);
+
+      try {
+        const storageKey = `profassistant_rewarded_${this.user.email || this.user.id || 'guest'}`;
+        localStorage.setItem(storageKey, JSON.stringify(this.rewardedActivities));
+      } catch (_) {}
+
+      this.afficherToastXp(
+        `✨ +${amount} XP acquis${label ? ' — ' + label : ''} !`,
+        'xp'
+      );
+      return true;
+    },
+
+    // 🛡️ Verrou anti-rebond sur les soumissions de devoirs (bloque les clics frénétiques)
+    verifierCooldownSoumission(exId, cooldownSeconds = 35) {
+      const key = String(exId || 'default');
+      const now = Date.now();
+      const lastTime = this.submissionCooldowns[key] || 0;
+      const elapsedSec = (now - lastTime) / 1000;
+
+      if (elapsedSec < cooldownSeconds) {
+        this.studentSpamAttempts = (Number(this.studentSpamAttempts) || 0) + 1;
+        const remaining = Math.ceil(cooldownSeconds - elapsedSec);
+        this.afficherToastXp(
+          `⏳ Copie déjà envoyée ! Patiente ${remaining}s avant de renvoyer (1 seule copie par exercice).`,
+          'warn'
+        );
+        this.syncCurrentStudentProgress();
+        return false;
+      }
+
+      this.submissionCooldowns[key] = now;
+      return true;
+    },
+
+    async acquitterMonAvertissementSpam() {
+      if (!this.spamWarningCommitmentChecked) return;
+      if (this.studentSpamWarning) {
+        this.studentSpamWarning.active = false;
+        this.studentSpamWarning.acknowledged_at = new Date().toISOString();
+      }
+      this.spamWarningCommitmentChecked = false;
+      await acquitterAvertissementSpamEleve({
+        classeId: this.user.classe,
+        eleveId: this.user.id,
+        email: this.user.email
+      });
     },
 
     updateStudentProfile(newNom, newClasse) {
@@ -272,6 +412,10 @@ export function createAuthStore() {
         classe: this.user.classe,
         xp: this.user.xp,
         competences: this.eleveCompetences,
+        rewarded_activities: this.rewardedActivities || [],
+        defis_ludiques: this.defisLudiques || null,
+        badges_altx: typeof this.getUnlockedAltxBadgesIds === 'function' ? this.getUnlockedAltxBadgesIds() : [],
+        spam_attempts: this.studentSpamAttempts || 0,
         bilan_personnel: this.bilanPersonnel,
         bilan_personnel_ch2: this.bilanPersonnelCh2,
         charte: {

@@ -146,7 +146,10 @@ export function createCourseStore() {
       if (isOk) {
         this.exerciseQuizzState.score++;
         this.exerciseQuizzState.feedbackMsg = q.successMessage || '✅ Excellente réponse !';
-        this.user.xp += 10;
+        const qKey = `quizz:${this.currentExercise?.id || 'ex'}:q${this.exerciseQuizzState.currentIndex}`;
+        if (typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(qKey, 10, 'Question de quiz');
+        }
       } else {
         const rightText = q.options[q.correctAnswer] || '';
         this.exerciseQuizzState.feedbackMsg = `❌ Pas tout à fait. La bonne réponse était : « ${rightText} ». ${q.explanation ? '(' + q.explanation + ')' : ''}`;
@@ -162,21 +165,27 @@ export function createCourseStore() {
         this.exerciseQuizzState.isCorrect = false;
         this.exerciseQuizzState.feedbackMsg = '';
       } else {
+        if (this.exerciseQuizzState.finished) return;
         this.exerciseQuizzState.finished = true;
+        const exId = this.currentExercise?.id || 'quiz-ex';
         const pct = total > 0 ? Math.round((this.exerciseQuizzState.score / total) * 100) : 100;
-        this.user.xp += 20;
-        try {
-          await soumettreDevoirCloud({
-            code_eleve: `QUIZ COMPLÉTÉ : ${this.exerciseQuizzState.score} / ${total} (${pct}%)`,
-            id_exercice: this.currentExercise?.id || 'quiz-ex',
-            titre_exercice: this.currentExercise?.titre || 'Quiz',
-            course_id: this.currentCourse?.id || 'dactylo-3e',
-            nom_eleve: this.user.nom,
-            classe_id: this.user.classe,
-            type: 'quizz',
-            autonomie: { score: 100 }
-          });
-        } catch (_) {}
+        if (typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(`exo:${exId}`, 20, this.currentExercise?.titre || 'Quiz complété');
+        }
+        if (typeof this.verifierCooldownSoumission !== 'function' || this.verifierCooldownSoumission(exId, 45)) {
+          try {
+            await soumettreDevoirCloud({
+              code_eleve: `QUIZ COMPLÉTÉ : ${this.exerciseQuizzState.score} / ${total} (${pct}%)`,
+              id_exercice: exId,
+              titre_exercice: this.currentExercise?.titre || 'Quiz',
+              course_id: this.currentCourse?.id || 'dactylo-3e',
+              nom_eleve: this.user.nom,
+              classe_id: this.user.classe,
+              type: 'quizz',
+              autonomie: { score: 100 }
+            });
+          } catch (_) {}
+        }
         this.syncCurrentStudentProgress();
       }
     },
@@ -733,6 +742,10 @@ export function createCourseStore() {
 
     async soumettreCodeExercice() {
       if (this.codingSubmitting) return;
+      const exId = this.currentExercise?.id || 'code-ex';
+      if (typeof this.verifierCooldownSoumission === 'function' && !this.verifierCooldownSoumission(exId, 35)) {
+        return;
+      }
       this.codingSubmitting = true;
       this.codingFeedback = '';
 
@@ -741,7 +754,7 @@ export function createCourseStore() {
       try {
         const res = await soumettreDevoirCloud({
           code_eleve: payload,
-          id_exercice: this.currentExercise?.id || 'code-ex',
+          id_exercice: exId,
           titre_exercice: this.currentExercise?.titre || this.currentExercise?.title || 'Code Web',
           course_id: this.currentCourse?.id || 'js-uaa5-classic',
           nom_eleve: this.user.nom,
@@ -757,14 +770,18 @@ export function createCourseStore() {
         const fb = res?.evaluation?.feedback_eleve || "Ton code a été analysé avec succès ! Bien joué pour la structure.";
         this.codingFeedback = `✅ ${fb} (Note suggérée : ${note}/100 • Autonomie : ${autonomyScore}%)`;
         this.codingScore = note;
-        this.user.xp += 30;
+        if (!res?.rateLimited && !res?.alreadyValidated && typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(`exo:${exId}`, 30, this.currentExercise?.titre || 'Mission Code');
+        }
         this.studentTutorCallsCount = 0;
         this.studentHintsUsedCount = 0;
         this.syncCurrentStudentProgress();
       } catch (err) {
         console.warn("[soumettreCodeExercice] Fallback local :", err);
         this.codingFeedback = "✅ Travail enregistré et transmis au professeur !";
-        this.user.xp += 20;
+        if (typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(`exo:${exId}`, 20, this.currentExercise?.titre || 'Mission Code');
+        }
         this.syncCurrentStudentProgress();
       } finally {
         this.codingSubmitting = false;
@@ -775,6 +792,11 @@ export function createCourseStore() {
       const docUrl = this.officeDocUrl.trim();
       if (!docUrl && this.currentExercise?.submission_type !== 'text') {
         alert("Veuillez coller le lien de votre Google Doc ou dossier Drive.");
+        return;
+      }
+
+      const exId = this.currentExercise?.id || 'office-ex';
+      if (typeof this.verifierCooldownSoumission === 'function' && !this.verifierCooldownSoumission(exId, 35)) {
         return;
       }
 
@@ -791,9 +813,9 @@ export function createCourseStore() {
       this.officeSubmitting = true;
       try {
         const content = `LIEN : ${docUrl}\n\nNOTES : ${this.officeNotes}`;
-        await soumettreDevoirCloud({
+        const res = await soumettreDevoirCloud({
           code_eleve: content,
-          id_exercice: this.currentExercise?.id || 'office-ex',
+          id_exercice: exId,
           titre_exercice: this.currentExercise?.titre || this.currentExercise?.title || 'Devoir Office',
           course_id: this.currentCourse?.id || 'bureautique-3e',
           nom_eleve: this.user.nom,
@@ -806,8 +828,12 @@ export function createCourseStore() {
           }
         });
         this.officeSubmissionStatus = 'pending';
-        this.officeFeedback = `✅ Document soumis au professeur ! (Score d'autonomie : ${autonomyScore}%)`;
-        this.user.xp += 25;
+        this.officeFeedback = res?.evaluation?.feedback_eleve
+          ? `✅ ${res.evaluation.feedback_eleve} (Score d'autonomie : ${autonomyScore}%)`
+          : `✅ Document soumis au professeur ! (Score d'autonomie : ${autonomyScore}%)`;
+        if (!res?.rateLimited && !res?.alreadyValidated && typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(`exo:${exId}`, 25, this.currentExercise?.titre || 'Mission Bureautique');
+        }
         this.studentTutorCallsCount = 0;
         this.studentHintsUsedCount = 0;
         this.syncCurrentStudentProgress();
@@ -815,7 +841,9 @@ export function createCourseStore() {
         console.warn("[soumettreOfficeDevoir] Fallback local :", err);
         this.officeSubmissionStatus = 'pending';
         this.officeFeedback = "✅ Travail mémorisé avec succès !";
-        this.user.xp += 20;
+        if (typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(`exo:${exId}`, 20, this.currentExercise?.titre || 'Mission Bureautique');
+        }
         this.syncCurrentStudentProgress();
       } finally {
         this.officeSubmitting = false;
@@ -828,13 +856,17 @@ export function createCourseStore() {
         alert("Veuillez coller le lien de votre création (Canva, Drive, Gemini, etc.).");
         return;
       }
+      const exId = this.currentExercise?.id || 'creative-ex';
+      if (typeof this.verifierCooldownSoumission === 'function' && !this.verifierCooldownSoumission(exId, 35)) {
+        return;
+      }
       const autonomyScore = typeof this.getCurrentAutonomyScore === 'function' ? this.getCurrentAutonomyScore() : 100;
       this.creativeSubmitting = true;
       try {
         const content = `PROJET : ${projUrl}\n\nDÉMARCHE : ${this.creativeNotes}`;
-        await soumettreDevoirCloud({
+        const res = await soumettreDevoirCloud({
           code_eleve: content,
-          id_exercice: this.currentExercise?.id || 'creative-ex',
+          id_exercice: exId,
           titre_exercice: this.currentExercise?.titre || this.currentExercise?.title || 'Projet Créatif',
           course_id: this.currentCourse?.id || 'studio-creatif',
           nom_eleve: this.user.nom,
@@ -847,8 +879,12 @@ export function createCourseStore() {
           }
         });
         this.creativeStatus = 'pending';
-        this.creativeFeedback = `✨ Mission créative transmise avec brio ! (Score d'autonomie : ${autonomyScore}%)`;
-        this.user.xp += 30;
+        this.creativeFeedback = res?.evaluation?.feedback_eleve
+          ? `✨ ${res.evaluation.feedback_eleve} (Score d'autonomie : ${autonomyScore}%)`
+          : `✨ Mission créative transmise avec brio ! (Score d'autonomie : ${autonomyScore}%)`;
+        if (!res?.rateLimited && !res?.alreadyValidated && typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(`exo:${exId}`, 30, this.currentExercise?.titre || 'Mission Créative');
+        }
         this.studentTutorCallsCount = 0;
         this.studentHintsUsedCount = 0;
         this.syncCurrentStudentProgress();
@@ -856,7 +892,9 @@ export function createCourseStore() {
         console.warn("[soumettreCreativeDevoir] Fallback local :", err);
         this.creativeStatus = 'pending';
         this.creativeFeedback = "✨ Mission créative mémorisée avec succès !";
-        this.user.xp += 20;
+        if (typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(`exo:${exId}`, 20, this.currentExercise?.titre || 'Mission Créative');
+        }
         this.syncCurrentStudentProgress();
       } finally {
         this.creativeSubmitting = false;
