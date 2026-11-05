@@ -151,6 +151,23 @@ Pour garantir une expérience sans latence sur les PC scolaires tout en maintena
 - [x] Blindage anti-injection du prompt Gemini dans les Cloud Functions.
 - [x] Configuration du build Vite pour sortie dans `public/v2` et déploiement Firebase Hosting.
 
+### Phase 5 : Refonte Ergonomique Unifiée (Modèle UAA3) & Système Anti-Spam XP (Novembre 2026 — Validé ✅)
+- [x] **Unification de la navigation FMTTN sur le modèle UAA3 (Création de site web)** :
+  - Chaque module (Module 0, Escape Game, Chapitre 1, Chapitre 2) comporte désormais exactement **2 onglets principaux** :
+    1. **`📖 1. Leçon & Théorie`** : Cours complet en pleine largeur, structuré par sous-chapitres numérotés (`1.1`, `1.2`... / `2.1`, `2.2`...), intégrant tous les encadrés officiels du manuel `@lt_X` (🧠 *Cerveau*, 💡 *Le savais-tu ?*, 💼 *Métier*, 🤖 *IA*), la synthèse vocale (`🔊 Écouter`), tous les **schémas interactifs** et le tableau des 34 compétences officielles en fin de leçon.
+    2. **`🎯 2. Atelier & Pratique`** : Barre de **missions numérotées séquentielles** avec **un seul exercice affiché à la fois**, indicateur d'état temps réel (`✅ Terminé` / `À réaliser`), bouton `📖 Relire la leçon` et navigation linéaire (`← Précédent` / `Passer à la mission suivante ➔`).
+- [x] **Suppression du mini-diaporama et des cartes NotebookLM redondantes** au profit de la vraie leçon interactive pleine largeur.
+- [x] **Allègement de la barre supérieure (`<header>`)** : fusion sur une seule ligne claire avec accès direct `🏠 Mes cours`, masquage de la barre de fil d'Ariane redondante sur le Hub d'accueil, et affichage des pastilles de missions directement sur la Carte du Cours.
+- [x] **26 Missions interactives réparties sur les 4 modules FMTTN** :
+  - **Module 0 (2 missions)** : `1. Jeu Charte : OK ou PAS OK ?` • `2. Atelier : Mot de passe blindé & Déconnexion (1-3-4-2)`.
+  - **Escape Game (5 missions)** : `Dossier 1 : Morse` • `Dossier 2 : Phishing` • `Dossier 3 : IA Atomium` • `Dossier 4 : Fichier Fantôme` • `Dossier 5 : Extensions`.
+  - **Chapitre 1 (8 missions)** : 4 Quiz thématiques (`Réseaux`, `Messagerie`, `Éthique & IA`, `Outils & Cloud`) + `5. Atelier Courriel Cci (p. 64)` + `6. Défi Traducteur Nétiquette (p. 43 & 59)` + `7. Projet Application (p. 84)` + `8. Bilan Auto-évaluation (p. 83)`.
+  - **Chapitre 2 (11 missions)** : 5 Quiz thématiques (`Profil`, `PEGI & BienVu`, `Cyberrisques`, `Attention & 3P`, `Traces & IP`) + `6. Inspecteur HTTPS (p. 106)` + `7. Tri Données Actives vs Passives (p. 114)` + `8. Défi Profil de Lucas (p. 125)` + `9. Défi Permissions de Lina (p. 114)` + `10. Projet Campagne 3 Réflexes (p. 158)` + `11. Bilan Auto-évaluation (p. 147)`.
+- [x] **Système Anti-Spam XP & Persistance Double (LocalStorage + Firestore)** :
+  - Chaque activité (`rewarded_activities`) ne donne des XP **qu'une seule fois à vie** (`attribuerXpUnique`).
+  - Déduplication côté serveur (`corrigerDevoir` dans `functions/index.js`) et outil enseignant de purge des doublons + recalcul d'XP + avertissement élève (`purgerSpamEtSanctionner`).
+  - Double sauvegarde locale (`profassistant_fmttn_state_<user>`) et Cloud Firestore (`progressions_v2`) garantissant que les 4 **Badges de Maîtrise Officiels `@lt_X`** (*Gardien du Poste*, *Détective des 5 Dossiers*, *Maître Courriel & Cci*, *Citoyen Cyber-Responsable*) restent définitivement débloqués après rafraîchissement.
+
 ---
 
 ## 👥 6. Gestion Multi-Enseignants & Multi-Classes

@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>body{font-family:Plus Jakarta Sans,sans-serif}</style>
-  <script type="module" crossorigin src="/assets/index-B8O91ZXR.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-Vlhq64ys.css">
+  <script type="module" crossorigin src="/assets/index-BeIgekLU.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BchSDEEi.css">
 </head>
 <body class="h-full flex flex-col bg-slate-50 text-slate-800" x-data="profAssistantApp()">
 
@@ -26,29 +26,17 @@
           @
         </div>
         <div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <h1 class="font-extrabold text-lg tracking-tight text-slate-900 cursor-pointer" @click="ouvrirHubCours()">ProfAssistant</h1>
-            <!-- Bouton rapide Hub Mes Cours -->
+          <div class="flex items-center gap-2.5">
+            <h1 class="font-extrabold text-lg tracking-tight text-slate-900 cursor-pointer whitespace-nowrap" @click="ouvrirHubCours()">ProfAssistant</h1>
             <button
+              type="button"
               @click="ouvrirHubCours()"
-              :class="studentViewMode === 'hub' && activeTab !== 'prof' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'"
-              class="text-xs font-extrabold px-2.5 py-1 border rounded-xl transition cursor-pointer flex items-center gap-1">
-              <span>🧭</span>
-              <span class="hidden sm:inline">Mes cours</span>
+              :class="studentViewMode === 'hub' && activeTab !== 'prof' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'"
+              class="text-xs font-extrabold px-2.5 py-1 border rounded-xl transition cursor-pointer flex items-center gap-1.5 shrink-0">
+              <span>🏠</span>
+              <span>Mes cours</span>
             </button>
-            <!-- Sélecteur de cours dynamique -->
-            <div class="relative">
-              <select 
-                :value="currentCourse?.id || 'fmttn-1re'"
-                @change="ouvrirCarteCours($event.target.value)"
-                class="text-xs font-bold px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 rounded-xl cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 transition max-w-[180px] sm:max-w-xs truncate">
-                <template x-for="c in coursesList" :key="c.id">
-                  <option :value="c.id" x-text="(c.theme?.icon || '📚') + ' ' + c.title" :selected="c.id === currentCourse?.id"></option>
-                </template>
-              </select>
-            </div>
           </div>
-          <p class="text-xs text-slate-500 font-medium truncate max-w-xs sm:max-w-md" x-text="currentCourse?.pitch || 'Plateforme pédagogique moderne'"></p>
         </div>
       </div>
 
@@ -56,16 +44,16 @@
       <div class="flex items-center gap-3">
         <div class="bg-slate-100 p-1 rounded-xl flex items-center gap-1 text-xs font-bold">
           <button 
-            @click="activeTab = 'decouvre'"
+            @click="activeTab = 'cours'"
             :class="activeTab !== 'prof' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
             class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer">
-            <span>🎒</span> Espace Élève
+            <span>🎒</span> <span class="hidden sm:inline">Élève</span>
           </button>
           <button 
             @click="ouvrirEspaceProf()"
             :class="activeTab === 'prof' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'"
             class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer">
-            <span>✨</span> Matrice SeGEC (Prof)
+            <span>✨</span> <span class="hidden sm:inline">Espace Prof</span>
             <span x-show="teacherAuth.isTeacher" class="w-2 h-2 rounded-full bg-emerald-400 inline-block" title="Enseignant connecté"></span>
           </button>
         </div>
@@ -302,7 +290,7 @@
   <div x-show="isLoggedIn || isGuestMode" class="flex-1 flex flex-col">
 
   <!-- 🧭 BARRE D'ENTONNOIR & FIL D'ARIANE (HUB → CARTE DU COURS → FOCUS — PHASE 8) -->
-  <div x-show="activeTab !== 'prof'" class="bg-slate-950 text-slate-200 border-b border-slate-800/80">
+  <div x-show="activeTab !== 'prof' && studentViewMode !== 'hub'" class="bg-slate-950 text-slate-200 border-b border-slate-800/80">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-3">
       <!-- Fil d'Ariane cliquable -->
       <nav class="flex items-center gap-1.5 text-xs font-bold overflow-x-auto">
@@ -382,25 +370,25 @@
       <!-- Sélecteur de Module -->
       <div class="flex items-center gap-2 mb-3 overflow-x-auto pb-1">
         <button 
-          @click="selectedModuleId = 'module-0'"
+          @click="selectFmttnModule('module-0')"
           :class="selectedModuleId === 'module-0' ? 'bg-blue-600 text-white border-blue-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
           class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0">
           <span>🚀</span> Module 0 : Bienvenue & Charte
         </button>
         <button 
-          @click="selectedModuleId = 'escape-game'"
+          @click="selectFmttnModule('escape-game')"
           :class="selectedModuleId === 'escape-game' ? 'bg-purple-600 text-white border-purple-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
           class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0">
           <span>🎮</span> Escape Game : Les 5 Dossiers Perdus
         </button>
         <button 
-          @click="selectedModuleId = 'ch1-communication'"
+          @click="selectFmttnModule('ch1-communication')"
           :class="selectedModuleId === 'ch1-communication' ? 'bg-blue-600 text-white border-blue-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
           class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer">
           <span>💬</span> Chapitre 1 : Communication & E-mail
         </button>
         <button 
-          @click="selectedModuleId = 'ch2-securite'"
+          @click="selectFmttnModule('ch2-securite')"
           :class="selectedModuleId === 'ch2-securite' ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
           class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer">
           <span>🛡️</span> Chapitre 2 : Sécurité & Données
@@ -417,92 +405,24 @@
              x-text="selectedModuleId === 'module-0' ? module0.sous_titre : (selectedModuleId === 'escape-game' ? escapeGame.contexte : (selectedModuleId === 'ch2-securite' ? chapter2.introduction : chapter.introduction))"></p>
         </div>
 
-        <!-- Onglets pour Module 0 (Ateliers vs Présentation NotebookLM) -->
-        <template x-if="activeTab !== 'prof' && selectedModuleId === 'module-0'">
-          <nav class="flex bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 self-start md:self-auto">
-            <button 
-              @click="activeTab = 'decouvre'"
-              :class="activeTab !== 'cours' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-              <span>🚀</span> Ateliers & Charte
+        <!-- Onglets du module FMTTN actif (modèle UAA3 : 1. Leçon & Théorie / 2. Atelier & Pratique) -->
+        <template x-if="activeTab !== 'prof'">
+          <nav class="flex bg-slate-800/90 p-1 rounded-xl border border-slate-700/60 self-start md:self-auto gap-1 shrink-0">
+            <button
+              @click="selectFmttnModule(selectedModuleId, 'cours')"
+              :class="activeTab !== 'pratique' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
+              class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer">
+              <span>📖</span>
+              <span>1. Leçon &amp; Théorie</span>
             </button>
-            <button 
-              @click="activeTab = 'cours'"
-              :class="activeTab === 'cours' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-              <span>📽️</span> Diaporama & NotebookLM
-            </button>
-          </nav>
-        </template>
-
-        <!-- Onglets du cycle (Si Chapitre 1 et mode élève) -->
-        <template x-if="activeTab !== 'prof' && selectedModuleId === 'ch1-communication'">
-          <nav class="flex flex-wrap bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 self-start md:self-auto gap-1">
-            <button 
-              @click="activeTab = 'decouvre'"
-              :class="activeTab === 'decouvre' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-              <span>🔍</span> Je découvre
-            </button>
-            <button 
-              @click="activeTab = 'pratique'"
-              :class="activeTab === 'pratique' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-              <span>⚙️</span> Je pratique
-            </button>
-            <button 
-              @click="activeTab = 'maitrise'"
-              :class="activeTab === 'maitrise' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-              <span>🎯</span> Je maîtrise
-            </button>
-            <button 
-              @click="activeTab = 'competences'"
-              :class="activeTab === 'competences' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-              <span>📊</span> Compétences
-            </button>
-            <button 
-              @click="activeTab = 'cours'"
-              :class="activeTab === 'cours' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-              <span>📽️</span> Diaporama & NotebookLM
-            </button>
-          </nav>
-        </template>
-
-        <!-- Onglets du cycle (Si Chapitre 2 et mode élève) -->
-        <template x-if="activeTab !== 'prof' && selectedModuleId === 'ch2-securite'">
-          <nav class="flex flex-wrap bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 self-start md:self-auto gap-1">
-            <button 
-              @click="activeTab = 'decouvre'"
-              :class="activeTab === 'decouvre' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-              <span>🔍</span> Je découvre
-            </button>
-            <button 
-              @click="activeTab = 'pratique'"
+            <button
+              @click="ouvrirAtelierFmttn()"
               :class="activeTab === 'pratique' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-              <span>⚙️</span> Je pratique
-            </button>
-            <button 
-              @click="activeTab = 'maitrise'"
-              :class="activeTab === 'maitrise' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-              <span>🎯</span> Je maîtrise
-            </button>
-            <button 
-              @click="activeTab = 'competences'"
-              :class="activeTab === 'competences' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-              <span>📊</span> Compétences
-            </button>
-            <button 
-              @click="activeTab = 'cours'"
-              :class="activeTab === 'cours' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-              <span>📽️</span> Diaporama & NotebookLM
+              class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer">
+              <span>🎯</span>
+              <span>2. Atelier &amp; Pratique</span>
+              <span class="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-black/25 text-white"
+                    x-text="getCurrentFmttnModuleMissions().filter(m => m.status === 'valide').length + '/' + getCurrentFmttnModuleMissions().length"></span>
             </button>
           </nav>
         </template>
@@ -709,14 +629,30 @@
                   <span>Théorie</span>
                 </button>
                 <button
-                  @click="ouvrirModeFocus({ chapterId: mod.id, exercise: getExercisesForChapter(mod)[0] || null, tab: currentCourse?.workspaceType === 'fmttn' ? 'decouvre' : 'pratique' })"
+                  @click="ouvrirModeFocus({ chapterId: mod.id, exercise: getExercisesForChapter(mod)[0] || null, tab: 'pratique' })"
                   class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold transition cursor-pointer flex items-center gap-1.5 shadow-xs">
                   <span>🎯</span>
-                  <span x-text="'Missions (' + getExercisesForChapter(mod).length + ')'"></span>
+                  <span x-text="'Missions (' + (currentCourse?.workspaceType === 'fmttn' ? getFmttnMissionsForModule(mod.id).length : getExercisesForChapter(mod).length) + ')'"></span>
                   <span>➔</span>
                 </button>
               </div>
             </div>
+
+            <!-- Aperçu des missions rattachées au module (cours FMTTN) -->
+            <template x-if="currentCourse?.workspaceType === 'fmttn' && getFmttnMissionsForModule(mod.id).length > 0">
+              <div class="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-2">
+                <span class="text-[11px] font-bold text-slate-400">Missions du module :</span>
+                <template x-for="m in getFmttnMissionsForModule(mod.id)" :key="m.id">
+                  <button
+                    @click="ouvrirModeFocus({ chapterId: mod.id, exercise: m, tab: 'pratique' })"
+                    :class="m.status === 'valide' ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-800'"
+                    class="px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5">
+                    <span x-text="m.status === 'valide' ? '✅' : (m.isQuizz ? '⚡' : '🎯')"></span>
+                    <span x-text="m.num + '. ' + m.shortTitle"></span>
+                  </button>
+                </template>
+              </div>
+            </template>
 
             <!-- Aperçu des missions rattachées au module (si cours hors FMTTN) -->
             <template x-if="currentCourse?.workspaceType !== 'fmttn' && getExercisesForChapter(mod).length > 0">
@@ -746,7 +682,7 @@
     <!-- ======================================================= -->
     <!-- BARRE DES 4 BADGES DE MAÎTRISE OFFICIELS @lt_X          -->
     <!-- ======================================================= -->
-    <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab !== 'prof' && activeTab !== 'cours'"
+    <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab !== 'prof'"
          class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 shadow-xs">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
         <div class="flex items-center gap-2">
@@ -776,12 +712,55 @@
     </div>
 
     <!-- ======================================================= -->
+    <!-- BARRE DES MISSIONS FMTTN (UNE MISSION À LA FOIS — MODÈLE UAA3) -->
+    <!-- ======================================================= -->
+    <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab === 'pratique'"
+         class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-extrabold text-slate-500">🎯 Missions du module :</span>
+          <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black"
+                x-text="getCurrentFmttnModuleMissions().filter(m => m.status === 'valide').length + ' / ' + getCurrentFmttnModuleMissions().length + ' terminées'"></span>
+        </div>
+        <button
+          type="button"
+          @click="relireLeconFmttn()"
+          class="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-extrabold transition cursor-pointer flex items-center gap-1 shrink-0">
+          <span>📖</span>
+          <span>Relire la leçon</span>
+        </button>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <template x-for="m in getCurrentFmttnModuleMissions()" :key="m.id">
+          <button
+            type="button"
+            @click="selectFmttnMission(m.id)"
+            :class="activeFmttnMissionId === m.id
+              ? 'bg-slate-900 text-white shadow-xs ring-2 ring-slate-900/20'
+              : (m.status === 'valide' ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100' : 'bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100')"
+            class="px-3 py-2 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer">
+            <span x-text="m.status === 'valide' ? '✅' : (m.isQuizz ? '⚡' : '🎯')"></span>
+            <span x-text="m.num + '. ' + m.shortTitle"></span>
+          </button>
+        </template>
+      </div>
+      <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+        <h3 class="font-black text-sm sm:text-base text-slate-900"
+            x-text="'Mission ' + (getCurrentFmttnMission()?.num || 1) + ' — ' + (getCurrentFmttnMission()?.titre || '')"></h3>
+        <span x-show="getCurrentFmttnMission()?.status === 'valide'"
+              class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black">✓ Terminé</span>
+        <span x-show="getCurrentFmttnMission()?.status !== 'valide'"
+              class="px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-black">À réaliser</span>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
     <!-- MODULE 0 : INTRODUCTION & CHARTE DE RENTRÉE             -->
     <!-- ======================================================= -->
-    <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab !== 'prof' && activeTab !== 'cours' && selectedModuleId === 'module-0'" class="space-y-8">
+    <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab !== 'prof' && selectedModuleId === 'module-0'" class="space-y-8">
       
       <!-- Bandeau Bienvenue & Mascotte -->
-      <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
+      <div x-show="activeTab !== 'pratique'" class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
         <div>
           <span class="px-3 py-1 bg-white/20 text-blue-100 rounded-full text-xs font-extrabold uppercase tracking-wider">
             Semaines 1 & 2 • Manuel @lt_X
@@ -797,10 +776,10 @@
       </div>
 
       <!-- Grille Ateliers -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div class="grid grid-cols-1 gap-8">
         
-        <!-- Jeu de la Charte Informatique -->
-        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+        <!-- Jeu de la Charte Informatique (Mission 1) -->
+        <div x-show="activeTab === 'pratique' && activeFmttnMissionId === 'm0-charte'" class="max-w-3xl mx-auto w-full bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between pb-4 border-b border-slate-100">
               <div class="flex items-center gap-2">
@@ -869,8 +848,8 @@
           </div>
         </div>
 
-        <!-- Mots de Passe & Déconnexion -->
-        <div class="space-y-6">
+        <!-- Mots de Passe & Déconnexion (Leçon) -->
+        <div x-show="activeTab !== 'pratique'" class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs">
             <div class="flex items-center gap-3 mb-3">
               <div class="p-2 rounded-xl bg-rose-100 text-rose-700 font-bold text-sm">🔒</div>
@@ -922,7 +901,7 @@
       </div>
 
       <!-- SCHÉMA VISUEL INTERACTIF MODULE 0 : ANATOMIE D'UNE ADRESSE & D'UN COURRIEL (@lt_X p. 13 & p. 62) -->
-      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
+      <div x-show="activeTab !== 'pratique'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100">
           <div class="flex items-center gap-3">
             <div class="p-2.5 rounded-2xl bg-blue-100 text-blue-700 text-lg font-black">🔬</div>
@@ -1012,7 +991,7 @@
       </div>
 
       <!-- Synthèse Officielle Module 0 : Anatomie E-mail, Comparatif Webmails & Déconnexion OS (p. 11-16) -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div x-show="activeTab !== 'pratique'" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- 9 Règles de la Charte à signer -->
         <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-3 flex flex-col justify-between">
           <div class="space-y-3">
@@ -1109,7 +1088,7 @@
       </div>
 
       <!-- Grille des 18 Usages Numériques & Outils Recommandés (@lt_X p. 11) -->
-      <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+      <div x-show="activeTab !== 'pratique'" class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
           <div>
             <h4 class="font-black text-sm text-slate-900">📱 Panorama des 18 Usages Numériques & Appareils Recommandés (p. 9-11)</h4>
@@ -1127,11 +1106,88 @@
         </div>
       </div>
 
+      <!-- MISSION 2 MODULE 0 : MOT DE PASSE BLINDÉ & DÉCONNEXION 1-3-4-2 (@lt_X p. 14 & 16) -->
+      <div x-show="activeTab === 'pratique' && activeFmttnMissionId === 'm0-mdp-deco'" class="max-w-3xl mx-auto w-full bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-6">
+        <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
+          <div class="p-2.5 rounded-2xl bg-rose-100 text-rose-700 text-lg font-black">🔐</div>
+          <div>
+            <h4 class="font-black text-base text-slate-900">Mot de passe blindé &amp; Règle d'or de déconnexion</h4>
+            <p class="text-xs text-slate-500">Deux questions pour vérifier que tu as retenu la leçon (p. 14 &amp; 16).</p>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="text-xs font-black text-slate-800">1. Lequel de ces mots de passe respecte les règles @lt_X ?</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <template x-for="pwd in ['lucas2014', 'azerty123', 'PommeVelo!27', '12345678']" :key="pwd">
+              <button type="button"
+                @click="m0DecoState.selectedPassword = pwd; m0DecoState.validated = false"
+                :class="m0DecoState.selectedPassword === pwd ? 'border-blue-600 bg-blue-50 text-blue-900 font-black' : 'border-slate-200 bg-white text-slate-700 hover:border-blue-300'"
+                class="p-3 rounded-2xl border-2 text-left font-mono text-sm transition cursor-pointer" x-text="pwd"></button>
+            </template>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="text-xs font-black text-slate-800">2. Quel est l'ordre correct pour quitter un PC de l'école ?</div>
+          <div class="text-[11px] text-slate-500">① Enregistrer son fichier • ② Fermer la session PC • ③ Se déconnecter de son compte • ④ Fermer le navigateur</div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <template x-for="ord in ['1-2-3-4', '2-1-4-3', '1-3-4-2', '4-3-2-1']" :key="ord">
+              <button type="button"
+                @click="m0DecoState.selectedOrder = ord; m0DecoState.validated = false"
+                :class="m0DecoState.selectedOrder === ord ? 'border-blue-600 bg-blue-50 text-blue-900 font-black' : 'border-slate-200 bg-white text-slate-700 hover:border-blue-300'"
+                class="p-3 rounded-2xl border-2 text-center font-mono text-sm transition cursor-pointer" x-text="ord"></button>
+            </template>
+          </div>
+        </div>
+
+        <div x-show="m0DecoState.validated" class="p-4 rounded-2xl border text-xs font-bold leading-relaxed"
+             :class="m0DecoState.completed ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'"
+             x-text="m0DecoState.feedback"></div>
+
+        <div class="flex justify-end">
+          <button type="button" @click="validerM0Deco()"
+            class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs transition shadow-sm cursor-pointer">
+            ✓ Valider mes réponses
+          </button>
+        </div>
+      </div>
+
     </div>
     <!-- ======================================================= -->
     <!-- ESCAPE GAME : LES 5 DOSSIERS PERDUS                     -->
     <!-- ======================================================= -->
     <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab !== 'prof' && selectedModuleId === 'escape-game'" class="space-y-8">
+
+      <!-- LEÇON ESCAPE GAME : CONTEXTE & RÈGLES DU JEU -->
+      <div x-show="activeTab !== 'pratique'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
+        <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
+          <div class="p-2.5 rounded-2xl bg-purple-100 text-purple-700 text-lg font-black">🎮</div>
+          <div>
+            <h4 class="font-black text-base text-slate-900">Mission de rentrée : restaurer le serveur de la classe</h4>
+            <p class="text-xs text-slate-500" x-text="escapeGame.contexte"></p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div class="p-4 rounded-2xl bg-purple-50 border border-purple-200"><div class="font-black text-purple-950 mb-1">1️⃣ Lis l'indice</div><p class="text-slate-700">Chaque dossier contient un message, un mail suspect, une affirmation d'IA ou un explorateur de fichiers.</p></div>
+          <div class="p-4 rounded-2xl bg-indigo-50 border border-indigo-200"><div class="font-black text-indigo-950 mb-1">2️⃣ Trouve le code</div><p class="text-slate-700">Utilise ce que tu as appris (Morse, phishing, vérification des sources, extensions) pour déduire le code.</p></div>
+          <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200"><div class="font-black text-emerald-950 mb-1">3️⃣ Débloque la suite</div><p class="text-slate-700">Un dossier résolu déverrouille le suivant. Les 5 dossiers = badge « Détective des 5 Dossiers ».</p></div>
+        </div>
+        <div class="space-y-2">
+          <template x-for="d in escapeGame.dossiers" :key="d.id">
+            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3 text-xs">
+              <div class="flex items-center gap-3">
+                <span class="text-xl" x-text="d.icone"></span>
+                <div>
+                  <div class="font-black text-slate-900" x-text="'Dossier ' + d.id + ' — ' + d.titre"></div>
+                  <div class="text-[11px] text-slate-500" x-text="d.chapitre"></div>
+                </div>
+              </div>
+              <span class="font-black" x-text="(getFmttnMissionsForModule('escape-game')[d.id - 1]?.status === 'valide') ? '✅' : (egState.dossierUnlocked.includes(d.id) ? '🔓' : '🔒')"></span>
+            </div>
+          </template>
+        </div>
+      </div>
       
       <!-- Bandeau Équipe & Timer -->
       <div class="bg-gradient-to-r from-purple-900 to-indigo-900 rounded-3xl p-6 text-white shadow-md flex items-center justify-between">
@@ -1152,8 +1208,8 @@
         </div>
       </div>
 
-      <!-- Strip des 5 Dossiers -->
-      <div class="grid grid-cols-5 gap-2 sm:gap-3">
+      <!-- Strip des 5 Dossiers (remplacé par la barre de missions) -->
+      <div class="hidden">
         <template x-for="d in escapeGame.dossiers" :key="d.id">
           <button 
             @click="if(egState.dossierUnlocked.includes(d.id)) egState.activeDossier = d.id"
@@ -1171,7 +1227,7 @@
       </div>
 
       <!-- Écran du Dossier Actif -->
-      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+      <div x-show="activeTab === 'pratique'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
         
         <!-- En-tête Dossier -->
         <div class="pb-4 border-b border-slate-100 flex items-center justify-between">
@@ -1388,12 +1444,54 @@
     <!-- CHAPITRE 1 : COMMUNICATION & COLLABORATION              -->
     <!-- ======================================================= -->
     <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab !== 'prof' && selectedModuleId === 'ch1-communication'" class="space-y-8">
+
+      <!-- ==================== 1. LEÇON & THÉORIE (PLEINE LARGEUR) ==================== -->
+      <div x-show="activeTab !== 'pratique'" class="space-y-6">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 rounded-2xl bg-blue-100 text-blue-700 text-lg font-black">📖</div>
+            <div>
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-blue-600">Leçon complète • Manuel @lt_X</span>
+              <h3 class="font-black text-lg text-slate-900">Chapitre 1 : Communication &amp; Collaboration</h3>
+            </div>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed" x-text="chapter.introduction"></p>
+          <div class="flex flex-wrap gap-2">
+            <template x-for="sec in [{key:'reseaux', mission:'ch1-q-reseaux', num:'1.1'},{key:'messagerie', mission:'ch1-q-messagerie', num:'1.2'},{key:'ethique', mission:'ch1-q-ethique', num:'1.3'},{key:'collaboration', mission:'ch1-q-collab', num:'1.4'}]" :key="sec.key">
+              <a :href="'#lecon-comm-' + sec.key"
+                 class="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 text-xs font-extrabold transition"
+                 x-text="sec.num + ' ' + (altxBank.comm[sec.key]?.icon || '') + ' ' + (altxBank.comm[sec.key]?.label || sec.key)"></a>
+            </template>
+          </div>
+        </div>
+
+        <template x-for="sec in [{key:'reseaux', mission:'ch1-q-reseaux', num:'1.1'},{key:'messagerie', mission:'ch1-q-messagerie', num:'1.2'},{key:'ethique', mission:'ch1-q-ethique', num:'1.3'},{key:'collaboration', mission:'ch1-q-collab', num:'1.4'}]" :key="sec.key">
+          <section :id="'lecon-comm-' + sec.key" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-4 scroll-mt-24">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+              <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-2xl bg-blue-600 text-white font-black text-sm flex items-center justify-center shrink-0" x-text="sec.num"></span>
+                <h4 class="font-black text-base text-slate-900" x-text="(altxBank.comm[sec.key]?.icon || '') + ' ' + (altxBank.comm[sec.key]?.label || sec.key)"></h4>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button"
+                  @click="lireTexteVocal((altxBank.comm[sec.key]?.label || '') + '. ' + (altxBank.comm[sec.key]?.lecon || ''))"
+                  class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold transition cursor-pointer">🔊 Écouter</button>
+                <button type="button"
+                  @click="ouvrirAtelierFmttn('ch1-communication', sec.mission)"
+                  class="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold transition cursor-pointer">⚡ S'entraîner (quiz)</button>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3" x-html="getFormatLeconByTheme('comm', sec.key)"></div>
+          </section>
+        </template>
+      </div>
+
       
-      <!-- ==================== 1. JE DÉCOUVRE ==================== -->
-      <div x-show="activeTab === 'decouvre'" class="space-y-6">
+      <!-- ==================== MISSIONS QUIZ (BANQUE OFFICIELLE @lt_X) ==================== -->
+      <div x-show="activeTab === 'pratique' && getCurrentFmttnMission()?.isQuizz" class="space-y-6">
         
-        <!-- Sélecteur de sous-thèmes officiels d'@lt_X -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <!-- Sélecteur de sous-thèmes (piloté par la barre de missions) -->
+        <div class="hidden">
           <button 
             @click="changeSubtheme('reseaux')"
             :class="activeSubthemeKey === 'reseaux' ? 'bg-blue-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-blue-300'"
@@ -1423,7 +1521,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           <!-- Colonne Gauche : Synthèse Théorique Officielle du Livre (Formatée en cartes claires) -->
-          <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs lg:col-span-1 space-y-3">
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs lg:col-span-1 space-y-3 hidden">
             <div class="flex items-center justify-between gap-2 pb-3 border-b border-slate-100">
               <div class="flex items-center gap-2">
                 <span class="text-xl" x-text="getActiveSubtheme().icon"></span>
@@ -1443,7 +1541,7 @@
           </div>
 
           <!-- Colonne Droite : Entraînement Interactif issu de la Banque de Questions (81 Questions) -->
-          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs lg:col-span-2 flex flex-col justify-between">
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs lg:col-span-3 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between pb-4 border-b border-slate-100">
                 <div class="flex items-center gap-2">
@@ -1524,11 +1622,11 @@
 
       </div>
 
-      <!-- ==================== 2. JE PRATIQUE ==================== -->
-      <div x-show="activeTab === 'pratique'" class="space-y-8">
+      <!-- ==================== ATELIERS, SCHÉMAS & DÉFIS (chaque bloc a son propre x-show) ==================== -->
+      <div class="space-y-8">
         
         <!-- ATELIER 1 : Simulateur de Courriel Professionnel (@lt_X page 64) -->
-        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+        <div x-show="activeTab === 'pratique' && activeFmttnMissionId === 'ch1-atelier-email'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
           <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
             <div class="flex items-center gap-3">
               <div class="p-2.5 rounded-2xl bg-blue-100 text-blue-700 text-lg font-black">✉️</div>
@@ -1619,7 +1717,7 @@
         </div>
 
         <!-- SCHÉMAS INTERACTIFS CHAPITRE 1 : TUNNEL CHIFFREMENT E2EE, CREATIVE COMMONS & UPLOAD/DOWNLOAD (p. 48, 69, 82) -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs">
+        <div x-show="activeTab !== 'pratique'" class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs">
           <!-- Schéma Interactif E2EE -->
           <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-3 flex flex-col justify-between">
             <div class="space-y-3">
@@ -1730,7 +1828,7 @@
         </div>
 
         <!-- MINI-DÉFI LUDIQUE 1 : LE TRADUCTEUR NÉTIQUETTE & CITOYENNETÉ (@lt_X p. 43 & 59) -->
-        <div class="bg-gradient-to-br from-indigo-950 via-blue-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-md space-y-5">
+        <div x-show="activeTab === 'pratique' && activeFmttnMissionId === 'ch1-defi-netiquette'" class="bg-gradient-to-br from-indigo-950 via-blue-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-md space-y-5">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
             <div class="flex items-center gap-3">
               <div class="w-12 h-12 rounded-2xl bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-2xl shrink-0">💬</div>
@@ -1803,7 +1901,7 @@
         </div>
 
         <!-- ATELIER 2 : Bilan Personnel d'Auto-Évaluation (@lt_X page 83) -->
-        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+        <div x-show="activeTab === 'pratique' && activeFmttnMissionId === 'ch1-bilan'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
           <div class="pb-4 border-b border-slate-100 mb-6">
             <h3 class="font-black text-base text-slate-900 flex items-center gap-2">
               <span>🎯</span> Bilan personnel : Sais-tu appliquer ces compétences ? (p. 83)
@@ -1835,12 +1933,17 @@
               </div>
             </template>
           </div>
+          <div class="mt-6 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <span class="text-xs text-slate-500" x-text="bilanCh1Validated ? '✅ Bilan enregistré et transmis à ton professeur.' : 'Choisis un émoji pour chaque compétence, puis valide ton bilan.'"></span>
+            <button type="button" @click="validerBilanCh1()"
+              class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs transition cursor-pointer shrink-0">✍️ Valider mon bilan</button>
+          </div>
         </div>
 
       </div>
 
-      <!-- ==================== 3. JE MAÎTRISE ==================== -->
-      <div x-show="activeTab === 'maitrise'" class="space-y-8">
+      <!-- ==================== PROJET DE MAÎTRISE (MISSION) ==================== -->
+      <div x-show="activeTab === 'pratique' && (activeFmttnMissionId === 'ch1-projet-app' || activeFmttnMissionId === 'ch2-projet-citoyen')" class="space-y-8">
         
         <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
           <div class="pb-4 border-b border-slate-100 mb-6 flex items-center justify-between">
@@ -1912,8 +2015,8 @@
 
       </div>
 
-      <!-- ==================== 4. MES COMPÉTENCES ==================== -->
-      <div x-show="activeTab === 'competences'" class="space-y-6">
+      <!-- ==================== COMPÉTENCES VISÉES (FIN DE LEÇON) ==================== -->
+      <div x-show="activeTab !== 'pratique'" class="space-y-6">
         <div class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs">
           <div class="flex items-center justify-between mb-6">
             <div>
@@ -1951,13 +2054,55 @@
     <!-- ======================================================= -->
     <!-- CHAPITRE 2 : SÉCURITÉ & PROTECTION DES DONNÉES           -->
     <!-- ======================================================= -->
-    <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab !== 'prof' && activeTab !== 'cours' && selectedModuleId === 'ch2-securite'" class="space-y-8">
+    <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab !== 'prof' && selectedModuleId === 'ch2-securite'" class="space-y-8">
 
-      <!-- ==================== 1. JE DÉCOUVRE ==================== -->
-      <div x-show="activeTab === 'decouvre'" class="space-y-6">
+      <!-- ==================== 1. LEÇON & THÉORIE (PLEINE LARGEUR) ==================== -->
+      <div x-show="activeTab !== 'pratique'" class="space-y-6">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 rounded-2xl bg-emerald-100 text-emerald-700 text-lg font-black">📖</div>
+            <div>
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-600">Leçon complète • Manuel @lt_X</span>
+              <h3 class="font-black text-lg text-slate-900">Chapitre 2 : Sécurité &amp; Protection des données</h3>
+            </div>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed" x-text="chapter2.introduction"></p>
+          <div class="flex flex-wrap gap-2">
+            <template x-for="sec in [{key:'profil', mission:'ch2-q-profil', num:'2.1'},{key:'signaletique', mission:'ch2-q-signaletique', num:'2.2'},{key:'cyber', mission:'ch2-q-cyber', num:'2.3'},{key:'confidentialite', mission:'ch2-q-attention', num:'2.4'},{key:'identite', mission:'ch2-q-traces', num:'2.5'}]" :key="sec.key">
+              <a :href="'#lecon-secu-' + sec.key"
+                 class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-extrabold transition"
+                 x-text="sec.num + ' ' + (altxBank.secu[sec.key]?.icon || '') + ' ' + (altxBank.secu[sec.key]?.label || sec.key)"></a>
+            </template>
+          </div>
+        </div>
+
+        <template x-for="sec in [{key:'profil', mission:'ch2-q-profil', num:'2.1'},{key:'signaletique', mission:'ch2-q-signaletique', num:'2.2'},{key:'cyber', mission:'ch2-q-cyber', num:'2.3'},{key:'confidentialite', mission:'ch2-q-attention', num:'2.4'},{key:'identite', mission:'ch2-q-traces', num:'2.5'}]" :key="sec.key">
+          <section :id="'lecon-secu-' + sec.key" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-4 scroll-mt-24">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+              <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-2xl bg-emerald-600 text-white font-black text-sm flex items-center justify-center shrink-0" x-text="sec.num"></span>
+                <h4 class="font-black text-base text-slate-900" x-text="(altxBank.secu[sec.key]?.icon || '') + ' ' + (altxBank.secu[sec.key]?.label || sec.key)"></h4>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button"
+                  @click="lireTexteVocal((altxBank.secu[sec.key]?.label || '') + '. ' + (altxBank.secu[sec.key]?.lecon || ''))"
+                  class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold transition cursor-pointer">🔊 Écouter</button>
+                <button type="button"
+                  @click="ouvrirAtelierFmttn('ch2-securite', sec.mission)"
+                  class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition cursor-pointer">⚡ S'entraîner (quiz)</button>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3" x-html="getFormatLeconByTheme('secu', sec.key)"></div>
+          </section>
+        </template>
+      </div>
+
+
+      <!-- ==================== MISSIONS QUIZ (BANQUE OFFICIELLE @lt_X) ==================== -->
+      <div x-show="activeTab === 'pratique' && getCurrentFmttnMission()?.isQuizz" class="space-y-6">
         
-        <!-- Sélecteur des 5 sous-thèmes officiels d'@lt_X -->
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <!-- Sélecteur des 5 sous-thèmes (piloté par la barre de missions) -->
+        <div class="hidden">
           <button 
             @click="changeSubthemeSecu('profil')"
             :class="activeSubthemeKeySecu === 'profil' ? 'bg-emerald-600 text-white font-black shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:border-emerald-300'"
@@ -1993,7 +2138,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           <!-- Colonne Gauche : Synthèse Théorique Officielle du Livre & Pièges Fréquents SeGEC -->
-          <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs lg:col-span-1 space-y-4">
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs lg:col-span-1 space-y-4 hidden">
             <div class="flex items-center justify-between gap-2 pb-3 border-b border-slate-100">
               <div class="flex items-center gap-2">
                 <span class="text-xl" x-text="getActiveSubthemeSecu().icon"></span>
@@ -2024,7 +2169,7 @@
           </div>
 
           <!-- Colonne Droite : Entraînement Interactif issu de la Banque de Questions (100 Questions) -->
-          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs lg:col-span-2 flex flex-col justify-between">
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs lg:col-span-3 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between pb-4 border-b border-slate-100">
                 <div class="flex items-center gap-2">
@@ -2105,11 +2250,11 @@
 
       </div>
 
-      <!-- ==================== 2. JE PRATIQUE ==================== -->
-      <div x-show="activeTab === 'pratique'" class="space-y-8">
+      <!-- ==================== ATELIERS, SCHÉMAS & DÉFIS (chaque bloc a son propre x-show) ==================== -->
+      <div class="space-y-8">
         
         <!-- ATELIER 1 : Simulateur de Navigation HTTP vs HTTPS (@lt_X page 106) -->
-        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+        <div x-show="activeTab === 'pratique' && activeFmttnMissionId === 'ch2-atelier-https'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
           <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
             <div class="flex items-center gap-3">
               <div class="p-2.5 rounded-2xl bg-emerald-100 text-emerald-700 text-lg font-black">🔒</div>
@@ -2198,7 +2343,7 @@
         </div>
 
         <!-- ATELIER 2 : Tri Interactif Données Actives vs Traces Passives (@lt_X page 114) -->
-        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+        <div x-show="activeTab === 'pratique' && activeFmttnMissionId === 'ch2-atelier-tri'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
           <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
             <div class="flex items-center gap-3">
               <div class="p-2.5 rounded-2xl bg-indigo-100 text-indigo-700 text-lg font-black">👣</div>
@@ -2249,7 +2394,7 @@
         </div>
 
         <!-- Fiches Réflexes Pratique Chapitre 2 @lt_X : 5 Formes de Cyberharcèlement, Art. 442bis, 103/116 000, 9 Techniques d'Attention & 3P -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs">
+        <div x-show="activeTab !== 'pratique'" class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs">
           <!-- 5 Formes de Cyberharcèlement & Loi Belge Art. 442bis -->
           <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-3">
             <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
@@ -2307,7 +2452,7 @@
         </div>
 
         <!-- SCHÉMAS VISUELS INTERACTIFS CHAPITRE 2 : ICEBERG IDENTITÉ NUMÉRIQUE & GALERIE PEGI / BIENVU 2026 -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
+        <div x-show="activeTab !== 'pratique'" class="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
           <!-- 1. Iceberg Interactif de l'Identité Numérique (@lt_X p. 114-115) -->
           <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -2409,10 +2554,10 @@
         </div>
 
         <!-- MINI-DÉFIS LUDIQUES #2 & #3 DU CHAPITRE 2 : INSPECTEUR DE PROFIL (LUCAS) & RÉVÉLATEUR DE PERMISSIONS (LINA) -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
+        <div x-show="activeTab === 'pratique' && (activeFmttnMissionId === 'ch2-defi-lucas' || activeFmttnMissionId === 'ch2-defi-lina')" class="grid grid-cols-1 gap-6 text-xs max-w-3xl mx-auto w-full">
 
           <!-- MINI-DÉFI #2 : INSPECTEUR DE PROFIL — LE COMPTE DE LUCAS (@lt_X p. 125) -->
-          <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 text-white shadow-md space-y-4 flex flex-col justify-between">
+          <div x-show="activeFmttnMissionId === 'ch2-defi-lucas'" class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 text-white shadow-md space-y-4 flex flex-col justify-between">
             <div class="space-y-4">
               <div class="flex items-center justify-between pb-3 border-b border-white/10">
                 <div class="flex items-center gap-2.5">
@@ -2457,7 +2602,7 @@
           </div>
 
           <!-- MINI-DÉFI #3 : RÉVÉLATEUR DE PERMISSIONS — L'APPLI LAMPE DE POCHE DE LINA (@lt_X p. 114) -->
-          <div class="bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-900 rounded-3xl p-6 text-white shadow-md space-y-4 flex flex-col justify-between">
+          <div x-show="activeFmttnMissionId === 'ch2-defi-lina'" class="bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-900 rounded-3xl p-6 text-white shadow-md space-y-4 flex flex-col justify-between">
             <div class="space-y-4">
               <div class="flex items-center justify-between pb-3 border-b border-white/10">
                 <div class="flex items-center gap-2.5">
@@ -2515,7 +2660,7 @@
         </div>
 
         <!-- ATELIER 3 : Bilan Personnel d'Auto-Évaluation (@lt_X page 147) -->
-        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+        <div x-show="activeTab === 'pratique' && activeFmttnMissionId === 'ch2-bilan'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
           <div class="pb-4 border-b border-slate-100 mb-6">
             <h3 class="font-black text-base text-slate-900 flex items-center gap-2">
               <span>🎯</span> Bilan personnel : Sécurité & Données (p. 147)
@@ -2547,12 +2692,17 @@
               </div>
             </template>
           </div>
+          <div class="mt-6 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <span class="text-xs text-slate-500" x-text="bilanCh2Validated ? '✅ Bilan enregistré et transmis à ton professeur.' : 'Choisis un émoji pour chaque compétence, puis valide ton bilan.'"></span>
+            <button type="button" @click="validerBilanCh2()"
+              class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs transition cursor-pointer shrink-0">✍️ Valider mon bilan</button>
+          </div>
         </div>
 
       </div>
 
-      <!-- ==================== 3. JE MAÎTRISE ==================== -->
-      <div x-show="activeTab === 'maitrise'" class="space-y-8">
+      <!-- ==================== PROJET DE MAÎTRISE (MISSION) ==================== -->
+      <div x-show="activeTab === 'pratique' && (activeFmttnMissionId === 'ch1-projet-app' || activeFmttnMissionId === 'ch2-projet-citoyen')" class="space-y-8">
         
         <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
           <div class="pb-4 border-b border-slate-100 mb-6 flex items-center justify-between">
@@ -2636,8 +2786,8 @@
 
       </div>
 
-      <!-- ==================== 4. MES COMPÉTENCES ==================== -->
-      <div x-show="activeTab === 'competences'" class="space-y-6">
+      <!-- ==================== COMPÉTENCES VISÉES (FIN DE LEÇON) ==================== -->
+      <div x-show="activeTab !== 'pratique'" class="space-y-6">
         <div class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xs">
           <div class="flex items-center justify-between mb-6">
             <div>
@@ -2673,104 +2823,30 @@
     </div>
 
     <!-- ======================================================= -->
-    <!-- DIAPORAMA DE COURS & NOTEBOOKLM (FMTTN)                 -->
+    <!-- PIED DE PAGE FMTTN : LEÇON ➔ ATELIER / MISSION SUIVANTE  -->
     <!-- ======================================================= -->
-    <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab !== 'prof' && activeTab === 'cours'" class="space-y-8">
-      
-      <!-- Bandeau Diaporama -->
-      <div class="bg-gradient-to-r from-indigo-900 via-blue-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab !== 'prof'">
+      <div x-show="activeTab !== 'pratique'"
+           class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs">
         <div>
-          <span class="px-3 py-1 bg-white/10 text-indigo-200 rounded-full text-xs font-extrabold uppercase tracking-wider">
-            Support de Cours • Programme SeGEC FMTTN
-          </span>
-          <h3 class="text-2xl font-black mt-2" x-text="selectedModuleId === 'module-0' ? module0.support_cours?.titre : (selectedModuleId === 'ch2-securite' ? chapter2.support_cours?.titre : chapter.support_cours?.titre)"></h3>
-          <p class="text-xs sm:text-sm text-indigo-100 mt-2 max-w-xl leading-relaxed" 
-             x-text="selectedModuleId === 'module-0' ? module0.support_cours?.description : (selectedModuleId === 'ch2-securite' ? chapter2.support_cours?.description : chapter.support_cours?.description)">
-          </p>
+          <h5 class="font-black text-slate-800 text-sm">Prêt pour la mise en pratique de ce module ?</h5>
+          <p class="text-xs text-slate-500 mt-0.5">Les missions s'affichent une par une, avec une coche ✓ dès qu'elles sont terminées.</p>
         </div>
-        <div class="flex items-center gap-3">
-          <a 
-            :href="getNotebookLMUrl()" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            class="px-5 py-3 rounded-2xl bg-white text-indigo-950 font-black text-xs hover:bg-indigo-50 transition shadow-sm flex items-center gap-2 cursor-pointer">
-            <span>📓</span> Ouvrir sur NotebookLM ↗
-          </a>
-        </div>
+        <button type="button" @click="ouvrirAtelierFmttn()"
+          class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs transition shadow-sm flex items-center gap-2 cursor-pointer">
+          <span x-text="'Passer à l\'Atelier Pratique du module (' + getCurrentFmttnModuleMissions().length + ' missions)'"></span>
+          <span>➔</span>
+        </button>
       </div>
-
-      <!-- Lecteur de Diapositives Interactif -->
-      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
-        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
-          <div class="flex items-center gap-2">
-            <span class="p-2 rounded-xl bg-indigo-100 text-indigo-700 text-xs font-black">📽️ Diapo</span>
-            <span class="text-xs font-extrabold text-slate-400" x-text="'Diapositive ' + (activeSlideIndex + 1) + ' sur ' + getCurrentModuleSlides().length"></span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <template x-for="(s, idx) in getCurrentModuleSlides()" :key="idx">
-              <button 
-                @click="activeSlideIndex = idx"
-                :class="activeSlideIndex === idx ? 'w-6 bg-indigo-600' : 'w-2 bg-slate-200 hover:bg-slate-300'"
-                class="h-2 rounded-full transition-all cursor-pointer"></button>
-            </template>
-          </div>
-        </div>
-
-        <!-- Contenu de la diapo active -->
-        <div class="min-h-[220px] flex flex-col justify-center py-6 px-4 sm:px-8 bg-slate-50/70 rounded-2xl border border-slate-100">
-          <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2">Notion clé SeGEC</span>
-          <h4 class="text-xl sm:text-2xl font-black text-slate-900 leading-snug" x-text="getCurrentSlide().titre"></h4>
-          <p class="text-sm sm:text-base text-slate-700 font-medium mt-3 leading-relaxed max-w-3xl" x-text="getCurrentSlide().contenu"></p>
-        </div>
-
-        <!-- Commandes de navigation diaporama -->
-        <div class="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
-          <button 
-            @click="prevSlide()"
-            class="px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs transition flex items-center gap-2 cursor-pointer">
-            <span>←</span> Précédent
-          </button>
-          
-          <div class="flex items-center gap-3">
-            <button 
-              @click="tutorOpen = true"
-              class="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1.5 cursor-pointer">
-              <span>🤖</span> Poser une question sur cette diapo
-            </button>
-            <button 
-              @click="nextSlide()"
-              class="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-extrabold text-xs hover:bg-indigo-700 transition flex items-center gap-2 cursor-pointer shadow-xs">
-              <span>Suivant</span> <span>→</span>
-            </button>
-          </div>
-        </div>
+      <div x-show="activeTab === 'pratique'" class="flex items-center justify-between gap-3">
+        <button type="button" @click="prevFmttnMission()"
+          class="px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs transition cursor-pointer">
+          ← Précédent
+        </button>
+        <button type="button" @click="nextFmttnMission()"
+          class="px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs transition shadow-sm cursor-pointer"
+          x-text="isLastFmttnMission() ? 'Module suivant : voir la leçon ➔' : 'Passer à la mission suivante ➔'"></button>
       </div>
-
-      <!-- Bloc NotebookLM Dédié avec conseils d'utilisation -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-gradient-to-tr from-amber-500/10 to-orange-500/10 border border-amber-200/80 rounded-3xl p-6 text-slate-800 space-y-2">
-          <div class="text-2xl">🎧</div>
-          <h5 class="font-extrabold text-sm text-amber-950">Podcasts & Résumés Audio</h5>
-          <p class="text-xs text-slate-600 leading-relaxed">
-            Écoutez la discussion audio générée par NotebookLM sur ce chapitre pour réviser le cours en autonomie.
-          </p>
-        </div>
-        <div class="bg-gradient-to-tr from-blue-500/10 to-indigo-500/10 border border-blue-200/80 rounded-3xl p-6 text-slate-800 space-y-2">
-          <div class="text-2xl">💬</div>
-          <h5 class="font-extrabold text-sm text-blue-950">Interroger la Synthèse</h5>
-          <p class="text-xs text-slate-600 leading-relaxed">
-            Posez toutes vos questions à NotebookLM : chaque réponse cite précisément le cours et le manuel @lt_X.
-          </p>
-        </div>
-        <div class="bg-gradient-to-tr from-emerald-500/10 to-teal-500/10 border border-emerald-200/80 rounded-3xl p-6 text-slate-800 space-y-2">
-          <div class="text-2xl">📋</div>
-          <h5 class="font-extrabold text-sm text-emerald-950">Fiches de Révision</h5>
-          <p class="text-xs text-slate-600 leading-relaxed">
-            Générez des guides d'étude, des fiches réflexes et des glossaires alignés sur le référentiel SeGEC.
-          </p>
-        </div>
-      </div>
-
     </div>
 
     <!-- ======================================================= -->

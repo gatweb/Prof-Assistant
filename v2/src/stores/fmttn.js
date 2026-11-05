@@ -124,7 +124,10 @@ function formatAltxLeconHtml(rawLecon) {
 export function createFmttnStore() {
   return {
     selectedModuleId: 'module-0',
-    activeTab: 'decouvre',
+    activeTab: 'cours',
+    activeFmttnMissionId: 'm0-charte',
+    fmttnUnlockedBadges: [],
+    showQuizCourseHint: false,
 
     module0: module0Data,
     chapter: chapterData,
@@ -143,6 +146,17 @@ export function createFmttnStore() {
     bankSubmitted: false,
     bankIsCorrect: false,
     bankScore: 0,
+
+    // Mission 2 du Module 0 : Déconnexion 1-3-4-2 & Mot de passe blindé
+    m0DecoState: {
+      selectedOrder: '1-3-4-2',
+      selectedPassword: 'PommeVelo!27',
+      validated: false,
+      completed: false,
+      feedback: ''
+    },
+    bilanCh1Validated: false,
+    bilanCh2Validated: false,
 
     eleveCompetences: {
       'NUM-1.D1': 'en_cours',
@@ -583,47 +597,519 @@ export function createFmttnStore() {
       }
     ],
 
+    getFormatLeconByTheme(chapterKey, subthemeKey) {
+      const raw = this.altxBank?.[chapterKey]?.[subthemeKey]?.lecon || '';
+      return formatAltxLeconHtml(raw);
+    },
+
+    isRewardedKey(key) {
+      return Array.isArray(this.rewardedActivities) && this.rewardedActivities.includes(key);
+    },
+
+    hasAnyRewardPrefix(prefix) {
+      return Array.isArray(this.rewardedActivities) && this.rewardedActivities.some(k => String(k).startsWith(prefix));
+    },
+
     getAltxMasteryBadges() {
       const c = this.eleveCompetences || {};
+      const savedBadges = Array.isArray(this.fmttnUnlockedBadges) ? this.fmttnUnlockedBadges : [];
+      const charteDone = Boolean(
+        savedBadges.includes('badge-charte') ||
+        (this.charteState?.finished && this.charteState?.score >= 40) ||
+        this.isRewardedKey('module0:charte-complete') ||
+        (Array.isArray(this.rewardedActivities) && this.rewardedActivities.filter(k => String(k).startsWith('charte:sit-')).length >= 4)
+      );
+      const egDone = Boolean(
+        savedBadges.includes('badge-eg') ||
+        this.egState?.finished ||
+        this.isRewardedKey('eg:dossier-5')
+      );
+      const ch1Done = Boolean(
+        savedBadges.includes('badge-ch1') ||
+        c['NUM-1.P2'] === 'acquis' ||
+        this.defisLudiques?.netiquette?.completed ||
+        this.isRewardedKey('defi:netiquette-ch1') ||
+        this.isRewardedKey('atelier:email-sim') ||
+        this.isRewardedKey('atelier:mission-app') ||
+        c['NUM-1.M1'] === 'acquis'
+      );
+      const ch2Done = Boolean(
+        savedBadges.includes('badge-ch2') ||
+        c['NUM-2.D4'] === 'acquis' ||
+        this.defisLudiques?.lucasProfil?.completed ||
+        this.defisLudiques?.linaPermissions?.completed ||
+        this.isRewardedKey('defi:lucas-profil') ||
+        this.isRewardedKey('defi:lina-permissions') ||
+        this.isRewardedKey('atelier:tri-donnees') ||
+        this.isRewardedKey('atelier:mission-secu') ||
+        c['NUM-2.M1'] === 'acquis'
+      );
+
       return [
         {
           id: 'badge-charte',
           icon: '📜',
           title: 'Gardien du Poste',
           desc: 'Module 0 • Charte & Déconnexion 1-3-4-2',
-          unlocked: Boolean(this.charteState?.finished && this.charteState?.score >= 40)
+          unlocked: charteDone
         },
         {
           id: 'badge-eg',
           icon: '🕵️',
           title: 'Détective des 5 Dossiers',
           desc: 'Escape Game • Serveur restauré (5/5)',
-          unlocked: Boolean(this.egState?.finished)
+          unlocked: egDone
         },
         {
           id: 'badge-ch1',
           icon: '✉️',
           title: 'Maître Courriel & Cci',
           desc: 'Chapitre 1 • Nétiquette, Cci & E2EE',
-          unlocked: Boolean(c['NUM-1.P2'] === 'acquis' || this.defisLudiques?.netiquette?.completed || c['NUM-1.M1'] === 'acquis')
+          unlocked: ch1Done
         },
         {
           id: 'badge-ch2',
           icon: '🛡️',
           title: 'Citoyen Cyber-Responsable',
           desc: 'Chapitre 2 • Traces, Profil & 103/116 000',
-          unlocked: Boolean(
-            c['NUM-2.D4'] === 'acquis' ||
-            this.defisLudiques?.lucasProfil?.completed ||
-            this.defisLudiques?.linaPermissions?.completed ||
-            c['NUM-2.M1'] === 'acquis'
-          )
+          unlocked: ch2Done
         }
       ];
     },
 
     getUnlockedAltxBadgesIds() {
       return this.getAltxMasteryBadges().filter(b => b.unlocked).map(b => b.id);
+    },
+
+    /**
+     * Retourne la liste structurée des missions d'un module FMTTN (comme UAA3 !)
+     * Chaque mission indique clairement son statut ('valide' | 'todo')
+     */
+    getFmttnMissionsForModule(moduleId) {
+      const mod = moduleId || this.selectedModuleId || 'module-0';
+      const c = this.eleveCompetences || {};
+      const unlockedDossiers = this.egState?.dossierUnlocked || [1];
+
+      if (mod === 'module-0') {
+        const m1Done = Boolean(
+          this.charteState?.finished ||
+          this.isRewardedKey('module0:charte-complete') ||
+          (Array.isArray(this.rewardedActivities) && this.rewardedActivities.filter(k => String(k).startsWith('charte:sit-')).length >= 4)
+        );
+        const m2Done = Boolean(
+          this.m0DecoState?.completed ||
+          this.isRewardedKey('module0:deco-mdp')
+        );
+        return [
+          {
+            id: 'm0-charte',
+            moduleId: 'module-0',
+            num: 1,
+            titre: 'Jeu : OK ou PAS OK ? (Charte informatique)',
+            shortTitle: 'Charte : OK ou PAS OK ?',
+            isQuizz: true,
+            status: m1Done ? 'valide' : null
+          },
+          {
+            id: 'm0-mdp-deco',
+            moduleId: 'module-0',
+            num: 2,
+            titre: 'Atelier : Mot de passe blindé & Déconnexion (1-3-4-2)',
+            shortTitle: 'Mot de passe & Déconnexion',
+            isQuizz: false,
+            status: m2Done ? 'valide' : null
+          }
+        ];
+      }
+
+      if (mod === 'escape-game') {
+        return [
+          {
+            id: 'eg-1',
+            moduleId: 'escape-game',
+            dossierNum: 1,
+            num: 1,
+            titre: 'Dossier 1 : Le Message Codé (Radio Morse)',
+            shortTitle: 'Dossier 1 : Morse',
+            isQuizz: false,
+            status: (unlockedDossiers.includes(2) || this.isRewardedKey('eg:dossier-1') || this.egState?.finished) ? 'valide' : null
+          },
+          {
+            id: 'eg-2',
+            moduleId: 'escape-game',
+            dossierNum: 2,
+            num: 2,
+            titre: 'Dossier 2 : Alerte Hameçonnage (Phishing)',
+            shortTitle: 'Dossier 2 : Phishing',
+            isQuizz: false,
+            status: (unlockedDossiers.includes(3) || this.isRewardedKey('eg:dossier-2') || this.egState?.finished) ? 'valide' : null
+          },
+          {
+            id: 'eg-3',
+            moduleId: 'escape-game',
+            dossierNum: 3,
+            num: 3,
+            titre: 'Dossier 3 : L\'Hallucination de l\'IA (Atomium)',
+            shortTitle: 'Dossier 3 : IA Atomium',
+            isQuizz: false,
+            status: (unlockedDossiers.includes(4) || this.isRewardedKey('eg:dossier-3') || this.egState?.finished) ? 'valide' : null
+          },
+          {
+            id: 'eg-4',
+            moduleId: 'escape-game',
+            dossierNum: 4,
+            num: 4,
+            titre: 'Dossier 4 : Le Fichier Fantôme (Serveur)',
+            shortTitle: 'Dossier 4 : Fichier Fantôme',
+            isQuizz: false,
+            status: (unlockedDossiers.includes(5) || this.isRewardedKey('eg:dossier-4') || this.egState?.finished) ? 'valide' : null
+          },
+          {
+            id: 'eg-5',
+            moduleId: 'escape-game',
+            dossierNum: 5,
+            num: 5,
+            titre: 'Dossier 5 : Réparer les Extensions (.docx, .png, .mp3, .pptx)',
+            shortTitle: 'Dossier 5 : Extensions',
+            isQuizz: false,
+            status: (this.egState?.finished || this.isRewardedKey('eg:dossier-5')) ? 'valide' : null
+          }
+        ];
+      }
+
+      if (mod === 'ch1-communication') {
+        return [
+          {
+            id: 'ch1-q-reseaux',
+            moduleId: 'ch1-communication',
+            subthemeKey: 'reseaux',
+            num: 1,
+            titre: 'Quiz : Réseaux socio-numériques (' + (this.altxBank?.comm?.reseaux?.questions?.length || 14) + ' Q)',
+            shortTitle: 'Quiz Réseaux',
+            isQuizz: true,
+            status: (c['NUM-1.D1'] === 'acquis' || this.hasAnyRewardPrefix('bank:comm:reseaux:')) ? 'valide' : null
+          },
+          {
+            id: 'ch1-q-messagerie',
+            moduleId: 'ch1-communication',
+            subthemeKey: 'messagerie',
+            num: 2,
+            titre: 'Quiz : Messagerie & Courriel (' + (this.altxBank?.comm?.messagerie?.questions?.length || 27) + ' Q)',
+            shortTitle: 'Quiz Messagerie',
+            isQuizz: true,
+            status: (c['NUM-1.D5'] === 'acquis' || this.hasAnyRewardPrefix('bank:comm:messagerie:')) ? 'valide' : null
+          },
+          {
+            id: 'ch1-q-ethique',
+            moduleId: 'ch1-communication',
+            subthemeKey: 'ethique',
+            num: 3,
+            titre: 'Quiz : Éthique, Droits & IA (' + (this.altxBank?.comm?.ethique?.questions?.length || 24) + ' Q)',
+            shortTitle: 'Quiz Éthique & IA',
+            isQuizz: true,
+            status: (c['NUM-1.D6'] === 'acquis' || this.hasAnyRewardPrefix('bank:comm:ethique:')) ? 'valide' : null
+          },
+          {
+            id: 'ch1-q-collab',
+            moduleId: 'ch1-communication',
+            subthemeKey: 'collaboration',
+            num: 4,
+            titre: 'Quiz : Outils collaboratifs & Cloud (' + (this.altxBank?.comm?.collaboration?.questions?.length || 20) + ' Q)',
+            shortTitle: 'Quiz Outils & Cloud',
+            isQuizz: true,
+            status: (c['NUM-1.D3'] === 'acquis' || this.hasAnyRewardPrefix('bank:comm:collaboration:')) ? 'valide' : null
+          },
+          {
+            id: 'ch1-atelier-email',
+            moduleId: 'ch1-communication',
+            num: 5,
+            titre: 'Atelier : Rédiger un e-mail officiel avec Cci (p. 64)',
+            shortTitle: 'Atelier Courriel Cci',
+            isQuizz: false,
+            status: (this.emailSim?.validationResults?.scoreGlobal >= 5 || this.isRewardedKey('atelier:email-sim') || c['NUM-1.P2'] === 'acquis') ? 'valide' : null
+          },
+          {
+            id: 'ch1-defi-netiquette',
+            moduleId: 'ch1-communication',
+            num: 6,
+            titre: 'Défi : Le Traducteur Nétiquette (p. 43 & 59)',
+            shortTitle: 'Défi Nétiquette',
+            isQuizz: false,
+            status: (this.defisLudiques?.netiquette?.completed || this.defisLudiques?.netiquette?.validated || this.isRewardedKey('defi:netiquette-ch1')) ? 'valide' : null
+          },
+          {
+            id: 'ch1-projet-app',
+            moduleId: 'ch1-communication',
+            num: 7,
+            titre: 'Projet : Invente ton application collaborative (p. 84)',
+            shortTitle: 'Projet Application',
+            isQuizz: false,
+            status: (this.missionApp?.isSubmitted || this.isRewardedKey('atelier:mission-app') || c['NUM-1.M1'] === 'acquis') ? 'valide' : null
+          },
+          {
+            id: 'ch1-bilan',
+            moduleId: 'ch1-communication',
+            num: 8,
+            titre: 'Bilan : Auto-évaluation des compétences Ch. 1 (p. 83)',
+            shortTitle: 'Bilan Chapitre 1',
+            isQuizz: false,
+            status: (this.bilanCh1Validated || this.isRewardedKey('bilan:ch1')) ? 'valide' : null
+          }
+        ];
+      }
+
+      if (mod === 'ch2-securite') {
+        return [
+          {
+            id: 'ch2-q-profil',
+            moduleId: 'ch2-securite',
+            subthemeKeySecu: 'profil',
+            num: 1,
+            titre: 'Quiz : Profil & Vie privée (' + (this.altxBank?.secu?.profil?.questions?.length || 23) + ' Q)',
+            shortTitle: 'Quiz Profil',
+            isQuizz: true,
+            status: (c['NUM-2.D1'] === 'acquis' || this.hasAnyRewardPrefix('bank:secu:profil:')) ? 'valide' : null
+          },
+          {
+            id: 'ch2-q-signaletique',
+            moduleId: 'ch2-securite',
+            subthemeKeySecu: 'signaletique',
+            num: 2,
+            titre: 'Quiz : Signalétiques PEGI & BienVu (' + (this.altxBank?.secu?.signaletique?.questions?.length || 20) + ' Q)',
+            shortTitle: 'Quiz PEGI & BienVu',
+            isQuizz: true,
+            status: (c['NUM-2.D2'] === 'acquis' || this.hasAnyRewardPrefix('bank:secu:signaletique:')) ? 'valide' : null
+          },
+          {
+            id: 'ch2-q-cyber',
+            moduleId: 'ch2-securite',
+            subthemeKeySecu: 'cyber',
+            num: 3,
+            titre: 'Quiz : Cyberrisques & HTTPS (' + (this.altxBank?.secu?.cyber?.questions?.length || 28) + ' Q)',
+            shortTitle: 'Quiz Cyberrisques',
+            isQuizz: true,
+            status: (c['NUM-2.D6'] === 'acquis' || this.hasAnyRewardPrefix('bank:secu:cyber:')) ? 'valide' : null
+          },
+          {
+            id: 'ch2-q-attention',
+            moduleId: 'ch2-securite',
+            subthemeKeySecu: 'confidentialite',
+            num: 4,
+            titre: 'Quiz : Économie de l\'attention & 3P (' + (this.altxBank?.secu?.confidentialite?.questions?.length || 20) + ' Q)',
+            shortTitle: 'Quiz Attention & 3P',
+            isQuizz: true,
+            status: (c['NUM-2.D5'] === 'acquis' || this.hasAnyRewardPrefix('bank:secu:confidentialite:')) ? 'valide' : null
+          },
+          {
+            id: 'ch2-q-traces',
+            moduleId: 'ch2-securite',
+            subthemeKeySecu: 'identite',
+            num: 5,
+            titre: 'Quiz : Traces numériques & Adresse IP (' + (this.altxBank?.secu?.identite?.questions?.length || 17) + ' Q)',
+            shortTitle: 'Quiz Traces & IP',
+            isQuizz: true,
+            status: (c['NUM-2.D8'] === 'acquis' || this.hasAnyRewardPrefix('bank:secu:identite:')) ? 'valide' : null
+          },
+          {
+            id: 'ch2-atelier-https',
+            moduleId: 'ch2-securite',
+            num: 6,
+            titre: 'Atelier : Inspecteur d\'Adresses Web HTTP vs HTTPS (p. 106)',
+            shortTitle: 'Inspecteur HTTPS',
+            isQuizz: false,
+            status: (this.isRewardedKey('atelier:http-banque') || c['NUM-2.D3'] === 'acquis') ? 'valide' : null
+          },
+          {
+            id: 'ch2-atelier-tri',
+            moduleId: 'ch2-securite',
+            num: 7,
+            titre: 'Atelier : Données Actives vs Traces Passives (p. 114)',
+            shortTitle: 'Tri Actif vs Passif',
+            isQuizz: false,
+            status: ((this.triDonnees?.valide && this.triDonnees?.score === 6) || this.isRewardedKey('atelier:tri-donnees') || c['NUM-2.D4'] === 'acquis') ? 'valide' : null
+          },
+          {
+            id: 'ch2-defi-lucas',
+            moduleId: 'ch2-securite',
+            num: 8,
+            titre: 'Défi : Inspecteur de Profil — Le compte de Lucas (p. 125)',
+            shortTitle: 'Défi Profil Lucas',
+            isQuizz: false,
+            status: (this.defisLudiques?.lucasProfil?.completed || (this.defisLudiques?.lucasProfil?.foundFlaws?.length || 0) >= 5 || this.isRewardedKey('defi:lucas-profil')) ? 'valide' : null
+          },
+          {
+            id: 'ch2-defi-lina',
+            moduleId: 'ch2-securite',
+            num: 9,
+            titre: 'Défi : Révélateur de Permissions — Lampe de Lina (p. 114)',
+            shortTitle: 'Défi Permissions Lina',
+            isQuizz: false,
+            status: (this.defisLudiques?.linaPermissions?.completed || this.isRewardedKey('defi:lina-permissions')) ? 'valide' : null
+          },
+          {
+            id: 'ch2-projet-citoyen',
+            moduleId: 'ch2-securite',
+            num: 10,
+            titre: 'Projet Citoyen : Campagne des 3 Réflexes (p. 158)',
+            shortTitle: 'Projet 3 Réflexes',
+            isQuizz: false,
+            status: (this.missionSecu?.isSubmitted || this.isRewardedKey('atelier:mission-secu') || c['NUM-2.M1'] === 'acquis') ? 'valide' : null
+          },
+          {
+            id: 'ch2-bilan',
+            moduleId: 'ch2-securite',
+            num: 11,
+            titre: 'Bilan : Auto-évaluation des compétences Ch. 2 (p. 147)',
+            shortTitle: 'Bilan Chapitre 2',
+            isQuizz: false,
+            status: (this.bilanCh2Validated || this.isRewardedKey('bilan:ch2')) ? 'valide' : null
+          }
+        ];
+      }
+
+      return [];
+    },
+
+    getCurrentFmttnModuleMissions() {
+      return this.getFmttnMissionsForModule(this.selectedModuleId);
+    },
+
+    getCurrentFmttnMission() {
+      const list = this.getCurrentFmttnModuleMissions();
+      return list.find(m => m.id === this.activeFmttnMissionId) || list[0] || null;
+    },
+
+    isLastFmttnMission() {
+      const list = this.getCurrentFmttnModuleMissions();
+      if (!list.length) return true;
+      return list[list.length - 1]?.id === this.activeFmttnMissionId;
+    },
+
+    relireLeconFmttn() {
+      this.activeTab = 'cours';
+      if (typeof window !== 'undefined' && window.scrollTo) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    },
+
+    selectFmttnModule(moduleId, defaultTab = 'cours') {
+      this.selectedModuleId = moduleId;
+      this.activeTab = defaultTab;
+      const list = this.getFmttnMissionsForModule(moduleId);
+      if (list.length > 0) {
+        this.selectFmttnMission(list[0].id, false);
+      }
+      if (typeof window !== 'undefined' && window.scrollTo) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    },
+
+    ouvrirAtelierFmttn(moduleId = null, missionId = null) {
+      if (moduleId && moduleId !== this.selectedModuleId) {
+        this.selectedModuleId = moduleId;
+      }
+      this.activeTab = 'pratique';
+      const list = this.getFmttnMissionsForModule(this.selectedModuleId);
+      if (missionId && list.some(m => m.id === missionId)) {
+        this.selectFmttnMission(missionId, false);
+      } else if (!list.some(m => m.id === this.activeFmttnMissionId) && list.length > 0) {
+        const firstTodo = list.find(m => m.status !== 'valide') || list[0];
+        this.selectFmttnMission(firstTodo.id, false);
+      }
+      if (typeof window !== 'undefined' && window.scrollTo) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    },
+
+    selectFmttnMission(missionId, switchToPratique = true) {
+      const list = this.getCurrentFmttnModuleMissions();
+      const found = list.find(m => m.id === missionId) || list[0];
+      if (!found) return;
+      this.activeFmttnMissionId = found.id;
+      this.showQuizCourseHint = false;
+      if (switchToPratique) {
+        this.activeTab = 'pratique';
+      }
+      if (found.subthemeKey) {
+        this.changeSubtheme(found.subthemeKey);
+      }
+      if (found.subthemeKeySecu) {
+        this.changeSubthemeSecu(found.subthemeKeySecu);
+      }
+      if (found.dossierNum) {
+        this.egState.activeDossier = found.dossierNum;
+        if (!this.egState.dossierUnlocked.includes(found.dossierNum)) {
+          this.egState.dossierUnlocked.push(found.dossierNum);
+        }
+      }
+    },
+
+    nextFmttnMission() {
+      const list = this.getCurrentFmttnModuleMissions();
+      const idx = list.findIndex(m => m.id === this.activeFmttnMissionId);
+      if (idx !== -1 && idx < list.length - 1) {
+        this.selectFmttnMission(list[idx + 1].id, true);
+        if (typeof window !== 'undefined' && window.scrollTo) {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        return;
+      }
+      // Sinon passer à la leçon du module suivant
+      const order = ['module-0', 'escape-game', 'ch1-communication', 'ch2-securite'];
+      const mIdx = order.indexOf(this.selectedModuleId);
+      if (mIdx !== -1 && mIdx < order.length - 1) {
+        this.selectFmttnModule(order[mIdx + 1], 'cours');
+      }
+    },
+
+    prevFmttnMission() {
+      if (this.activeTab === 'pratique') {
+        const list = this.getCurrentFmttnModuleMissions();
+        const idx = list.findIndex(m => m.id === this.activeFmttnMissionId);
+        if (idx > 0) {
+          this.selectFmttnMission(list[idx - 1].id, true);
+          return;
+        }
+        this.activeTab = 'cours';
+        return;
+      }
+      const order = ['module-0', 'escape-game', 'ch1-communication', 'ch2-securite'];
+      const mIdx = order.indexOf(this.selectedModuleId);
+      if (mIdx > 0) {
+        this.selectFmttnModule(order[mIdx - 1], 'cours');
+      }
+    },
+
+    validerM0Deco() {
+      const orderOk = this.m0DecoState.selectedOrder === '1-3-4-2';
+      const pwdOk = this.m0DecoState.selectedPassword === 'PommeVelo!27';
+      this.m0DecoState.validated = true;
+      this.m0DecoState.completed = orderOk && pwdOk;
+      if (orderOk && pwdOk) {
+        this.m0DecoState.feedback = '✅ Parfait ! Ordre 1-3-4-2 (Enregistrer ➔ Se déconnecter du compte ➔ Fermer le navigateur ➔ Fermer la session PC) et mot de passe de 12+ caractères avec majuscules, minuscules, chiffres et symbole validés !';
+        if (typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique('module0:deco-mdp', 20, 'Module 0 : Mot de passe & Déconnexion 1-3-4-2');
+        }
+        this.syncCurrentStudentProgress();
+      } else {
+        this.m0DecoState.feedback = '❌ Vérifie tes réponses : l\'ordre officiel du manuel (p. 16) est 1-3-4-2 et un mot de passe robuste comporte au moins 12 caractères variés (ex: PommeVelo!27).';
+      }
+    },
+
+    validerBilanCh1() {
+      this.bilanCh1Validated = true;
+      if (typeof this.attribuerXpUnique === 'function') {
+        this.attribuerXpUnique('bilan:ch1', 15, 'Auto-évaluation Chapitre 1');
+      }
+      this.syncCurrentStudentProgress();
+    },
+
+    validerBilanCh2() {
+      this.bilanCh2Validated = true;
+      if (typeof this.attribuerXpUnique === 'function') {
+        this.attribuerXpUnique('bilan:ch2', 15, 'Auto-évaluation Chapitre 2');
+      }
+      this.syncCurrentStudentProgress();
     },
 
     getCurrentNetiquetteScenario() {
@@ -779,6 +1265,13 @@ export function createFmttnStore() {
         this.charteState.hasAnswered = false;
       } else {
         this.charteState.finished = true;
+        if (!Array.isArray(this.fmttnUnlockedBadges)) this.fmttnUnlockedBadges = [];
+        if (!this.fmttnUnlockedBadges.includes('badge-charte')) {
+          this.fmttnUnlockedBadges.push('badge-charte');
+        }
+        if (typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique('module0:charte-complete', 20, 'Charte Informatique validée');
+        }
         this.syncCurrentStudentProgress();
       }
     },
@@ -894,6 +1387,7 @@ export function createFmttnStore() {
 
       setTimeout(() => {
         this.egState.activeDossier = num;
+        this.activeFmttnMissionId = `eg-${num}`;
         this.egState.inputCode = '';
         this.egState.feedback = '';
         this.egState.isSuccess = false;

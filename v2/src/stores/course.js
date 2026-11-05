@@ -258,9 +258,13 @@ export function createCourseStore() {
       if (this.currentCourse?.workspaceType === 'fmttn') {
         const targetMod = moduleParam || exParam;
         if (targetMod && ['module-0', 'escape-game', 'ch1-communication', 'ch2-securite'].includes(targetMod)) {
-          this.selectedModuleId = targetMod;
+          if (typeof this.selectFmttnModule === 'function') {
+            this.selectFmttnModule(targetMod, 'cours');
+          } else {
+            this.selectedModuleId = targetMod;
+          }
         }
-        this.activeTab = 'decouvre';
+        this.activeTab = 'cours';
         this.studentViewMode = 'focus';
         return true;
       }
@@ -328,7 +332,7 @@ export function createCourseStore() {
     // NAVIGATION EN ENTONNOIR (HUB -> COURS -> FOCUS)
     // ==========================================
     ouvrirHubCours() {
-      this.activeTab = 'decouvre';
+      this.activeTab = 'cours';
       this.studentViewMode = 'hub';
       this.updateUrlQueryParams({ view: 'hub' });
     },
@@ -344,10 +348,22 @@ export function createCourseStore() {
 
     async ouvrirModeFocus({ chapterId = null, exercise = null, tab = null } = {}) {
       if (this.currentCourse?.workspaceType === 'fmttn') {
-        if (chapterId) {
-          this.selectedModuleId = chapterId;
+        const modId = chapterId || this.selectedModuleId || 'module-0';
+        if (tab === 'pratique' || exercise) {
+          if (typeof this.ouvrirAtelierFmttn === 'function') {
+            this.ouvrirAtelierFmttn(modId, exercise?.id || null);
+          } else {
+            this.selectedModuleId = modId;
+            this.activeTab = 'pratique';
+          }
+        } else {
+          if (typeof this.selectFmttnModule === 'function') {
+            this.selectFmttnModule(modId, 'cours');
+          } else {
+            this.selectedModuleId = modId;
+            this.activeTab = 'cours';
+          }
         }
-        this.activeTab = tab || 'decouvre';
         this.studentViewMode = 'focus';
         this.updateUrlQueryParams({ courseId: 'fmttn-1re', exId: this.selectedModuleId });
         return;
@@ -376,11 +392,16 @@ export function createCourseStore() {
      */
     async focusEtapeSuivante() {
       if (this.currentCourse?.workspaceType === 'fmttn') {
-        const order = ['module-0', 'escape-game', 'ch1-communication', 'ch2-securite'];
-        const idx = order.indexOf(this.selectedModuleId);
-        if (idx < order.length - 1) {
-          this.selectedModuleId = order[idx + 1];
-          this.activeTab = 'decouvre';
+        if (this.activeTab !== 'pratique') {
+          if (typeof this.ouvrirAtelierFmttn === 'function') {
+            this.ouvrirAtelierFmttn();
+          } else {
+            this.activeTab = 'pratique';
+          }
+          return;
+        }
+        if (typeof this.nextFmttnMission === 'function') {
+          this.nextFmttnMission();
         }
         return;
       }
@@ -424,11 +445,8 @@ export function createCourseStore() {
 
     async focusEtapePrecedente() {
       if (this.currentCourse?.workspaceType === 'fmttn') {
-        const order = ['module-0', 'escape-game', 'ch1-communication', 'ch2-securite'];
-        const idx = order.indexOf(this.selectedModuleId);
-        if (idx > 0) {
-          this.selectedModuleId = order[idx - 1];
-          this.activeTab = 'decouvre';
+        if (typeof this.prevFmttnMission === 'function') {
+          this.prevFmttnMission();
         }
         return;
       }
@@ -578,8 +596,12 @@ export function createCourseStore() {
       this.currentChapter = found.chapters?.[0] || null;
 
       if (this.currentCourse.workspaceType === 'fmttn') {
-        this.selectedModuleId = 'module-0';
-        this.activeTab = 'decouvre';
+        if (typeof this.selectFmttnModule === 'function') {
+          this.selectFmttnModule('module-0', 'cours');
+        } else {
+          this.selectedModuleId = 'module-0';
+          this.activeTab = 'cours';
+        }
         this.tutorMessage = "Salut ! Je suis ton assistant @lt_X pour le cours de Numérique FMTTN. Pose-moi tes questions sur la charte, la sécurité ou la communication !";
       } else {
         this.activeTab = 'cours';

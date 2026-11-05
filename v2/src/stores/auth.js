@@ -247,11 +247,17 @@ export function createAuthStore() {
     async chargerProgressionEleveReelleDepuisDb() {
       if (!this.user.email && !this.user.id) return;
       try {
-        const storageKey = `profassistant_rewarded_${this.user.email || this.user.id}`;
+        const userKey = this.user.email || this.user.id;
+        const storageKey = `profassistant_rewarded_${userKey}`;
+        const stateCacheKey = `profassistant_fmttn_state_${userKey}`;
         try {
           const cachedRewards = JSON.parse(localStorage.getItem(storageKey) || '[]');
           if (Array.isArray(cachedRewards)) {
             this.rewardedActivities = cachedRewards;
+          }
+          const cachedState = JSON.parse(localStorage.getItem(stateCacheKey) || 'null');
+          if (cachedState && typeof cachedState === 'object') {
+            this.appliquerEtatProgressionFmttn(cachedState);
           }
         } catch (_) {}
 
@@ -261,35 +267,7 @@ export function createAuthStore() {
             const p = data.progression;
             if (p.classe_id) this.user.classe = p.classe_id;
             if (typeof p.xp === 'number') this.user.xp = p.xp;
-            if (p.competences) this.eleveCompetences = { ...this.eleveCompetences, ...p.competences };
-            if (p.bilan_personnel) this.bilanPersonnel = { ...this.bilanPersonnel, ...p.bilan_personnel };
-            if (p.bilan_personnel_ch2) this.bilanPersonnelCh2 = { ...this.bilanPersonnelCh2, ...p.bilan_personnel_ch2 };
-            if (p.charte) this.charteState = { ...this.charteState, ...p.charte };
-            if (p.escape_game) this.egState = { ...this.egState, ...p.escape_game };
-            if (p.email_sim) this.emailSim = { ...this.emailSim, ...p.email_sim };
-            if (p.defis_ludiques && this.defisLudiques) {
-              if (p.defis_ludiques.netiquette) {
-                this.defisLudiques.netiquette = { ...this.defisLudiques.netiquette, ...p.defis_ludiques.netiquette };
-              }
-              if (p.defis_ludiques.lucasProfil) {
-                const savedFlaws = p.defis_ludiques.lucasProfil.foundFlaws || p.defis_ludiques.lucasProfil.fixedFlaws || [];
-                this.defisLudiques.lucasProfil = {
-                  ...this.defisLudiques.lucasProfil,
-                  ...p.defis_ludiques.lucasProfil,
-                  foundFlaws: Array.isArray(savedFlaws) ? savedFlaws : []
-                };
-              }
-              if (p.defis_ludiques.linaPermissions) {
-                const defaultItems = this.defisLudiques.linaPermissions.items || [];
-                this.defisLudiques.linaPermissions = {
-                  ...this.defisLudiques.linaPermissions,
-                  ...p.defis_ludiques.linaPermissions,
-                  items: Array.isArray(p.defis_ludiques.linaPermissions.items) && p.defis_ludiques.linaPermissions.items.length
-                    ? p.defis_ludiques.linaPermissions.items
-                    : defaultItems
-                };
-              }
-            }
+            this.appliquerEtatProgressionFmttn(p);
             if (Array.isArray(p.rewarded_activities)) {
               this.rewardedActivities = Array.from(new Set([...this.rewardedActivities, ...p.rewarded_activities]));
               localStorage.setItem(storageKey, JSON.stringify(this.rewardedActivities));
@@ -416,6 +394,57 @@ export function createAuthStore() {
       });
     },
 
+    appliquerEtatProgressionFmttn(p) {
+      if (!p || typeof p !== 'object') return;
+      if (p.competences) this.eleveCompetences = { ...this.eleveCompetences, ...p.competences };
+      if (p.bilan_personnel) this.bilanPersonnel = { ...this.bilanPersonnel, ...p.bilan_personnel };
+      if (p.bilan_personnel_ch2) this.bilanPersonnelCh2 = { ...this.bilanPersonnelCh2, ...p.bilan_personnel_ch2 };
+      if (p.charte) this.charteState = { ...this.charteState, ...p.charte };
+      if (p.escape_game) {
+        this.egState = {
+          ...this.egState,
+          ...p.escape_game,
+          dossierUnlocked: Array.isArray(p.escape_game.dossierUnlocked) && p.escape_game.dossierUnlocked.length
+            ? p.escape_game.dossierUnlocked
+            : (this.egState.dossierUnlocked || [1])
+        };
+      }
+      if (p.email_sim) this.emailSim = { ...this.emailSim, ...p.email_sim };
+      if (p.mission_app) this.missionApp = { ...this.missionApp, ...p.mission_app };
+      if (p.http_sim) this.httpSim = { ...this.httpSim, ...p.http_sim };
+      if (p.tri_donnees) this.triDonnees = { ...this.triDonnees, ...p.tri_donnees };
+      if (p.mission_secu) this.missionSecu = { ...this.missionSecu, ...p.mission_secu };
+      if (p.m0_deco) this.m0DecoState = { ...this.m0DecoState, ...p.m0_deco };
+      if (typeof p.bilan_ch1_validated === 'boolean') this.bilanCh1Validated = p.bilan_ch1_validated;
+      if (typeof p.bilan_ch2_validated === 'boolean') this.bilanCh2Validated = p.bilan_ch2_validated;
+      if (Array.isArray(p.badges_altx)) {
+        this.fmttnUnlockedBadges = Array.from(new Set([...(this.fmttnUnlockedBadges || []), ...p.badges_altx]));
+      }
+      if (p.defis_ludiques && this.defisLudiques) {
+        if (p.defis_ludiques.netiquette) {
+          this.defisLudiques.netiquette = { ...this.defisLudiques.netiquette, ...p.defis_ludiques.netiquette };
+        }
+        if (p.defis_ludiques.lucasProfil) {
+          const savedFlaws = p.defis_ludiques.lucasProfil.foundFlaws || p.defis_ludiques.lucasProfil.fixedFlaws || [];
+          this.defisLudiques.lucasProfil = {
+            ...this.defisLudiques.lucasProfil,
+            ...p.defis_ludiques.lucasProfil,
+            foundFlaws: Array.isArray(savedFlaws) ? savedFlaws : []
+          };
+        }
+        if (p.defis_ludiques.linaPermissions) {
+          const defaultItems = this.defisLudiques.linaPermissions.items || [];
+          this.defisLudiques.linaPermissions = {
+            ...this.defisLudiques.linaPermissions,
+            ...p.defis_ludiques.linaPermissions,
+            items: Array.isArray(p.defis_ludiques.linaPermissions.items) && p.defis_ludiques.linaPermissions.items.length
+              ? p.defis_ludiques.linaPermissions.items
+              : defaultItems
+          };
+        }
+      }
+    },
+
     updateStudentProfile(newNom, newClasse) {
       if (newNom) this.user.nom = newNom.trim();
       if (newClasse) {
@@ -426,6 +455,9 @@ export function createAuthStore() {
     },
 
     async syncCurrentStudentProgress() {
+      const unlockedBadges = typeof this.getUnlockedAltxBadgesIds === 'function' ? this.getUnlockedAltxBadgesIds() : [];
+      this.fmttnUnlockedBadges = Array.from(new Set([...(this.fmttnUnlockedBadges || []), ...unlockedBadges]));
+
       const dataToSave = {
         nom: this.user.nom,
         email: this.user.email,
@@ -434,10 +466,13 @@ export function createAuthStore() {
         competences: this.eleveCompetences,
         rewarded_activities: this.rewardedActivities || [],
         defis_ludiques: this.defisLudiques || null,
-        badges_altx: typeof this.getUnlockedAltxBadgesIds === 'function' ? this.getUnlockedAltxBadgesIds() : [],
+        badges_altx: this.fmttnUnlockedBadges,
         spam_attempts: this.studentSpamAttempts || 0,
         bilan_personnel: this.bilanPersonnel,
         bilan_personnel_ch2: this.bilanPersonnelCh2,
+        bilan_ch1_validated: Boolean(this.bilanCh1Validated),
+        bilan_ch2_validated: Boolean(this.bilanCh2Validated),
+        m0_deco: this.m0DecoState || null,
         charte: {
           score: this.charteState.score,
           finished: this.charteState.finished
@@ -468,6 +503,11 @@ export function createAuthStore() {
         active_course_id: this.currentCourse?.id || 'fmttn-1re',
         active_exercise_id: this.currentExercise?.id || this.selectedModuleId || ''
       };
+
+      try {
+        const userKey = this.user.email || this.user.id || 'guest';
+        localStorage.setItem(`profassistant_fmttn_state_${userKey}`, JSON.stringify(dataToSave));
+      } catch (_) {}
 
       await saveEleveProgression(this.user.classe, this.user.email || this.user.id || 'el_student', dataToSave);
     },
@@ -505,7 +545,7 @@ export function createAuthStore() {
       this.teacherAuth.isTeacher = false;
       this.teacherAuth.user = null;
       this.teacherAuth.profile = null;
-      this.activeTab = 'decouvre';
+      this.activeTab = 'cours';
     }
   };
 }
