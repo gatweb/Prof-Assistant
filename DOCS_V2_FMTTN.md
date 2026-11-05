@@ -202,3 +202,27 @@ Pour s'adapter aux contraintes de la salle informatique avec des élèves de 11 
 - L'élève choisit simplement sa classe (`1A`, `1B`...) dans le bandeau supérieur.
 - Il indique son prénom/nom une seule fois (stocké en `localStorage`).
 - Une session anonyme Firebase Auth est créée silencieusement pour synchroniser les données dans Firestore sous `/progressions_v2/{classeId}_{eleveId}`.
+
+
+---
+
+## 9. Phase 7 — Activation API Google Classroom, Cours complet « Bureautique & Google Workspace (3e) » & Optimisation du Bundle JS
+
+### 9.1 Activation des API Google Cloud (`classroom`, `forms`, `drive`)
+- Activation directe sur le projet GCP `profassistant-61fde` (`429919803539`) via Google Cloud SDK :
+  - `classroom.googleapis.com`
+  - `forms.googleapis.com`
+  - `drive.googleapis.com`
+- Gestion bienveillante dans [`v2/src/stores/classroom.js`](file:///run/media/gaetan/Data/_DEV/_PROD/Prof%20Assistant/v2/src/stores/classroom.js) lorsqu'un compte enseignant n'a encore aucun cours actif sur Google Classroom.
+
+### 9.2 Cours complet « Bureautique & Google Workspace (3e) » (`bureautique-3e`)
+- **4 modules théoriques illustrés et structurés** dans `public/cours/bureautique-3e/` :
+  1. [`01_drive_organisation.md`](file:///run/media/gaetan/Data/_DEV/_PROD/Prof%20Assistant/public/cours/bureautique-3e/01_drive_organisation.md) : Stockage Cloud vs Local, arborescence numérotée (`01_`, `02_`), code couleur, convention de nommage (`BUR_Ex01_Sujet_NomPrenom`), les 3 niveaux de droits (**Lecteur / Commentateur / Éditeur**) et piège de l'accès *Limité*.
+  2. [`02_docs_mise_en_page.md`](file:///run/media/gaetan/Data/_DEV/_PROD/Prof%20Assistant/public/cours/bureautique-3e/02_docs_mise_en_page.md) : Configuration de la page A4 & marges 2,5 cm, les 4 alignements (**Justifié `Ctrl+Maj+J`**), interlignes 1,15 et espacement après paragraphe, les 8 raccourcis vitaux (dont **`Ctrl+Maj+V`** *Coller sans mise en forme*), habillage d'image (*Adapter le texte*) et tableaux.
+  3. [`03_styles_sommaires.md`](file:///run/media/gaetan/Data/_DEV/_PROD/Prof%20Assistant/public/cours/bureautique-3e/03_styles_sommaires.md) : Styles hiérarchiques (**Titre 1 / Titre 2 / Titre 3**), mise à jour automatique des styles, **Table des matières dynamique**, **Saut de page (`Ctrl+Entrée`)** vs **Saut de section**, et numérotation avec *Première page différente*.
+  4. [`04_typographie_dactylographie.md`](file:///run/media/gaetan/Data/_DEV/_PROD/Prof%20Assistant/public/cours/bureautique-3e/04_typographie_dactylographie.md) : Règles de ponctuation française et norme NBN (signes simples `.` `,` vs signes doubles `:` `;` `!` `?`), **espace insécable (`Ctrl+Maj+Espace`)**, guillemets français `« … »`, majuscules accentuées (`À`, `É`, `È`, `Ç`) et les 5 péchés capitaux de la lisibilité.
+- **8 activités progressives** dans [`v2/src/services/courseManager.js`](file:///run/media/gaetan/Data/_DEV/_PROD/Prof%20Assistant/v2/src/services/courseManager.js) : chaque module dispose d'un **Quiz interactif de 5 QCM** (`bur-m1-quiz` à `bur-m4-quiz`) suivi d'une **Mission pratique Google Drive/Docs** (`bur-ex2`, `bur-ex1`, `bur-ex3`, `bur-ex4`).
+
+### 9.3 Découpage du Bundle JS (Code Splitting Vite 8 / Rolldown)
+- Configuration de `rolldownOptions.output.codeSplitting.groups` dans [`v2/vite.config.js`](file:///run/media/gaetan/Data/_DEV/_PROD/Prof%20Assistant/v2/vite.config.js) en **8 chunks spécialisés** (< 500 kB chacun, 0 avertissement de build) :
+  - `vendor-firestore`, `vendor-katex`, `data-fmttn`, `index`, `workspace-teacher`, `vendor-firebase`, `vendor-alpine`, `vendor-markdown`.

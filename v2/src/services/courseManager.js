@@ -33,12 +33,159 @@ Ton rôle :
 export const DEFAULT_EXERCISES_BY_COURSE = {
   "bureautique-3e": [
     {
+      id: "bur-m1-quiz",
+      course_id: "bureautique-3e",
+      chapitre: "bur-ch1",
+      type: "quizz",
+      isQuizz: true,
+      titre: "Quiz 1 : Cloud, Arborescence & Droits de Partage",
+      consigne: "Vérifie ta maîtrise de Google Drive, du nommage professionnel des fichiers et des 3 niveaux d'autorisation avant de passer à la pratique.",
+      theorie_md: "### Mémo Drive\n- **Lecteur** : consulte sans modifier.\n- **Commentateur** : suggère dans la marge.\n- **Éditeur** : modifie et supprime.\n- Numérote toujours tes dossiers (`01_`, `02_`).",
+      questions: [
+        {
+          question: "Pourquoi commence-t-on le nom des dossiers par un numéro (ex: 01_Bureautique, 02_Français) dans Google Drive ?",
+          options: [
+            "Pour imposer un ordre logique constant sans dépendre du tri alphabétique automatique",
+            "Parce que Google Drive refuse les dossiers qui commencent par une lettre",
+            "Pour augmenter l'espace de stockage gratuit du compte",
+            "Pour chiffrer automatiquement le contenu du dossier"
+          ],
+          correctAnswer: 0,
+          explication: "Par défaut, Drive trie par ordre alphabétique. Le préfixe 01_, 02_ permet de garder tes matières dans l'ordre que tu as choisi."
+        },
+        {
+          question: "Tu remets un rapport final à ton professeur et tu souhaites qu'il puisse annoter ton texte dans la marge sans écraser tes phrases. Quel rôle choisis-tu ?",
+          options: [
+            "Commentateur",
+            "Lecteur",
+            "Éditeur",
+            "Propriétaire"
+          ],
+          correctAnswer: 0,
+          explication: "Le mode Commentateur permet d'ajouter des commentaires et des suggestions visibles sans modifier directement le texte d'origine."
+        },
+        {
+          question: "Lequel de ces noms de fichiers respecte les conventions professionnelles de bureautique ?",
+          options: [
+            "BUR_Ex01_Presentation_DupontLucas",
+            "Document sans titre (4)",
+            "mon devoir de bureautique final v2 vraiment final",
+            "texte.doc"
+          ],
+          correctAnswer: 0,
+          explication: "Un nom professionnel indique la matière, la référence de l'exercice, le sujet et le nom de l'auteur sans espaces superflus."
+        },
+        {
+          question: "Que se passe-t-il si tu remets un lien Google Docs dont l'accès général est resté sur « Limité » sans avoir ajouté l'adresse de ton professeur ?",
+          options: [
+            "Le professeur verra un message « Accès refusé » et ne pourra pas lire ta copie",
+            "Le document sera automatiquement supprimé après 24 heures",
+            "Le document s'ouvrira quand même mais en noir et blanc",
+            "Google Classroom convertira automatiquement le lien en fichier MP3"
+          ],
+          correctAnswer: 0,
+          explication: "En mode « Limité », seules les adresses explicitement invitées ont accès au fichier."
+        },
+        {
+          question: "Dans Google Drive, où va un fichier que tu viens de supprimer par erreur et combien de temps peux-tu le restaurer ?",
+          options: [
+            "Dans la Corbeille de Drive pendant 30 jours",
+            "Il est détruit définitivement à la seconde où tu appuies sur Supprimer",
+            "Dans le dossier Téléchargements de Windows pendant 1 an",
+            "Il est envoyé par e-mail à tous tes contacts"
+          ],
+          correctAnswer: 0,
+          explication: "La Corbeille de Google Drive conserve les éléments supprimés pendant 30 jours avant leur effacement définitif."
+        }
+      ]
+    },
+    {
+      id: "bur-ex2",
+      course_id: "bureautique-3e",
+      chapitre: "bur-ch1",
+      titre: "Mission 1 : Arborescence & Partage Google Drive",
+      consigne: "1. Crée dans ton **Google Drive** un dossier principal nommé `3e Secondaire - [Ton Nom]`.\n2. À l'intérieur, crée **4 sous-dossiers numérotés et colorés** : `01_Bureautique`, `02_Français`, `03_Maths`, `04_Projets`.\n3. Dans `01_Bureautique`, crée un Google Docs nommé `BUR_Ex01_Presentation_[TonNom]` contenant 5 lignes sur tes objectifs de l'année.\n4. Configure le partage en mode **Commentateur** (ou *Tous les utilisateurs disposant du lien*) et colle le lien ci-dessous.",
+      theorie_md: "### Rappel Partage Drive\n\n- Clic droit sur le dossier ou fichier > **Partager**.\n- Sous **Accès général**, passe de *Limité* à **Tous les utilisateurs disposant du lien**.\n- Choisis le rôle **Commentateur** ou **Lecteur**, puis clique sur **Copier le lien**.",
+      external_tools: [
+        { name: "Google Drive", url: "https://drive.google.com" },
+        { name: "Google Docs", url: "https://docs.google.com" }
+      ],
+      submission_type: "drive_link"
+    },
+    {
+      id: "bur-m2-quiz",
+      course_id: "bureautique-3e",
+      chapitre: "bur-ch2",
+      type: "quizz",
+      isQuizz: true,
+      titre: "Quiz 2 : Mise en page, Alignements & Raccourcis Docs",
+      consigne: "Teste tes réflexes sur la configuration A4, l'alignement justifié, les espacements de paragraphe et les raccourcis clavier essentiels.",
+      theorie_md: "### Raccourcis clés\n- `Ctrl + B` : Gras | `Ctrl + I` : Italique\n- `Ctrl + Maj + J` : Justifier le texte\n- `Ctrl + Maj + V` : Coller **sans** mise en forme",
+      questions: [
+        {
+          question: "Quel alignement est obligatoire pour les paragraphes du corps d'un rapport professionnel afin d'obtenir des bords gauche et droit parfaitement nets ?",
+          options: [
+            "Justifier (Ctrl + Maj + J)",
+            "Centrer (Ctrl + Maj + E)",
+            "Aligner à droite (Ctrl + Maj + R)",
+            "Ajouter des espaces à la fin de chaque ligne"
+          ],
+          correctAnswer: 0,
+          explication: "L'alignement Justifié répartit proprement les mots entre la marge gauche et la marge droite, comme dans un livre ou un journal."
+        },
+        {
+          question: "Tu copies une phrase depuis Wikipédia et elle arrive dans ton Google Docs avec un fond gris, une police différente et des liens bleus. Quel raccourci utilises-tu pour coller uniquement le texte propre ?",
+          options: [
+            "Ctrl + Maj + V (Coller sans mise en forme)",
+            "Ctrl + V suivi de 10 fois Retour arrière",
+            "Ctrl + Alt + Suppr",
+            "Alt + F4"
+          ],
+          correctAnswer: 0,
+          explication: "Ctrl + Maj + V colle le texte brut en adoptant immédiatement la police et la taille de ton document Google Docs."
+        },
+        {
+          question: "Comment espace-t-on proprement deux paragraphes dans Google Docs sans décaler la mise en page ?",
+          options: [
+            "En activant « Ajouter un espace après le paragraphe » (ou espacement 6 pt / 10 pt) dans le menu Interligne",
+            "En appuyant 4 fois sur la touche Entrée entre chaque paragraphe",
+            "En insérant un tableau vide",
+            "En appuyant 50 fois sur la barre d'espace"
+          ],
+          correctAnswer: 0,
+          explication: "L'espacement automatique après paragraphe garantit un écart constant et évite les lignes vides parasites en haut d'une nouvelle page."
+        },
+        {
+          question: "Quelle option d'habillage d'image permet au texte de s'écouler élégamment sur le côté droit ou gauche d'une illustration ?",
+          options: [
+            "Adapter le texte",
+            "Aligné avec le texte",
+            "Derrière l'écran",
+            "Rogner l'image"
+          ],
+          correctAnswer: 0,
+          explication: "L'option « Adapter le texte » entoure l'image avec le paragraphe tout en respectant une petite marge de sécurité."
+        },
+        {
+          question: "Où vérifie-t-on que le document est bien au format européen A4 (21 × 29,7 cm) avec des marges de 2,5 cm et non au format américain Letter ?",
+          options: [
+            "Fichier > Configuration de la page",
+            "Outils > Dictionnaire",
+            "Insertion > Caractères spéciaux",
+            "Affichage > Plein écran"
+          ],
+          correctAnswer: 0,
+          explication: "Le menu Fichier > Configuration de la page permet de définir le format A4, l'orientation Portrait/Paysage et les 4 marges."
+        }
+      ]
+    },
+    {
       id: "bur-ex1",
       course_id: "bureautique-3e",
       chapitre: "bur-ch2",
-      titre: "Mise en page d'un rapport de stage",
-      consigne: "Crée un document Google Docs avec un titre principal (**Titre 1**), deux sous-sections (**Titre 2**), des marges standard (2,5 cm) et une table des matières automatique.",
-      theorie_md: "### Rappels Google Docs\n\n- Sélectionne ton texte et utilise **Format > Styles de paragraphe** pour appliquer Titre 1 et Titre 2.\n- Insère le sommaire dynamique via **Insertion > Table des matières**.\n- Pense à l'espace insécable `Ctrl+Maj+Espace` avant les deux-points (:).",
+      titre: "Mission 2 : Fiche de Synthèse A4 Justifiée & Illustrée",
+      consigne: "Crée dans `01_Bureautique` un document nommé `BUR_Ex02_MiseEnPage_[TonNom]` sur le sujet de ton choix (sport, jeu vidéo, métier, animal) respectant **tous ces critères** :\n1. **Configuration de la page** : Format **A4**, orientation Portrait, marges de **2,5 cm**.\n2. **Corps du texte** : Au moins 2 paragraphes en police sobre (Arial, Calibri ou Roboto, taille 11 ou 12 pt), alignement **Justifié (`Ctrl+Maj+J`)**, interligne **1,15** et espace après le paragraphe.\n3. **Mise en valeur** : Mots-clés en **Gras (`Ctrl+B`)**, 1 citation en *Italique (`Ctrl+I`)* et 1 lien hypertexte propre (`Ctrl+K`).\n4. **Médias** : 1 image avec habillage **Adapter le texte** + 1 tableau comparatif de 3 colonnes avec une ligne d'en-tête colorée.",
+      theorie_md: "### Checklist Mise en page (Module 2)\n\n- **Fichier > Configuration de la page** : A4 + Marges 2,5 cm.\n- **Justifier** les paragraphes : `Ctrl + Maj + J`.\n- **Interligne 1,15** + *Ajouter un espace après le paragraphe*.\n- **Image** : cliquer sur l'image > icône *Adapter le texte*.",
       external_tools: [
         { name: "Google Docs", url: "https://docs.google.com" },
         { name: "Google Drive", url: "https://drive.google.com" }
@@ -46,14 +193,160 @@ export const DEFAULT_EXERCISES_BY_COURSE = {
       submission_type: "drive_link"
     },
     {
-      id: "bur-ex2",
+      id: "bur-m3-quiz",
       course_id: "bureautique-3e",
-      chapitre: "bur-ch1",
-      titre: "Organisation & Partage Drive",
-      consigne: "Crée une arborescence de dossiers dans Google Drive : `Mon École > 3e Secondaire > Bureautique`. Partage le dossier en mode 'Lecteur' et colle le lien ci-dessous.",
-      theorie_md: "### Partage dans Google Drive\n\n- Fais un clic droit sur le dossier > **Partager**.\n- Définis l'accès général sur *Tous les utilisateurs disposant du lien* en mode **Lecteur**.",
+      chapitre: "bur-ch3",
+      type: "quizz",
+      isQuizz: true,
+      titre: "Quiz 3 : Styles, Sommaire Automatique & Sauts de Section",
+      consigne: "Vérifie que tu sais structurer un long rapport avec les Styles de titres, la Table des matières dynamique et les Sauts de page/section.",
+      theorie_md: "### Mémo Structure de Rapport\n- **Titre 1** (`Ctrl+Alt+1`) : Grands chapitres\n- **Titre 2** (`Ctrl+Alt+2`) : Sous-parties\n- **Saut de page** : `Ctrl + Entrée`\n- **Page de garde** : cocher *Première page différente*",
+      questions: [
+        {
+          question: "Pourquoi faut-il obligatoirement utiliser les styles « Titre 1 » et « Titre 2 » plutôt que de simplement grossir la taille du texte à la main ?",
+          options: [
+            "Pour que Google Docs reconnaisse la hiérarchie des chapitres et puisse générer automatiquement le plan et la table des matières",
+            "Parce qu'il est interdit d'utiliser le bouton Gras dans Google Docs",
+            "Pour réduire la taille du fichier de 90 %",
+            "Pour traduire automatiquement le document en anglais"
+          ],
+          correctAnswer: 0,
+          explication: "Seuls les paragraphes dotés d'un style Titre 1, Titre 2 ou Titre 3 sont détectés par le générateur de Table des matières."
+        },
+        {
+          question: "Quel raccourci clavier permet de commencer immédiatement un nouveau chapitre tout en haut de la page suivante (sans appuyer 15 fois sur Entrée) ?",
+          options: [
+            "Ctrl + Entrée (Saut de page)",
+            "Maj + Espace",
+            "Alt + Tab",
+            "Ctrl + Retour arrière"
+          ],
+          correctAnswer: 0,
+          explication: "Ctrl + Entrée insère un saut de page propre : même si tu ajoutes du texte avant, le chapitre suivant restera toujours en haut de sa page."
+        },
+        {
+          question: "Tu souhaites placer uniquement la page 3 de ton rapport en format Paysage (pour un grand tableau) tout en gardant les pages 1, 2 et 4 en Portrait. Que dois-tu insérer ?",
+          options: [
+            "Des Sauts de section (page suivante) avant et après la page 3",
+            "Un simple saut de ligne",
+            "Une zone de dessin",
+            "Un deuxième fichier Google Sheets"
+          ],
+          correctAnswer: 0,
+          explication: "Le Saut de section isole une partie du document pour lui appliquer une orientation (Paysage) ou des en-têtes indépendants."
+        },
+        {
+          question: "Quelle case faut-il cocher dans l'en-tête ou le pied de page pour que la Page de Garde (page 1) n'affiche pas de numéro de page ?",
+          options: [
+            "Première page différente",
+            "Masquer les marges",
+            "Mode suggestion",
+            "Aligner à droite"
+          ],
+          correctAnswer: 0,
+          explication: "L'option « Première page différente » laisse la page de garde vierge d'en-tête et de numéro tout en numérotant la suite du dossier."
+        },
+        {
+          question: "Tu as ajouté deux nouveaux sous-chapitres (Titre 2) à la fin de ton rapport. Comment mets-tu à jour ta table des matières ?",
+          options: [
+            "En cliquant sur la table des matières puis sur le bouton circulaire 🔄 « Actualiser la table des matières »",
+            "En retapant les titres et les numéros de page au clavier avec des petits points",
+            "En supprimant tout le document",
+            "En redémarrant l'ordinateur"
+          ],
+          correctAnswer: 0,
+          explication: "Un seul clic sur le bouton 🔄 Actualiser recalcule instantanément tous les titres et les numéros de page."
+        }
+      ]
+    },
+    {
+      id: "bur-ex3",
+      course_id: "bureautique-3e",
+      chapitre: "bur-ch3",
+      titre: "Mission 3 : Rapport Multi-Pages avec Sommaire Automatique",
+      consigne: "Crée dans `01_Bureautique` un document nommé `BUR_Ex03_Rapport_Styles_[TonNom]` comportant **4 pages structurées** :\n1. **Page 1 (Page de garde)** : Grand titre centré (style **Titre**), sous-titre, ton nom, ta classe, et un **Saut de page (`Ctrl+Entrée`)**.\n2. **Page 2 (Sommaire)** : Insère une **Table des matières automatique avec numéros de page** (**Insertion > Table des matières**), suivie d'un **Saut de page (`Ctrl+Entrée`)**.\n3. **Pages 3 et 4 (Contenu)** : Rédige au moins **3 grands chapitres (`Titre 1`)** contenant chacun **2 sous-parties (`Titre 2`)** et un court paragraphe justifié (`Texte normal`).\n4. **Pied de page** : Ajoute la numérotation automatique des pages en cochant **☑️ Première page différente**.",
+      theorie_md: "### Mémo Styles & Sommaire (Module 3)\n\n- **Titre 1** : `Ctrl + Alt + 1` | **Titre 2** : `Ctrl + Alt + 2`\n- **Saut de page** : `Ctrl + Entrée` (zéro ligne vide !)\n- **Sommaire** : *Insertion > Table des matières*\n- **Numéros de page** : *Insertion > Numéros de page* (cocher *Première page différente*).",
       external_tools: [
-        { name: "Google Drive", url: "https://drive.google.com" }
+        { name: "Google Docs", url: "https://docs.google.com" }
+      ],
+      submission_type: "drive_link"
+    },
+    {
+      id: "bur-m4-quiz",
+      course_id: "bureautique-3e",
+      chapitre: "bur-ch4",
+      type: "quizz",
+      isQuizz: true,
+      titre: "Quiz 4 : Typographie Française, Ponctuation & Espace Insécable",
+      consigne: "Vérifie que tu maîtrises les règles typographiques francophones (signes simples vs signes doubles, espace insécable et majuscules accentuées).",
+      theorie_md: "### Règle d'or de la ponctuation\n- **Signes simples (`.` `,`)** : collés au mot précédent, 1 espace après.\n- **Signes doubles (`:` `;` `!` `?`) & `%` `€`** : **1 espace insécable (`Ctrl+Maj+Espace`)** avant, 1 espace après.",
+      questions: [
+        {
+          question: "En typographie française, quelle est la règle exacte pour la virgule (,) et le point (.) ?",
+          options: [
+            "Pas d'espace avant (collé au mot), une espace après",
+            "Une espace avant et une espace après",
+            "Une espace avant, pas d'espace après",
+            "Aucune espace ni avant ni après"
+          ],
+          correctAnswer: 0,
+          explication: "Les signes simples (. , …) se collent toujours à la dernière lettre du mot qui précède et sont suivis d'une espace."
+        },
+        {
+          question: "À quoi sert l'espace insécable (Ctrl + Maj + Espace) placée avant un point d'interrogation (?), deux-points (:) ou le symbole euro (€) ?",
+          options: [
+            "À empêcher Google Docs de couper la ligne entre le mot et le signe de ponctuation",
+            "À mettre automatiquement la phrase en gras",
+            "À insérer un saut de page",
+            "À vérifier l'orthographe du mot"
+          ],
+          correctAnswer: 0,
+          explication: "Un signe double (: ; ! ?) ou une unité (€, %) ne doit jamais se retrouver rejeté tout seul au début de la ligne suivante."
+        },
+        {
+          question: "Laquelle de ces phrases respecte parfaitement les règles typographiques françaises pour les parenthèses et les deux-points ?",
+          options: [
+            "Le rapport (version finale) est prêt : bravo !",
+            "Le rapport ( version finale ) est prêt: bravo!",
+            "Le rapport(version finale)est prêt :bravo !",
+            "Le rapport ( version finale) est prêt : bravo!"
+          ],
+          correctAnswer: 0,
+          explication: "Les parenthèses sont collées à l'intérieur au texte qu'elles entourent, et les signes doubles (: et !) sont précédés d'une espace insécable."
+        },
+        {
+          question: "Selon l'Académie française et les normes typographiques, faut-il mettre les accents sur les lettres majuscules (ex: À, É, È, Ç) ?",
+          options: [
+            "Oui, toujours : l'accent a pleine valeur orthographique sur les majuscules",
+            "Non, c'est strictement interdit en français",
+            "Uniquement sur la lettre E mais jamais sur le A",
+            "Uniquement dans les SMS"
+          ],
+          correctAnswer: 0,
+          explication: "En français, les majuscules portent obligatoirement leurs accents et cédilles (École, À bientôt, État, Ça)."
+        },
+        {
+          question: "Pourquoi est-il déconseillé de souligner un titre ou d'écrire tout un paragraphe en MAJUSCULES dans un document ?",
+          options: [
+            "Le soulignement imite un lien hypertexte et coupe les jambages des lettres, tandis que les majuscules ralentissent la lecture et équivalent à crier",
+            "Parce que cela consomme plus d'encre bleue à l'écran",
+            "Parce que Google Docs refuse d'enregistrer les textes en majuscules",
+            "Parce que cela désactive le clavier AZERTY"
+          ],
+          correctAnswer: 0,
+          explication: "On met un titre en valeur par son Style (Titre 1/2, taille, gras, couleur sobre), jamais par le soulignement ou le tout-majuscules."
+        }
+      ]
+    },
+    {
+      id: "bur-ex4",
+      course_id: "bureautique-3e",
+      chapitre: "bur-ch4",
+      titre: "Mission 4 : Le Chasseur de Fautes Typographiques",
+      consigne: "Crée un Google Docs nommé `BUR_Ex04_Typographie_[TonNom]`, copie-colle le texte fautif ci-dessous avec **`Ctrl+Maj+V`**, puis **corrige les 12 fautes de typographie et de ponctuation** (espaces avant/après `.` `,` `:` `;` `!` `?`, espaces insécables `Ctrl+Maj+Espace` devant `:` `?` `!` `€` `%`, parenthèses, guillemets français `« … »`, majuscules accentuées `À` et `É` et suppression du tout-majuscules) :\n\n> `A l'ecole ,nous apprenons la bureautique.Savez - vous combien coute cet ordinateur?Il coute 650€( avec une remise de 15% ) !Le professeur a dit \"n'oubliez jamais les espaces insecables:c'est essentiel;sinon la ponctuation saute a la ligne\" .ET VOUS ,ETES-VOUS PRETS ?`",
+      theorie_md: "### Les 12 points à vérifier avant d'envoyer\n1. `À l'école, nous...` (majuscule accentuée + virgule collée avant, espace après)\n2. `. Savez-vous` (espace après le point, trait d'union collé sans espace)\n3. `coûte cet ordinateur ?` (`û` + espace insécable avant `?`)\n4. `650 € (avec une remise de 15 %) !` (espaces insécables devant `€`, `%` et `!`, parenthèses collées à l'intérieur)\n5. `« N'oubliez jamais les espaces insécables : c'est essentiel ; sinon... »` (guillemets français, `:` et `;` entourés d'espaces)\n6. `Et vous, êtes-vous prêts ?` (phrase normale avec `ê` et non tout en MAJUSCULES).",
+      external_tools: [
+        { name: "Google Docs", url: "https://docs.google.com" }
       ],
       submission_type: "drive_link"
     }
@@ -478,14 +771,21 @@ export class CourseManagerV2 {
   async loadChapterMarkdown(course, chapter) {
     if (!course || !chapter) return "";
 
-    if (typeof chapter.theorie_md === "string" && chapter.theorie_md.trim()) {
+    const isStubOrShortBureautique = (txt) => {
+      if (!txt || typeof txt !== "string") return true;
+      if (txt.includes("Contenu du cours en cours de finalisation")) return true;
+      if (course.id === "bureautique-3e" && chapter.file && txt.trim().length < 1200) return true;
+      return false;
+    };
+
+    if (typeof chapter.theorie_md === "string" && chapter.theorie_md.trim() && !isStubOrShortBureautique(chapter.theorie_md)) {
       return chapter.theorie_md;
     }
 
     if (course.id && chapter.id) {
       try {
         const modSnap = await getDoc(doc(db, "cours", course.id, "modules", chapter.id));
-        if (modSnap.exists() && modSnap.data()?.theorie_md) {
+        if (modSnap.exists() && modSnap.data()?.theorie_md && !isStubOrShortBureautique(modSnap.data().theorie_md)) {
           return modSnap.data().theorie_md;
         }
       } catch (_) {}
@@ -611,8 +911,24 @@ export class CourseManagerV2 {
       }
 
       if (dbExercises.length > 0) {
-        dbExercises.sort((a, b) => (a.id || '').localeCompare(b.id || '', undefined, { numeric: true }));
-        return dbExercises;
+        const mergedMap = new Map();
+        dbExercises.forEach(ex => mergedMap.set(ex.id, ex));
+        // Garantir que toutes les activités de la banque par défaut (notamment les quiz & nouvelles missions) soient présentes
+        defaultList.forEach(defEx => {
+          const existing = mergedMap.get(defEx.id);
+          if (!existing || courseId === "bureautique-3e") {
+            mergedMap.set(defEx.id, defEx);
+          }
+        });
+        const merged = Array.from(mergedMap.values());
+        const orderIndex = new Map(defaultList.map((e, idx) => [e.id, idx]));
+        merged.sort((a, b) => {
+          const ia = orderIndex.has(a.id) ? orderIndex.get(a.id) : 999;
+          const ib = orderIndex.has(b.id) ? orderIndex.get(b.id) : 999;
+          if (ia !== ib) return ia - ib;
+          return (a.id || '').localeCompare(b.id || '', undefined, { numeric: true });
+        });
+        return merged;
       }
       return defaultList;
     } catch (e) {

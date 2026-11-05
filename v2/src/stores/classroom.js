@@ -84,7 +84,12 @@ export function createClassroomStore() {
         await this.chargerCoursClassroom();
         await this.verifierNouveauxElevesClassroom();
       } catch (err) {
-        alert("Erreur lors de la connexion à Google Classroom : " + err.message);
+        const msg = err?.message || String(err);
+        if (msg.includes('has not been used in project') || msg.includes('is disabled')) {
+          this.classroomAutoSyncSummary = "⏳ L'API Google Classroom vient d'être activée sur le serveur Google Cloud. Patientez 1 à 2 minutes puis réessayez.";
+        } else {
+          this.classroomAutoSyncSummary = "⚠️ Erreur connexion Classroom : " + msg;
+        }
       } finally {
         this.classroomLoading = false;
       }
@@ -160,7 +165,7 @@ export function createClassroomStore() {
         this.classroomCourses = courses;
 
         if (!courses.length) {
-          this.classroomAutoSyncSummary = "⚠️ Aucun cours actif trouvé sur votre compte Google Classroom.";
+          this.classroomAutoSyncSummary = "ℹ️ Connexion Google Classroom active ! Aucun cours actif n'a été trouvé sur ce compte Google (créez un cours dans Google Classroom puis relancez la synchronisation).";
           return;
         }
 
@@ -218,7 +223,12 @@ export function createClassroomStore() {
         this.classroomAutoSyncSummary = `✅ Synchronisation réussie : ${classesSynced} classe(s) Classroom (${syncedClassNames.join(', ')}) et ${totalStudentsSynced} élève(s) importés !`;
       } catch (err) {
         console.error("[synchroniserToutesMesClassesClassroom] Erreur :", err);
-        alert("Erreur lors de la synchronisation Google Classroom : " + err.message);
+        const msg = err?.message || String(err);
+        if (msg.includes('has not been used in project') || msg.includes('is disabled')) {
+          this.classroomAutoSyncSummary = "⏳ L'API Google Classroom vient d'être activée sur le projet Cloud. Patientez 1 à 2 minutes puis cliquez à nouveau sur Synchroniser.";
+        } else {
+          this.classroomAutoSyncSummary = "⚠️ Erreur lors de la synchronisation Google Classroom : " + msg;
+        }
       } finally {
         this.classroomAutoSyncLoading = false;
       }
