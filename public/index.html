@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>body{font-family:Plus Jakarta Sans,sans-serif}</style>
-  <script type="module" crossorigin src="/assets/index-BeIgekLU.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BchSDEEi.css">
+  <script type="module" crossorigin src="/assets/index-CjW_-pY1.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-CB1xTtxc.css">
 </head>
 <body class="h-full flex flex-col bg-slate-50 text-slate-800" x-data="profAssistantApp()">
 
@@ -3899,156 +3899,203 @@
     </div>
 
     <!-- ======================================================= -->
-    <!-- ESPACE ENSEIGNANT : PROGRAMME SEGEC & GESTION RÉELLE   -->
+    <!-- ESPACE ENSEIGNANT : NAVIGATION SIMPLIFIÉE & CLASSROOM   -->
     <!-- ======================================================= -->
-    <div x-show="activeTab === 'prof'" class="space-y-8">
+    <div x-show="activeTab === 'prof'" class="space-y-6">
       
-      <!-- En-tête Enseignant -->
-      <div class="bg-gradient-to-r from-slate-900 to-indigo-950 rounded-3xl p-8 text-white shadow-md">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div class="flex items-center gap-2 mb-2 flex-wrap">
-              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/30 text-indigo-300 text-xs font-extrabold">
-                <span>✨</span> Espace Enseignant • Référentiel SeGEC FMTTN 1re
+      <!-- En-tête Enseignant Unifié & Épuré -->
+      <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-indigo-950 rounded-3xl p-6 sm:p-7 text-white shadow-md">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div class="space-y-2">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/30 text-indigo-200 text-xs font-extrabold">
+                <span>🎓</span> Espace Professeur
               </span>
-              <span x-show="firestoreSynced" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Firestore synchronisé en direct
+              <span x-show="firestoreSynced" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Synchronisé en direct
+              </span>
+              <span x-show="classroomConnected" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/25 border border-emerald-400/30 text-emerald-200 text-[11px] font-extrabold">
+                <span>🏫</span> Google Classroom actif (<span x-text="classroomCourses.length">0</span> cours)
               </span>
             </div>
 
-            <div class="flex items-center gap-3 flex-wrap">
-              <h2 class="text-2xl font-black tracking-tight">Tableau de Bord :</h2>
-              <div class="inline-flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-xl border border-white/20">
-                <span class="text-xs text-indigo-200 font-semibold">Classe suivie :</span>
+            <!-- Sélecteur de Classe Unique (pilote tout l'espace prof : copies, suivi et élèves) -->
+            <div class="flex items-center gap-3 flex-wrap pt-1">
+              <h2 class="text-xl sm:text-2xl font-black tracking-tight">Classe affichée :</h2>
+              <div class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 px-3.5 py-2 rounded-2xl border border-white/20 transition">
                 <select 
                   x-model="selectedTeacherClass" 
                   @change="changerClasseEnseignant($event.target.value)"
-                  class="bg-transparent font-black text-white text-base cursor-pointer focus:outline-none">
-                  <template x-for="c in availableClasses" :key="c">
-                    <option :value="c" x-text="'Classe ' + c" class="text-slate-900 font-bold" :selected="c === selectedTeacherClass"></option>
+                  class="bg-transparent font-black text-white text-sm sm:text-base cursor-pointer focus:outline-none">
+                  <option value="tous" class="text-slate-900 font-black">🌍 Toutes mes classes</option>
+                  <template x-for="card in getClassCardsSummary()" :key="card.id">
+                    <option 
+                      :value="card.id" 
+                      x-text="'Classe ' + card.id + (card.studentCount ? ' (' + card.studentCount + ' él.)' : '') + (card.isLinked ? ' • 🏫 Classroom' : '')" 
+                      class="text-slate-900 font-bold" 
+                      :selected="card.id === selectedTeacherClass"></option>
                   </template>
                 </select>
               </div>
+              <button
+                x-show="selectedTeacherClass !== 'tous'"
+                @click="changerClasseEnseignant('tous')"
+                class="text-xs font-bold text-indigo-300 hover:text-white underline cursor-pointer">
+                Voir toutes les classes
+              </button>
             </div>
-
-            <p class="text-xs sm:text-sm text-slate-300 mt-2">
-              Données réelles des élèves : Escape Game de rentrée, Charte informatique, Quiz de diagnostic et Simulateur d'e-mail.
-            </p>
           </div>
 
-          <div class="flex items-center gap-2 flex-wrap">
+          <!-- Actions Principales Directes : Synchroniser Classroom en 1 clic + Inscrire un élève -->
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <button 
+              @click="synchroniserToutesMesClassesClassroom()"
+              :disabled="classroomAutoSyncLoading"
+              class="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-black text-xs transition shadow-sm flex items-center gap-2 cursor-pointer">
+              <span x-show="classroomAutoSyncLoading" class="animate-spin">⏳</span>
+              <span x-show="!classroomAutoSyncLoading">🏫</span>
+              <span x-text="classroomAutoSyncLoading ? 'Synchronisation Classroom...' : (classroomConnected ? '🔄 Synchroniser mes classes Classroom' : '🏫 Récupérer mes classes Google Classroom')"></span>
+            </button>
+
             <button 
               @click="modalAddStudentOpen = true"
-              class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition border border-white/20 flex items-center gap-1.5 cursor-pointer">
-              <span>➕</span> Inscrire un élève
-            </button>
-            <button 
-              @click="genererRemediationProf()"
-              class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs transition shadow-sm flex items-center gap-2 cursor-pointer">
-              <span>⚡</span> Générer remédiation ciblée (1 clic)
+              class="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition border border-white/20 flex items-center gap-1.5 cursor-pointer">
+              <span>➕</span> Ajouter un élève
             </button>
           </div>
         </div>
 
-        <!-- Sous-onglets de navigation Enseignant -->
-        <div class="mt-6 pt-4 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto">
+        <!-- Notification retour Synchronisation Classroom ou Nouveaux élèves détectés -->
+        <div x-show="classroomAutoSyncSummary" class="mt-4 p-3 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-100 text-xs font-extrabold flex items-center justify-between">
+          <span x-text="classroomAutoSyncSummary"></span>
+          <button @click="classroomAutoSyncSummary = ''" class="text-emerald-200 hover:text-white font-black text-sm cursor-pointer">&times;</button>
+        </div>
+
+        <div x-show="classroomNewStudentsDetected.length > 0" class="mt-4 p-3 rounded-2xl bg-amber-500/20 border border-amber-400/40 text-amber-100 text-xs font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <span>🔔 <strong x-text="classroomNewStudentsDetected.length"></strong> nouvel(aux) élève(s) repéré(s) dans vos cours Google Classroom !</span>
+          <button @click="synchroniserNouveauxElevesDetectes()" class="px-3 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs cursor-pointer shrink-0">
+            ⚡ Les ajouter en 1 clic
+          </button>
+        </div>
+
+        <!-- Navigation Principale en 4 Grands Onglets Clairs (Zéro barre de défilement cachée !) -->
+        <div class="mt-6 pt-5 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+          <!-- 1. Copies à corriger -->
           <button 
             @click="activeProfSubTab = 'copies'"
-            :class="activeProfSubTab === 'copies' ? 'bg-indigo-600 text-white font-extrabold' : 'bg-slate-800/80 text-slate-400 hover:text-white'"
-            class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
-            <span>📥</span> Copies & Devoirs
-            <span x-show="getPendingSubmissionsCount() > 0" 
-                  class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-400 text-slate-900"
-                  x-text="getPendingSubmissionsCount()"></span>
+            :class="activeProfSubTab === 'copies' ? 'bg-indigo-600 text-white ring-2 ring-indigo-400/50 shadow-sm' : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white'"
+            class="p-3.5 rounded-2xl text-left transition flex items-center justify-between gap-2 cursor-pointer">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="text-2xl shrink-0">📥</span>
+              <div class="min-w-0">
+                <div class="text-xs font-black truncate">1. Copies à corriger</div>
+                <div class="text-[11px] opacity-75 truncate">Corriger & valider les devoirs</div>
+              </div>
+            </div>
+            <span 
+              x-show="getPendingSubmissionsCount() > 0" 
+              class="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-400 text-slate-950 shrink-0"
+              x-text="getPendingSubmissionsCount()"></span>
           </button>
+
+          <!-- 2. Suivi & Notes de la Classe -->
           <button 
             @click="activeProfSubTab = 'matrice'"
-            :class="activeProfSubTab === 'matrice' ? 'bg-indigo-600 text-white font-extrabold' : 'bg-slate-800/80 text-slate-400 hover:text-white'"
-            class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
-            <span>📊</span> Matrice & Suivi de Classe
+            :class="activeProfSubTab === 'matrice' ? 'bg-indigo-600 text-white ring-2 ring-indigo-400/50 shadow-sm' : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white'"
+            class="p-3.5 rounded-2xl text-left transition flex items-center justify-between gap-2 cursor-pointer">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="text-2xl shrink-0">📊</span>
+              <div class="min-w-0">
+                <div class="text-xs font-black truncate">2. Suivi & Notes</div>
+                <div class="text-[11px] opacity-75 truncate">Activité en direct & Bulletin</div>
+              </div>
+            </div>
           </button>
+
+          <!-- 3. Mes Classes & Élèves (Classroom) -->
           <button 
-            @click="activeProfSubTab = 'eleves'"
-            :class="activeProfSubTab === 'eleves' ? 'bg-indigo-600 text-white font-extrabold' : 'bg-slate-800/80 text-slate-400 hover:text-white'"
-            class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
-            <span>👥</span> Gestion des Élèves & Classes (V1)
+            @click="activeProfSubTab = 'eleves'; if (classroomConnected && !classroomCourses.length) chargerCoursClassroom();"
+            :class="(activeProfSubTab === 'eleves' || activeProfSubTab === 'classroom') ? 'bg-indigo-600 text-white ring-2 ring-indigo-400/50 shadow-sm' : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white'"
+            class="p-3.5 rounded-2xl text-left transition flex items-center justify-between gap-2 cursor-pointer">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="text-2xl shrink-0">🏫</span>
+              <div class="min-w-0">
+                <div class="text-xs font-black truncate">3. Classes & Classroom</div>
+                <div class="text-[11px] opacity-75 truncate">Élèves, import & devoirs</div>
+              </div>
+            </div>
+            <span 
+              class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-white/15 text-white shrink-0"
+              x-text="allClassStudents.length"></span>
           </button>
+
+          <!-- 4. Cours & Outils IA -->
           <button 
-            @click="activeProfSubTab = 'notebooklm'"
-            :class="activeProfSubTab === 'notebooklm' ? 'bg-indigo-600 text-white font-extrabold' : 'bg-slate-800/80 text-slate-400 hover:text-white'"
-            class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
-            <span>📽️</span> Supports de Cours & NotebookLM
+            @click="activeProfSubTab = 'outils'; if (activeProfToolSubTab === 'studio') initCourseStudio();"
+            :class="['outils', 'studio', 'forms', 'notebooklm', 'equipe'].includes(activeProfSubTab) ? 'bg-indigo-600 text-white ring-2 ring-indigo-400/50 shadow-sm' : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white'"
+            class="p-3.5 rounded-2xl text-left transition flex items-center justify-between gap-2 cursor-pointer">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="text-2xl shrink-0">🛠️</span>
+              <div class="min-w-0">
+                <div class="text-xs font-black truncate">4. Cours & Outils IA</div>
+                <div class="text-[11px] opacity-75 truncate">Studio, Quiz Forms & Équipe</div>
+              </div>
+            </div>
           </button>
-          <button 
-            @click="activeProfSubTab = 'equipe'; chargerEquipeEnseignants()"
-            :class="activeProfSubTab === 'equipe' ? 'bg-indigo-600 text-white font-extrabold' : 'bg-slate-800/80 text-slate-400 hover:text-white'"
-            class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
-            <span>🧑‍🏫</span> Équipe Enseignante & Rôles
-          </button>
-          <button 
-            @click="activeProfSubTab = 'classroom'; if (classroomConnected) chargerCoursClassroom();"
-            :class="activeProfSubTab === 'classroom' ? 'bg-indigo-600 text-white font-extrabold' : 'bg-slate-800/80 text-slate-400 hover:text-white'"
-            class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
-            <span>🏫</span> Google Classroom
-            <span x-show="classroomConnected" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          </button>
-          <button 
-            @click="activeProfSubTab = 'forms'"
-            :class="activeProfSubTab === 'forms' ? 'bg-indigo-600 text-white font-extrabold' : 'bg-slate-800/80 text-slate-400 hover:text-white'"
-            class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
-            <span>📝</span> Quiz & Forms (IA)
-          </button>
-          <button 
-            @click="activeProfSubTab = 'studio'; initCourseStudio();"
-            :class="activeProfSubTab === 'studio' ? 'bg-indigo-600 text-white font-extrabold' : 'bg-slate-800/80 text-slate-400 hover:text-white'"
-            class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shrink-0">
-            <span>🎨</span> Course Studio & Import IA
-          </button>
-          <a 
-            href="/v1/admin.html"
-            target="_blank"
-            class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-indigo-200 bg-slate-900/60 border border-slate-700/60 transition flex items-center gap-1.5 shrink-0 ml-auto"
-            title="Accéder à l'ancien tableau de bord V1 en lecture/secours">
-            <span>🏛️</span> V1 Archive ↗
-          </a>
         </div>
       </div>
 
       <!-- ============================================== -->
-      <!-- SOUS-ONGLET 0 : COPIES & VALIDATION DES DEVOIRS -->
+      <!-- ONGLET 1 : COPIES À CORRIGER                   -->
       <!-- ============================================== -->
-      <div x-show="activeProfSubTab === 'copies'" class="space-y-6">
+      <div x-show="activeProfSubTab === 'copies'" class="space-y-5">
         
-        <!-- Cartes Statistiques Copies -->
+        <!-- Cartes Statistiques Cliquables (Filtres rapides en 1 clic) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-            <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Copies Reçues</div>
-            <div class="text-3xl font-black text-slate-900 mt-1" x-text="teacherSubmissions.length">0</div>
-            <p class="text-xs text-slate-500 mt-1">Tous cours et classes confondus</p>
-          </div>
-          <div class="bg-white p-5 rounded-2xl border border-amber-200/80 shadow-xs bg-gradient-to-br from-white to-amber-50/40">
-            <div class="text-xs font-bold uppercase tracking-wider text-amber-700 flex items-center gap-1.5">
-              <span>⏳</span> En Attente de Validation
+          <button
+            type="button"
+            @click="submissionFilterStatus = (submissionFilterStatus === 'a_valider' ? 'tous' : 'a_valider'); submissionsPageLimit = 25"
+            :class="submissionFilterStatus === 'a_valider' ? 'ring-2 ring-amber-500 border-amber-400' : 'border-amber-200/80'"
+            class="bg-white p-5 rounded-2xl border shadow-xs bg-gradient-to-br from-white to-amber-50/40 text-left transition cursor-pointer hover:shadow-sm">
+            <div class="text-xs font-bold uppercase tracking-wider text-amber-700 flex items-center justify-between">
+              <span>⏳ À corriger / valider</span>
+              <span x-show="submissionFilterStatus === 'a_valider'" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">Filtre actif</span>
             </div>
             <div class="text-3xl font-black text-amber-600 mt-1" x-text="getPendingSubmissionsCount()">0</div>
-            <p class="text-xs text-slate-500 mt-1">Nécessite votre relecture / note</p>
-          </div>
-          <div class="bg-white p-5 rounded-2xl border border-emerald-200/80 shadow-xs bg-gradient-to-br from-white to-emerald-50/40">
-            <div class="text-xs font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
-              <span>✅</span> Devoirs Validés
+            <p class="text-xs text-slate-500 mt-1">Cliquez pour afficher uniquement les copies en attente</p>
+          </button>
+
+          <button
+            type="button"
+            @click="submissionFilterStatus = (submissionFilterStatus === 'valide' ? 'tous' : 'valide'); submissionsPageLimit = 25"
+            :class="submissionFilterStatus === 'valide' ? 'ring-2 ring-emerald-500 border-emerald-400' : 'border-emerald-200/80'"
+            class="bg-white p-5 rounded-2xl border shadow-xs bg-gradient-to-br from-white to-emerald-50/40 text-left transition cursor-pointer hover:shadow-sm">
+            <div class="text-xs font-bold uppercase tracking-wider text-emerald-700 flex items-center justify-between">
+              <span>✅ Devoirs Validés</span>
+              <span x-show="submissionFilterStatus === 'valide'" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900">Filtre actif</span>
             </div>
-            <div class="text-3xl font-black text-emerald-600 mt-1" x-text="teacherSubmissions.filter(s => s.status === 'valide').length">0</div>
+            <div class="text-3xl font-black text-emerald-600 mt-1" x-text="teacherSubmissions.filter(s => s.status === 'valide' && (submissionFilterClass === 'tous' || (s.classe_id || s.classe) === submissionFilterClass)).length">0</div>
             <p class="text-xs text-slate-500 mt-1">Corrigés et transmis aux élèves</p>
-          </div>
+          </button>
+
+          <button
+            type="button"
+            @click="submissionFilterStatus = 'tous'; submissionsPageLimit = 25"
+            class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs text-left transition cursor-pointer hover:shadow-sm">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Copies Affichées</div>
+            <div class="text-3xl font-black text-slate-900 mt-1" x-text="getFilteredSubmissions().length">0</div>
+            <p class="text-xs text-slate-500 mt-1" x-text="selectedTeacherClass === 'tous' ? 'Toutes classes confondues' : 'Pour la classe ' + selectedTeacherClass"></p>
+          </button>
+
           <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
-            <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Actions par Lot & Exports</div>
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Actions Rapides</div>
             <div class="flex flex-col gap-1.5 mt-2">
               <button 
                 @click="validerLotCopiesEligibles()"
                 :disabled="batchValidating || getBatchEligibleSubmissions().length === 0"
-                class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs">
+                class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs">
                 <span>⚡</span>
-                <span x-text="batchValidating ? 'Validation...' : 'Valider par lot (' + getBatchEligibleSubmissions().length + ')'"></span>
+                <span x-text="batchValidating ? 'Validation...' : 'Valider les copies réussies (' + getBatchEligibleSubmissions().length + ')'"></span>
               </button>
               <button 
                 @click="exporterSubmissionsCSV()"
@@ -4061,176 +4108,26 @@
 
         <div x-show="batchFeedbackMsg" class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black text-center" x-text="batchFeedbackMsg"></div>
 
-        <!-- 🛡️ CONSOLE ANTI-SPAM XP, PURGE DES DOUBLONS & AVERTISSEMENTS ÉLÈVES -->
-        <div class="bg-gradient-to-br from-rose-950 via-slate-900 to-indigo-950 rounded-3xl p-6 text-white border border-rose-500/40 shadow-md space-y-5">
-          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-white/10">
-            <div class="flex items-start gap-3.5">
-              <div class="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-400/40 flex items-center justify-center text-2xl shrink-0">
-                🛡️
-              </div>
-              <div>
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span class="px-2.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-black uppercase tracking-wider">
-                    Bouclier Anti-Spam Actif (1 activité = 1 seul gain XP)
-                  </span>
-                  <span class="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black"
-                        x-text="getDuplicateSubmissionsStats().duplicateCount + ' copie(s) en doublon détectée(s)'"></span>
-                  <span class="px-2.5 py-0.5 rounded-full bg-indigo-400/20 text-indigo-200 text-[10px] font-bold"
-                        x-text="getDuplicateSubmissionsStats().uniqueCount + ' copie(s) uniques légitimes'"></span>
-                </div>
-                <h3 class="font-black text-base sm:text-lg mt-1">Console de Nettoyage des Doublons, Recalcul d'XP & Avertissement Spammeurs</h3>
-                <p class="text-xs text-slate-300 mt-0.5">
-                  Purgez les copies générées par clic intempestif, ramenez les compteurs XP aux vraies réussites et envoyez un avertissement officiel bloquant sur l'écran des élèves concernés.
-                </p>
-              </div>
-            </div>
-
-            <!-- Actions Globales 1-Clic -->
-            <div class="flex flex-wrap items-center gap-2 shrink-0">
-              <label class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" x-model="deduplicateSpeedGrader" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer" />
-                <span>Masquer les doublons (1 copie/élève)</span>
-              </label>
-
-              <button
-                type="button"
-                @click="nettoyerDoublonsSubmissions()"
-                :disabled="antiSpamCleaning || getDuplicateSubmissionsStats().duplicateCount === 0"
-                class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-slate-950 font-black text-xs transition cursor-pointer shadow-sm flex items-center gap-1.5">
-                <span>🧹</span>
-                <span x-text="antiSpamCleaning ? 'Purge en cours...' : 'Purger les ' + getDuplicateSubmissionsStats().duplicateCount + ' doublons'"></span>
-              </button>
-
-              <button
-                type="button"
-                @click="assainirClasseAntiSpam1Clic()"
-                :disabled="antiSpamCleaning"
-                class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:opacity-40 text-white font-black text-xs transition cursor-pointer shadow-sm flex items-center gap-1.5">
-                <span>⚡</span>
-                <span>Tout assainir (Purger + Recalculer XP + Avertir)</span>
-              </button>
-            </div>
-          </div>
-
-          <div x-show="antiSpamFeedbackMsg"
-               class="p-3.5 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 text-emerald-200 text-xs font-black flex items-center justify-between">
-            <span x-text="antiSpamFeedbackMsg"></span>
-            <button @click="antiSpamFeedbackMsg = ''" class="text-emerald-200 hover:text-white font-black cursor-pointer">&times;</button>
-          </div>
-
-          <!-- Message d'avertissement personnalisable -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center bg-white/5 p-4 rounded-2xl border border-white/10 text-xs">
-            <div>
-              <div class="font-black text-rose-200 flex items-center gap-1.5">
-                <span>📢</span> <span>Message de l'avertissement bloquant :</span>
-              </div>
-              <p class="text-[11px] text-slate-400 mt-0.5">
-                S'affiche en plein écran rouge chez l'élève jusqu'à ce qu'il coche et signe son engagement.
-              </p>
-            </div>
-            <div class="lg:col-span-2">
-              <textarea
-                rows="2"
-                x-model="customWarningMessage"
-                class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-white focus:outline-none focus:border-rose-400"></textarea>
-            </div>
-          </div>
-
-          <!-- Radar des Spammeurs détectés -->
-          <div x-show="getDuplicateSubmissionsStats().spammersList.length > 0" class="space-y-3">
-            <div class="flex items-center justify-between">
-              <h4 class="text-xs font-black uppercase tracking-wider text-rose-300 flex items-center gap-2">
-                <span>🚨 Radar des Spammeurs Détectés</span>
-                <span class="px-2 py-0.5 rounded-full bg-rose-500/30 text-rose-200" x-text="getDuplicateSubmissionsStats().spammersList.length + ' élève(s)'"></span>
-              </h4>
-              <button
-                type="button"
-                @click="showSpammerRadar = !showSpammerRadar"
-                class="text-xs font-bold text-indigo-300 hover:underline cursor-pointer"
-                x-text="showSpammerRadar ? 'Masquer le tableau ▲' : 'Afficher le tableau ▼'"></button>
-            </div>
-
-            <div x-show="showSpammerRadar" class="overflow-x-auto rounded-2xl border border-white/15 bg-slate-900/70">
-              <table class="w-full text-left text-xs text-slate-200">
-                <thead class="bg-slate-950/70 text-slate-400 uppercase font-extrabold text-[10px] border-b border-white/10">
-                  <tr>
-                    <th class="py-2.5 px-3">Élève & Classe</th>
-                    <th class="py-2.5 px-3">Anomalie détectée</th>
-                    <th class="py-2.5 px-3">XP Actuel vs Légitime</th>
-                    <th class="py-2.5 px-3">Statut Avertissement</th>
-                    <th class="py-2.5 px-3 text-right">Sanctions & Actions</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-white/10">
-                  <template x-for="sp in getDuplicateSubmissionsStats().spammersList" :key="sp.studentKey">
-                    <tr class="hover:bg-white/5 transition">
-                      <td class="py-2.5 px-3">
-                        <div class="font-black text-white" x-text="sp.nom"></div>
-                        <div class="text-[10px] text-slate-400 font-mono" x-text="(sp.classe || '1A') + (sp.email ? ' • ' + sp.email : '')"></div>
-                      </td>
-                      <td class="py-2.5 px-3">
-                        <span class="px-2 py-0.5 rounded-lg bg-rose-500/20 border border-rose-500/40 text-rose-200 font-bold text-[11px]"
-                              x-text="sp.reason"></span>
-                      </td>
-                      <td class="py-2.5 px-3 font-mono">
-                        <span class="text-rose-400 font-black line-through mr-1.5" x-text="sp.currentXp + ' XP'"></span>
-                        <span>➔</span>
-                        <span class="text-emerald-400 font-black ml-1.5" x-text="sp.legitXp + ' XP'"></span>
-                      </td>
-                      <td class="py-2.5 px-3">
-                        <template x-if="!sp.spamWarning">
-                          <span class="text-[11px] text-slate-400">Non averti</span>
-                        </template>
-                        <template x-if="sp.spamWarning && sp.spamWarning.active">
-                          <span class="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-bold text-[10px]">⏳ Affiché sur son écran</span>
-                        </template>
-                        <template x-if="sp.spamWarning && !sp.spamWarning.active && sp.spamWarning.acknowledgedAt">
-                          <span class="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold text-[10px]">✅ Lu et signé par l'élève</span>
-                        </template>
-                      </td>
-                      <td class="py-2.5 px-3 text-right">
-                        <div class="flex items-center justify-end gap-1.5 flex-wrap">
-                          <button
-                            type="button"
-                            @click="recalculerXpEtAvertirEleve(sp, { resetToZero: false, sendWarning: true })"
-                            class="px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[11px] transition cursor-pointer">
-                            ⚖️ Recalculer XP + Avertir
-                          </button>
-                          <button
-                            type="button"
-                            @click="recalculerXpEtAvertirEleve(sp, { resetToZero: true, sendWarning: true })"
-                            class="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-black text-[11px] transition cursor-pointer">
-                            🚨 0 XP + Avertir
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  </template>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- Barre de Filtres Multi-Critères -->
+        <!-- Barre de Filtres + Protection Anti-Doublons Discrète & Rassurante -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            
             <!-- Recherche élève / exercice -->
             <div>
-              <label class="block text-xs font-bold text-slate-500 mb-1">Recherche :</label>
+              <label class="block text-xs font-bold text-slate-500 mb-1">Rechercher un élève ou devoir :</label>
               <input 
                 type="text" 
                 x-model="submissionSearchText"
-                placeholder="Nom, email, exercice..."
+                @input="submissionsPageLimit = 25"
+                placeholder="Nom, email, titre d'exercice..."
                 class="w-full text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
             </div>
 
             <!-- Filtre Statut -->
             <div>
-              <label class="block text-xs font-bold text-slate-500 mb-1">Statut :</label>
+              <label class="block text-xs font-bold text-slate-500 mb-1">Statut de correction :</label>
               <select 
                 x-model="submissionFilterStatus"
+                @change="submissionsPageLimit = 25"
                 class="w-full text-xs font-bold px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                 <option value="tous">Tous les statuts</option>
                 <option value="a_valider">⏳ À valider (en attente)</option>
@@ -4240,15 +4137,16 @@
               </select>
             </div>
 
-            <!-- Filtre Classe -->
+            <!-- Filtre Classe (Synchronisé avec le sélecteur principal) -->
             <div>
               <label class="block text-xs font-bold text-slate-500 mb-1">Classe :</label>
               <select 
                 x-model="submissionFilterClass"
+                @change="changerFiltreClasseCopies($event.target.value)"
                 class="w-full text-xs font-bold px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-                <option value="tous">Toutes les classes</option>
-                <template x-for="c in availableClasses" :key="c">
-                  <option :value="c" x-text="'Classe ' + c"></option>
+                <option value="tous">🌍 Toutes les classes</option>
+                <template x-for="card in getClassCardsSummary()" :key="card.id">
+                  <option :value="card.id" x-text="'Classe ' + card.id + (card.subsCount ? ' (' + card.subsCount + ' copies)' : '')"></option>
                 </template>
               </select>
             </div>
@@ -4258,30 +4156,149 @@
               <label class="block text-xs font-bold text-slate-500 mb-1">Cours :</label>
               <select 
                 x-model="submissionFilterCourse"
+                @change="submissionsPageLimit = 25"
                 class="w-full text-xs font-bold px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-                <option value="tous">Tous les cours</option>
+                <option value="tous">📚 Tous les cours</option>
                 <template x-for="crs in coursesList" :key="crs.id">
                   <option :value="crs.id" x-text="(crs.theme?.icon || '📚') + ' ' + crs.title"></option>
                 </template>
               </select>
             </div>
-
           </div>
 
-          <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
-            <div>
-              Affichage de <span class="font-extrabold text-slate-900" x-text="getFilteredSubmissions().length"></span> copie(s)
+          <!-- Bandeau Calme & Discret : Déduplication & Hygiène des Copies (Zéro peur !) -->
+          <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="flex flex-wrap items-center gap-4">
+              <span class="text-slate-500">
+                Affichage de <strong class="text-slate-900" x-text="Math.min(submissionsPageLimit, getFilteredSubmissions().length)"></strong> sur <strong class="text-slate-900" x-text="getFilteredSubmissions().length"></strong> copie(s)
+              </span>
+
+              <label class="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200/70 text-slate-700 font-bold cursor-pointer transition">
+                <input type="checkbox" x-model="deduplicateSpeedGrader" class="w-3.5 h-3.5 accent-indigo-600 rounded cursor-pointer" />
+                <span>🛡️ Regrouper les essais multiples (1 copie/élève)</span>
+              </label>
+
+              <button 
+                x-show="submissionSearchText || submissionFilterStatus !== 'tous' || submissionFilterClass !== 'tous' || submissionFilterCourse !== 'tous'"
+                @click="submissionSearchText = ''; submissionFilterStatus = 'tous'; changerFiltreClasseCopies('tous'); submissionFilterCourse = 'tous'"
+                class="text-indigo-600 hover:underline font-bold cursor-pointer">
+                Réinitialiser les filtres
+              </button>
             </div>
-            <button 
-              x-show="submissionSearchText || submissionFilterStatus !== 'tous' || submissionFilterClass !== 'tous' || submissionFilterCourse !== 'tous'"
-              @click="submissionSearchText = ''; submissionFilterStatus = 'tous'; submissionFilterClass = 'tous'; submissionFilterCourse = 'tous'"
-              class="text-indigo-600 hover:underline font-bold cursor-pointer">
-              Réinitialiser les filtres
-            </button>
+
+            <!-- Boutons discrets de nettoyage des doublons -->
+            <div class="flex items-center gap-2">
+              <button
+                x-show="getDuplicateSubmissionsStats().duplicateCount > 0"
+                type="button"
+                @click="nettoyerDoublonsSubmissions()"
+                :disabled="antiSpamCleaning"
+                class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-bold text-xs transition cursor-pointer flex items-center gap-1.5">
+                <span>🧹</span>
+                <span x-text="antiSpamCleaning ? 'Nettoyage...' : 'Supprimer ' + getDuplicateSubmissionsStats().duplicateCount + ' doublon(s)'"></span>
+              </button>
+
+              <button
+                type="button"
+                @click="showAntiSpamPanel = !showAntiSpamPanel"
+                class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition cursor-pointer flex items-center gap-1">
+                <span>⚖️ Régulation XP</span>
+                <span x-show="getDuplicateSubmissionsStats().spammersList.length > 0" class="px-1.5 py-0.2 rounded-full bg-amber-200 text-amber-900 text-[10px] font-black" x-text="getDuplicateSubmissionsStats().spammersList.length"></span>
+                <span x-text="showAntiSpamPanel ? '▲' : '▼'" class="text-[10px] ml-0.5"></span>
+              </button>
+            </div>
+          </div>
+
+          <div x-show="antiSpamFeedbackMsg" class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between">
+            <span x-text="antiSpamFeedbackMsg"></span>
+            <button @click="antiSpamFeedbackMsg = ''" class="text-emerald-700 font-black cursor-pointer">&times;</button>
+          </div>
+
+          <!-- Tiroir Pliable : Régulation XP & Avertissements (Ouvert uniquement à la demande du professeur) -->
+          <div x-show="showAntiSpamPanel" x-transition class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-4 text-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+              <div>
+                <h4 class="font-black text-slate-900 text-sm flex items-center gap-2">
+                  <span>🛡️ Outil de Régulation Fair-Play XP & Nettoyage des Doublons</span>
+                </h4>
+                <p class="text-slate-500 text-[11px] mt-0.5">
+                  Chaque exercice ne rapporte désormais des points d'XP qu'une seule fois. Si un élève avait envoyé de nombreux doublons auparavant, vous pouvez nettoyer et ajuster son solde ici.
+                </p>
+              </div>
+              <button
+                type="button"
+                @click="assainirClasseAntiSpam1Clic()"
+                :disabled="antiSpamCleaning"
+                class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-extrabold text-xs transition cursor-pointer shrink-0">
+                ⚡ Nettoyer les doublons & recalculer les XP anormaux
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 items-center">
+              <div>
+                <label class="font-bold text-slate-700 block">Message de rappel fair-play (si envoi d'un avertissement) :</label>
+                <span class="text-[11px] text-slate-400">S'affiche à l'élève lors de sa prochaine connexion.</span>
+              </div>
+              <div class="lg:col-span-2">
+                <textarea rows="2" x-model="customWarningMessage" class="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-indigo-500"></textarea>
+              </div>
+            </div>
+
+            <template x-if="getDuplicateSubmissionsStats().spammersList.length > 0">
+              <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+                <table class="w-full text-left text-xs">
+                  <thead class="bg-slate-50 text-slate-500 uppercase font-extrabold text-[10px] border-b border-slate-200">
+                    <tr>
+                      <th class="py-2 px-3">Élève & Classe</th>
+                      <th class="py-2 px-3">Détail</th>
+                      <th class="py-2 px-3">XP Actuel ➔ Estimé</th>
+                      <th class="py-2 px-3">Statut</th>
+                      <th class="py-2 px-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100">
+                    <template x-for="sp in getDuplicateSubmissionsStats().spammersList" :key="sp.studentKey">
+                      <tr>
+                        <td class="py-2 px-3 font-bold text-slate-900">
+                          <span x-text="sp.nom"></span>
+                          <span class="text-[10px] text-slate-400 ml-1" x-text="'(' + (sp.classe || '1A') + ')'"></span>
+                        </td>
+                        <td class="py-2 px-3 text-slate-600" x-text="sp.reason"></td>
+                        <td class="py-2 px-3 font-mono">
+                          <span class="text-slate-400 line-through mr-1" x-text="sp.currentXp + ' XP'"></span>
+                          <span>➔</span>
+                          <span class="text-emerald-700 font-bold ml-1" x-text="sp.legitXp + ' XP'"></span>
+                        </td>
+                        <td class="py-2 px-3">
+                          <span x-show="!sp.spamWarning" class="text-[11px] text-slate-400">—</span>
+                          <span x-show="sp.spamWarning && sp.spamWarning.active" class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold text-[10px]">⏳ Rappel envoyé</span>
+                          <span x-show="sp.spamWarning && !sp.spamWarning.active && sp.spamWarning.acknowledgedAt" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">✅ Lu par l'élève</span>
+                        </td>
+                        <td class="py-2 px-3 text-right">
+                          <div class="flex items-center justify-end gap-1.5">
+                            <button type="button" @click="recalculerXpEtAvertirEleve(sp, { resetToZero: false, sendWarning: false })" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] cursor-pointer">
+                              Ajuster XP seul
+                            </button>
+                            <button type="button" @click="recalculerXpEtAvertirEleve(sp, { resetToZero: false, sendWarning: true })" class="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer">
+                              Ajuster XP + Avertir
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </template>
+            <template x-if="getDuplicateSubmissionsStats().spammersList.length === 0">
+              <div class="text-center py-3 text-slate-500 font-medium">
+                ✅ Aucun envoi abusif détecté dans cette classe.
+              </div>
+            </template>
           </div>
         </div>
 
-        <!-- Tableau des Copies -->
+        <!-- Tableau des Copies Paginé -->
         <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs text-slate-600">
@@ -4296,23 +4313,29 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
-                <template x-for="sub in getFilteredSubmissions()" :key="sub.id">
+                <template x-for="sub in getPaginatedSubmissions()" :key="sub.id">
                   <tr class="hover:bg-slate-50/80 transition">
                     <td class="py-3 px-4 font-mono text-slate-500">
-                      <div class="font-bold text-slate-700" x-text="sub.date_soumission ? new Date(sub.date_soumission).toLocaleDateString('fr-BE') : 'Date n/d'"></div>
+                      <div class="font-bold text-slate-700 flex items-center gap-1.5">
+                        <span x-text="sub.date_soumission ? new Date(sub.date_soumission).toLocaleDateString('fr-BE') : 'Date n/d'"></span>
+                        <span x-show="sub._duplicateCount > 1" class="px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 text-[10px] font-sans font-bold" x-text="sub._duplicateCount + ' essais'"></span>
+                      </div>
                       <div class="text-[10px]" x-text="sub.date_soumission ? new Date(sub.date_soumission).toLocaleTimeString('fr-BE', {hour: '2-digit', minute:'2-digit'}) : ''"></div>
                     </td>
                     <td class="py-3 px-4">
                       <div class="font-extrabold text-slate-900" x-text="sub.nom_eleve || 'Élève'"></div>
-                      <div class="text-[11px] text-slate-400 flex items-center gap-1">
-                        <span class="font-bold text-indigo-600" x-text="sub.classe_id || sub.classe || 'Classe n/d'"></span>
-                        <span x-show="sub.email_eleve">•</span>
-                        <span x-text="sub.email_eleve"></span>
+                      <div class="text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5">
+                        <button
+                          type="button"
+                          @click="changerFiltreClasseCopies(sub.classe_id || sub.classe || '1A')"
+                          class="px-2 py-0.2 rounded-md bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-extrabold text-[10px] cursor-pointer"
+                          x-text="sub.classe_id || sub.classe || 'Classe n/d'"></button>
+                        <span x-show="sub.email_eleve" class="truncate max-w-[180px]" x-text="sub.email_eleve"></span>
                       </div>
                     </td>
                     <td class="py-3 px-4">
                       <div class="font-bold text-slate-800" x-text="sub.titre_exercice || 'Exercice'"></div>
-                      <div class="text-[11px] text-slate-400" x-text="sub.course_id || sub.id_course || 'js-uaa5-classic'"></div>
+                      <div class="text-[11px] text-slate-400" x-text="coursesList.find(c => c.id === (sub.course_id || sub.id_course))?.title || sub.course_id || sub.id_course || 'Cours'"></div>
                     </td>
                     <td class="py-3 px-4">
                       <div class="flex items-center gap-1.5 flex-wrap">
@@ -4366,66 +4389,90 @@
                 <tr x-show="getFilteredSubmissions().length === 0">
                   <td colspan="6" class="py-12 text-center text-slate-400 font-medium">
                     <div class="text-3xl mb-2">📭</div>
-                    <div>Aucune copie trouvée selon vos critères de recherche.</div>
+                    <div>Aucune copie trouvée pour ces critères.</div>
                   </td>
                 </tr>
               </tbody>
             </table>
+          </div>
+
+          <!-- Bouton Afficher plus de copies (Pagination fluide) -->
+          <div x-show="getFilteredSubmissions().length > submissionsPageLimit" class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs">
+            <span class="text-slate-500 font-bold">
+              <span x-text="submissionsPageLimit"></span> copies affichées sur <span x-text="getFilteredSubmissions().length"></span>
+            </span>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                @click="submissionsPageLimit += 25"
+                class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold transition cursor-pointer shadow-xs">
+                ➕ Afficher 25 copies suivantes
+              </button>
+              <button
+                type="button"
+                @click="submissionsPageLimit = getFilteredSubmissions().length"
+                class="px-3 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold transition cursor-pointer">
+                Tout afficher
+              </button>
+            </div>
           </div>
         </div>
 
       </div>
 
       <!-- ============================================== -->
-      <!-- SOUS-ONGLET 1 : MATRICE DES COMPÉTENCES & SUIVI -->
+      <!-- ONGLET 2 : SUIVI & NOTES DE LA CLASSE          -->
       <!-- ============================================== -->
       <div x-show="activeProfSubTab === 'matrice'" class="space-y-6">
         
-        <!-- Barre de Sélection de Cours pour la Matrice + Export Bulletin -->
-        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <!-- Barre de Sélection de Cours pour la Matrice + Export Bulletin + Remédiation -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold shrink-0">
               📊
             </div>
             <div>
               <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                Cours analysé pour la classe <span class="text-indigo-600 font-black" x-text="selectedTeacherClass"></span>
+                Suivi de maîtrise • <span class="text-indigo-600 font-black" x-text="selectedTeacherClass === 'tous' ? 'Toutes les classes' : ('Classe ' + selectedTeacherClass)"></span>
               </div>
               <div class="text-sm font-black text-slate-900" x-text="coursesList.find(c => c.id === profSelectedCourseId)?.title || 'Référentiel Numérique'"></div>
             </div>
           </div>
 
-          <!-- Liste des cours disponibles + Bouton Export Bulletin -->
-          <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-            <template x-for="c in coursesList" :key="c.id">
-              <button 
-                @click="changerCoursMatriceProf(c.id)"
-                :class="profSelectedCourseId === c.id ? 'bg-indigo-600 text-white shadow-xs font-black' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold'"
-                class="px-3.5 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 shrink-0 cursor-pointer">
-                <span x-text="c.theme?.icon || c.icon || '📚'"></span>
-                <span x-text="c.title"></span>
-              </button>
-            </template>
+          <!-- Sélecteur de Cours + Actions Bulletin & Remédiation -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <select
+              :value="profSelectedCourseId"
+              @change="changerCoursMatriceProf($event.target.value)"
+              class="px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-extrabold text-slate-800 cursor-pointer focus:outline-none focus:border-indigo-600">
+              <option value="fmttn-1c">🤖 Référentiel SeGEC FMTTN 1re (@lt_X)</option>
+              <template x-for="c in coursesList.filter(x => x.id !== 'fmttn-1c' && x.id !== 'fmttn-1re')" :key="c.id">
+                <option :value="c.id" x-text="(c.theme?.icon || '📚') + ' ' + c.title"></option>
+              </template>
+            </select>
+
+            <button 
+              @click="genererRemediationProf()"
+              class="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-extrabold text-xs transition flex items-center gap-1.5 cursor-pointer">
+              <span>⚡</span> Fiche de remédiation
+            </button>
 
             <button
               @click="exporterBulletinCSV()"
-              class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold transition flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs">
-              <span>📋</span>
-              <span>Export Bulletin (CSV)</span>
+              class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold transition flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs">
+              <span>📋</span> Export Bulletin (CSV)
             </button>
           </div>
         </div>
 
-        <!-- ============================================== -->
         <!-- VUE CLASSE EN DIRECT & SIGNAL « BLOQUÉ » (PHASE 11) -->
-        <!-- ============================================== -->
         <div class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
             <div class="flex items-center gap-2.5">
               <span class="text-xl">📡</span>
               <div>
-                <h3 class="font-black text-base text-slate-900">Vue Classe en Direct & Signal « Bloqué »</h3>
-                <p class="text-xs text-slate-500">Suivi en temps réel de l'état de chaque élève et échelle de maîtrise SeGEC (Non acquis / En cours / Acquis / Dépassé).</p>
+                <h3 class="font-black text-base text-slate-900">Activité des Élèves en Direct</h3>
+                <p class="text-xs text-slate-500">Repérez d'un coup d'œil qui travaille, qui a terminé et qui a besoin d'aide.</p>
               </div>
             </div>
 
@@ -4433,19 +4480,19 @@
             <div class="flex flex-wrap items-center gap-2 text-[11px] font-bold">
               <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">⚪ Non démarré</span>
               <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">🔵 En activité</span>
-              <span class="px-2 py-0.5 rounded-full bg-orange-100 text-orange-900 font-black">🟠 Bloqué (≥ 2 indices ou 3 appels IA)</span>
+              <span class="px-2 py-0.5 rounded-full bg-orange-100 text-orange-900 font-black">🟠 Bloqué</span>
               <span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">🟣 Soumis</span>
               <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">🟢 Validé</span>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div x-show="getLiveClassStatusList().length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <template x-for="st in getLiveClassStatusList()" :key="st.id || st.nom">
               <div class="p-3.5 rounded-2xl border border-slate-200 hover:border-indigo-300 transition flex flex-col justify-between gap-2 bg-slate-50/50">
                 <div class="flex items-start justify-between gap-2">
-                  <div>
-                    <div class="font-black text-xs text-slate-900" x-text="st.nom"></div>
-                    <div class="text-[10px] text-slate-400 font-mono truncate max-w-[150px]" x-text="st.email || ('XP : ' + st.xp)"></div>
+                  <div class="min-w-0">
+                    <div class="font-black text-xs text-slate-900 truncate" x-text="st.nom"></div>
+                    <div class="text-[10px] text-slate-400 font-mono truncate" x-text="st.email || ('XP : ' + st.xp)"></div>
                   </div>
                   <span
                     :class="st.mastery.badgeClass"
@@ -4463,12 +4510,14 @@
               </div>
             </template>
           </div>
+
+          <div x-show="getLiveClassStatusList().length === 0" class="py-8 text-center text-slate-400 text-xs">
+            Aucun élève trouvé pour cette sélection. Cliquez sur <strong>« 🏫 3. Classes & Classroom »</strong> pour importer vos élèves depuis Google Classroom en 1 clic !
+          </div>
         </div>
 
-        <!-- ============================================== -->
-        <!-- VUE 1 : RÉFÉRENTIEL FMTTN (SeGEC)              -->
-        <!-- ============================================== -->
-        <div x-show="profSelectedCourseId === 'fmttn-1c'" class="space-y-6">
+        <!-- VUE 1 : RÉFÉRENTIEL FMTTN (SeGEC) -->
+        <div x-show="profSelectedCourseId === 'fmttn-1c' || profSelectedCourseId === 'fmttn-1re'" class="space-y-6">
           <!-- Métriques Globales -->
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
@@ -4508,7 +4557,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
               <div>
                 <h3 class="font-extrabold text-base text-slate-900">Matrice de Maîtrise des Acquis (Référentiel SeGEC FMTTN)</h3>
-                <span class="text-xs text-slate-400 font-bold" x-text="classeEleves.length + ' élève(s) actif(s)'"></span>
+                <span class="text-xs text-slate-400 font-bold" x-text="classeEleves.length + ' élève(s) suivi(s)'"></span>
               </div>
 
               <!-- Sélecteur de Chapitre pour la matrice -->
@@ -4544,9 +4593,12 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                  <template x-for="eleve in classeEleves" :key="eleve.id">
+                  <template x-for="eleve in classeEleves" :key="eleve.docKey || eleve.id">
                     <tr class="hover:bg-slate-50/70 transition">
-                      <td class="py-3.5 px-4 font-extrabold text-slate-900" x-text="eleve.nom"></td>
+                      <td class="py-3.5 px-4 font-extrabold text-slate-900">
+                        <span x-text="eleve.nom"></span>
+                        <span x-show="selectedTeacherClass === 'tous'" class="ml-1 px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 text-[10px]" x-text="eleve.classe_id"></span>
+                      </td>
                       <td class="py-3.5 px-4 font-bold text-purple-700" x-text="eleve.eg"></td>
                       <td class="py-3.5 px-4">
                         <span :class="eleve.charte === 'acquis' ? 'bg-emerald-100 text-emerald-800' : (eleve.charte === 'en_cours' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')"
@@ -4572,8 +4624,7 @@
                   </template>
                   <tr x-show="classeEleves.length === 0">
                     <td colspan="8" class="py-8 text-center text-slate-400 font-medium">
-                      Aucun élève n'a encore enregistré de progression dans la classe <strong x-text="selectedTeacherClass"></strong>.<br>
-                      Basculez sur l'onglet <strong>« Gestion des Élèves & Classes »</strong> ci-dessus pour inscrire vos élèves.
+                      Aucun élève n'a encore enregistré de progression dans cette sélection.
                     </td>
                   </tr>
                 </tbody>
@@ -4586,19 +4637,22 @@
                 <thead>
                   <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
                     <th class="py-3 px-4">Élève</th>
-                    <th class="py-3 px-4">Mots de passe NUM-2.D1</th>
-                    <th class="py-3 px-4">PEGI NUM-2.D2</th>
-                    <th class="py-3 px-4">HTTPS NUM-2.D3</th>
-                    <th class="py-3 px-4">Traces NUM-2.D4</th>
-                    <th class="py-3 px-4">Attention NUM-2.D5</th>
-                    <th class="py-3 px-4">Mission NUM-2.M1</th>
+                    <th class="py-3 px-4">Mots de passe D1</th>
+                    <th class="py-3 px-4">Sauvegarde 3-2-1 D2</th>
+                    <th class="py-3 px-4">Cadenas HTTPS D3</th>
+                    <th class="py-3 px-4">Tri Données D4</th>
+                    <th class="py-3 px-4">Captologie D5</th>
+                    <th class="py-3 px-4">Affiche Sécu M1</th>
                     <th class="py-3 px-4 text-right">Score</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                  <template x-for="eleve in classeEleves" :key="eleve.id">
+                  <template x-for="eleve in classeEleves" :key="eleve.docKey || eleve.id">
                     <tr class="hover:bg-slate-50/70 transition">
-                      <td class="py-3.5 px-4 font-extrabold text-slate-900" x-text="eleve.nom"></td>
+                      <td class="py-3.5 px-4 font-extrabold text-slate-900">
+                        <span x-text="eleve.nom"></span>
+                        <span x-show="selectedTeacherClass === 'tous'" class="ml-1 px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 text-[10px]" x-text="eleve.classe_id"></span>
+                      </td>
                       <td class="py-3.5 px-4">
                         <span :class="eleve.num2_d1 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
                               class="px-2 py-0.5 rounded-full font-bold" x-text="eleve.num2_d1 || 'en_cours'"></span>
@@ -4628,7 +4682,7 @@
                   </template>
                   <tr x-show="classeEleves.length === 0">
                     <td colspan="8" class="py-8 text-center text-slate-400 font-medium">
-                      Aucun élève n'a encore enregistré de progression dans la classe <strong x-text="selectedTeacherClass"></strong>.
+                      Aucun élève n'a encore enregistré de progression dans cette sélection.
                     </td>
                   </tr>
                 </tbody>
@@ -4663,31 +4717,24 @@
           </div>
         </div>
 
-        <!-- ============================================== -->
         <!-- VUE 2 : COURS MODULAIRE (CODING, OFFICE, ETC.) -->
-        <!-- ============================================== -->
-        <div x-show="profSelectedCourseId !== 'fmttn-1c'" class="space-y-6">
-          
-          <!-- Métriques du Cours Sélectionné -->
+        <div x-show="profSelectedCourseId !== 'fmttn-1c' && profSelectedCourseId !== 'fmttn-1re'" class="space-y-6">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
               <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Soumissions</div>
               <div class="text-3xl font-black text-slate-900 mt-1" x-text="getCourseStatsForCurrentClass().total">0</div>
-              <p class="text-xs text-slate-500 mt-1">Devoirs reçus dans cette classe</p>
+              <p class="text-xs text-slate-500 mt-1">Devoirs reçus</p>
             </div>
-
             <div class="bg-white p-5 rounded-2xl border border-emerald-200/80 shadow-xs bg-gradient-to-br from-white to-emerald-50/40">
               <div class="text-xs font-bold uppercase tracking-wider text-emerald-600">Copies Validées</div>
               <div class="text-3xl font-black text-emerald-700 mt-1" x-text="getCourseStatsForCurrentClass().validated">0</div>
               <p class="text-xs text-emerald-600/80 mt-1">Évaluées et notées</p>
             </div>
-
             <div class="bg-white p-5 rounded-2xl border border-amber-200/80 shadow-xs bg-gradient-to-br from-white to-amber-50/40">
               <div class="text-xs font-bold uppercase tracking-wider text-amber-600">En Attente de Note</div>
               <div class="text-3xl font-black text-amber-700 mt-1" x-text="getCourseStatsForCurrentClass().pending">0</div>
               <p class="text-xs text-amber-600/80 mt-1">Nécessitent votre relecture</p>
             </div>
-
             <div class="bg-white p-5 rounded-2xl border border-indigo-200/80 shadow-xs bg-gradient-to-br from-white to-indigo-50/40">
               <div class="text-xs font-bold uppercase tracking-wider text-indigo-600">Exercices au Programme</div>
               <div class="text-3xl font-black text-indigo-700 mt-1" x-text="profCourseExercises.length">0</div>
@@ -4695,7 +4742,6 @@
             </div>
           </div>
 
-          <!-- Matrice Élèves × Exercices -->
           <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs overflow-x-auto">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
               <div>
@@ -4707,7 +4753,6 @@
                   Cliquez sur une pastille pour ouvrir la copie de l'élève, consulter son travail et attribuer une note.
                 </p>
               </div>
-
               <div class="flex items-center gap-3">
                 <span class="text-xs text-slate-400 font-bold" x-text="classeEleves.length + ' élève(s)'"></span>
                 <button 
@@ -4718,13 +4763,11 @@
               </div>
             </div>
 
-            <!-- Chargement des exercices -->
             <div x-show="profCourseLoading" class="py-12 text-center text-slate-400">
               <div class="animate-spin text-2xl mb-2">⏳</div>
               <p class="text-xs font-bold">Chargement des exercices du cours...</p>
             </div>
 
-            <!-- Table Matrice Élèves × Exercices -->
             <div x-show="!profCourseLoading" class="overflow-x-auto">
               <table class="w-full text-left text-xs border-collapse min-w-[700px]">
                 <thead>
@@ -4742,19 +4785,16 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                  <template x-for="eleve in classeEleves" :key="eleve.id">
+                  <template x-for="eleve in classeEleves" :key="eleve.docKey || eleve.id">
                     <tr class="hover:bg-slate-50/70 transition">
                       <td class="py-3.5 px-4 font-extrabold text-slate-900">
                         <div x-text="eleve.nom"></div>
                         <div class="text-[10px] text-slate-400 font-normal" x-text="eleve.email || ''"></div>
                       </td>
-
-                      <!-- Cellule pour chaque exercice -->
                       <template x-for="exo in profCourseExercises" :key="exo.id">
                         <td class="py-3.5 px-4 text-center">
                           <template x-if="getStudentExerciseSubmission(eleve, exo)">
                             <div>
-                              <!-- Statut : Validé -->
                               <button 
                                 x-show="getStudentExerciseSubmission(eleve, exo)?.status === 'valide' || getStudentExerciseSubmission(eleve, exo)?.status === 'validee'"
                                 @click="ouvrirModalCorrection(getStudentExerciseSubmission(eleve, exo))"
@@ -4762,8 +4802,6 @@
                                 <span>✓</span>
                                 <span x-text="(getStudentExerciseSubmission(eleve, exo)?.note_suggeree || 80) + '/100'"></span>
                               </button>
-
-                              <!-- Statut : À valider / pending -->
                               <button 
                                 x-show="getStudentExerciseSubmission(eleve, exo)?.status === 'a_valider' || getStudentExerciseSubmission(eleve, exo)?.status === 'pending'"
                                 @click="ouvrirModalCorrection(getStudentExerciseSubmission(eleve, exo))"
@@ -4771,8 +4809,6 @@
                                 <span>⏳</span>
                                 <span>À noter</span>
                               </button>
-
-                              <!-- Statut : À corriger -->
                               <button 
                                 x-show="getStudentExerciseSubmission(eleve, exo)?.status === 'a_corriger'"
                                 @click="ouvrirModalCorrection(getStudentExerciseSubmission(eleve, exo))"
@@ -4780,8 +4816,6 @@
                                 <span>⚠️</span>
                                 <span>À revoir</span>
                               </button>
-
-                              <!-- Statut : Archivé -->
                               <button 
                                 x-show="getStudentExerciseSubmission(eleve, exo)?.status === 'archive'"
                                 @click="ouvrirModalCorrection(getStudentExerciseSubmission(eleve, exo))"
@@ -4795,8 +4829,6 @@
                           </template>
                         </td>
                       </template>
-
-                      <!-- Progression de l'élève sur le cours -->
                       <td class="py-3.5 px-4 text-right">
                         <div class="flex items-center justify-end gap-2">
                           <div class="w-16 bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -4807,95 +4839,346 @@
                       </td>
                     </tr>
                   </template>
-
-                  <!-- Aucun élève -->
                   <tr x-show="classeEleves.length === 0">
                     <td :colspan="profCourseExercises.length + 2" class="py-8 text-center text-slate-400 font-medium">
-                      Aucun élève trouvé dans la classe <strong x-text="selectedTeacherClass"></strong>.
+                      Aucun élève trouvé dans cette sélection.
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
-
         </div>
 
       </div>
 
-      <!-- ============================================== -->
-      <!-- SOUS-ONGLET 2 : GESTION DES ÉLÈVES & CLASSES   -->
-      <!-- ============================================== -->
-      <div x-show="activeProfSubTab === 'eleves'" class="space-y-6">
+      <!-- ============================================================== -->
+      <!-- ONGLET 3 : MES CLASSES, ÉLÈVES & GOOGLE CLASSROOM (UNIFIÉ !)    -->
+      <!-- ============================================================== -->
+      <div x-show="activeProfSubTab === 'eleves' || activeProfSubTab === 'classroom'" class="space-y-6">
         
-        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 mb-6">
-            <div>
-              <h3 class="font-black text-base text-slate-900">Gestion des Élèves Réels (Système V1)</h3>
-              <p class="text-xs text-slate-500 mt-0.5">Retrouvez la liste complète des élèves, assignez leurs classes et suivez leur statut.</p>
+        <!-- BLOC 1 : PASSERELLE GOOGLE CLASSROOM (RÉCUPÉRATION AUTOMATIQUE DES CLASSES & ÉLÈVES) -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-emerald-200/80 shadow-xs space-y-6">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+            <div class="flex items-start gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-bold border border-emerald-100 shrink-0">
+                🏫
+              </div>
+              <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h3 class="font-black text-base sm:text-lg text-slate-900">Synchronisation Google Classroom</h3>
+                  <span x-show="classroomConnected" class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black">
+                    ✓ Connecté (<span x-text="classroomCourses.length">0</span> cours trouvés)
+                  </span>
+                  <span x-show="!classroomConnected" class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-bold">
+                    Non connecté
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">
+                  Récupérez automatiquement vos classes et listes d'élèves depuis Google Classroom, ou publiez un devoir en 1 clic.
+                </p>
+              </div>
             </div>
-            
-            <div class="flex items-center gap-3">
+
+            <!-- Boutons d'action Classroom -->
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <button 
+                @click="synchroniserToutesMesClassesClassroom()"
+                :disabled="classroomAutoSyncLoading"
+                class="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-black text-xs transition shadow-sm flex items-center gap-2 cursor-pointer">
+                <span x-show="classroomAutoSyncLoading" class="animate-spin">⏳</span>
+                <span x-show="!classroomAutoSyncLoading">🔄</span>
+                <span x-text="classroomAutoSyncLoading ? 'Importation de vos classes...' : 'Tout récupérer depuis Classroom (Classes + Élèves)'"></span>
+              </button>
+
+              <button 
+                x-show="classroomConnected"
+                @click="showClassroomPublishDrawer = !showClassroomPublishDrawer"
+                class="px-4 py-3 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-extrabold text-xs transition flex items-center gap-1.5 cursor-pointer">
+                <span>🚀</span>
+                <span x-text="showClassroomPublishDrawer ? 'Fermer la publication de devoir ▲' : 'Publier un devoir dans Classroom ▼'"></span>
+              </button>
+
+              <button 
+                x-show="classroomConnected"
+                @click="deconnecterGoogleClassroom()"
+                class="px-3 py-3 rounded-2xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-500 font-bold text-xs transition cursor-pointer"
+                title="Déconnecter Google Classroom">
+                Déconnecter
+              </button>
+            </div>
+          </div>
+
+          <!-- Si connecté : Cartes visuelles des cours Google Classroom du professeur -->
+          <div x-show="classroomConnected && classroomCourses.length > 0" class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="text-xs font-black uppercase tracking-wider text-slate-400">Vos cours Google Classroom détectés :</div>
+              <span class="text-[11px] text-slate-400">Cliquez sur un cours pour cibler ou personnaliser son import</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              <template x-for="crs in classroomCourses" :key="crs.id">
+                <div 
+                  @click="selectionnerCoursClassroom(crs.id)"
+                  :class="classroomSelectedCourseId === crs.id ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/20' : 'border-slate-200 hover:border-emerald-300 bg-slate-50/50'"
+                  class="p-4 rounded-2xl border transition cursor-pointer flex flex-col justify-between gap-3">
+                  <div>
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="font-black text-sm text-slate-900" x-text="crs.name"></div>
+                      <span class="px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-700 text-[11px] font-black shrink-0"
+                            x-text="(classroomCourseRostersCounts[crs.id] !== undefined ? classroomCourseRostersCounts[crs.id] : '...') + ' él.'"></span>
+                    </div>
+                    <div class="text-xs text-slate-500 mt-0.5" x-text="crs.section ? ('Section : ' + crs.section) : 'Cours actif Classroom'"></div>
+                  </div>
+
+                  <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between gap-2">
+                    <template x-if="getMappingForClassroomCourse(crs.id)">
+                      <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black">
+                        🔗 Lié à la Classe <span x-text="getMappingForClassroomCourse(crs.id)?.id"></span>
+                      </span>
+                    </template>
+                    <template x-if="!getMappingForClassroomCourse(crs.id)">
+                      <span class="text-[11px] text-slate-400 font-bold">Non lié manuellement</span>
+                    </template>
+
+                    <span class="text-[11px] font-extrabold text-emerald-700">Gérer ➔</span>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <!-- Barre d'import / liaison rapide pour le cours Classroom sélectionné -->
+            <div x-show="classroomSelectedCourse" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+              <div x-show="classroomImportSuccessMsg" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-black flex items-center justify-between">
+                <span x-text="classroomImportSuccessMsg"></span>
+                <button @click="classroomImportSuccessMsg = ''" class="text-emerald-700 font-bold cursor-pointer">&times;</button>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                <div class="md:col-span-4">
+                  <label class="block text-[11px] font-black text-slate-700 mb-1">
+                    Cours Classroom sélectionné (<span x-text="classroomSelectedCourseStudents.length"></span> élèves) :
+                  </label>
+                  <div class="px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-black text-slate-900 truncate" x-text="classroomSelectedCourse?.name"></div>
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="block text-[11px] font-black text-slate-700 mb-1">Classe cible :</label>
+                  <select 
+                    x-model="classroomTargetClass"
+                    class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:outline-none focus:border-indigo-600">
+                    <template x-for="c in availableClasses" :key="c">
+                      <option :value="c" x-text="'Classe ' + c"></option>
+                    </template>
+                  </select>
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="block text-[11px] font-black text-slate-700 mb-1">Ou nouveau nom :</label>
+                  <input 
+                    type="text" 
+                    x-model="classroomNewClassName" 
+                    placeholder="Ex: 1C, 2B..." 
+                    class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white uppercase focus:outline-none focus:border-indigo-600" />
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="block text-[11px] font-black text-slate-700 mb-1">Cours associé :</label>
+                  <select
+                    x-model="classroomMappingForm.courseId"
+                    class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:outline-none focus:border-indigo-600">
+                    <template x-for="c in coursesList" :key="c.id">
+                      <option :value="c.id" x-text="(c.theme?.icon || '📚') + ' ' + c.title"></option>
+                    </template>
+                  </select>
+                </div>
+
+                <div class="md:col-span-2">
+                  <button 
+                    @click="importerElevesClassroom(classroomTargetClass)"
+                    :disabled="classroomImportLoading || classroomSelectedCourseStudents.length === 0"
+                    class="w-full py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span x-show="classroomImportLoading" class="animate-spin">⏳</span>
+                    <span x-show="!classroomImportLoading">📥</span>
+                    <span x-text="classroomImportLoading ? 'Import...' : 'Importer (' + classroomSelectedCourseStudents.length + ')'"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tiroir Pliable : Publier un Devoir dans Google Classroom -->
+          <div x-show="classroomConnected && showClassroomPublishDrawer" x-transition class="p-6 rounded-2xl bg-emerald-50/40 border border-emerald-200 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-emerald-200/60">
+              <div>
+                <h4 class="font-black text-sm text-slate-900">🚀 Publier une activité ProfAssistant comme Devoir Classroom</h4>
+                <p class="text-xs text-slate-500">Crée un devoir dans <strong x-text="classroomSelectedCourse?.name || 'votre cours Classroom'"></strong> avec un lien direct pour les élèves.</p>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-xs font-black bg-white text-emerald-700 border border-emerald-200" x-text="classroomCourseWorkList.length + ' devoir(s) actif(s)'"></span>
+            </div>
+
+            <div x-show="classroomPublishSuccess" class="p-3 bg-emerald-100 border border-emerald-300 rounded-xl text-emerald-900 text-xs font-black flex items-center justify-between">
+              <span x-text="classroomPublishSuccess"></span>
+              <button @click="classroomPublishSuccess = ''" class="text-emerald-800 font-bold cursor-pointer">&times;</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs font-black text-slate-700 mb-1">Mode de publication :</label>
+                <div class="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 text-xs font-extrabold">
+                  <button type="button" @click="changerModePublicationClassroom('single')" :class="classroomNewAssignment.publishMode === 'single' ? 'bg-emerald-600 text-white' : 'text-slate-600'" class="flex-1 py-1.5 px-2 rounded-lg transition cursor-pointer">🎯 Mission</button>
+                  <button type="button" @click="changerModePublicationClassroom('module')" :class="classroomNewAssignment.publishMode === 'module' ? 'bg-emerald-600 text-white' : 'text-slate-600'" class="flex-1 py-1.5 px-2 rounded-lg transition cursor-pointer">📦 Module</button>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-black text-slate-700 mb-1">Cours ProfAssistant :</label>
+                <select x-model="classroomNewAssignment.selectedCourseId" @change="preparerDevoirClassroom($event.target.value)" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white">
+                  <template x-for="c in coursesList" :key="c.id">
+                    <option :value="c.id" x-text="(c.theme?.icon || '📚') + ' ' + c.title"></option>
+                  </template>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-black text-slate-700 mb-1">Module / Chapitre :</label>
+                <select x-model="classroomNewAssignment.selectedModuleId" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white">
+                  <template x-for="ch in (coursesList.find(c => c.id === classroomNewAssignment.selectedCourseId)?.chapters || [])" :key="ch.id">
+                    <option :value="ch.id" x-text="ch.title"></option>
+                  </template>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+              <div class="md:col-span-2">
+                <label class="block text-xs font-black text-slate-700 mb-1">Titre du devoir dans Classroom :</label>
+                <input type="text" x-model="classroomNewAssignment.title" placeholder="Ex: [Numérique] Mission 1 - Courriel & Cci" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold" />
+              </div>
+              <div>
+                <button @click="publierActiviteClassroom()" :disabled="classroomPublishLoading || !classroomNewAssignment.title.trim()" class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl transition cursor-pointer shadow-xs">
+                  <span x-text="classroomPublishLoading ? '⏳ Publication...' : '📤 Publier dans Classroom'"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BLOC 2 : VOS CLASSES EN UN COUP D'ŒIL (PASTILLES DE FILTRE RAPIDE) -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+            <div>
+              <h3 class="font-black text-base sm:text-lg text-slate-900">Mes Classes & Liste des Élèves</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Cliquez sur une classe ci-dessous pour afficher ses élèves, changer un élève de groupe ou inscrire un nouvel élève.</p>
+            </div>
+
+            <div class="flex items-center gap-2.5 flex-wrap">
               <div class="relative">
                 <input 
                   type="text" 
                   x-model="searchStudentQuery" 
                   placeholder="Rechercher un élève..." 
-                  class="px-3 py-2 pl-8 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-600 w-full sm:w-56" />
+                  class="px-3 py-2 pl-8 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-600 w-full sm:w-56 bg-slate-50 focus:bg-white" />
                 <span class="absolute left-2.5 top-2.5 text-slate-400">🔍</span>
               </div>
               <button 
                 @click="modalAddStudentOpen = true"
                 class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer">
-                <span>➕</span> Inscrire un élève
+                <span>➕</span> Ajouter un élève
               </button>
             </div>
           </div>
 
-          <!-- Table des Élèves -->
-          <div class="overflow-x-auto">
+          <!-- Cartes / Pastilles de sélection de Classe -->
+          <div class="flex items-center gap-2 overflow-x-auto pb-2">
+            <button
+              type="button"
+              @click="changerClasseEnseignant('tous')"
+              :class="selectedTeacherClass === 'tous' ? 'bg-slate-900 text-white shadow-xs font-black' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold'"
+              class="px-4 py-2.5 rounded-2xl text-xs transition flex items-center gap-2 shrink-0 cursor-pointer">
+              <span>🌍 Toutes les classes</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] bg-white/20" x-text="allSchoolStudents.length"></span>
+            </button>
+
+            <template x-for="card in getClassCardsSummary()" :key="card.id">
+              <button
+                type="button"
+                @click="changerClasseEnseignant(card.id)"
+                :class="selectedTeacherClass === card.id ? 'bg-indigo-600 text-white shadow-xs font-black ring-2 ring-indigo-300' : (card.studentCount > 0 || card.isLinked ? 'bg-indigo-50/70 hover:bg-indigo-100 text-indigo-950 border border-indigo-200 font-extrabold' : 'bg-slate-50 hover:bg-slate-100 text-slate-500 border border-slate-200 font-semibold')"
+                class="px-4 py-2.5 rounded-2xl text-xs transition flex items-center gap-2 shrink-0 cursor-pointer">
+                <span x-show="card.isLinked" title="Liée à Google Classroom">🏫</span>
+                <span x-text="'Classe ' + card.id"></span>
+                <span 
+                  :class="selectedTeacherClass === card.id ? 'bg-white/25 text-white' : (card.studentCount > 0 ? 'bg-indigo-200/70 text-indigo-900' : 'bg-slate-200 text-slate-600')"
+                  class="px-2 py-0.5 rounded-full text-[10px] font-black" 
+                  x-text="card.studentCount + ' él.'"></span>
+              </button>
+            </template>
+          </div>
+
+          <!-- Tableau des Élèves de la classe sélectionnée -->
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
             <table class="w-full text-left text-xs border-collapse min-w-[600px]">
-              <thead>
-                <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
-                  <th class="py-3 px-4">Élève</th>
-                  <th class="py-3 px-4">Classe</th>
-                  <th class="py-3 px-4">Points XP</th>
-                  <th class="py-3 px-4">Statut</th>
-                  <th class="py-3 px-4 text-center">Changer de classe</th>
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider text-[11px]">
+                <tr>
+                  <th class="py-3.5 px-4">Élève & Adresse Google</th>
+                  <th class="py-3.5 px-4">Classe actuelle</th>
+                  <th class="py-3.5 px-4">Points XP</th>
+                  <th class="py-3.5 px-4 text-center">Déplacer vers une autre classe</th>
+                  <th class="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
-                <template x-for="student in getElevesFiltresGestion()" :key="student.id">
+                <template x-for="student in getElevesFiltresGestion()" :key="student.id + '_' + student.classe">
                   <tr class="hover:bg-slate-50/70 transition">
-                    <td class="py-3.5 px-4 font-bold text-slate-900 flex items-center gap-2.5">
-                      <span class="w-7 h-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-black">
-                        👤
-                      </span>
+                    <td class="py-3 px-4 font-bold text-slate-900 flex items-center gap-3">
+                      <span class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-black shrink-0"
+                            x-text="(student.nom || 'E').substring(0, 2).toUpperCase()"></span>
                       <div>
-                        <div x-text="student.nom"></div>
-                        <div class="text-[11px] text-slate-400 font-normal" x-text="student.email || 'Pas d\'e-mail requis'"></div>
+                        <div class="font-extrabold text-slate-900" x-text="student.nom"></div>
+                        <div class="text-[11px] text-slate-400 font-mono" x-text="student.email || 'Inscrit manuellement'"></div>
                       </div>
                     </td>
-                    <td class="py-3.5 px-4 font-extrabold text-indigo-700" x-text="student.classe"></td>
-                    <td class="py-3.5 px-4 font-mono font-bold text-amber-600" x-text="(student.xp || 0) + ' XP'"></td>
-                    <td class="py-3.5 px-4">
-                      <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800 text-[11px]">Actif</span>
+                    <td class="py-3 px-4">
+                      <span class="px-2.5 py-1 rounded-full font-black bg-indigo-50 text-indigo-700 text-xs" x-text="'Classe ' + (student.classe || '1A')"></span>
                     </td>
-                    <td class="py-3.5 px-4 text-center">
+                    <td class="py-3 px-4 font-mono font-bold text-amber-600" x-text="(student.xp || 0) + ' XP'"></td>
+                    <td class="py-3 px-4 text-center">
                       <select 
                         @change="changerClasseEleve(student.id, $event.target.value)"
-                        class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-slate-700 cursor-pointer focus:outline-none focus:border-indigo-600">
+                        class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 cursor-pointer focus:outline-none focus:border-indigo-600">
                         <template x-for="cl in availableClasses" :key="cl">
-                          <option :value="cl" x-text="'Vers ' + cl" :selected="cl === student.classe"></option>
+                          <option :value="cl" x-text="'Classe ' + cl" :selected="cl === student.classe"></option>
                         </template>
                       </select>
                     </td>
+                    <td class="py-3 px-4 text-right">
+                      <div class="flex items-center justify-end gap-1.5">
+                        <button
+                          type="button"
+                          @click="activeProfSubTab = 'copies'; submissionSearchText = student.nom"
+                          class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] transition cursor-pointer"
+                          title="Voir les copies de cet élève">
+                          📥 Copies
+                        </button>
+                        <button
+                          type="button"
+                          @click="supprimerEleveModal(student)"
+                          class="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition cursor-pointer"
+                          title="Retirer cet élève de la liste">
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 </template>
-                <tr x-show="allClassStudents.length === 0">
-                  <td colspan="5" class="py-8 text-center text-slate-400 font-medium">
-                    Aucun élève trouvé dans la base pour la classe <strong x-text="selectedTeacherClass"></strong>.<br>
-                    Cliquez sur le bouton <strong>« Inscrire un élève »</strong> pour débuter l'année avec votre vraie liste de classe !
+                <tr x-show="getElevesFiltresGestion().length === 0">
+                  <td colspan="5" class="py-10 text-center text-slate-400 font-medium">
+                    <div class="text-2xl mb-1.5">👥</div>
+                    <div>Aucun élève trouvé pour <strong x-text="selectedTeacherClass === 'tous' ? 'cette recherche' : ('la classe ' + selectedTeacherClass)"></strong>.</div>
+                    <div class="mt-2">
+                      Cliquez sur le bouton vert <strong>« 🔄 Tout récupérer depuis Classroom »</strong> ci-dessus pour importer vos classes automatiquement !
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -4905,19 +5188,64 @@
 
       </div>
 
-      <!-- ============================================== -->
-      <!-- SOUS-ONGLET 3 : CONFIGURATION NOTEBOOKLM       -->
-      <!-- ============================================== -->
-      <div x-show="activeProfSubTab === 'notebooklm'" class="space-y-6">
+      <!-- ============================================================== -->
+      <!-- ONGLET 4 : COURS & OUTILS IA (STUDIO, FORMS, DIAPOS & ÉQUIPE)  -->
+      <!-- ============================================================== -->
+      <div x-show="['outils', 'studio', 'forms', 'notebooklm', 'equipe'].includes(activeProfSubTab)" class="space-y-6">
         
-        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+        <!-- Sous-menu clair des Outils Pédagogiques & Administration -->
+        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              @click="activeProfSubTab = 'outils'; activeProfToolSubTab = 'studio'; initCourseStudio();"
+              :class="(activeProfSubTab === 'studio' || (activeProfSubTab === 'outils' && activeProfToolSubTab === 'studio')) ? 'bg-indigo-600 text-white font-black shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold'"
+              class="px-4 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-2">
+              <span>🎨</span> Éditeur de Cours & Import IA
+            </button>
+
+            <button
+              type="button"
+              @click="activeProfSubTab = 'outils'; activeProfToolSubTab = 'forms';"
+              :class="(activeProfSubTab === 'forms' || (activeProfSubTab === 'outils' && activeProfToolSubTab === 'forms')) ? 'bg-purple-600 text-white font-black shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold'"
+              class="px-4 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-2">
+              <span>📝</span> Générateur de Quiz Google Forms (IA)
+            </button>
+
+            <button
+              type="button"
+              @click="activeProfSubTab = 'outils'; activeProfToolSubTab = 'notebooklm';"
+              :class="(activeProfSubTab === 'notebooklm' || (activeProfSubTab === 'outils' && activeProfToolSubTab === 'notebooklm')) ? 'bg-indigo-600 text-white font-black shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold'"
+              class="px-4 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-2">
+              <span>📽️</span> Diaporamas & Carnets NotebookLM
+            </button>
+
+            <button
+              type="button"
+              @click="activeProfSubTab = 'outils'; activeProfToolSubTab = 'equipe'; chargerEquipeEnseignants();"
+              :class="(activeProfSubTab === 'equipe' || (activeProfSubTab === 'outils' && activeProfToolSubTab === 'equipe')) ? 'bg-indigo-600 text-white font-black shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold'"
+              class="px-4 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-2">
+              <span>🧑‍🏫</span> Équipe Enseignante & Accès
+            </button>
+          </div>
+
+          <a 
+            href="/v1/admin.html"
+            target="_blank"
+            class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-indigo-600 bg-slate-50 border border-slate-200 transition flex items-center gap-1.5"
+            title="Accéder à l'ancien tableau de bord V1 en lecture/secours">
+            <span>🏛️</span> Archive V1 ↗
+          </a>
+        </div>
+
+        <!-- OUTIL 3 : DIAPORAMAS & NOTEBOOKLM -->
+        <div x-show="activeProfSubTab === 'notebooklm' || (activeProfSubTab === 'outils' && activeProfToolSubTab === 'notebooklm')" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
           <div class="pb-4 border-b border-slate-100 mb-6">
             <h3 class="font-black text-base text-slate-900">Intégration de vos Diaporamas & Carnets NotebookLM</h3>
             <p class="text-xs text-slate-500 mt-0.5">Associez vos liens de carnets de notes NotebookLM ou vos présentations Google Slides à chaque chapitre.</p>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Module 0 Config -->
             <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
               <div class="flex items-center justify-between">
                 <span class="font-extrabold text-sm text-slate-900">Module 0 : Bienvenue & Charte</span>
@@ -4925,20 +5253,13 @@
               </div>
               <div>
                 <label class="block text-xs font-bold text-slate-600 mb-1">Lien de votre carnet NotebookLM :</label>
-                <input 
-                  type="url" 
-                  x-model="module0.support_cours.notebooklm_url" 
-                  placeholder="https://notebooklm.google.com/notebook/..." 
-                  class="w-full bg-white px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-600 font-mono" />
+                <input type="url" x-model="module0.support_cours.notebooklm_url" placeholder="https://notebooklm.google.com/notebook/..." class="w-full bg-white px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-600 font-mono" />
               </div>
-              <button 
-                @click="sauvegarderNotebookLMConfig('module-0', module0.support_cours.notebooklm_url)"
-                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition cursor-pointer">
+              <button @click="sauvegarderNotebookLMConfig('module-0', module0.support_cours.notebooklm_url)" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition cursor-pointer">
                 Enregistrer pour le Module 0
               </button>
             </div>
 
-            <!-- Chapitre 1 Config -->
             <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
               <div class="flex items-center justify-between">
                 <span class="font-extrabold text-sm text-slate-900">Chapitre 1 : Communication & E-mail</span>
@@ -4946,20 +5267,13 @@
               </div>
               <div>
                 <label class="block text-xs font-bold text-slate-600 mb-1">Lien de votre carnet NotebookLM :</label>
-                <input 
-                  type="url" 
-                  x-model="chapter.support_cours.notebooklm_url" 
-                  placeholder="https://notebooklm.google.com/notebook/..." 
-                  class="w-full bg-white px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-600 font-mono" />
+                <input type="url" x-model="chapter.support_cours.notebooklm_url" placeholder="https://notebooklm.google.com/notebook/..." class="w-full bg-white px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-600 font-mono" />
               </div>
-              <button 
-                @click="sauvegarderNotebookLMConfig('ch1-communication', chapter.support_cours.notebooklm_url)"
-                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition cursor-pointer">
+              <button @click="sauvegarderNotebookLMConfig('ch1-communication', chapter.support_cours.notebooklm_url)" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition cursor-pointer">
                 Enregistrer pour le Chapitre 1
               </button>
             </div>
 
-            <!-- Chapitre 2 Config -->
             <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
               <div class="flex items-center justify-between">
                 <span class="font-extrabold text-sm text-slate-900">Chapitre 2 : Sécurité & Données</span>
@@ -4967,28 +5281,17 @@
               </div>
               <div>
                 <label class="block text-xs font-bold text-slate-600 mb-1">Lien de votre carnet NotebookLM :</label>
-                <input 
-                  type="url" 
-                  x-model="chapter2.support_cours.notebooklm_url" 
-                  placeholder="https://notebooklm.google.com/notebook/..." 
-                  class="w-full bg-white px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-emerald-600 font-mono" />
+                <input type="url" x-model="chapter2.support_cours.notebooklm_url" placeholder="https://notebooklm.google.com/notebook/..." class="w-full bg-white px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-emerald-600 font-mono" />
               </div>
-              <button 
-                @click="sauvegarderNotebookLMConfig('ch2-securite', chapter2.support_cours.notebooklm_url)"
-                class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition cursor-pointer">
+              <button @click="sauvegarderNotebookLMConfig('ch2-securite', chapter2.support_cours.notebooklm_url)" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition cursor-pointer">
                 Enregistrer pour le Chapitre 2
               </button>
             </div>
           </div>
         </div>
 
-      </div>
-
-      <!-- ============================================== -->
-      <!-- SOUS-ONGLET 4 : ÉQUIPE ENSEIGNANTE & RÔLES     -->
-      <!-- ============================================== -->
-      <div x-show="activeProfSubTab === 'equipe'" class="space-y-6">
-        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+        <!-- OUTIL 4 : ÉQUIPE ENSEIGNANTE & RÔLES -->
+        <div x-show="activeProfSubTab === 'equipe' || (activeProfSubTab === 'outils' && activeProfToolSubTab === 'equipe')" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100 mb-6">
             <div>
               <h3 class="font-black text-base text-slate-900 flex items-center gap-2">
@@ -5011,7 +5314,6 @@
             </div>
           </div>
 
-          <!-- Recherche -->
           <div class="mb-4">
             <input 
               type="text" 
@@ -5020,7 +5322,6 @@
               class="w-full sm:w-80 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white" />
           </div>
 
-          <!-- Tableau -->
           <div class="overflow-x-auto rounded-2xl border border-slate-200">
             <table class="w-full text-left text-xs">
               <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase font-black tracking-wider">
@@ -5072,11 +5373,7 @@
                     </td>
                     <td class="py-3 px-4 text-right">
                       <div class="flex items-center justify-end gap-1.5" x-show="teacherAuth.isAdmin || teacherAuth.user?.email === 'gatweb@gmail.com'">
-                        <button 
-                          @click="ouvrirModalEnseignant(true, t)"
-                          class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition text-[11px] cursor-pointer">
-                          ✏️
-                        </button>
+                        <button @click="ouvrirModalEnseignant(true, t)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition text-[11px] cursor-pointer">✏️</button>
                         <template x-if="t.email !== 'gatweb@gmail.com'">
                           <div class="flex items-center gap-1">
                             <button 
@@ -5102,520 +5399,11 @@
             </table>
           </div>
         </div>
-      </div>
-
-      <!-- ============================================== -->
-      <!-- SOUS-ONGLET 5 : GOOGLE CLASSROOM (PHASE 4)     -->
-      <!-- ============================================== -->
-      <div x-show="activeProfSubTab === 'classroom'" class="space-y-6">
-        
-        <!-- ÉTAT 1 : NON CONNECTÉ -->
-        <div x-show="!classroomConnected" class="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200/80 shadow-xs text-center max-w-3xl mx-auto">
-          <div class="w-20 h-20 mx-auto mb-6 rounded-3xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-4xl shadow-xs border border-emerald-100">
-            🏫
-          </div>
-
-          <h3 class="text-2xl font-black text-slate-900 tracking-tight">Intégration Google Classroom</h3>
-          <p class="text-sm text-slate-500 mt-2 max-w-xl mx-auto leading-relaxed">
-            Connectez vos cours Google Classroom pour importer instantanément vos listes d'élèves, publier vos activités ProfAssistant en 1 clic et synchroniser les notes de devoirs.
-          </p>
-
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 my-8 text-left">
-            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-              <div class="text-xl mb-1.5">👥</div>
-              <div class="text-xs font-black text-slate-900">Import des Élèves</div>
-              <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Récupérez automatiquement les noms et emails de vos élèves sans saisie manuelle.</p>
-            </div>
-            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-              <div class="text-xl mb-1.5">🚀</div>
-              <div class="text-xs font-black text-slate-900">Publication de Devoirs</div>
-              <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Publiez les missions interactives avec lien direct vers le workspace adapté.</p>
-            </div>
-            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-              <div class="text-xl mb-1.5">📤</div>
-              <div class="text-xs font-black text-slate-900">Remontée des Notes</div>
-              <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Après correction dans l'espace prof, renvoyez la note officielle en 1 clic.</p>
-            </div>
-          </div>
-
-          <div class="flex flex-col items-center gap-3">
-            <button 
-              @click="connecterGoogleClassroom()" 
-              :disabled="classroomLoading"
-              class="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl transition shadow-md hover:shadow-lg flex items-center justify-center gap-3 cursor-pointer">
-              <span x-show="classroomLoading" class="animate-spin text-base">⏳</span>
-              <span x-show="!classroomLoading" class="text-base">🏫</span>
-              <span x-text="classroomLoading ? 'Connexion en cours...' : 'Connecter mon compte Google Classroom'"></span>
-            </button>
-            <p class="text-[11px] text-slate-400">
-              Utilise les permissions OAuth standard pour Google Workspace for Education.
-            </p>
-          </div>
-        </div>
-
-        <!-- ÉTAT 2 : CONNECTÉ -->
-        <div x-show="classroomConnected" class="space-y-6">
-          
-          <!-- Barre d'état & sélecteur de cours Classroom -->
-          <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="flex items-center gap-3.5">
-              <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-bold shadow-xs border border-emerald-100">
-                🏫
-              </div>
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Connecté à Classroom
-                  </span>
-                  <span class="text-xs text-slate-400 font-bold" x-text="classroomCourses.length + ' cours actif(s)'"></span>
-                </div>
-                <div class="text-base font-black text-slate-900 mt-1" x-text="classroomSelectedCourse?.name || 'Sélectionnez un cours Classroom'"></div>
-              </div>
-            </div>
-
-            <div class="flex items-center gap-2.5 flex-wrap">
-              <!-- Sélecteur de cours Classroom -->
-              <select 
-                x-model="classroomSelectedCourseId" 
-                @change="selectionnerCoursClassroom($event.target.value)"
-                class="px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-600 cursor-pointer bg-slate-50">
-                <template x-for="c in classroomCourses" :key="c.id">
-                  <option :value="c.id" x-text="c.name + (c.section ? ' (' + c.section + ')' : '')"></option>
-                </template>
-              </select>
-
-              <button 
-                @click="chargerCoursClassroom()"
-                :disabled="classroomLoading"
-                class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer"
-                title="Rafraîchir les cours">
-                🔄
-              </button>
-
-              <button 
-                @click="deconnecterGoogleClassroom()"
-                class="px-3 py-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 rounded-xl text-xs font-bold transition cursor-pointer">
-                Déconnecter
-              </button>
-            </div>
-          </div>
-
-          <!-- ALERTE NOUVEAUX ÉLÈVES DÉTECTÉS DANS LE ROSTER CLASSROOM (PHASE 9) -->
-          <div x-show="classroomNewStudentsDetected.length > 0" class="bg-amber-50 border border-amber-300 rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
-            <div class="flex items-start gap-3">
-              <span class="text-2xl">🔔</span>
-              <div>
-                <h4 class="font-black text-sm text-amber-950" x-text="classroomNewStudentsDetected.length + ' nouvel(aux) élève(s) détecté(s) dans Google Classroom !'"></h4>
-                <p class="text-xs text-amber-800 mt-0.5">
-                  Ces élèves sont inscrits dans Classroom mais pas encore dans la classe ProfAssistant correspondante.
-                </p>
-              </div>
-            </div>
-            <button
-              @click="synchroniserNouveauxElevesDetectes()"
-              :disabled="classroomImportLoading"
-              class="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-xs transition cursor-pointer shrink-0 shadow-xs">
-              ⚡ Ajouter ces <span x-text="classroomNewStudentsDetected.length"></span> élève(s) en 1 clic
-            </button>
-          </div>
-
-          <!-- VOLET 0 (PHASE 9) : LIER MES COURS CLASSROOM ↔ CLASSE & COURS PROFASSISTANT -->
-          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-indigo-200/80 shadow-xs space-y-5">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
-                  🔗
-                </div>
-                <div>
-                  <h4 class="font-black text-base text-slate-900">Lier ce cours Classroom à une classe ProfAssistant</h4>
-                  <p class="text-xs text-slate-500">Permet de reconnaître les élèves à 100 % dès leur connexion Google et de filtrer automatiquement leurs cours.</p>
-                </div>
-              </div>
-              <template x-if="getMappingForClassroomCourse(classroomSelectedCourseId)">
-                <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black">
-                  ✓ Lié à la classe <span x-text="getMappingForClassroomCourse(classroomSelectedCourseId)?.id"></span>
-                </span>
-              </template>
-            </div>
-
-            <div x-show="classroomMappingSuccessMsg" class="p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 text-xs font-black flex items-center justify-between">
-              <span x-text="classroomMappingSuccessMsg"></span>
-              <button @click="classroomMappingSuccessMsg = ''" class="text-emerald-700 font-bold cursor-pointer">&times;</button>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-              <div>
-                <label class="block text-xs font-black text-slate-700 mb-1">Classe ProfAssistant :</label>
-                <select
-                  x-model="classroomMappingForm.classeId"
-                  class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:outline-none focus:border-indigo-600">
-                  <template x-for="c in availableClasses" :key="c">
-                    <option :value="c" x-text="'Classe ' + c"></option>
-                  </template>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-xs font-black text-slate-700 mb-1">Ou créer une classe :</label>
-                <input
-                  type="text"
-                  x-model="classroomMappingForm.newClasseId"
-                  placeholder="Ex: 3TT, 4G..."
-                  class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold uppercase focus:outline-none focus:border-indigo-600" />
-              </div>
-
-              <div>
-                <label class="block text-xs font-black text-slate-700 mb-1">Cours ProfAssistant associé :</label>
-                <select
-                  x-model="classroomMappingForm.courseId"
-                  class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:outline-none focus:border-indigo-600">
-                  <template x-for="c in coursesList" :key="c.id">
-                    <option :value="c.id" x-text="(c.theme?.icon || '📚') + ' ' + c.title"></option>
-                  </template>
-                </select>
-              </div>
-
-              <div>
-                <button
-                  @click="enregistrerLiaisonClassroom()"
-                  :disabled="classroomMappingSaving || !classroomSelectedCourseId"
-                  class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs transition cursor-pointer shadow-xs disabled:opacity-50">
-                  <span x-text="classroomMappingSaving ? 'Enregistrement...' : '🔗 Enregistrer la liaison'"></span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Option de renvoi automatique des notes -->
-            <div class="pt-2 flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 text-xs">
-              <label class="inline-flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
-                <input
-                  type="checkbox"
-                  x-model="classroomMappingForm.autoSyncGrades"
-                  class="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer" />
-                <span>📤 Renvoyer automatiquement la note dans Classroom dès qu'une copie est validée</span>
-              </label>
-
-              <!-- Récapitulatif des liaisons actives -->
-              <div x-show="classMappings.filter(m => m.classroom_course_id).length > 0" class="flex flex-wrap items-center gap-1.5">
-                <span class="text-[11px] font-bold text-slate-400">Liaisons actives :</span>
-                <template x-for="m in classMappings.filter(m => m.classroom_course_id)" :key="m.id">
-                  <span class="px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-800 text-[11px] font-extrabold"
-                        x-text="m.id + ' ↔ ' + (m.classroom_course_name || m.classroom_course_id)"></span>
-                </template>
-              </div>
-            </div>
-          </div>
-
-          <!-- Grille des 2 Volets : Import Élèves & Publication Devoirs -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
-            <!-- VOLET 1 : IMPORTATION DE CLASSES & ÉLÈVES -->
-            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
-                  <div class="flex items-center gap-2.5">
-                    <span class="text-xl">👥</span>
-                    <div>
-                      <h4 class="font-black text-base text-slate-900">Importer les Élèves</h4>
-                      <p class="text-xs text-slate-400">Depuis le cours Classroom vers ProfAssistant</p>
-                    </div>
-                  </div>
-                  <span class="px-2.5 py-1 rounded-full text-xs font-black bg-indigo-50 text-indigo-700" x-text="classroomSelectedCourseStudents.length + ' élève(s)'"></span>
-                </div>
-
-                <!-- Notification succès import -->
-                <div x-show="classroomImportSuccessMsg" class="mb-4 p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 text-xs font-black flex items-center justify-between animate-fadeIn">
-                  <span x-text="classroomImportSuccessMsg"></span>
-                  <button @click="classroomImportSuccessMsg = ''" class="text-emerald-700 hover:text-emerald-900 text-base font-bold cursor-pointer">&times;</button>
-                </div>
-
-                <!-- Aperçu des élèves du cours Classroom -->
-                <div class="space-y-2 mb-6">
-                  <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Élèves trouvés dans Classroom :</div>
-                  
-                  <div x-show="classroomStudentsLoading" class="py-6 text-center text-slate-400 text-xs">
-                    <span class="animate-spin inline-block mr-1">⏳</span> Récupération du roster Classroom...
-                  </div>
-
-                  <div x-show="!classroomStudentsLoading && classroomSelectedCourseStudents.length > 0" class="max-h-48 overflow-y-auto space-y-1.5 pr-1 divide-y divide-slate-50">
-                    <template x-for="st in classroomSelectedCourseStudents" :key="st.userId">
-                      <div class="flex items-center justify-between py-1.5 px-2 hover:bg-slate-50 rounded-lg text-xs">
-                        <div class="font-extrabold text-slate-800" x-text="st.fullName"></div>
-                        <div class="text-[11px] text-slate-400 font-mono" x-text="st.email"></div>
-                      </div>
-                    </template>
-                  </div>
-
-                  <div x-show="!classroomStudentsLoading && classroomSelectedCourseStudents.length === 0" class="py-6 text-center text-slate-400 text-xs italic">
-                    Aucun élève inscrit dans ce cours Classroom pour le moment.
-                  </div>
-                </div>
-
-                <!-- Choix de la classe de destination -->
-                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3">
-                  <label class="block text-xs font-black text-slate-700">Classe de destination dans ProfAssistant :</label>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <div>
-                      <span class="text-[10px] text-slate-400 font-bold block mb-1">Classe existante :</span>
-                      <select 
-                        x-model="classroomTargetClass"
-                        class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:outline-none focus:border-indigo-600">
-                        <template x-for="c in availableClasses" :key="c">
-                          <option :value="c" x-text="'Classe ' + c"></option>
-                        </template>
-                      </select>
-                    </div>
-
-                    <div>
-                      <span class="text-[10px] text-slate-400 font-bold block mb-1">Ou nouvelle classe :</span>
-                      <input 
-                        type="text" 
-                        x-model="classroomNewClassName" 
-                        placeholder="Ex: 3A, 4TQ..." 
-                        class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white uppercase focus:outline-none focus:border-indigo-600" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Bouton d'action import -->
-              <div class="pt-6">
-                <button 
-                  @click="importerElevesClassroom(classroomTargetClass)"
-                  :disabled="classroomImportLoading || classroomSelectedCourseStudents.length === 0"
-                  class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl transition shadow-sm hover:shadow flex items-center justify-center gap-2 cursor-pointer">
-                  <span x-show="classroomImportLoading" class="animate-spin">⏳</span>
-                  <span x-show="!classroomImportLoading">📥</span>
-                  <span x-text="classroomImportLoading ? 'Importation en cours...' : 'Importer ' + classroomSelectedCourseStudents.length + ' élèves dans ProfAssistant'"></span>
-                </button>
-              </div>
-            </div>
-
-            <!-- VOLET 2 : PUBLICATION D'ACTIVITÉS EN DEVOIR -->
-            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
-                  <div class="flex items-center gap-2.5">
-                    <span class="text-xl">🚀</span>
-                    <div>
-                      <h4 class="font-black text-base text-slate-900">Publier un Devoir</h4>
-                      <p class="text-xs text-slate-400">Créer un devoir dans Google Classroom avec lien direct</p>
-                    </div>
-                  </div>
-                  <span class="px-2.5 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-700" x-text="classroomCourseWorkList.length + ' devoir(s) en ligne'"></span>
-                </div>
-
-                <!-- Notification succès publication -->
-                <div x-show="classroomPublishSuccess" class="mb-4 p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 text-xs font-black flex items-center justify-between animate-fadeIn">
-                  <span x-text="classroomPublishSuccess"></span>
-                  <button @click="classroomPublishSuccess = ''" class="text-emerald-700 hover:text-emerald-900 text-base font-bold cursor-pointer">&times;</button>
-                </div>
-
-                <!-- Formulaire de Publication Enrichie (Phase 9) -->
-                <div class="space-y-4">
-                  <!-- Mode de publication : Activité unique vs Module entier -->
-                  <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl text-xs font-extrabold">
-                    <button
-                      type="button"
-                      @click="changerModePublicationClassroom('single')"
-                      :class="classroomNewAssignment.publishMode === 'single' ? 'bg-white text-emerald-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-                      class="flex-1 py-1.5 px-3 rounded-lg transition cursor-pointer">
-                      🎯 Activité unique
-                    </button>
-                    <button
-                      type="button"
-                      @click="changerModePublicationClassroom('module')"
-                      :class="classroomNewAssignment.publishMode === 'module' ? 'bg-white text-emerald-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-                      class="flex-1 py-1.5 px-3 rounded-lg transition cursor-pointer">
-                      📦 Module entier
-                    </button>
-                  </div>
-
-                  <!-- Sélection du cours et du module/exercice ProfAssistant -->
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label class="block text-xs font-black text-slate-700 mb-1">Cours ProfAssistant :</label>
-                      <select 
-                        x-model="classroomNewAssignment.selectedCourseId"
-                        @change="preparerDevoirClassroom($event.target.value)"
-                        class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:outline-none focus:border-emerald-600 cursor-pointer">
-                        <template x-for="c in coursesList" :key="c.id">
-                          <option :value="c.id" x-text="(c.theme?.icon || '📚') + ' ' + c.title"></option>
-                        </template>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label class="block text-xs font-black text-slate-700 mb-1">Module / Chapitre :</label>
-                      <select
-                        x-model="classroomNewAssignment.selectedModuleId"
-                        class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:outline-none focus:border-emerald-600 cursor-pointer">
-                        <template x-for="ch in (coursesList.find(c => c.id === classroomNewAssignment.selectedCourseId)?.chapters || [])" :key="ch.id">
-                          <option :value="ch.id" x-text="ch.title"></option>
-                        </template>
-                      </select>
-                    </div>
-                  </div>
-
-                  <!-- Choix de l'exercice précis (si mode single et exercices disponibles) -->
-                  <div x-show="classroomNewAssignment.publishMode === 'single' && classroomPublishExercisesList.length > 0">
-                    <label class="block text-xs font-black text-slate-700 mb-1">Mission / Exercice ciblé (Lien profond `?course=&ex=`) :</label>
-                    <select
-                      x-model="classroomNewAssignment.selectedExerciseId"
-                      @change="preparerDevoirClassroom(classroomNewAssignment.selectedCourseId, $event.target.value)"
-                      class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:outline-none focus:border-emerald-600 cursor-pointer">
-                      <template x-for="ex in classroomPublishExercisesList" :key="ex.id">
-                        <option :value="ex.id" x-text="ex.titre || ex.title"></option>
-                      </template>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label class="block text-xs font-black text-slate-700 mb-1">Titre du devoir dans Classroom :</label>
-                    <input 
-                      type="text" 
-                      x-model="classroomNewAssignment.title" 
-                      placeholder="Ex: [Web] Exercice 1 - Ma première page HTML" 
-                      class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-600" />
-                  </div>
-
-                  <div>
-                    <label class="block text-xs font-black text-slate-700 mb-1">Consignes / Description pour les élèves :</label>
-                    <textarea 
-                      rows="2" 
-                      x-model="classroomNewAssignment.description" 
-                      placeholder="Cliquez sur le lien ci-joint pour ouvrir directement votre activité en mode Focus..."
-                      class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-emerald-600"></textarea>
-                  </div>
-
-                  <!-- Date limite & Thème Classroom (Phase 9) -->
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
-                    <div>
-                      <label class="block text-[11px] font-black text-slate-700 mb-1">📅 Date limite (optionnel) :</label>
-                      <div class="flex items-center gap-1.5">
-                        <input
-                          type="date"
-                          x-model="classroomNewAssignment.dueDate"
-                          class="flex-1 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold focus:outline-none focus:border-emerald-600" />
-                        <input
-                          type="time"
-                          x-model="classroomNewAssignment.dueTime"
-                          class="w-24 px-2 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold focus:outline-none focus:border-emerald-600" />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label class="block text-[11px] font-black text-slate-700 mb-1">🏷️ Thème Classroom (Topic) :</label>
-                      <select
-                        x-model="classroomNewAssignment.topicId"
-                        class="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold focus:outline-none focus:border-emerald-600 mb-1.5">
-                        <option value="">-- Aucun thème ou créer ci-dessous --</option>
-                        <template x-for="tp in classroomTopicsList" :key="tp.topicId">
-                          <option :value="tp.topicId" x-text="tp.name"></option>
-                        </template>
-                      </select>
-                      <input
-                        type="text"
-                        x-model="classroomNewAssignment.newTopicName"
-                        placeholder="Ou nouveau thème (ex: Chapitre 1)"
-                        class="w-full px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-[11px] focus:outline-none focus:border-emerald-600" />
-                    </div>
-                  </div>
-
-                  <div class="flex items-center justify-between gap-4">
-                    <div class="flex items-center gap-2">
-                      <label class="text-xs font-black text-slate-700">Barème :</label>
-                      <input 
-                        type="number" 
-                        min="10" 
-                        max="100" 
-                        step="5" 
-                        x-model="classroomNewAssignment.maxPoints" 
-                        class="w-20 px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-black text-center" />
-                      <span class="text-xs text-slate-400 font-bold">points</span>
-                    </div>
-
-                    <span class="text-[11px] text-emerald-700 font-bold">Lien profond `?course=&ex=` actif 🔗</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Bouton d'action publication -->
-              <div class="pt-6">
-                <button 
-                  @click="publierActiviteClassroom()"
-                  :disabled="classroomPublishLoading || !classroomNewAssignment.title.trim()"
-                  class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl transition shadow-sm hover:shadow flex items-center justify-center gap-2 cursor-pointer">
-                  <span x-show="classroomPublishLoading" class="animate-spin">⏳</span>
-                  <span x-show="!classroomPublishLoading">📤</span>
-                  <span x-text="classroomPublishLoading ? 'Publication dans Classroom...' : 'Publier ce devoir dans ' + (classroomSelectedCourse?.name || 'Classroom')"></span>
-                </button>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Tableau des Devoirs Actifs du Cours Classroom -->
-          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
-            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-              <div>
-                <h4 class="font-black text-base text-slate-900">Devoirs Classroom du Cours</h4>
-                <p class="text-xs text-slate-400">Consultez les devoirs publiés et accédez directement aux copies dans Google Classroom.</p>
-              </div>
-
-              <span class="text-xs font-bold text-slate-500" x-text="classroomCourseWorkList.length + ' devoir(s)'"></span>
-            </div>
-
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs border-collapse min-w-[600px]">
-                <thead>
-                  <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
-                    <th class="py-3 px-4">Titre du Devoir</th>
-                    <th class="py-3 px-4">Barème</th>
-                    <th class="py-3 px-4">Date de Création</th>
-                    <th class="py-3 px-4 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                  <template x-for="cw in classroomCourseWorkList" :key="cw.id">
-                    <tr class="hover:bg-slate-50/70 transition">
-                      <td class="py-3.5 px-4 font-black text-slate-900">
-                        <div x-text="cw.title"></div>
-                        <div class="text-[11px] text-slate-400 font-normal truncate max-w-md" x-text="cw.description"></div>
-                      </td>
-                      <td class="py-3.5 px-4 font-bold text-slate-700">
-                        <span class="px-2 py-0.5 rounded-full bg-slate-100" x-text="(cw.maxPoints || 100) + ' pts'"></span>
-                      </td>
-                      <td class="py-3.5 px-4 text-slate-500" x-text="cw.creationTime ? new Date(cw.creationTime).toLocaleDateString('fr-BE') : '—'"></td>
-                      <td class="py-3.5 px-4 text-right">
-                        <a 
-                          :href="cw.alternateLink || '#'" 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-xl transition inline-flex items-center gap-1">
-                          <span>Ouvrir dans Classroom</span> ↗
-                        </a>
-                      </td>
-                    </tr>
-                  </template>
-                  <tr x-show="classroomCourseWorkList.length === 0">
-                    <td colspan="4" class="py-8 text-center text-slate-400 font-medium">
-                      Aucun devoir publié dans ce cours pour l'instant. Utilisez le formulaire ci-dessus pour publier votre premier devoir !
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
 
       <!-- ============================================== -->
       <!-- SOUS-ONGLET 6 : QUIZ & GOOGLE FORMS (PHASE 5) -->
       <!-- ============================================== -->
-      <div x-show="activeProfSubTab === 'forms'" class="space-y-6">
+      <div x-show="activeProfSubTab === 'forms' || (activeProfSubTab === 'outils' && activeProfToolSubTab === 'forms')" class="space-y-6">
         
         <!-- En-tête Générateur IA Google Forms -->
         <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
@@ -5896,7 +5684,7 @@
       <!-- ============================================== -->
       <!-- SOUS-ONGLET 7 : COURSE STUDIO & IMPORT (PHASES 10 & 13) -->
       <!-- ============================================== -->
-      <div x-show="activeProfSubTab === 'studio'" class="space-y-6">
+      <div x-show="activeProfSubTab === 'studio' || (activeProfSubTab === 'outils' && activeProfToolSubTab === 'studio')" class="space-y-6">
         
         <!-- En-tête Course Studio -->
         <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
@@ -6310,6 +6098,8 @@
         </div>
 
       </div>
+
+      </div><!-- Fin Onglet 4 : Cours & Outils IA -->
 
     </div>
 

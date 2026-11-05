@@ -97,12 +97,16 @@ export function createAuthStore() {
           if (authStatus.isTeacher) {
             console.log(`[Prof] Bienvenue ${authStatus.profile?.nom || authStatus.user?.email}`);
             if (authStatus.profile?.classes?.length) {
-              const firstClass = authStatus.profile.classes.find(c => c !== 'all') || '1A';
+              const firstClass = authStatus.profile.classes.find(c => c !== 'all') || 'tous';
               this.selectedTeacherClass = firstClass;
+              this.submissionFilterClass = firstClass;
             }
             this.activerEcouteClasse(this.selectedTeacherClass);
             this.activerEcouteSubmissions();
             await this.chargerElevesReels();
+            if (typeof this.chargerTousLesElevesEcole === 'function') {
+              await this.chargerTousLesElevesEcole();
+            }
             this.classroomConnected = isClassroomConnected();
             if (this.classroomConnected) {
               await this.chargerCoursClassroom();
@@ -517,6 +521,9 @@ export function createAuthStore() {
         this.activeTab = 'prof';
         this.activerEcouteClasse(this.selectedTeacherClass);
         this.chargerElevesReels();
+        if (typeof this.chargerTousLesElevesEcole === 'function') {
+          this.chargerTousLesElevesEcole();
+        }
       } else {
         this.modalLoginProfOpen = true;
         this.teacherAuth.errorMsg = '';
@@ -533,8 +540,16 @@ export function createAuthStore() {
       if (res.success) {
         this.modalLoginProfOpen = false;
         this.activeTab = 'prof';
+        if (res.accessToken) {
+          setClassroomToken(res.accessToken);
+          this.classroomConnected = true;
+          this.chargerCoursClassroom();
+        }
         this.activerEcouteClasse(this.selectedTeacherClass);
         this.chargerElevesReels();
+        if (typeof this.chargerTousLesElevesEcole === 'function') {
+          this.chargerTousLesElevesEcole();
+        }
       } else {
         this.teacherAuth.errorMsg = res.message || `L'adresse Google "${res.email}" n'est pas autorisée sur l'espace enseignant.`;
       }

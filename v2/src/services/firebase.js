@@ -58,6 +58,9 @@ export async function loginUtilisateurGoogle() {
   try {
     const provider = new GoogleAuthProvider();
     provider.addScope('https://www.googleapis.com/auth/classroom.courses.readonly');
+    provider.addScope('https://www.googleapis.com/auth/classroom.rosters.readonly');
+    provider.addScope('https://www.googleapis.com/auth/classroom.coursework.students');
+    provider.addScope('https://www.googleapis.com/auth/classroom.topics');
     provider.addScope('https://www.googleapis.com/auth/drive.metadata.readonly');
     provider.setCustomParameters({ prompt: 'select_account' });
     const result = await signInWithPopup(auth, provider);
@@ -72,12 +75,19 @@ export async function loginUtilisateurGoogle() {
   }
 }
 
-// 2b. Connexion Enseignant dédiée via Google (pour synchronisation immédiate)
+// 2b. Connexion Enseignant dédiée via Google (avec scopes Google Classroom inclus d'office)
 export async function loginProfesseurGoogle() {
   try {
     const provider = new GoogleAuthProvider();
+    provider.addScope('https://www.googleapis.com/auth/classroom.courses.readonly');
+    provider.addScope('https://www.googleapis.com/auth/classroom.rosters.readonly');
+    provider.addScope('https://www.googleapis.com/auth/classroom.coursework.students');
+    provider.addScope('https://www.googleapis.com/auth/classroom.topics');
+    provider.addScope('https://www.googleapis.com/auth/drive.metadata.readonly');
     provider.setCustomParameters({ prompt: 'select_account' });
     const result = await signInWithPopup(auth, provider);
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    const accessToken = credential?.accessToken || null;
     const user = result.user;
 
     try {
@@ -105,16 +115,16 @@ export async function loginProfesseurGoogle() {
         classes: ["1A", "1B", "1C", "1D"]
       };
 
-      return { success: true, user, profile };
+      return { success: true, user, profile, accessToken };
     } catch (fnErr) {
       console.warn("[Auth Prof] Erreur sync function, vérification directe Firestore :", fnErr);
       const docSnap = await getDoc(doc(db, "enseignants", user.email.toLowerCase()));
       if (docSnap.exists() && docSnap.data().actif !== false) {
         const profile = docSnap.data();
-        return { success: true, user, profile };
+        return { success: true, user, profile, accessToken };
       }
       if (user.email === 'gatweb@gmail.com') {
-        return { success: true, user, profile: { email: user.email, nom: "Administrateur", role: "admin", classes: ["all"] } };
+        return { success: true, user, profile: { email: user.email, nom: "Administrateur", role: "admin", classes: ["all"] }, accessToken };
       }
       await signOut(auth);
       return { success: false, reason: "error", error: fnErr.message };
@@ -381,10 +391,10 @@ export async function chargerProgressionEleveReelle(classeId, email, uid) {
 // 6. Écoute temps réel des élèves d'une classe pour la "Météo de classe SeGEC"
 export function listenToClasseProgressions(classeId, onUpdate) {
   try {
-    const q = query(
-      collection(db, "progressions_v2"), 
-      where("classe_id", "==", classeId)
-    );
+    const isAll = !classeId || classeId === 'tous' || classeId === 'all';
+    const q = isAll
+      ? collection(db, "progressions_v2")
+      : query(collection(db, "progressions_v2"), where("classe_id", "==", classeId));
 
     return onSnapshot(q, (snapshot) => {
       const eleves = [];
@@ -414,9 +424,10 @@ export function listenToClasseProgressions(classeId, onUpdate) {
 
         eleves.push({
           docKey: docSnap.id,
-          id: d.eleve_id,
+          id: d.eleve_id || docSnap.id,
           uid: d.uid || '',
-          classe_id: d.classe_id || classeId,
+          classe_id: d.classe_id || d.classe || (isAll ? '1A' : classeId),
+          classe: d.classe_id || d.classe || (isAll ? '1A' : classeId),
           email: d.eleve_email || '',
           nom: d.eleve_nom || "Élève",
           eg: egRatio,
@@ -463,93 +474,186 @@ export function listenToClasseProgressions(classeId, onUpdate) {
   }
 }
 
-// 7. GESTION DES ÉLÈVES & CLASSES (SYSTÈME V1 ÉTENDU)
+// 7. GESTION DES ÉLÈVES & CLASSES (SYSTÈME V1 ÉTENDU + DÉDUPLICATION PAR EMAIL)
 export async function getRealClassStudents(classeId) {
   try {
+    const isAll = !classeId || classeId === 'all' || classeId === 'tous';
     const studentMap = {};
 
     // 1. Récupérer depuis 'users'
-    const qUsers = classeId === 'all' 
-      ? collection(db, "users") 
+    const qUsers = isAll
+      ? collection(db, "users")
       : query(collection(db, "users"), where("classe", "==", classeId));
-    
+
     const snapUsers = await getDocs(qUsers);
     snapUsers.forEach(docSnap => {
       const u = docSnap.data();
-      studentMap[docSnap.id] = {
+      const emailKey = (u.email || "").toLowerCase().trim();
+      const mapKey = emailKey || docSnap.id;
+      studentMap[mapKey] = {
         id: docSnap.id,
+        userDocId: docSnap.id,
         nom: u.nom || u.displayName || docSnap.id,
-        email: u.email || "",
-        classe: u.classe || classeId,
+        email: emailKey,
+        classe: u.classe || (isAll ? "1A" : classeId),
         status: u.status || "actif",
         xp: u.xp || 0
       };
     });
 
     // 2. Récupérer depuis 'progressions_v2' pour fusionner les scores réels
-    const qProg = classeId === 'all'
+    const qProg = isAll
       ? collection(db, "progressions_v2")
       : query(collection(db, "progressions_v2"), where("classe_id", "==", classeId));
 
     const snapProg = await getDocs(qProg);
     snapProg.forEach(docSnap => {
       const p = docSnap.data();
-      const elId = p.eleve_email || p.eleve_id || docSnap.id;
+      const emailKey = (p.eleve_email || "").toLowerCase().trim();
+      const elId = emailKey || p.eleve_id || docSnap.id;
       if (!studentMap[elId]) {
         studentMap[elId] = {
-          id: elId,
+          id: p.eleve_id || docSnap.id,
+          progDocKey: docSnap.id,
           nom: p.eleve_nom || "Élève",
-          email: p.eleve_email || (elId.includes('@') ? elId : ""),
-          classe: p.classe_id || classeId,
+          email: emailKey || (elId.includes('@') ? elId : ""),
+          classe: p.classe_id || p.classe || (isAll ? "1A" : classeId),
           status: "actif",
           xp: p.xp || 0
         };
       } else {
-        if (!studentMap[elId].email && p.eleve_email) {
-          studentMap[elId].email = p.eleve_email;
+        studentMap[elId].progDocKey = docSnap.id;
+        if (!studentMap[elId].email && emailKey) {
+          studentMap[elId].email = emailKey;
+        }
+        if (p.eleve_nom && (!studentMap[elId].nom || studentMap[elId].nom === "Élève")) {
+          studentMap[elId].nom = p.eleve_nom;
         }
       }
       studentMap[elId].progression = p;
-      if (p.xp > studentMap[elId].xp) {
+      if ((p.xp || 0) > (studentMap[elId].xp || 0)) {
         studentMap[elId].xp = p.xp;
       }
     });
 
-    return Object.values(studentMap).sort((a, b) => a.nom.localeCompare(b.nom));
+    return Object.values(studentMap).sort((a, b) => (a.nom || '').localeCompare(b.nom || ''));
   } catch (err) {
     console.error("[Firestore] Erreur chargement élèves réels :", err);
     return [];
   }
 }
 
-// Ajouter un élève manuellement (depuis le tableau de bord prof)
+// Ajouter un élève manuellement ou depuis Classroom (idempotent : pas de doublon si l'email existe déjà)
 export async function addRealStudent(nom, classe, email = "") {
   try {
-    const studentId = 'el_' + Math.random().toString(36).substring(2, 9);
+    const cleanEmail = (email || "").trim().toLowerCase();
+    const cleanNom = (nom || "Élève").trim();
+    const cleanClasse = (classe || "1A").trim().toUpperCase();
+    const studentId = cleanEmail
+      ? 'st_' + cleanEmail.replace(/[^a-z0-9]/g, '_')
+      : 'el_' + Math.random().toString(36).substring(2, 9);
+
     const userDocRef = doc(db, "users", studentId);
     await setDoc(userDocRef, {
-      nom: nom.trim(),
-      classe: classe,
-      email: email.trim().toLowerCase(),
+      nom: cleanNom,
+      classe: cleanClasse,
+      email: cleanEmail,
       status: "actif",
-      created_at: serverTimestamp()
-    });
+      updated_at: serverTimestamp()
+    }, { merge: true });
 
-    // Initialiser document progression
-    const progRef = doc(db, "progressions_v2", `${classe}_${studentId}`);
+    const progKey = cleanEmail
+      ? `${cleanClasse}_${cleanEmail}`.replace(/[^a-zA-Z0-9_-]/g, '_')
+      : `${cleanClasse}_${studentId}`;
+    const progRef = doc(db, "progressions_v2", progKey);
     await setDoc(progRef, {
-      classe_id: classe,
-      classe: classe,
+      classe_id: cleanClasse,
+      classe: cleanClasse,
       eleve_id: studentId,
-      eleve_nom: nom.trim(),
-      xp: 0,
+      eleve_nom: cleanNom,
+      eleve_email: cleanEmail,
       updated_at: new Date().toISOString()
-    });
+    }, { merge: true });
 
     return { success: true, id: studentId };
   } catch (err) {
     console.error("[Firestore] Erreur création élève :", err);
     return { success: false, error: err.message };
+  }
+}
+
+// Synchronisation rapide par lot d'une classe Classroom entière (préserve les XP existants)
+export async function upsertClassroomRosterBatch(studentsList = [], classeId = "1A", classroomCourseName = "") {
+  if (!Array.isArray(studentsList) || studentsList.length === 0) {
+    return { success: true, count: 0 };
+  }
+  const cleanClasse = String(classeId || "1A").trim().toUpperCase();
+  const batch = writeBatch(db);
+  let count = 0;
+
+  for (const st of studentsList) {
+    const cleanEmail = String(st.email || "").trim().toLowerCase();
+    const cleanNom = String(st.fullName || st.nom || "Élève").trim();
+    if (!cleanNom && !cleanEmail) continue;
+
+    const studentId = cleanEmail
+      ? 'st_' + cleanEmail.replace(/[^a-z0-9]/g, '_')
+      : 'st_' + cleanNom.toLowerCase().replace(/[^a-z0-9]/g, '_');
+
+    const userRef = doc(db, "users", studentId);
+    batch.set(userRef, {
+      nom: cleanNom,
+      classe: cleanClasse,
+      email: cleanEmail,
+      photoURL: st.photoUrl || "",
+      classroom_course_name: classroomCourseName || "",
+      status: "actif",
+      updated_at: serverTimestamp()
+    }, { merge: true });
+
+    const progKey = cleanEmail
+      ? `${cleanClasse}_${cleanEmail}`.replace(/[^a-zA-Z0-9_-]/g, '_')
+      : `${cleanClasse}_${studentId}`;
+    const progRef = doc(db, "progressions_v2", progKey);
+    batch.set(progRef, {
+      classe_id: cleanClasse,
+      classe: cleanClasse,
+      eleve_id: studentId,
+      eleve_nom: cleanNom,
+      eleve_email: cleanEmail,
+      updated_at: new Date().toISOString()
+    }, { merge: true });
+
+    count++;
+  }
+
+  await batch.commit();
+  return { success: true, count };
+}
+
+// Supprimer un élève d'une classe (nettoyage des profils de test ou doublons)
+export async function deleteStudentFromClassInDb(student) {
+  try {
+    if (!student) return false;
+    if (student.userDocId || (student.id && !student.id.includes('@'))) {
+      try {
+        await deleteDoc(doc(db, "users", student.userDocId || student.id));
+      } catch (_) {}
+    }
+    if (student.progDocKey) {
+      try {
+        await deleteDoc(doc(db, "progressions_v2", student.progDocKey));
+      } catch (_) {}
+    } else if (student.classe && (student.email || student.id)) {
+      const key = `${student.classe}_${student.email || student.id}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+      try {
+        await deleteDoc(doc(db, "progressions_v2", key));
+      } catch (_) {}
+    }
+    return true;
+  } catch (err) {
+    console.error("[deleteStudentFromClassInDb] Erreur :", err);
+    return false;
   }
 }
 

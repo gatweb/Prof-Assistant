@@ -8,13 +8,15 @@ import {
   fetchCourseTopics,
   createCourseTopic,
   publishCourseWork,
-  syncStudentGradeToClassroom
+  syncStudentGradeToClassroom,
+  inferClassCodeFromCourse
 } from '../services/classroomService.js';
 import {
   addRealStudent,
   getRealClassStudents,
   getClassMappings,
-  saveClassMapping
+  saveClassMapping,
+  upsertClassroomRosterBatch
 } from '../services/firebase.js';
 import { courseManagerV2 } from '../services/courseManager.js';
 
@@ -22,7 +24,11 @@ export function createClassroomStore() {
   return {
     classroomConnected: false,
     classroomCourses: [],
+    classroomCourseRostersCounts: {},
     classroomLoading: false,
+    classroomAutoSyncLoading: false,
+    classroomAutoSyncSummary: '',
+    showClassroomPublishDrawer: false,
     classroomSelectedCourseId: '',
     classroomSelectedCourse: null,
     classroomSelectedCourseStudents: [],
@@ -88,6 +94,7 @@ export function createClassroomStore() {
       disconnectGoogleClassroom();
       this.classroomConnected = false;
       this.classroomCourses = [];
+      this.classroomCourseRostersCounts = {};
       this.classroomSelectedCourseId = '';
       this.classroomSelectedCourse = null;
       this.classroomSelectedCourseStudents = [];
@@ -96,6 +103,7 @@ export function createClassroomStore() {
       this.classroomNewStudentsDetected = [];
       this.classroomImportSuccessMsg = '';
       this.classroomPublishSuccess = '';
+      this.classroomAutoSyncSummary = '';
     },
 
     async chargerCoursClassroom() {
@@ -104,9 +112,28 @@ export function createClassroomStore() {
       try {
         this.classMappings = await getClassMappings();
         this.classroomCourses = await fetchClassroomCourses();
+
+        // Ajouter automatiquement les classes détectées aux classes disponibles
+        for (const c of this.classroomCourses) {
+          const code = inferClassCodeFromCourse(c, this.availableClasses, this.classMappings);
+          if (code && !this.availableClasses.includes(code)) {
+            this.availableClasses.push(code);
+          }
+        }
+
         if (this.classroomCourses.length > 0 && !this.classroomSelectedCourseId) {
           await this.selectionnerCoursClassroom(this.classroomCourses[0].id);
         }
+
+        // Charger en arrière-plan le nombre d'élèves de chaque cours Classroom
+        Promise.all(
+          this.classroomCourses.map(async (c) => {
+            try {
+              const list = await fetchCourseStudents(c.id);
+              this.classroomCourseRostersCounts[c.id] = list.length;
+            } catch (_) {}
+          })
+        );
       } catch (err) {
         console.warn("Erreur chargement cours Classroom :", err);
         if (err.message && err.message.includes("expiré")) {
@@ -117,6 +144,86 @@ export function createClassroomStore() {
       }
     },
 
+    /**
+     * 🔄 SYNCHRONISATION 1-CLIC : Récupère automatiquement toutes les classes et tous les élèves depuis Google Classroom
+     */
+    async synchroniserToutesMesClassesClassroom() {
+      this.classroomAutoSyncLoading = true;
+      this.classroomAutoSyncSummary = '';
+      try {
+        if (!isClassroomConnected()) {
+          await connectGoogleClassroom();
+          this.classroomConnected = true;
+        }
+        this.classMappings = await getClassMappings();
+        const courses = await fetchClassroomCourses();
+        this.classroomCourses = courses;
+
+        if (!courses.length) {
+          this.classroomAutoSyncSummary = "⚠️ Aucun cours actif trouvé sur votre compte Google Classroom.";
+          return;
+        }
+
+        let totalStudentsSynced = 0;
+        let classesSynced = 0;
+        const syncedClassNames = [];
+
+        for (const course of courses) {
+          const existingMap = (this.classMappings || []).find(
+            m => String(m.classroom_course_id) === String(course.id)
+          );
+          const classCode = existingMap?.id || inferClassCodeFromCourse(course, this.availableClasses, this.classMappings);
+
+          let students = [];
+          try {
+            students = await fetchCourseStudents(course.id);
+            this.classroomCourseRostersCounts[course.id] = students.length;
+          } catch (stErr) {
+            console.warn(`[Classroom Sync] Roster ignoré pour ${course.name}:`, stErr.message);
+          }
+
+          await saveClassMapping(classCode, {
+            classroom_course_id: course.id,
+            classroom_course_name: course.name,
+            course_id: existingMap?.course_id || 'fmttn-1re',
+            cours_ids: existingMap?.cours || [existingMap?.course_id || 'fmttn-1re'],
+            auto_sync_grades: existingMap?.auto_sync_grades !== undefined ? existingMap.auto_sync_grades : true
+          });
+
+          if (students.length > 0) {
+            const batchRes = await upsertClassroomRosterBatch(students, classCode, course.name);
+            totalStudentsSynced += (batchRes.count || 0);
+          }
+
+          if (!this.availableClasses.includes(classCode)) {
+            this.availableClasses.push(classCode);
+          }
+          classesSynced++;
+          syncedClassNames.push(`${classCode} (${students.length})`);
+        }
+
+        this.classMappings = await getClassMappings();
+        this.classroomNewStudentsDetected = [];
+
+        if (!this.classroomSelectedCourseId && courses.length > 0) {
+          await this.selectionnerCoursClassroom(courses[0].id);
+        }
+
+        if (typeof this.chargerTousLesElevesEcole === 'function') {
+          await this.chargerTousLesElevesEcole();
+        }
+        await this.chargerElevesReels();
+        this.activerEcouteClasse(this.selectedTeacherClass);
+
+        this.classroomAutoSyncSummary = `✅ Synchronisation réussie : ${classesSynced} classe(s) Classroom (${syncedClassNames.join(', ')}) et ${totalStudentsSynced} élève(s) importés !`;
+      } catch (err) {
+        console.error("[synchroniserToutesMesClassesClassroom] Erreur :", err);
+        alert("Erreur lors de la synchronisation Google Classroom : " + err.message);
+      } finally {
+        this.classroomAutoSyncLoading = false;
+      }
+    },
+
     async selectionnerCoursClassroom(courseId) {
       this.classroomSelectedCourseId = courseId;
       this.classroomSelectedCourse = this.classroomCourses.find(c => c.id === courseId) || null;
@@ -124,7 +231,6 @@ export function createClassroomStore() {
       this.classroomPublishSuccess = '';
       this.classroomMappingSuccessMsg = '';
 
-      // Pré-remplir le formulaire de liaison si une liaison existe déjà pour ce cours Classroom
       const existingMap = (this.classMappings || []).find(
         m => String(m.classroom_course_id) === String(courseId)
       );
@@ -133,6 +239,13 @@ export function createClassroomStore() {
         this.classroomMappingForm.courseId = existingMap.course_id || 'fmttn-1re';
         this.classroomMappingForm.autoSyncGrades = Boolean(existingMap.auto_sync_grades);
         this.classroomTargetClass = existingMap.id;
+      } else if (this.classroomSelectedCourse) {
+        const inferred = inferClassCodeFromCourse(this.classroomSelectedCourse, this.availableClasses, this.classMappings);
+        if (!this.availableClasses.includes(inferred)) {
+          this.availableClasses.push(inferred);
+        }
+        this.classroomMappingForm.classeId = inferred;
+        this.classroomTargetClass = inferred;
       }
 
       this.classroomStudentsLoading = true;
@@ -145,6 +258,7 @@ export function createClassroomStore() {
           fetchCourseTopics(courseId)
         ]);
         this.classroomSelectedCourseStudents = students;
+        this.classroomCourseRostersCounts[courseId] = students.length;
         this.classroomCourseWorkList = courseWork;
         this.classroomTopicsList = topics;
         if (courseWork.length > 0 && !this.classroomSelectedAssignmentForSync) {
@@ -281,31 +395,49 @@ export function createClassroomStore() {
     },
 
     async importerElevesClassroom(targetClass) {
-      const finalClass = (this.classroomNewClassName.trim() || targetClass || '1A').toUpperCase();
+      const finalClass = (this.classroomNewClassName.trim() || this.classroomMappingForm.newClasseId.trim() || targetClass || this.classroomMappingForm.classeId || '1A').toUpperCase();
       if (!this.classroomSelectedCourseStudents.length) {
         alert("Aucun élève trouvé dans ce cours Classroom.");
         return;
       }
 
-      if (!confirm(`Importer ${this.classroomSelectedCourseStudents.length} élèves dans la classe "${finalClass}" ?`)) {
-        return;
-      }
-
       this.classroomImportLoading = true;
       this.classroomImportSuccessMsg = '';
-      let successCount = 0;
 
       try {
-        for (const st of this.classroomSelectedCourseStudents) {
-          const res = await addRealStudent(st.fullName, finalClass, st.email);
-          if (res.success) successCount++;
+        // 1. Enregistrer automatiquement la liaison Classroom <-> Classe
+        if (this.classroomSelectedCourseId && this.classroomSelectedCourse) {
+          await saveClassMapping(finalClass, {
+            classroom_course_id: this.classroomSelectedCourseId,
+            classroom_course_name: this.classroomSelectedCourse.name,
+            course_id: this.classroomMappingForm.courseId || 'fmttn-1re',
+            cours_ids: [this.classroomMappingForm.courseId || 'fmttn-1re'],
+            auto_sync_grades: this.classroomMappingForm.autoSyncGrades !== false
+          });
+          this.classMappings = await getClassMappings();
         }
 
-        this.classroomImportSuccessMsg = `🎉 ${successCount} élève(s) importé(s) avec succès dans la classe ${finalClass} !`;
+        // 2. Importer tout le roster en lot sans doublon
+        const batchRes = await upsertClassroomRosterBatch(
+          this.classroomSelectedCourseStudents,
+          finalClass,
+          this.classroomSelectedCourse?.name || ''
+        );
+
+        if (!this.availableClasses.includes(finalClass)) {
+          this.availableClasses.push(finalClass);
+        }
+
+        this.classroomImportSuccessMsg = `🎉 ${batchRes.count} élève(s) synchronisé(s) et liés à la classe ${finalClass} !`;
         this.classroomNewClassName = '';
+        this.classroomMappingForm.newClasseId = '';
         this.classroomNewStudentsDetected = [];
-        
+
         this.selectedTeacherClass = finalClass;
+        this.submissionFilterClass = finalClass;
+        if (typeof this.chargerTousLesElevesEcole === 'function') {
+          await this.chargerTousLesElevesEcole();
+        }
         await this.chargerElevesReels();
         this.activerEcouteClasse(finalClass);
       } catch (err) {

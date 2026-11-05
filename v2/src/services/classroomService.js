@@ -20,37 +20,53 @@ export const CLASSROOM_SCOPES = [
 ];
 
 const STORAGE_KEY_TOKEN = 'prof_classroom_access_token';
+const STORAGE_KEY_EXPIRY = 'prof_classroom_token_expiry';
 const API_BASE = 'https://classroom.googleapis.com/v1';
 
 let inMemoryToken = null;
 
 /**
- * Récupère le token d'accès Classroom (mémoire ou sessionStorage)
+ * Récupère le token d'accès Classroom (mémoire, sessionStorage ou localStorage avec vérification d'expiration)
  */
 export function getClassroomToken() {
   if (inMemoryToken) return inMemoryToken;
   try {
-    const stored = sessionStorage.getItem(STORAGE_KEY_TOKEN);
+    const expiry = Number(localStorage.getItem(STORAGE_KEY_EXPIRY) || sessionStorage.getItem(STORAGE_KEY_EXPIRY) || 0);
+    if (expiry && Date.now() > expiry) {
+      localStorage.removeItem(STORAGE_KEY_TOKEN);
+      localStorage.removeItem(STORAGE_KEY_EXPIRY);
+      sessionStorage.removeItem(STORAGE_KEY_TOKEN);
+      sessionStorage.removeItem(STORAGE_KEY_EXPIRY);
+      return null;
+    }
+    const stored = sessionStorage.getItem(STORAGE_KEY_TOKEN) || localStorage.getItem(STORAGE_KEY_TOKEN);
     if (stored) {
       inMemoryToken = stored;
       return stored;
     }
   } catch (e) {
-    console.warn("[Classroom] sessionStorage non accessible :", e);
+    console.warn("[Classroom] Storage non accessible :", e);
   }
   return null;
 }
 
 /**
- * Enregistre le token d'accès Classroom
+ * Enregistre le token d'accès Classroom (valide ~55 min pour éviter les reconnexions incessantes)
  */
 export function setClassroomToken(token) {
   inMemoryToken = token;
   try {
     if (token) {
+      const expiry = String(Date.now() + 55 * 60 * 1000);
       sessionStorage.setItem(STORAGE_KEY_TOKEN, token);
+      sessionStorage.setItem(STORAGE_KEY_EXPIRY, expiry);
+      localStorage.setItem(STORAGE_KEY_TOKEN, token);
+      localStorage.setItem(STORAGE_KEY_EXPIRY, expiry);
     } else {
       sessionStorage.removeItem(STORAGE_KEY_TOKEN);
+      sessionStorage.removeItem(STORAGE_KEY_EXPIRY);
+      localStorage.removeItem(STORAGE_KEY_TOKEN);
+      localStorage.removeItem(STORAGE_KEY_EXPIRY);
     }
   } catch (e) {
     console.warn("[Classroom] Impossible d'écrire le token en storage :", e);
@@ -212,13 +228,43 @@ export function detectClassFromCourses(courses = [], availableClasses = [], clas
   // 2. Secours : Détection par motif standard (ex: 1A, 1ère A, 2B, 3TT, etc.)
   for (const course of courses) {
     const text = `${course.section || ''} ${course.name || ''}`.trim();
-    const match = text.match(/\b([1-6])[\s\-_]*(ère|ere|ème|eme)?[\s\-_]*([A-Za-z]{1,2})\b/i);
+    const match = text.match(/\b([1-6])[\s\-_]*(ère|ere|ème|eme|re|e)?[\s\-_]*([A-Za-z]{1,3})\b/i);
     if (match) {
       return `${match[1]}${match[3].toUpperCase()}`;
     }
   }
 
   return null;
+}
+
+/**
+ * Déduit automatiquement le nom de classe ProfAssistant à partir d'un cours Google Classroom
+ */
+export function inferClassCodeFromCourse(course, availableClasses = [], classMappings = []) {
+  if (!course) return '1A';
+  const existing = (classMappings || []).find(m => String(m.classroom_course_id) === String(course.id));
+  if (existing && existing.id) return existing.id;
+
+  const detected = detectClassFromCourses([course], availableClasses, []);
+  if (detected) return detected.toUpperCase();
+
+  // Si la section est courte (ex: "1re C", "2B", "3TQ"), on la nettoie
+  const rawSection = String(course.section || '').trim();
+  if (rawSection && rawSection.length <= 12) {
+    return rawSection.toUpperCase().replace(/\s+/g, '');
+  }
+
+  // Sinon, extraire un code lisible du nom du cours Classroom
+  const rawName = String(course.name || 'CLASSE').trim();
+  const shortClean = rawName
+    .replace(/[^a-zA-Z0-9\s\-]/g, '')
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .join('-')
+    .toUpperCase()
+    .substring(0, 14);
+  return shortClean || '1A';
 }
 
 /**

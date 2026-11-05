@@ -3,6 +3,7 @@ import {
   getRealClassStudents,
   addRealStudent,
   updateStudentClassInDb,
+  deleteStudentFromClassInDb,
   listerEnseignantsCloud,
   enregistrerEnseignantCloud,
   supprimerEnseignantCloud,
@@ -17,8 +18,9 @@ import { courseManagerV2 } from '../services/courseManager.js';
 export function createTeacherStore() {
   return {
     activeProfSubTab: 'copies',
+    activeProfToolSubTab: 'studio', // 'studio' | 'forms' | 'notebooklm' | 'equipe'
     profMatrixChapter: 'ch1',
-    selectedTeacherClass: '1A',
+    selectedTeacherClass: 'tous',
     unsubscribeTeacherListener: null,
     firestoreSynced: false,
     remediationGenerated: false,
@@ -29,6 +31,7 @@ export function createTeacherStore() {
     submissionFilterCourse: 'tous',
     submissionFilterClass: 'tous',
     submissionSearchText: '',
+    submissionsPageLimit: 25,
     selectedSubmission: null,
     modalCorrectionOpen: false,
     gradingNote: 80,
@@ -39,6 +42,7 @@ export function createTeacherStore() {
     batchValidating: false,
     batchFeedbackMsg: '',
     deduplicateSpeedGrader: true,
+    showAntiSpamPanel: false,
     antiSpamCleaning: false,
     antiSpamFeedbackMsg: '',
     showSpammerRadar: true,
@@ -61,6 +65,7 @@ export function createTeacherStore() {
       actif: true
     },
 
+    allSchoolStudents: [],
     allClassStudents: [],
     searchStudentQuery: '',
     modalAddStudentOpen: false,
@@ -73,8 +78,23 @@ export function createTeacherStore() {
     classeEleves: [],
 
     changerClasseEnseignant(newClass) {
-      this.selectedTeacherClass = newClass;
-      this.activerEcouteClasse(newClass);
+      const target = newClass || 'tous';
+      this.selectedTeacherClass = target;
+      this.submissionFilterClass = target;
+      this.submissionsPageLimit = 25;
+      if (target !== 'tous' && target !== 'all') {
+        this.newStudentData.classe = target;
+      }
+      this.activerEcouteClasse(target);
+      this.chargerElevesReels();
+    },
+
+    changerFiltreClasseCopies(newClass) {
+      const target = newClass || 'tous';
+      this.submissionFilterClass = target;
+      this.selectedTeacherClass = target;
+      this.submissionsPageLimit = 25;
+      this.activerEcouteClasse(target);
       this.chargerElevesReels();
     },
 
@@ -93,7 +113,73 @@ export function createTeacherStore() {
     },
 
     async chargerElevesReels() {
-      this.allClassStudents = await getRealClassStudents(this.selectedTeacherClass);
+      const target = (!this.selectedTeacherClass || this.selectedTeacherClass === 'tous') ? 'all' : this.selectedTeacherClass;
+      this.allClassStudents = await getRealClassStudents(target);
+    },
+
+    async chargerTousLesElevesEcole() {
+      try {
+        const list = await getRealClassStudents('all');
+        this.allSchoolStudents = list;
+        for (const st of list) {
+          if (st.classe && st.classe !== 'all' && st.classe !== 'tous' && !this.availableClasses.includes(st.classe)) {
+            this.availableClasses.push(st.classe);
+          }
+        }
+      } catch (e) {
+        console.warn("[chargerTousLesElevesEcole] Erreur :", e);
+      }
+    },
+
+    getClassCardsSummary() {
+      const countByClass = {};
+      for (const st of (this.allSchoolStudents || [])) {
+        const cl = st.classe || '1A';
+        countByClass[cl] = (countByClass[cl] || 0) + 1;
+      }
+
+      const pendingByClass = {};
+      const totalSubsByClass = {};
+      for (const sub of (this.teacherSubmissions || [])) {
+        const cl = sub.classe_id || sub.classe || '';
+        if (!cl) continue;
+        totalSubsByClass[cl] = (totalSubsByClass[cl] || 0) + 1;
+        if (sub.status === 'a_valider' || sub.status === 'pending') {
+          pendingByClass[cl] = (pendingByClass[cl] || 0) + 1;
+        }
+      }
+
+      const allCodes = new Set([...(this.availableClasses || [])]);
+      Object.keys(countByClass).forEach(k => allCodes.add(k));
+      Object.keys(totalSubsByClass).forEach(k => allCodes.add(k));
+      (this.classMappings || []).forEach(m => { if (m.id) allCodes.add(m.id); });
+
+      const cards = Array.from(allCodes)
+        .filter(c => c && c !== 'all' && c !== 'tous')
+        .map(c => {
+          const map = (this.classMappings || []).find(m => String(m.id).toUpperCase() === String(c).toUpperCase());
+          const studentCount = countByClass[c] || 0;
+          const pendingCount = pendingByClass[c] || 0;
+          const subsCount = totalSubsByClass[c] || 0;
+          const isLinked = Boolean(map?.classroom_course_id);
+          return {
+            id: c,
+            studentCount,
+            pendingCount,
+            subsCount,
+            isLinked,
+            classroomCourseName: map?.classroom_course_name || '',
+            courseId: map?.course_id || 'fmttn-1re'
+          };
+        });
+
+      // Trier : d'abord les classes liées à Classroom ou contenant des élèves/copies
+      return cards.sort((a, b) => {
+        const scoreA = (a.isLinked ? 1000 : 0) + (a.studentCount * 10) + a.subsCount;
+        const scoreB = (b.isLinked ? 1000 : 0) + (b.studentCount * 10) + b.subsCount;
+        if (scoreB !== scoreA) return scoreB - scoreA;
+        return a.id.localeCompare(b.id);
+      });
     },
 
     async chargerEquipeEnseignants() {
@@ -192,9 +278,13 @@ export function createTeacherStore() {
     async ajouterEleveManuel() {
       if (!this.newStudentData.nom.trim()) return;
 
+      const targetClasse = (this.newStudentData.classe && this.newStudentData.classe !== 'tous' && this.newStudentData.classe !== 'all')
+        ? this.newStudentData.classe
+        : '1A';
+
       const res = await addRealStudent(
         this.newStudentData.nom,
-        this.newStudentData.classe,
+        targetClasse,
         this.newStudentData.email
       );
 
@@ -202,6 +292,7 @@ export function createTeacherStore() {
         this.newStudentData.nom = '';
         this.newStudentData.email = '';
         this.modalAddStudentOpen = false;
+        await this.chargerTousLesElevesEcole();
         await this.chargerElevesReels();
         this.activerEcouteClasse(this.selectedTeacherClass);
       } else {
@@ -210,8 +301,20 @@ export function createTeacherStore() {
     },
 
     async changerClasseEleve(studentId, newClass) {
-      const ok = await updateStudentClassInDb(studentId, newClass, this.selectedTeacherClass);
+      const ok = await updateStudentClassInDb(studentId, newClass, this.selectedTeacherClass === 'tous' ? '1A' : this.selectedTeacherClass);
       if (ok) {
+        await this.chargerTousLesElevesEcole();
+        await this.chargerElevesReels();
+        this.activerEcouteClasse(this.selectedTeacherClass);
+      }
+    },
+
+    async supprimerEleveModal(student) {
+      if (!student) return;
+      if (!confirm(`Retirer l'élève « ${student.nom} » (${student.classe || '1A'}) de la liste ?`)) return;
+      const ok = await deleteStudentFromClassInDb(student);
+      if (ok) {
+        await this.chargerTousLesElevesEcole();
         await this.chargerElevesReels();
         this.activerEcouteClasse(this.selectedTeacherClass);
       }
@@ -219,9 +322,12 @@ export function createTeacherStore() {
 
     getElevesFiltresGestion() {
       const q = this.searchStudentQuery.toLowerCase().trim();
-      if (!q) return this.allClassStudents;
-      return this.allClassStudents.filter(s => 
-        s.nom.toLowerCase().includes(q) || (s.email && s.email.toLowerCase().includes(q))
+      const baseList = this.allClassStudents || [];
+      if (!q) return baseList;
+      return baseList.filter(s => 
+        (s.nom || '').toLowerCase().includes(q) ||
+        (s.email && s.email.toLowerCase().includes(q)) ||
+        (s.classe && s.classe.toLowerCase().includes(q))
       );
     },
 
@@ -260,7 +366,7 @@ export function createTeacherStore() {
           }
         }
 
-        if (this.submissionFilterClass !== 'tous') {
+        if (this.submissionFilterClass !== 'tous' && this.submissionFilterClass !== 'all') {
           const subClass = sub.classe_id || sub.classe || '';
           if (subClass !== this.submissionFilterClass) return false;
         }
@@ -296,7 +402,6 @@ export function createTeacherStore() {
         } else {
           const entry = groups.get(key);
           entry.count += 1;
-          // Priorité au statut 'valide' si présent, sinon le plus récent (filtered est déjà trié du plus récent au plus ancien)
           if (sub.status === 'valide' && entry.best.status !== 'valide') {
             entry.best = sub;
           }
@@ -307,6 +412,11 @@ export function createTeacherStore() {
         ...entry.best,
         _duplicateCount: entry.count
       }));
+    },
+
+    getPaginatedSubmissions() {
+      const list = this.getFilteredSubmissions();
+      return list.slice(0, this.submissionsPageLimit || 25);
     },
 
     getPendingSubmissionsCount() {
@@ -346,7 +456,7 @@ export function createTeacherStore() {
       for (const sub of this.teacherSubmissions) {
         const email = (sub.email_eleve || '').toLowerCase().trim();
         const nom = (sub.nom_eleve || 'Élève').trim();
-        const classe = (sub.classe_id || sub.classe || this.selectedTeacherClass || '1A').trim();
+        const classe = (sub.classe_id || sub.classe || (this.selectedTeacherClass !== 'tous' ? this.selectedTeacherClass : '1A')).trim();
         const studentKey = email || (sub.uid_eleve || nom).toLowerCase().trim();
         const exKey = (sub.id_exercice || sub.titre_exercice || 'exo').toLowerCase().trim();
         const pairKey = `${studentKey}::${exKey}`;
@@ -378,11 +488,11 @@ export function createTeacherStore() {
         if (count > 1) duplicateCount += (count - 1);
       }
 
-      // Croiser avec les élèves de la classe (pour détecter aussi les XP gonflés sur les QCM)
+      // Ne signaler dans la liste d'anomalies que les vrais abus (≥ 4 doublons ou XP très gonflé ou avertissement actif)
       const spammersMap = new Map();
 
       for (const [key, st] of studentStats.entries()) {
-        if (st.duplicateSubmissions >= 2) {
+        if (st.duplicateSubmissions >= 4) {
           const matchingEleve = (this.classeEleves || []).find(
             e => (e.email && e.email.toLowerCase() === st.email) || (e.nom && e.nom.toLowerCase() === st.nom.toLowerCase())
           );
@@ -391,12 +501,12 @@ export function createTeacherStore() {
           spammersMap.set(key, {
             ...st,
             docKey: matchingEleve?.docKey || st.email || st.nom,
-            classe: matchingEleve?.classe || st.classe || this.selectedTeacherClass,
+            classe: matchingEleve?.classe || st.classe || '1A',
             currentXp,
             legitXp,
             spamAttempts: matchingEleve?.spam_attempts || st.duplicateSubmissions,
             spamWarning: matchingEleve?.spam_warning || null,
-            reason: `${st.duplicateSubmissions} copie(s) en doublon (${st.totalSubmissions} envois pour ${st.uniqueExercises.size} exo)`
+            reason: `${st.duplicateSubmissions} copies en doublon (${st.totalSubmissions} envois pour ${st.uniqueExercises.size} exo)`
           });
         }
       }
@@ -406,9 +516,9 @@ export function createTeacherStore() {
         if (!key) continue;
         const legitXp = this.calculerXpLegitimeEleve(el, 0);
         const currentXp = Number(el.xp || 0);
-        const isXpInflated = currentXp > legitXp + 180 || currentXp >= 750;
-        const hasSpamAttempts = Number(el.spam_attempts || 0) >= 2;
-        const hasActiveWarning = Boolean(el.spam_warning);
+        const isXpInflated = currentXp > legitXp + 250 || currentXp >= 850;
+        const hasSpamAttempts = Number(el.spam_attempts || 0) >= 4;
+        const hasActiveWarning = Boolean(el.spam_warning?.active);
 
         if ((isXpInflated || hasSpamAttempts || hasActiveWarning) && !spammersMap.has(key)) {
           spammersMap.set(key, {
@@ -416,7 +526,7 @@ export function createTeacherStore() {
             docKey: el.docKey || el.email || el.nom,
             nom: el.nom || 'Élève',
             email: el.email || '',
-            classe: el.classe || this.selectedTeacherClass,
+            classe: el.classe || '1A',
             totalSubmissions: 0,
             duplicateSubmissions: Number(el.spam_attempts || 0),
             currentXp,
@@ -424,8 +534,8 @@ export function createTeacherStore() {
             spamAttempts: Number(el.spam_attempts || 0),
             spamWarning: el.spam_warning || null,
             reason: isXpInflated
-              ? `XP anormalement élevé (${currentXp} XP vs ~${legitXp} XP légitimes)`
-              : `${el.spam_attempts || 0} tentative(s) de spam détectée(s)`
+              ? `XP élevé (${currentXp} XP vs ~${legitXp} XP estimés)`
+              : `${el.spam_attempts || 0} envois répétés détectés`
           });
         }
       }
@@ -994,7 +1104,7 @@ export function createTeacherStore() {
       const cid = this.profSelectedCourseId;
       return this.teacherSubmissions.find(s => {
         const subClass = s.classe_id || s.classe || '';
-        if (this.selectedTeacherClass && subClass && subClass !== this.selectedTeacherClass) {
+        if (this.selectedTeacherClass && this.selectedTeacherClass !== 'tous' && this.selectedTeacherClass !== 'all' && subClass && subClass !== this.selectedTeacherClass) {
           return false;
         }
 
@@ -1036,7 +1146,7 @@ export function createTeacherStore() {
     getCourseStatsForCurrentClass() {
       const list = this.teacherSubmissions.filter(s => {
         const subClass = s.classe_id || s.classe || '';
-        if (this.selectedTeacherClass && subClass && subClass !== this.selectedTeacherClass) return false;
+        if (this.selectedTeacherClass && this.selectedTeacherClass !== 'tous' && this.selectedTeacherClass !== 'all' && subClass && subClass !== this.selectedTeacherClass) return false;
         const subCourse = s.course_id || s.id_course || 'js-uaa5-classic';
         return subCourse === this.profSelectedCourseId;
       });

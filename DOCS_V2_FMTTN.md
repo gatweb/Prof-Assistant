@@ -168,6 +168,21 @@ Pour garantir une expérience sans latence sur les PC scolaires tout en maintena
   - Déduplication côté serveur (`corrigerDevoir` dans `functions/index.js`) et outil enseignant de purge des doublons + recalcul d'XP + avertissement élève (`purgerSpamEtSanctionner`).
   - Double sauvegarde locale (`profassistant_fmttn_state_<user>`) et Cloud Firestore (`progressions_v2`) garantissant que les 4 **Badges de Maîtrise Officiels `@lt_X`** (*Gardien du Poste*, *Détective des 5 Dossiers*, *Maître Courriel & Cci*, *Citoyen Cyber-Responsable*) restent définitivement débloqués après rafraîchissement.
 
+### Phase 6 : Refonte Ergonomique de l'Espace Professeur & Synchronisation Google Classroom 1-Clic (Novembre 2026 — Validé ✅)
+- [x] **Navigation Enseignant simplifiée en 4 grands piliers (sans barre de défilement horizontale cachée)** :
+  1. **`📥 1. Copies à corriger`** : Cartes statistiques cliquables en 1 clic, filtres unifiés, pagination fluide (25 copies par page + *Afficher plus*) et SpeedGrader.
+  2. **`📊 2. Suivi & Notes`** : Activité des élèves en direct (`⚪ 🔵 🟠 🟣 🟢`), Matrice de maîtrise des acquis SeGEC, Fiche de remédiation et Export Bulletin CSV.
+  3. **`🏫 3. Classes & Classroom`** : Gestion unifiée des classes, de la liste des élèves et de Google Classroom sur un seul écran clair.
+  4. **`🛠️ 4. Cours & Outils IA`** : Regroupement structuré de l'Éditeur de Cours (*Course Studio*), du Générateur de Quiz Google Forms IA, des supports NotebookLM et de l'Équipe Enseignante.
+- [x] **Récupération automatique des classes et élèves depuis Google Classroom (`synchroniserToutesMesClassesClassroom`)** :
+  - Demande des scopes OAuth Classroom dès la connexion Google Enseignant (`loginProfesseurGoogle`) et persistance du jeton (`localStorage` + `sessionStorage`).
+  - Bouton 1-clic **« 🏫 Récupérer / Synchroniser mes classes Classroom »** directement dans l'en-tête : détecte tous les cours Google Classroom actifs du professeur, déduit ou associe le code de classe (`inferClassCodeFromCourse`), crée les liaisons Firestore (`classes/{id}`) et importe tous les élèves par lot (`upsertClassroomRosterBatch`) sans doublon et sans écraser les XP existants.
+- [x] **Sélecteur de classe unique et synchronisé** :
+  - Choisir une classe (ou `🌍 Toutes mes classes`) dans l'en-tête filtre simultanément les copies à corriger, le suivi en direct, la matrice et la liste d'élèves.
+  - Les classes actives (liées à Classroom ou contenant des élèves/copies) s'affichent automatiquement en tête avec leur nombre d'élèves (`getClassCardsSummary`).
+- [x] **Bandeau Anti-Spam discret et rassurant** :
+  - Remplacement de l'ancien grand bloc rouge d'alerte par une barre calme d'une seule ligne intégrée aux filtres (`🛡️ Regrouper les essais multiples (1 copie/élève)` + bouton `🧹 Supprimer X doublon(s)` + tiroir pliable `⚖️ Régulation XP` ouvert uniquement à la demande).
+
 ---
 
 ## 👥 6. Gestion Multi-Enseignants & Multi-Classes
