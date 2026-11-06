@@ -26,7 +26,7 @@
           @
         </div>
         <div>
-          <div class="flex items-center gap-2.5">
+          <div class="flex items-center gap-2">
             <h1 class="font-extrabold text-lg tracking-tight text-slate-900 cursor-pointer whitespace-nowrap" @click="ouvrirHubCours()">ProfAssistant</h1>
             <button
               type="button"
@@ -34,7 +34,16 @@
               :class="studentViewMode === 'hub' && activeTab !== 'prof' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'"
               class="text-xs font-extrabold px-2.5 py-1 border rounded-xl transition cursor-pointer flex items-center gap-1.5 shrink-0">
               <span>🏠</span>
-              <span>Mes cours</span>
+              <span>Mes cours (<span x-text="getStudentYearLevel()"></span>)</span>
+            </button>
+            <button
+              type="button"
+              x-show="activeTab !== 'prof'"
+              @click="ouvrirModalCodeAccesCours()"
+              class="text-xs font-extrabold px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-xl transition cursor-pointer hidden md:flex items-center gap-1 shrink-0"
+              title="Déverrouiller un cours avec un code donné par ton professeur">
+              <span>🔑</span>
+              <span>Code cours</span>
             </button>
           </div>
         </div>
@@ -522,6 +531,13 @@
           </div>
 
           <button
+            @click="ouvrirModalCodeAccesCours()"
+            class="px-4 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs transition cursor-pointer shadow-sm flex items-center gap-2">
+            <span>🔑</span>
+            <span>J'ai un code de cours</span>
+          </button>
+
+          <button
             @click="skillTreeModalOpen = true"
             class="px-4 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition cursor-pointer shadow-sm flex items-center gap-2">
             <span>🌳</span>
@@ -530,19 +546,23 @@
         </div>
       </div>
 
-      <!-- Grille des cartes de cours -->
+      <!-- Grille des cartes de cours (filtrées par niveau 1re vs 3e ou débloquées par code) -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <template x-for="course in getFilteredHubCourses()" :key="course.id">
           <div
             @click="ouvrirCarteCours(course.id)"
-            class="bg-white rounded-3xl p-6 border border-slate-200/90 hover:border-blue-400 shadow-xs hover:shadow-xl transition-all duration-200 flex flex-col justify-between cursor-pointer group">
+            :class="course.unlocked ? 'bg-white border-slate-200/90 hover:border-blue-400 hover:shadow-xl' : 'bg-slate-100/80 border-slate-200 opacity-75 hover:opacity-100'"
+            class="rounded-3xl p-6 border shadow-xs transition-all duration-200 flex flex-col justify-between cursor-pointer group">
             <div>
               <div class="flex items-center justify-between gap-2 mb-4">
                 <div class="w-12 h-12 rounded-2xl bg-slate-100 group-hover:bg-blue-50 flex items-center justify-center text-2xl transition"
-                     x-text="course.theme?.icon || '📚'"></div>
-                <div class="flex items-center gap-1.5">
-                  <span x-show="course.recommended" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">
-                    Recommandé <span x-text="user.classe"></span>
+                     x-text="course.unlocked ? (course.theme?.icon || '📚') : '🔒'"></div>
+                <div class="flex items-center gap-1.5 flex-wrap justify-end">
+                  <span x-show="course.unlocked && course.recommended" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">
+                    ✓ Ton cours (<span x-text="user.classe"></span>)
+                  </span>
+                  <span x-show="!course.unlocked" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300">
+                    🔒 Réservé <span x-text="course.targetYear"></span> (Code requis)
                   </span>
                   <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600"
                         x-text="(course.chapters?.length || 1) + ' modules'"></span>
@@ -554,18 +574,28 @@
             </div>
 
             <div class="mt-6 pt-4 border-t border-slate-100 space-y-2">
-              <div class="flex items-center justify-between text-xs font-bold">
-                <span class="text-slate-500">Progression</span>
-                <span class="text-blue-600 font-black" x-text="course.progressPercent + '%'"></span>
-              </div>
-              <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-500"
-                     :style="'width: ' + course.progressPercent + '%'"></div>
-              </div>
-              <div class="pt-2 flex items-center justify-between text-xs font-extrabold text-blue-600">
-                <span>Ouvrir la carte du cours</span>
-                <span class="group-hover:translate-x-1 transition-transform">➔</span>
-              </div>
+              <template x-if="course.unlocked">
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between text-xs font-bold">
+                    <span class="text-slate-500">Progression</span>
+                    <span class="text-blue-600 font-black" x-text="course.progressPercent + '%'"></span>
+                  </div>
+                  <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-500"
+                         :style="'width: ' + course.progressPercent + '%'"></div>
+                  </div>
+                  <div class="pt-2 flex items-center justify-between text-xs font-extrabold text-blue-600">
+                    <span>Ouvrir la carte du cours</span>
+                    <span class="group-hover:translate-x-1 transition-transform">➔</span>
+                  </div>
+                </div>
+              </template>
+              <template x-if="!course.unlocked">
+                <div class="pt-1 flex items-center justify-between text-xs font-extrabold text-amber-800">
+                  <span>🔑 Déverrouiller avec le code du professeur</span>
+                  <span>➔</span>
+                </div>
+              </template>
             </div>
           </div>
         </template>
@@ -4439,7 +4469,7 @@
             </div>
           </div>
 
-          <!-- Sélecteur de Cours + Actions Bulletin & Remédiation -->
+          <!-- Sélecteur de Cours + Code d'accès élève + Actions Bulletin & Remédiation -->
           <div class="flex items-center gap-2 flex-wrap">
             <select
               :value="profSelectedCourseId"
@@ -4450,6 +4480,12 @@
                 <option :value="c.id" x-text="(c.theme?.icon || '📚') + ' ' + c.title"></option>
               </template>
             </select>
+
+            <span class="px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-black flex items-center gap-1.5"
+                  title="Code d'accès permettant à un élève de déverrouiller ce cours manuellement">
+              <span>🔑 Code cours :</span>
+              <code class="font-mono bg-white px-1.5 py-0.5 rounded border border-amber-300" x-text="getActiveProfCourseAccessCode()"></code>
+            </span>
 
             <button 
               @click="genererRemediationProf()"
@@ -7298,6 +7334,91 @@
 
       </div>
     </template>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODALE : CODE D'ACCÈS AU COURS & VÉRIFICATION DU NIVEAU (1re vs 3e)  -->
+  <!-- ==================================================================== -->
+  <div
+    x-show="modalCourseAccessCodeOpen"
+    x-cloak
+    class="fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-4"
+    @keydown.escape.window="fermerModalCodeAccesCours()">
+
+    <div
+      @click.outside="fermerModalCodeAccesCours()"
+      class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5">
+
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center text-2xl font-black shrink-0">
+            🔑
+          </div>
+          <div>
+            <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-black uppercase tracking-wider">
+              Accès protégé par niveau
+            </span>
+            <h3 class="font-black text-lg text-slate-900 mt-0.5"
+                x-text="pendingLockedCourse ? ('Déverrouiller : ' + pendingLockedCourse.title) : 'Entrer un code de cours'"></h3>
+          </div>
+        </div>
+        <button
+          type="button"
+          @click="fermerModalCodeAccesCours()"
+          class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed space-y-1.5">
+        <p x-show="pendingLockedCourse">
+          Ce cours est prévu pour les élèves de <strong class="text-indigo-700" x-text="pendingLockedCourse?.targetYear || 'ce niveau'"></strong>, alors que ton profil indique actuellement la classe <strong class="text-slate-900" x-text="user.classe || '1A'"></strong>.
+        </p>
+        <p>
+          Si tu t'es trompé(e) de classe, change simplement ta classe ci-dessous. Sinon, entre le <strong>code d'accès du cours</strong> donné par ton professeur :
+        </p>
+      </div>
+
+      <!-- Raccourci rapide si l'élève n'avait pas choisi la bonne classe (ex: élève de 3e resté sur 1A) -->
+      <div class="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-2">
+        <div class="text-[11px] font-extrabold text-blue-950">
+          🏫 Tu es dans une autre classe ? Choisis ta vraie classe pour débloquer automatiquement tes cours :
+        </div>
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <template x-for="cl in availableClasses" :key="cl">
+            <button
+              type="button"
+              @click="choisirClasseEleve(cl); fermerModalCodeAccesCours()"
+              :class="user.classe === cl ? 'bg-blue-600 text-white font-black' : 'bg-white hover:bg-blue-100 text-slate-800 border border-blue-200 font-bold'"
+              class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer"
+              x-text="cl"></button>
+          </template>
+        </div>
+      </div>
+
+      <!-- Saisie du code d'accès -->
+      <div class="space-y-2">
+        <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500">
+          🔑 Ou entre le code d'accès du professeur :
+        </label>
+        <div class="flex items-center gap-2">
+          <input
+            type="text"
+            x-model="courseAccessCodeInput"
+            @keydown.enter="validerCodeAccesCours()"
+            placeholder="Ex: FMTTN1, BUREAU3, CODE3..."
+            class="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 text-sm font-mono font-black uppercase tracking-wider text-slate-900 focus:outline-none focus:border-indigo-600 bg-slate-50 focus:bg-white" />
+          <button
+            type="button"
+            @click="validerCodeAccesCours()"
+            class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition cursor-pointer shadow-sm shrink-0">
+            Déverrouiller ➔
+          </button>
+        </div>
+        <p x-show="courseAccessCodeError" class="text-xs font-bold text-rose-600 mt-1" x-text="courseAccessCodeError"></p>
+      </div>
+
+    </div>
   </div>
 
   <script type="module" src="/src/main.js"></script>

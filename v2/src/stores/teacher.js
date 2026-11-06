@@ -9,6 +9,9 @@ import {
   cleanDuplicatesAndArchiveOldStudentsInDb,
   getCurrentSchoolYearLabel,
   normalizeStudentNameTokens,
+  isGhostOrDemoAccount,
+  resolveBestStudentClass,
+  getYearLevelFromClass,
   listerEnseignantsCloud,
   enregistrerEnseignantCloud,
   supprimerEnseignantCloud,
@@ -76,16 +79,21 @@ export function createTeacherStore() {
     // Filtre par année scolaire & activité : 'actifs' (Année en cours) | 'inactifs' (0 activité) | 'archives' (Années précédentes) | 'tous'
     studentPeriodFilter: 'actifs',
     studentArchiveYearFilter: 'tous',
+    currentSchoolYear: getCurrentSchoolYearLabel(),
     cleaningStudentsLoading: false,
+    cleaningStudentsInProgress: false,
     cleaningStudentsFeedback: '',
+    studentCleanStatusMsg: '',
 
     // Vue « 📋 Bulletin Scolaire Individuel »
     modalBulletinEleveOpen: false,
     selectedBulletinStudent: null,
     bulletinAppreciationDraft: '',
+    bulletinAppreciationText: '',
     bulletinCustomNote20: '',
     bulletinSaving: false,
     bulletinSaveFeedback: '',
+    bulletinSaveMsg: '',
 
     modalAddStudentOpen: false,
     newStudentData: {
@@ -101,10 +109,38 @@ export function createTeacherStore() {
     },
 
     /**
+     * Sépare automatiquement les élèves de 1re année et de 3e année selon le cours sélectionné par le professeur
+     */
+    doesStudentMatchSelectedProfCourseLevel(st) {
+      if (!st) return false;
+      if (isGhostOrDemoAccount(st.nom, st.email, st.id, st.xp)) return false;
+      // Si le professeur a cliqué sur une classe spécifique (ex: 3A ou 1A), respecter ce choix
+      if (this.selectedTeacherClass && this.selectedTeacherClass !== 'tous' && this.selectedTeacherClass !== 'all') {
+        return true;
+      }
+      const stYear = getYearLevelFromClass(st.classe || st.classe_id || '1A');
+      const cid = String(this.profSelectedCourseId || 'fmttn-1c').toLowerCase();
+      if (cid.includes('1re') || cid.includes('1c')) {
+        return stYear === '1re';
+      }
+      if (cid.includes('3e') || cid.includes('uaa5')) {
+        return stYear === '3e';
+      }
+      return true;
+    },
+
+    getActiveProfCourseAccessCode() {
+      const cid = this.profSelectedCourseId === 'fmttn-1c' ? 'fmttn-1re' : this.profSelectedCourseId;
+      const found = (this.coursesList || []).find(c => c.id === cid);
+      return found?.accessCode || courseManagerV2.inferCourseAccessCode({ id: cid });
+    },
+
+    /**
      * Détermine si un élève a au moins 1 copie remise ou une activité réelle
      */
     hasStudentRealActivity(st) {
       if (!st) return false;
+      if (isGhostOrDemoAccount(st.nom, st.email, st.id, st.xp)) return false;
       if ((Number(st.xp) || 0) > 0) return true;
       if (st.classroom_course_name) return true;
       if (st.eg === '5/5' || st.charte === 'acquis' || st.p2 === 'acquis') return true;
@@ -112,7 +148,7 @@ export function createTeacherStore() {
       const email = (st.email || '').toLowerCase().trim();
       return (this.teacherSubmissions || []).some(s => {
         if (email && s.email_eleve && s.email_eleve.toLowerCase().trim() === email) return true;
-        if (normName && s.nom_eleve && normalizeStudentNameTokens(s.nom_eleve) === normName) return true;
+        if (normName && normName !== 'eleve' && s.nom_eleve && normalizeStudentNameTokens(s.nom_eleve) === normName) return true;
         return false;
       });
     },
@@ -170,6 +206,7 @@ export function createTeacherStore() {
         inactifs,
         archives,
         total: baseList.length,
+        tous: baseList.length,
         duplicates
       };
     },
@@ -426,10 +463,15 @@ export function createTeacherStore() {
       if (!student) return;
       const ok = await archiveOrRestoreStudentInDb(student, archive);
       if (ok) {
-        this.cleaningStudentsFeedback = archive
+        const msg = archive
           ? `🗄️ « ${student.nom} » a été déplacé dans « Années précédentes & Archives ».`
           : `✅ « ${student.nom} » a été restauré dans l'année en cours (${this.getCurrentSchoolYear()}).`;
-        setTimeout(() => { this.cleaningStudentsFeedback = ''; }, 5000);
+        this.cleaningStudentsFeedback = msg;
+        this.studentCleanStatusMsg = msg;
+        setTimeout(() => {
+          this.cleaningStudentsFeedback = '';
+          this.studentCleanStatusMsg = '';
+        }, 5000);
         await this.chargerTousLesElevesEcole();
         await this.chargerElevesReels();
         this.activerEcouteClasse(this.selectedTeacherClass);
@@ -438,24 +480,33 @@ export function createTeacherStore() {
 
     async nettoyerDoublonsEtAnciensEleves() {
       this.cleaningStudentsLoading = true;
-      this.cleaningStudentsFeedback = '⏳ Fusion des doublons, suppression des comptes fantômes et archivage des anciens comptes...';
+      this.cleaningStudentsInProgress = true;
+      const waitMsg = '⏳ Fusion des doublons, suppression des comptes fantômes ("Élève") et archivage des anciens comptes...';
+      this.cleaningStudentsFeedback = waitMsg;
+      this.studentCleanStatusMsg = waitMsg;
       try {
         const res = await cleanDuplicatesAndArchiveOldStudentsInDb();
         await this.chargerTousLesElevesEcole();
         await this.chargerElevesReels();
         this.activerEcouteClasse(this.selectedTeacherClass);
-        this.cleaningStudentsFeedback = `✨ Base assainie : ${res.duplicatesMerged} doublon(s) fusionné(s), ${res.ghostsDeleted} compte(s) fantôme(s) supprimé(s), et ${res.oldArchived} compte(s) inactif(s)/ancien(s) rangé(s) dans « Années précédentes » !`;
+        const doneMsg = `✨ Base assainie : ${res.duplicatesMerged} doublon(s) fusionné(s), ${res.ghostsDeleted} compte(s) fantôme(s) supprimé(s), et ${res.oldArchived} compte(s) inactif(s)/ancien(s) rangé(s) !`;
+        this.cleaningStudentsFeedback = doneMsg;
+        this.studentCleanStatusMsg = doneMsg;
       } catch (err) {
         alert("Erreur lors du nettoyage des élèves : " + err.message);
         this.cleaningStudentsFeedback = '';
+        this.studentCleanStatusMsg = '';
       } finally {
         this.cleaningStudentsLoading = false;
+        this.cleaningStudentsInProgress = false;
       }
     },
 
     getElevesFiltresGestion() {
       const q = this.searchStudentQuery.toLowerCase().trim();
-      const baseList = (this.allClassStudents || []).filter(s => this.matchesCurrentStudentPeriodFilter(s));
+      const baseList = (this.allClassStudents || []).filter(
+        s => !isGhostOrDemoAccount(s.nom, s.email, s.id, s.xp) && this.matchesCurrentStudentPeriodFilter(s)
+      );
       if (!q) return baseList;
       return baseList.filter(s => 
         (s.nom || '').toLowerCase().includes(q) ||
@@ -466,7 +517,11 @@ export function createTeacherStore() {
 
     getFilteredClasseEleves() {
       const list = this.classeEleves || [];
-      return list.filter(el => this.matchesCurrentStudentPeriodFilter(el));
+      return list.filter(
+        el => !isGhostOrDemoAccount(el.nom, el.email, el.id, el.xp) &&
+              this.doesStudentMatchSelectedProfCourseLevel(el) &&
+              this.matchesCurrentStudentPeriodFilter(el)
+      );
     },
 
     getProgressionMoyenneClasse() {
@@ -976,7 +1031,7 @@ export function createTeacherStore() {
         const email = (item.email || '').toLowerCase().trim();
         const cl = (item.classe || item.classe_id || '1A').toUpperCase().trim();
         const normName = normalizeStudentNameTokens(item.nom || '');
-        const nameKey = normName && normName !== 'eleve' ? `${cl}::${normName}` : '';
+        const nameKey = normName && normName !== 'eleve' ? normName : '';
 
         if (email && mergedMap.has(email)) return email;
         if (nameKey && nameToKey.has(nameKey)) {
@@ -996,24 +1051,31 @@ export function createTeacherStore() {
       };
 
       (this.allClassStudents || []).forEach(st => {
+        if (isGhostOrDemoAccount(st.nom, st.email, st.id, st.xp)) return;
         const key = resolveKey(st);
+        const existing = mergedMap.get(key) || {};
+        const bestClasse = resolveBestStudentClass(existing.classe, st.classe, Boolean(existing.classroom_course_name), Boolean(st.classroom_course_name));
         mergedMap.set(key, {
+          ...existing,
           ...st,
-          id: st.id,
-          nom: st.nom,
-          classe: st.classe || '1A',
-          email: st.email || '',
-          xp: st.xp || 0,
-          score: st.progression?.score || 50,
-          tutor_calls_count: Number(st.progression?.tutor_calls_count) || 0,
-          hints_used_count: Number(st.progression?.hints_used_count) || 0,
-          updated_at: st.progression?.updated_at || st.lastActiveIso || null
+          id: st.id || existing.id,
+          nom: (st.nom && st.nom !== 'Élève') ? st.nom : (existing.nom || st.nom),
+          classe: bestClasse,
+          classe_id: bestClasse,
+          email: st.email || existing.email || '',
+          xp: Math.max(st.xp || 0, existing.xp || 0),
+          score: Math.max(st.progression?.score || 50, existing.score || 50),
+          tutor_calls_count: Math.max(Number(st.progression?.tutor_calls_count) || 0, existing.tutor_calls_count || 0),
+          hints_used_count: Math.max(Number(st.progression?.hints_used_count) || 0, existing.hints_used_count || 0),
+          updated_at: st.progression?.updated_at || st.lastActiveIso || existing.updated_at || null
         });
       });
 
       (this.classeEleves || []).forEach(ce => {
+        if (isGhostOrDemoAccount(ce.nom, ce.email, ce.id, ce.xp)) return;
         const key = resolveKey(ce);
         const existing = mergedMap.get(key) || {};
+        const bestClasse = resolveBestStudentClass(existing.classe, ce.classe, Boolean(existing.classroom_course_name), false);
         mergedMap.set(key, {
           ...existing,
           ...ce,
@@ -1021,7 +1083,8 @@ export function createTeacherStore() {
           userDocIds: existing.userDocIds || [],
           progDocKeys: Array.from(new Set([...(existing.progDocKeys || []), ...(ce.progDocKeys || [ce.docKey].filter(Boolean))])),
           nom: (ce.nom && ce.nom !== 'Élève') ? ce.nom : (existing.nom || ce.nom),
-          classe: ce.classe || existing.classe || '1A',
+          classe: bestClasse,
+          classe_id: bestClasse,
           email: ce.email || existing.email || '',
           xp: Math.max(ce.xp || 0, existing.xp || 0),
           score: Math.max(ce.score || 50, existing.score || 50),
@@ -1036,15 +1099,19 @@ export function createTeacherStore() {
         });
       });
 
-      const students = Array.from(mergedMap.values()).filter(el => this.matchesCurrentStudentPeriodFilter(el));
+      const students = Array.from(mergedMap.values()).filter(
+        el => !isGhostOrDemoAccount(el.nom, el.email, el.id, el.xp) &&
+              this.doesStudentMatchSelectedProfCourseLevel(el) &&
+              this.matchesCurrentStudentPeriodFilter(el)
+      );
       const now = Date.now();
 
       return students.map(el => {
         const normElName = normalizeStudentNameTokens(el.nom || '');
-        // Chercher les soumissions de cet élève
+        // Chercher les soumissions de cet élève (sans jamais matcher un nom générique "eleve")
         const subs = (this.teacherSubmissions || []).filter(s => {
           const sameEmail = el.email && s.email_eleve && s.email_eleve.toLowerCase().trim() === el.email.toLowerCase().trim();
-          const sameName = normElName && s.nom_eleve && normalizeStudentNameTokens(s.nom_eleve) === normElName;
+          const sameName = normElName && normElName !== 'eleve' && s.nom_eleve && normalizeStudentNameTokens(s.nom_eleve) === normElName;
           return sameEmail || sameName;
         });
 
@@ -1114,11 +1181,14 @@ export function createTeacherStore() {
       if (!student) return;
       this.selectedBulletinStudent = student;
       const report = this.getBulletinDataForStudent(student);
-      this.bulletinAppreciationDraft = student.bulletin_appreciation || report.autoAppreciation;
+      const initialAppreciation = student.bulletin_appreciation || report.autoAppreciation;
+      this.bulletinAppreciationDraft = initialAppreciation;
+      this.bulletinAppreciationText = initialAppreciation;
       this.bulletinCustomNote20 = student.bulletin_custom_note20 !== null && student.bulletin_custom_note20 !== undefined
         ? String(student.bulletin_custom_note20)
         : '';
       this.bulletinSaveFeedback = '';
+      this.bulletinSaveMsg = '';
       this.modalBulletinEleveOpen = true;
     },
 
@@ -1153,24 +1223,33 @@ export function createTeacherStore() {
     getBulletinDataForStudent(student) {
       const st = student || this.selectedBulletinStudent;
       if (!st) {
+        const emptyMastery = this.getMasteryLevelFromScore(0);
         return {
           nom: 'Élève',
           classe: '1A',
           email: '',
           schoolYear: this.getCurrentSchoolYear(),
+          anneeScolaire: this.getCurrentSchoolYear(),
           bucket: 'actifs',
           moyenne100: 0,
-          moyenne20: 0,
-          mastery: this.getMasteryLevelFromScore(0),
+          avgScore100: 0,
+          moyenne20: null,
+          avgNote20: null,
+          mastery: emptyMastery,
+          niveauMaitrise: emptyMastery,
           xp: 0,
           legitXp: 0,
           autonomyPct: 100,
+          autonomy: 100,
           tutorCalls: 0,
           hintsUsed: 0,
           submissions: [],
+          travaux: [],
+          totalTravaux: 0,
           validatedCount: 0,
           pendingCount: 0,
-          fmttnSummary: null,
+          fmttnItems: [],
+          competencesFmttn: [],
           coursesBreakdown: [],
           autoAppreciation: ''
         };
@@ -1182,13 +1261,13 @@ export function createTeacherStore() {
       // Fusionner avec la fiche temps réel de classeEleves si disponible
       const liveProg = (this.classeEleves || []).find(ce =>
         (email && ce.email && ce.email.toLowerCase().trim() === email) ||
-        (normName && normalizeStudentNameTokens(ce.nom || '') === normName)
+        (normName && normName !== 'eleve' && normalizeStudentNameTokens(ce.nom || '') === normName)
       ) || st.progression || {};
 
       // Récupérer et dédupliquer les soumissions de l'élève
       const rawSubs = (this.teacherSubmissions || []).filter(s => {
         if (email && s.email_eleve && s.email_eleve.toLowerCase().trim() === email) return true;
-        if (normName && s.nom_eleve && normalizeStudentNameTokens(s.nom_eleve) === normName) return true;
+        if (normName && normName !== 'eleve' && s.nom_eleve && normalizeStudentNameTokens(s.nom_eleve) === normName) return true;
         return false;
       });
 
@@ -1196,7 +1275,11 @@ export function createTeacherStore() {
       for (const s of rawSubs) {
         const exKey = `${s.course_id || s.id_course || 'cours'}::${(s.id_exercice || s.titre_exercice || s.id).toLowerCase()}`;
         if (!subMap.has(exKey) || (s.status === 'valide' && subMap.get(exKey).status !== 'valide')) {
-          subMap.set(exKey, s);
+          subMap.set(exKey, {
+            ...s,
+            exercice_title: s.titre_exercice || s.exercice_title || s.id_exercice || 'Activité',
+            exercice_id: s.id_exercice || s.exercice_id || s.id
+          });
         }
       }
       const uniqueSubs = Array.from(subMap.values()).sort(
@@ -1237,13 +1320,13 @@ export function createTeacherStore() {
       const num2_m1 = liveProg.num2_m1 || liveProg.competences?.['NUM-2.M1'] || 'en_cours';
 
       const fmttnItems = [
-        { label: 'Charte & Sécurité du poste (M0)', status: charte },
-        { label: `Investigation Escape Game (${eg})`, status: eg === '5/5' ? 'acquis' : 'en_cours' },
-        { label: 'Anatomie Courriel & Nétiquette (D5)', status: d5 },
-        { label: 'Simulateur E-mail & Cci / RGPD (P2)', status: p2 },
-        { label: 'Protocole HTTPS & Cadenas TLS (D3)', status: num2_d3 },
-        { label: 'Traces Actives vs Passives (D4)', status: num2_d4 },
-        { label: 'Campagne Stop Cyberharcèlement (M1)', status: num2_m1 }
+        { code: 'MOD-0', label: 'Charte & Sécurité du poste (M0)', status: charte },
+        { code: 'INV-EG', label: `Investigation Escape Game (${eg})`, status: eg === '5/5' ? 'acquis' : 'en_cours' },
+        { code: 'NUM-1.D5', label: 'Anatomie Courriel & Nétiquette', status: d5 },
+        { code: 'NUM-1.P2', label: 'Simulateur E-mail & Cci / RGPD', status: p2 },
+        { code: 'NUM-2.D3', label: 'Protocole HTTPS & Cadenas TLS', status: num2_d3 },
+        { code: 'NUM-2.D4', label: 'Traces Actives vs Passives', status: num2_d4 },
+        { code: 'NUM-2.M1', label: 'Campagne Stop Cyberharcèlement', status: num2_m1 }
       ];
 
       // Répartition par cours pour les travaux remis
@@ -1299,24 +1382,34 @@ export function createTeacherStore() {
         autoAppreciation += `Belle autonomie (${autonomyPct}%), poursuis sur cette lancée !`;
       }
 
+      const schoolYear = st.school_year || this.getCurrentSchoolYear();
+
       return {
         nom: st.nom || 'Élève',
         classe: st.classe || st.classe_id || '1A',
         email: email || 'Inscrit manuellement',
-        schoolYear: st.school_year || this.getCurrentSchoolYear(),
+        schoolYear,
+        anneeScolaire: schoolYear,
         bucket: this.getStudentPeriodBucket(st),
         moyenne100,
+        avgScore100: moyenne100,
         moyenne20,
+        avgNote20: moyenne20,
         mastery,
+        niveauMaitrise: mastery,
         xp,
         legitXp,
         autonomyPct,
+        autonomy: autonomyPct,
         tutorCalls,
         hintsUsed,
         submissions: uniqueSubs,
+        travaux: uniqueSubs,
+        totalTravaux: uniqueSubs.length,
         validatedCount,
         pendingCount,
         fmttnItems,
+        competencesFmttn: fmttnItems,
         coursesBreakdown,
         autoAppreciation
       };
@@ -1326,23 +1419,28 @@ export function createTeacherStore() {
       if (!this.selectedBulletinStudent) return;
       const report = this.getBulletinDataForStudent(this.selectedBulletinStudent);
       this.bulletinAppreciationDraft = report.autoAppreciation;
+      this.bulletinAppreciationText = report.autoAppreciation;
     },
 
     async sauvegarderBulletinEleve() {
       if (!this.selectedBulletinStudent) return;
       this.bulletinSaving = true;
       this.bulletinSaveFeedback = '';
+      this.bulletinSaveMsg = '';
       try {
+        const appreciation = this.bulletinAppreciationText || this.bulletinAppreciationDraft || '';
         const custom20 = this.bulletinCustomNote20 !== '' && !isNaN(Number(this.bulletinCustomNote20))
           ? Math.min(20, Math.max(0, Number(this.bulletinCustomNote20)))
           : null;
         await saveStudentBulletinInDb(this.selectedBulletinStudent, {
-          appreciation: this.bulletinAppreciationDraft,
+          appreciation,
           customNote20: custom20
         });
-        this.selectedBulletinStudent.bulletin_appreciation = this.bulletinAppreciationDraft;
+        this.selectedBulletinStudent.bulletin_appreciation = appreciation;
         this.selectedBulletinStudent.bulletin_custom_note20 = custom20;
-        this.bulletinSaveFeedback = '✅ Bulletin (note & appréciation) enregistré dans le dossier de l\'élève !';
+        const okMsg = '✅ Bulletin (note & appréciation) enregistré dans le dossier de l\'élève !';
+        this.bulletinSaveFeedback = okMsg;
+        this.bulletinSaveMsg = okMsg;
         await this.chargerElevesReels();
       } catch (err) {
         alert("Erreur lors de la sauvegarde du bulletin : " + err.message);
@@ -1353,12 +1451,16 @@ export function createTeacherStore() {
 
     async copierAppreciationBulletin() {
       const report = this.getBulletinDataForStudent(this.selectedBulletinStudent);
-      const textToCopy = `${report.nom} (${report.classe}) — Note : ${report.moyenne20}/20 (${report.mastery.label}) : ${this.bulletinAppreciationDraft || report.autoAppreciation}`;
+      const text = this.bulletinAppreciationText || this.bulletinAppreciationDraft || report.autoAppreciation;
+      const textToCopy = `${report.nom} (${report.classe}) — Note : ${report.moyenne20}/20 (${report.mastery.label}) : ${text}`;
       try {
         await navigator.clipboard.writeText(textToCopy);
-        this.bulletinSaveFeedback = '📋 Appréciation et note copiées dans le presse-papiers (prêt à coller dans Smartschool / Pronote) !';
+        const copiedMsg = '📋 Appréciation et note copiées dans le presse-papiers (prêt à coller dans Smartschool / Pronote) !';
+        this.bulletinSaveFeedback = copiedMsg;
+        this.bulletinSaveMsg = copiedMsg;
       } catch (_) {
         this.bulletinSaveFeedback = 'ℹ️ Sélectionnez le texte ci-dessus et faites Ctrl+C.';
+        this.bulletinSaveMsg = 'ℹ️ Sélectionnez le texte ci-dessus et faites Ctrl+C.';
       }
     },
 

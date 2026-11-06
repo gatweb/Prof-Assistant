@@ -267,19 +267,25 @@ export async function saveEleveProgression(classeId, eleveId, data) {
     if (!auth.currentUser) await initStudentSession();
     if (!auth.currentUser) throw new Error("Aucune session Firebase");
 
-    const email = auth.currentUser.email ? auth.currentUser.email.toLowerCase() : (data.email || '');
-    const nom = data.nom || auth.currentUser.displayName || (email ? email.split('@')[0] : "Élève");
+    const email = auth.currentUser.email ? auth.currentUser.email.toLowerCase().trim() : (data.email || '').toLowerCase().trim();
+    const nom = (data.nom || auth.currentUser.displayName || (email ? email.split('@')[0] : "Élève")).trim();
     const uid = auth.currentUser.uid;
 
+    // Ne JAMAIS créer de document dans progressions_v2 pour un visiteur non identifié ("Élève") ou pour un compte enseignant en test
+    if (isGhostOrDemoAccount(nom, email, eleveId, data.xp)) {
+      return false;
+    }
+
+    const cleanClasse = (classeId || data.classe || '1A').toUpperCase().trim();
     const docKey = email 
-      ? `${classeId}_${email}`.replace(/[^a-zA-Z0-9_-]/g, '_')
-      : `${classeId}_${eleveId}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+      ? `${cleanClasse}_${email}`.replace(/[^a-zA-Z0-9_-]/g, '_')
+      : `${cleanClasse}_${eleveId}`.replace(/[^a-zA-Z0-9_-]/g, '_');
     const docRef = doc(db, "progressions_v2", docKey);
 
     const payload = {
       uid: uid,
-      classe_id: classeId,
-      classe: classeId,
+      classe_id: cleanClasse,
+      classe: cleanClasse,
       eleve_id: eleveId,
       eleve_nom: nom,
       eleve_email: email,
@@ -337,26 +343,57 @@ export function subscribeToStudentOwnProgression(classeId, email, uid, onUpdate)
   }
 }
 
-// 5b. Chargement de la progression réelle d'un élève depuis Firestore
+// 5b. Chargement de la progression réelle d'un élève depuis Firestore (avec détection prioritaire de sa vraie classe dans 'users')
 export async function chargerProgressionEleveReelle(classeId, email, uid) {
   try {
     const normalizedEmail = (email || '').toLowerCase().trim();
+    let officialClasse = '';
     let progressionData = null;
 
-    if (classeId && normalizedEmail) {
-      const docKey = `${classeId}_${normalizedEmail}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+    // 1. Vérifier d'abord dans 'users' quelle est la classe officielle de l'élève (ex: importée depuis Google Classroom)
+    if (normalizedEmail) {
+      const stDocId = 'st_' + normalizedEmail.replace(/[^a-z0-9]/g, '_');
+      const userSnap = await getDoc(doc(db, "users", stDocId));
+      if (userSnap.exists() && userSnap.data()?.classe) {
+        officialClasse = String(userSnap.data().classe).toUpperCase().trim();
+      } else {
+        const qUser = query(collection(db, "users"), where("email", "==", normalizedEmail));
+        const qUserSnap = await getDocs(qUser);
+        qUserSnap.forEach(d => {
+          const cl = String(d.data()?.classe || '').toUpperCase().trim();
+          if (cl) {
+            officialClasse = resolveBestStudentClass(officialClasse, cl, false, Boolean(d.data()?.classroom_course_name));
+          }
+        });
+      }
+    }
+
+    const bestTargetClasse = resolveBestStudentClass(classeId, officialClasse);
+
+    if (bestTargetClasse && normalizedEmail) {
+      const docKey = `${bestTargetClasse}_${normalizedEmail}`.replace(/[^a-zA-Z0-9_-]/g, '_');
       const snap = await getDoc(doc(db, "progressions_v2", docKey));
       if (snap.exists()) {
         progressionData = snap.data();
       }
     }
 
-    if (!progressionData && normalizedEmail) {
+    if (normalizedEmail) {
       const q = query(collection(db, "progressions_v2"), where("eleve_email", "==", normalizedEmail));
       const qSnap = await getDocs(q);
-      if (!qSnap.empty) {
-        progressionData = qSnap.docs[0].data();
-      }
+      qSnap.forEach(dSnap => {
+        const d = dSnap.data();
+        const dCl = String(d.classe_id || d.classe || '').toUpperCase().trim();
+        if (!progressionData) {
+          progressionData = d;
+        } else {
+          const currCl = String(progressionData.classe_id || progressionData.classe || '').toUpperCase().trim();
+          const bestCl = resolveBestStudentClass(currCl, dCl);
+          if (dCl === bestCl && ((Number(d.xp) || 0) >= (Number(progressionData.xp) || 0) || currCl === '1A')) {
+            progressionData = { ...progressionData, ...d, classe_id: bestCl, classe: bestCl };
+          }
+        }
+      });
     }
 
     if (!progressionData && uid) {
@@ -365,6 +402,11 @@ export async function chargerProgressionEleveReelle(classeId, email, uid) {
       if (!qSnap.empty) {
         progressionData = qSnap.docs[0].data();
       }
+    }
+
+    if (progressionData && officialClasse) {
+      progressionData.classe_id = resolveBestStudentClass(progressionData.classe_id, officialClasse, false, true);
+      progressionData.classe = progressionData.classe_id;
     }
 
     // Charger l'historique des soumissions de devoirs de l'élève
@@ -379,6 +421,7 @@ export async function chargerProgressionEleveReelle(classeId, email, uid) {
     }
 
     return {
+      officialClasse: officialClasse || (progressionData?.classe_id || ''),
       progression: progressionData,
       submissions
     };
@@ -439,15 +482,52 @@ export function isGhostOrDemoAccount(nom = "", email = "", id = "", xp = 0) {
   const cleanEmail = String(email || "").trim().toLowerCase();
   const cleanId = String(id || "").trim().toLowerCase();
 
-  if (cleanEmail === "invite@demo.local" || cleanId.startsWith("guest_")) return true;
+  if (cleanEmail === "invite@demo.local" || cleanId.startsWith("guest_") || cleanId === "el_student") return true;
+
+  // Exclure les adresses e-mail des professeurs de la liste des élèves (ex: tests avec gatweb@gmail.com)
+  if (cleanEmail && ALLOWED_TEACHERS.some(t => t.email.toLowerCase() === cleanEmail)) {
+    return true;
+  }
+
+  // Exclure TOUS les profils génériques "Élève", "Anonyme", "Invité" (même s'ils avaient 50 XP par défaut)
   if (
-    (cleanNom === "élève" || cleanNom === "eleve" || cleanNom === "élève invité" || cleanNom === "eleve invite" || cleanNom === "anonyme") &&
-    !cleanEmail &&
-    Number(xp || 0) <= 20
+    !cleanNom ||
+    cleanNom === "élève" ||
+    cleanNom === "eleve" ||
+    cleanNom === "élève invité" ||
+    cleanNom === "eleve invite" ||
+    cleanNom === "anonyme" ||
+    cleanNom === "invité" ||
+    cleanNom === "invite" ||
+    cleanNom === "utilisateur" ||
+    cleanNom === "el_student"
   ) {
     return true;
   }
   return false;
+}
+
+/**
+ * Lorsqu'un élève possède un ancien enregistrement par défaut en "1A" et un enregistrement dans sa vraie classe (ex: 3A, 3GTD, 1B),
+ * conserve toujours la vraie classe spécifique plutôt que le fallback "1A".
+ */
+export function resolveBestStudentClass(classA = "", classB = "", fromClassroomA = false, fromClassroomB = false) {
+  const a = String(classA || "").toUpperCase().trim();
+  const b = String(classB || "").toUpperCase().trim();
+  if (!a) return b || "1A";
+  if (!b) return a || "1A";
+  if (fromClassroomB && !fromClassroomA) return b;
+  if (fromClassroomA && !fromClassroomB) return a;
+  if (a === "1A" && b !== "1A") return b;
+  if (b === "1A" && a !== "1A") return a;
+  return b || a;
+}
+
+export function getYearLevelFromClass(classe = "") {
+  const cl = String(classe || "").toUpperCase().trim();
+  if (cl.startsWith("3")) return "3e";
+  if (cl.startsWith("2")) return "2e";
+  return "1re";
 }
 
 export function inferStudentSchoolYearAndStatus({ updatedIso, createdIso, explicitSchoolYear, explicitStatus, archived, xp = 0, fromClassroom = false }) {
@@ -485,13 +565,13 @@ export function inferStudentSchoolYearAndStatus({ updatedIso, createdIso, explic
   };
 }
 
-// 6. Écoute temps réel des élèves d'une classe pour la "Météo de classe SeGEC" (AVEC DÉDUPLICATION & FILTRE FANTÔMES)
+// 6. Écoute temps réel des élèves d'une classe pour la "Météo de classe SeGEC" (AVEC DÉDUPLICATION INTER-CLASSES & FILTRE FANTÔMES)
 export function listenToClasseProgressions(classeId, onUpdate) {
   try {
     const isAll = !classeId || classeId === 'tous' || classeId === 'all';
-    const q = isAll
-      ? collection(db, "progressions_v2")
-      : query(collection(db, "progressions_v2"), where("classe_id", "==", classeId));
+    const targetCl = isAll ? '' : String(classeId).toUpperCase().trim();
+    // On écoute l'ensemble de progressions_v2 pour pouvoir résoudre la vraie classe d'un élève (ex: 3A au lieu d'un vieux 1A par défaut)
+    const q = collection(db, "progressions_v2");
 
     return onSnapshot(q, (snapshot) => {
       const dedupMap = new Map();
@@ -501,16 +581,16 @@ export function listenToClasseProgressions(classeId, onUpdate) {
         const d = docSnap.data();
         const email = (d.eleve_email || '').toLowerCase().trim();
         const nom = (d.eleve_nom || "Élève").trim();
-        const cl = (d.classe_id || d.classe || (isAll ? '1A' : classeId)).toUpperCase().trim();
+        const cl = (d.classe_id || d.classe || (isAll ? '1A' : targetCl)).toUpperCase().trim();
         const xp = Number(d.xp) || 0;
 
-        // Ignorer les sessions invités / fantômes vides
+        // Ignorer les sessions invités / fantômes / comptes profs
         if (isGhostOrDemoAccount(nom, email, d.eleve_id || docSnap.id, xp)) {
           return;
         }
 
         const normName = normalizeStudentNameTokens(nom);
-        const nameLookupKey = normName && normName !== 'eleve' ? `${cl}::${normName}` : '';
+        const nameLookupKey = normName && normName !== 'eleve' ? normName : '';
 
         let canonicalKey = email || (nameLookupKey && nameToKeyMap.get(nameLookupKey)) || nameLookupKey || `${cl}::${d.eleve_id || docSnap.id}`;
         if (email && nameLookupKey) {
@@ -604,8 +684,12 @@ export function listenToClasseProgressions(classeId, onUpdate) {
         } else {
           const existing = dedupMap.get(canonicalKey);
           const allProgKeys = Array.from(new Set([...(existing.progDocKeys || []), docSnap.id]));
+          const bestCl = resolveBestStudentClass(existing.classe, candidate.classe);
           const preferNew = (candidate.xp > existing.xp) || (candidate.score > existing.score) || (!existing.email && candidate.email);
           const merged = preferNew ? { ...existing, ...candidate } : { ...candidate, ...existing };
+          merged.classe = bestCl;
+          merged.classe_id = bestCl;
+          merged.docKey = allProgKeys.find(k => k.toUpperCase().startsWith(bestCl + '_')) || merged.docKey;
           merged.progDocKeys = allProgKeys;
           merged.xp = Math.max(existing.xp || 0, candidate.xp || 0);
           merged.score = Math.max(existing.score || 50, candidate.score || 50);
@@ -621,7 +705,11 @@ export function listenToClasseProgressions(classeId, onUpdate) {
         }
       });
 
-      const eleves = Array.from(dedupMap.values()).sort((a, b) => (a.nom || '').localeCompare(b.nom || ''));
+      let eleves = Array.from(dedupMap.values());
+      if (!isAll) {
+        eleves = eleves.filter(e => e.classe === targetCl);
+      }
+      eleves.sort((a, b) => (a.nom || '').localeCompare(b.nom || ''));
       onUpdate(eleves);
     }, (error) => {
       console.warn("[Firestore] Écoute classe :", error.message);
@@ -633,16 +721,17 @@ export function listenToClasseProgressions(classeId, onUpdate) {
   }
 }
 
-// 7. GESTION DES ÉLÈVES & CLASSES (SYSTÈME V1/V2 UNIFIÉ + DÉDUPLICATION MULTI-CLÉS NOM/EMAIL + ANNÉE SCOLAIRE)
+// 7. GESTION DES ÉLÈVES & CLASSES (SYSTÈME V1/V2 UNIFIÉ + DÉDUPLICATION MULTI-CLÉS INTER-CLASSES + ANNÉE SCOLAIRE)
 export async function getRealClassStudents(classeId) {
   try {
     const isAll = !classeId || classeId === 'all' || classeId === 'tous';
+    const targetCl = isAll ? '' : String(classeId).toUpperCase().trim();
     const studentMap = new Map();
     const nameIndex = new Map();
 
     const findCanonicalKey = (emailKey, normName, cl, fallbackId) => {
       if (emailKey && studentMap.has(emailKey)) return emailKey;
-      const nameKey = normName && normName !== 'eleve' ? `${cl}::${normName}` : '';
+      const nameKey = normName && normName !== 'eleve' ? normName : '';
       if (nameKey && nameIndex.has(nameKey)) {
         const mapped = nameIndex.get(nameKey);
         if (emailKey && mapped !== emailKey && studentMap.has(mapped)) {
@@ -660,17 +749,13 @@ export async function getRealClassStudents(classeId) {
       return chosen;
     };
 
-    // 1. Récupérer depuis 'users'
-    const qUsers = isAll
-      ? collection(db, "users")
-      : query(collection(db, "users"), where("classe", "==", classeId));
-
-    const snapUsers = await getDocs(qUsers);
+    // 1. Récupérer l'ensemble de 'users' pour résoudre la vraie classe de chaque élève
+    const snapUsers = await getDocs(collection(db, "users"));
     snapUsers.forEach(docSnap => {
       const u = docSnap.data();
       const emailKey = (u.email || "").toLowerCase().trim();
       const nom = (u.nom || u.displayName || docSnap.id).trim();
-      const cl = (u.classe || (isAll ? "1A" : classeId)).toUpperCase().trim();
+      const cl = (u.classe || "1A").toUpperCase().trim();
       const xp = Number(u.xp) || 0;
 
       if (isGhostOrDemoAccount(nom, emailKey, docSnap.id, xp)) return;
@@ -707,6 +792,7 @@ export async function getRealClassStudents(classeId) {
       } else {
         const ex = studentMap.get(mapKey);
         ex.userDocIds = Array.from(new Set([...(ex.userDocIds || []), docSnap.id]));
+        ex.classe = resolveBestStudentClass(ex.classe, cl, Boolean(ex.classroom_course_name), Boolean(u.classroom_course_name));
         if (!ex.email && emailKey) ex.email = emailKey;
         if (nom && nom !== docSnap.id && (!ex.nom || ex.nom === ex.id)) ex.nom = nom;
         if (xp > (ex.xp || 0)) ex.xp = xp;
@@ -719,16 +805,12 @@ export async function getRealClassStudents(classeId) {
     });
 
     // 2. Récupérer depuis 'progressions_v2' pour fusionner les scores réels
-    const qProg = isAll
-      ? collection(db, "progressions_v2")
-      : query(collection(db, "progressions_v2"), where("classe_id", "==", classeId));
-
-    const snapProg = await getDocs(qProg);
+    const snapProg = await getDocs(collection(db, "progressions_v2"));
     snapProg.forEach(docSnap => {
       const p = docSnap.data();
       const emailKey = (p.eleve_email || "").toLowerCase().trim();
       const nom = (p.eleve_nom || "Élève").trim();
-      const cl = (p.classe_id || p.classe || (isAll ? "1A" : classeId)).toUpperCase().trim();
+      const cl = (p.classe_id || p.classe || "1A").toUpperCase().trim();
       const xp = Number(p.xp) || 0;
 
       if (isGhostOrDemoAccount(nom, emailKey, p.eleve_id || docSnap.id, xp)) return;
@@ -763,8 +845,9 @@ export async function getRealClassStudents(classeId) {
         });
       } else {
         const ex = studentMap.get(mapKey);
-        ex.progDocKey = ex.progDocKey || docSnap.id;
+        ex.classe = resolveBestStudentClass(ex.classe, cl, Boolean(ex.classroom_course_name), false);
         ex.progDocKeys = Array.from(new Set([...(ex.progDocKeys || []), docSnap.id]));
+        ex.progDocKey = ex.progDocKeys.find(k => k.toUpperCase().startsWith(ex.classe + '_')) || ex.progDocKey || docSnap.id;
         if (!ex.email && emailKey) ex.email = emailKey;
         if (nom && nom !== "Élève" && (!ex.nom || ex.nom === "Élève" || ex.nom === ex.id)) {
           ex.nom = nom;
@@ -788,10 +871,16 @@ export async function getRealClassStudents(classeId) {
       }
     });
 
-    return Array.from(studentMap.values()).map(st => ({
+    let results = Array.from(studentMap.values()).map(st => ({
       ...st,
       duplicateDocsCount: Math.max(0, (st.userDocIds?.length || 0) - 1) + Math.max(0, (st.progDocKeys?.length || 0) - 1)
-    })).sort((a, b) => (a.nom || '').localeCompare(b.nom || ''));
+    }));
+
+    if (!isAll) {
+      results = results.filter(st => st.classe === targetCl);
+    }
+
+    return results.sort((a, b) => (a.nom || '').localeCompare(b.nom || ''));
   } catch (err) {
     console.error("[Firestore] Erreur chargement élèves réels :", err);
     return [];
@@ -1076,11 +1165,22 @@ export async function cleanDuplicatesAndArchiveOldStudentsInDb() {
         }
       }
 
-      // S'il y a plusieurs progDocKeys pour la même personne, garder celui avec le meilleur XP et supprimer les doublons
-      if (Array.isArray(st.progDocKeys) && st.progDocKeys.length > 1) {
-        const keepProgKey = st.progDocKey || st.progDocKeys[0];
+      // S'il y a plusieurs progDocKeys pour la même personne (ex: un ancien 1A_ et un vrai 3A_), garder celui de sa vraie classe et supprimer les autres
+      if (Array.isArray(st.progDocKeys) && st.progDocKeys.length > 0) {
+        const bestClasse = (st.classe || '1A').toUpperCase().trim();
+        const canonicalProgKey = st.progDocKeys.find(k => k.toUpperCase().startsWith(bestClasse + '_')) || st.progDocKey || st.progDocKeys[0];
+        if (st.progression) {
+          await setDoc(doc(db, "progressions_v2", canonicalProgKey), {
+            ...st.progression,
+            classe_id: bestClasse,
+            classe: bestClasse,
+            eleve_nom: st.nom,
+            eleve_email: st.email || '',
+            xp: st.xp || 0
+          }, { merge: true });
+        }
         for (const pk of st.progDocKeys) {
-          if (pk !== keepProgKey) {
+          if (pk !== canonicalProgKey) {
             try {
               await deleteDoc(doc(db, "progressions_v2", pk));
               duplicatesMerged++;

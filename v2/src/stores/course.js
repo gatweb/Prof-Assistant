@@ -63,6 +63,120 @@ export function createCourseStore() {
       finished: false
     },
 
+    // 🔒 Verrouillage des cours par Niveau (1re vs 3e) & Code d'accès enseignant
+    unlockedCourseIds: (() => {
+      try {
+        return JSON.parse(localStorage.getItem('profassistant_unlocked_courses') || '[]');
+      } catch (_) {
+        return [];
+      }
+    })(),
+    modalCourseAccessCodeOpen: false,
+    pendingLockedCourse: null,
+    courseAccessCodeInput: '',
+    courseAccessCodeError: '',
+
+    getStudentYearLevel() {
+      const cl = String(this.user?.classe || '1A').toUpperCase().trim();
+      if (cl.startsWith('3')) return '3e';
+      if (cl.startsWith('2')) return '2e';
+      return '1re';
+    },
+
+    isCourseUnlockedForStudent(course) {
+      if (!course) return false;
+      if (this.teacherAuth?.isTeacher) return true;
+      if ((this.unlockedCourseIds || []).includes(course.id)) return true;
+
+      const cl = String(this.user?.classe || '1A').toUpperCase().trim();
+      const explicitMapping = (this.classMappings || []).find(
+        m => String(m.id || '').toUpperCase() === cl
+      );
+      if (explicitMapping) {
+        const linked = explicitMapping.cours || (explicitMapping.course_id ? [explicitMapping.course_id] : []);
+        if (linked.includes(course.id)) return true;
+      }
+
+      const targetYear = course.targetYear || courseManagerV2.inferCourseTargetYear(course);
+      if (targetYear === 'all') return true;
+      return targetYear === this.getStudentYearLevel();
+    },
+
+    getStudentAccessibleCourses() {
+      if (!this.coursesList || !this.coursesList.length) return [];
+      if (this.teacherAuth?.isTeacher) return this.coursesList;
+      return this.coursesList.filter(c => this.isCourseUnlockedForStudent(c));
+    },
+
+    async verifierEtOrienterCoursSelonClasseEleve() {
+      if (this.teacherAuth?.isTeacher || !this.coursesList?.length) return;
+      if (this.currentCourse && this.isCourseUnlockedForStudent(this.currentCourse)) return;
+
+      const studentYear = this.getStudentYearLevel();
+      let preferred = null;
+      if (studentYear === '3e') {
+        preferred = this.coursesList.find(c => c.id === 'bureautique-3e')
+          || this.coursesList.find(c => c.id === 'js-uaa5-classic')
+          || this.coursesList.find(c => (c.targetYear || courseManagerV2.inferCourseTargetYear(c)) === '3e');
+      } else {
+        preferred = this.coursesList.find(c => c.id === 'fmttn-1re')
+          || this.coursesList.find(c => (c.targetYear || courseManagerV2.inferCourseTargetYear(c)) === '1re');
+      }
+
+      if (preferred && preferred.id !== this.currentCourse?.id) {
+        await this.changerCours(preferred.id, false, true);
+      }
+    },
+
+    ouvrirModalCodeAccesCours(course = null) {
+      this.pendingLockedCourse = course;
+      this.courseAccessCodeInput = '';
+      this.courseAccessCodeError = '';
+      this.modalCourseAccessCodeOpen = true;
+    },
+
+    fermerModalCodeAccesCours() {
+      this.modalCourseAccessCodeOpen = false;
+      this.pendingLockedCourse = null;
+      this.courseAccessCodeInput = '';
+      this.courseAccessCodeError = '';
+    },
+
+    async validerCodeAccesCours() {
+      const code = String(this.courseAccessCodeInput || '').toUpperCase().trim();
+      if (!code) {
+        this.courseAccessCodeError = "Veuillez entrer le code d'accès communiqué par votre professeur.";
+        return;
+      }
+
+      let matchedCourse = null;
+      if (this.pendingLockedCourse) {
+        const expected = (this.pendingLockedCourse.accessCode || courseManagerV2.inferCourseAccessCode(this.pendingLockedCourse)).toUpperCase();
+        if (code === expected || code === 'PROF2026') {
+          matchedCourse = this.pendingLockedCourse;
+        }
+      } else {
+        matchedCourse = (this.coursesList || []).find(
+          c => (c.accessCode || courseManagerV2.inferCourseAccessCode(c)).toUpperCase() === code
+        );
+      }
+
+      if (!matchedCourse) {
+        this.courseAccessCodeError = "Code d'accès invalide. Vérifiez le code auprès de votre professeur (ex: FMTTN1, BUREAU3, CODE3).";
+        return;
+      }
+
+      if (!this.unlockedCourseIds.includes(matchedCourse.id)) {
+        this.unlockedCourseIds.push(matchedCourse.id);
+        try {
+          localStorage.setItem('profassistant_unlocked_courses', JSON.stringify(this.unlockedCourseIds));
+        } catch (_) {}
+      }
+
+      this.fermerModalCodeAccesCours();
+      await this.changerCours(matchedCourse.id, true, true);
+    },
+
     getRenderedExerciseConsigne() {
       const ex = this.currentExercise;
       if (!ex) return '<p class="text-slate-500">Sélectionnez une activité.</p>';
@@ -218,7 +332,12 @@ export function createCourseStore() {
         // 1. Vérifier les paramètres d'URL pour les liens profonds Classroom (?course=&ex=&module=&view=)
         const handledDeepLink = await this.handleDeepLinkParams();
 
-        // 2. Si pas de lien profond et cours non-FMTTN, charger le contenu normal
+        // 2. Orienter automatiquement l'élève vers le cours de son niveau (1re vs 3e) s'il n'a pas de lien profond
+        if (!handledDeepLink) {
+          await this.verifierEtOrienterCoursSelonClasseEleve();
+        }
+
+        // 3. Si pas de lien profond et cours non-FMTTN, charger le contenu normal
         if (!handledDeepLink && this.currentCourse && this.currentCourse.workspaceType !== 'fmttn') {
           await this.chargerContenuCoursActif();
         }
@@ -338,8 +457,15 @@ export function createCourseStore() {
     },
 
     async ouvrirCarteCours(courseId) {
-      if (courseId && courseId !== this.currentCourse?.id) {
-        await this.changerCours(courseId, false);
+      if (courseId) {
+        const target = (this.coursesList || []).find(c => c.id === courseId);
+        if (target && !this.teacherAuth?.isTeacher && !this.isCourseUnlockedForStudent(target)) {
+          this.ouvrirModalCodeAccesCours(target);
+          return;
+        }
+        if (courseId !== this.currentCourse?.id) {
+          await this.changerCours(courseId, false, true);
+        }
       }
       this.studentViewMode = 'course';
       this.moduleActiveTab = 'theorie';
@@ -516,7 +642,10 @@ export function createCourseStore() {
       );
 
       return this.coursesList.map(c => {
-        let recommended = true;
+        const unlocked = this.isCourseUnlockedForStudent(c);
+        const targetYear = c.targetYear || courseManagerV2.inferCourseTargetYear(c);
+        const accessCode = c.accessCode || courseManagerV2.inferCourseAccessCode(c);
+        let recommended = unlocked;
         if (linkedCourseIds.size > 0) {
           recommended = linkedCourseIds.has(c.id);
         } else if (is1re2e) {
@@ -526,6 +655,9 @@ export function createCourseStore() {
         }
         return {
           ...c,
+          targetYear,
+          accessCode,
+          unlocked,
           recommended,
           explicitlyLinked: linkedCourseIds.has(c.id),
           progressPercent: this.getCourseCompletionPercent(c)
@@ -589,7 +721,13 @@ export function createCourseStore() {
       return 'todo';
     },
 
-    async changerCours(courseId, goToFocus = true) {
+    async changerCours(courseId, goToFocus = true, skipLockCheck = false) {
+      const targetCourse = (this.coursesList || []).find(c => c.id === courseId);
+      if (targetCourse && !skipLockCheck && !this.teacherAuth?.isTeacher && !this.isCourseUnlockedForStudent(targetCourse)) {
+        this.ouvrirModalCodeAccesCours(targetCourse);
+        return;
+      }
+
       const found = courseManagerV2.selectCourse(courseId);
       if (!found) return;
       this.currentCourse = found;

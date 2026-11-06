@@ -7,6 +7,8 @@ import { db, getFirestoreCoursesList, getCourseModulesFromFirestore, saveCourseS
 export const FMTTN_COURSE_DEF = {
   id: "fmttn-1re",
   workspaceType: "fmttn",
+  targetYear: "1re",
+  accessCode: "FMTTN1",
   title: "Numérique FMTTN 1re (@lt_X)",
   pitch: "Programme officiel SeGEC — Charte, Escape Game, Communication & Collaboration, Sécurité & Traces numériques.",
   systemPrompt: `Tu es le Tuteur Socratique d'@lt_X pour des élèves de 1re secondaire (11-12 ans) en Belgique (programme SeGEC / FMTTN).
@@ -639,7 +641,11 @@ export class CourseManagerV2 {
         ...normalizedLocal.filter(c => c.id !== "fmttn-1re"),
         ...customFirestoreCourses,
         ...MULTI_SUBJECT_PILOT_COURSES.filter(pc => !fsMap.has(pc.id) && !normalizedLocal.some(nl => nl.id === pc.id))
-      ];
+      ].map(c => ({
+        ...c,
+        targetYear: this.inferCourseTargetYear(c),
+        accessCode: this.inferCourseAccessCode(c)
+      }));
       this.courses = allCourses;
 
       const savedCourseId = localStorage.getItem(this.storageKey);
@@ -671,6 +677,28 @@ export class CourseManagerV2 {
       return found;
     }
     return null;
+  }
+
+  inferCourseTargetYear(course = {}) {
+    if (course.targetYear) return course.targetYear;
+    const id = String(course.id || "").toLowerCase();
+    const title = String(course.title || "").toLowerCase();
+    if (id.includes("1re") || id.includes("1c") || title.includes("1re")) return "1re";
+    if (id.includes("3e") || id.includes("uaa5") || title.includes("(3e)") || title.includes("3e")) return "3e";
+    return "all";
+  }
+
+  inferCourseAccessCode(course = {}) {
+    if (course.accessCode) return String(course.accessCode).toUpperCase().trim();
+    const defaults = {
+      "fmttn-1re": "FMTTN1",
+      "bureautique-3e": "BUREAU3",
+      "js-uaa5-classic": "CODE3",
+      "dactylo-3e": "CLAVIER",
+      "multimedia-3e": "MEDIA3",
+      "git-github-3e": "GIT3"
+    };
+    return defaults[course.id] || String(course.id || "COURS").slice(0, 6).toUpperCase();
   }
 
   selectChapter(chapterId) {

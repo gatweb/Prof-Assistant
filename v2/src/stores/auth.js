@@ -9,7 +9,8 @@ import {
   chargerProgressionEleveReelle,
   subscribeToStudentOwnProgression,
   acquitterAvertissementSpamEleve,
-  getClassMappings
+  getClassMappings,
+  cleanDuplicatesAndArchiveOldStudentsInDb
 } from '../services/firebase.js';
 import { AVAILABLE_CLASSES } from '../services/teachers-config.js';
 import {
@@ -106,6 +107,18 @@ export function createAuthStore() {
             await this.chargerElevesReels();
             if (typeof this.chargerTousLesElevesEcole === 'function') {
               await this.chargerTousLesElevesEcole();
+            }
+            // Nettoyage silencieux automatique des comptes fantômes "Élève" en arrière-plan
+            if (!sessionStorage.getItem('profassistant_ghosts_cleaned_v2')) {
+              sessionStorage.setItem('profassistant_ghosts_cleaned_v2', '1');
+              cleanDuplicatesAndArchiveOldStudentsInDb().then(async (res) => {
+                if (res && (res.ghostsDeleted > 0 || res.duplicatesMerged > 0)) {
+                  await this.chargerElevesReels();
+                  if (typeof this.chargerTousLesElevesEcole === 'function') {
+                    await this.chargerTousLesElevesEcole();
+                  }
+                }
+              }).catch(() => {});
             }
             this.classroomConnected = isClassroomConnected();
             if (this.classroomConnected) {
@@ -241,10 +254,13 @@ export function createAuthStore() {
       initStudentSession();
     },
 
-    choisirClasseEleve(c) {
+    async choisirClasseEleve(c) {
       this.user.classe = c;
       localStorage.setItem('profassistant_student_classe', c);
       this.modalClassChoiceOpen = false;
+      if (typeof this.verifierEtOrienterCoursSelonClasseEleve === 'function') {
+        await this.verifierEtOrienterCoursSelonClasseEleve();
+      }
       this.syncCurrentStudentProgress();
     },
 
@@ -267,9 +283,17 @@ export function createAuthStore() {
 
         const data = await chargerProgressionEleveReelle(this.user.classe, this.user.email, this.user.id);
         if (data) {
+          if (data.officialClasse) {
+            this.user.classe = data.officialClasse;
+            localStorage.setItem('profassistant_student_classe', data.officialClasse);
+            this.modalClassChoiceOpen = false;
+          }
           if (data.progression) {
             const p = data.progression;
-            if (p.classe_id) this.user.classe = p.classe_id;
+            if (p.classe_id && !data.officialClasse) {
+              this.user.classe = p.classe_id;
+              localStorage.setItem('profassistant_student_classe', p.classe_id);
+            }
             if (typeof p.xp === 'number') this.user.xp = p.xp;
             this.appliquerEtatProgressionFmttn(p);
             if (Array.isArray(p.rewarded_activities)) {
@@ -288,6 +312,11 @@ export function createAuthStore() {
             const validated = data.submissions.filter(s => s.status === 'valide').length;
             console.log(`[Progression] ${data.submissions.length} travaux trouvés (${validated} validés)`);
           }
+        }
+
+        // Orienter immédiatement l'élève vers le cours correspondant à son niveau (1re vs 3e)
+        if (typeof this.verifierEtOrienterCoursSelonClasseEleve === 'function') {
+          await this.verifierEtOrienterCoursSelonClasseEleve();
         }
 
         // Activer l'écoute temps réel du profil élève pour recevoir en direct les recalculs d'XP et avertissements prof
