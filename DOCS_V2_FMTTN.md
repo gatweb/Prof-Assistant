@@ -226,3 +226,33 @@ Pour s'adapter aux contraintes de la salle informatique avec des élèves de 11 
 ### 9.3 Découpage du Bundle JS (Code Splitting Vite 8 / Rolldown)
 - Configuration de `rolldownOptions.output.codeSplitting.groups` dans [`v2/vite.config.js`](file:///run/media/gaetan/Data/_DEV/_PROD/Prof%20Assistant/v2/vite.config.js) en **8 chunks spécialisés** (< 500 kB chacun, 0 avertissement de build) :
   - `vendor-firestore`, `vendor-katex`, `data-fmttn`, `index`, `workspace-teacher`, `vendor-firebase`, `vendor-alpine`, `vendor-markdown`.
+
+---
+
+## 10. Phase 8 — Déduplication Intelligente des Élèves, Filtre par Année Scolaire & Vue « 📋 Bulletin Scolaire Individuel »
+
+### 10.1 Élimination des doublons d'élèves et des comptes fantômes (`firebase.js` & `teacher.js`)
+- **Normalisation par jetons de nom et adresse e-mail (`normalizeStudentNameTokens`)** :
+  - Fusionne automatiquement les entrées `users` et `progressions_v2` appartenant au même élève, même si l'ordre Prénom/Nom diffère (`"Dupont Lucas"` == `"Lucas DUPONT"`) ou si un document a été créé avec un `uid` anonyme avant la connexion Google Classroom.
+  - Filtre automatiquement les comptes de démonstration/fantômes (`"Élève"`, `"Élève Invité"`, `"Anonyme"`, `"invite@demo.local"`).
+  - Bouton 1-clic **« 🧹 Fusionner doublons & Ranger anciens »** (`nettoyerDoublonsEtAnciensEleves()`) qui nettoie et consolide physiquement les documents Firestore en doublon tout en conservant le maximum d'XP, le meilleur score et l'adresse e-mail Google.
+
+### 10.2 Filtre par Année Scolaire, Comptes Inactifs & Vue « Années précédentes »
+- Barre de filtrage rapide présente à la fois dans **`📊 2. Suivi & Notes`** et **`🏫 3. Classes & Classroom`** :
+  - **`🟢 Année 2026-2027 (Actifs)`** *(vue par défaut)* : affiche uniquement les élèves de l'année en cours ou ayant une activité réelle, pour ne jamais encombrer la vue du professeur.
+  - **`💤 Comptes inactifs (0 XP / 0 devoir)`** : isole les comptes sans activité pour vérification ou nettoyage.
+  - **`🗄️ Années précédentes & Archives`** : vue dédiée aux élèves des années scolaires antérieures ou archivés manuellement, avec bouton **`🗄️ Archiver / ↩️ Restaurer`** en 1 clic (`archiverOuRestaurerEleve`).
+  - **`🌍 Tous`** : vue complète de tous les profils enregistrés.
+
+### 10.3 Vue « 📋 Bulletin Scolaire Individuel » (`modalBulletinEleveOpen`)
+- Accessible en **1 clic sur n'importe quel élève** (depuis les cartes du suivi en direct, les matrices de compétences ou la liste des classes) :
+  - **En-tête avec navigation rapide `◀ Précédent / Suivant ▶`** pour faire défiler tous les élèves de la classe lors de la préparation des conseils de classe ou de l'encodage des bulletins.
+  - **4 indicateurs synthétiques** :
+    1. **Moyenne générale sur `/20` et `/100`** calculée sur l'ensemble des travaux et quiz dédupliqués de l'élève.
+    2. **Niveau de maîtrise officiel SeGEC / FW-B** (`Code D` Dépassement ≥85%, `Code A` Acquis ≥70%, `Code EC` En cours ≥50%, `Code NA` Non acquis <50%).
+    3. **Bilan des travaux remis** (validés vs en attente de correction).
+    4. **Engagement (XP) & Score d'Autonomie** face au tuteur IA Socratique.
+  - **Grille détaillée des compétences du référentiel** (`NUM-1.D1` à `NUM-2.M1`).
+  - **Tableau récapitulatif des copies et évaluations de l'élève** avec accès direct `🔍 Voir copie` vers le SpeedGrader.
+  - **Appréciation pédagogique automatique et modifiable** : génère une synthèse prête à être copiée en 1 clic (`📋 Copier pour le bulletin` pour Smartschool / Pronote), sauvegardée dans Firestore (`💾 Enregistrer sur la fiche élève`) ou imprimée en PDF (`🖨️ Imprimer / PDF`).
+

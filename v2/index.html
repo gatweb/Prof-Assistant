@@ -4467,12 +4467,65 @@
 
         <!-- VUE CLASSE EN DIRECT & SIGNAL « BLOQUÉ » (PHASE 11) -->
         <div class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs space-y-4">
+          <!-- Barre de Filtre Rapide par Année Scolaire & Activité -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-[11px] font-black uppercase tracking-wider text-slate-500 mr-1">📅 Vue élèves :</span>
+              <button
+                type="button"
+                @click="studentPeriodFilter = 'actifs'"
+                :class="studentPeriodFilter === 'actifs' ? 'bg-emerald-600 text-white font-black shadow-2xs' : 'bg-white text-slate-700 border border-slate-200 font-bold hover:bg-slate-100'"
+                class="px-3 py-1.5 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5">
+                <span>🟢 Année <span x-text="getCurrentSchoolYear()"></span> (Actifs)</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-black/15" x-text="getStudentsPeriodCounts().actifs"></span>
+              </button>
+              <button
+                type="button"
+                @click="studentPeriodFilter = 'inactifs'"
+                :class="studentPeriodFilter === 'inactifs' ? 'bg-amber-600 text-white font-black shadow-2xs' : 'bg-white text-slate-700 border border-slate-200 font-bold hover:bg-slate-100'"
+                class="px-3 py-1.5 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5">
+                <span>💤 Comptes inactifs</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-black/10" x-text="getStudentsPeriodCounts().inactifs"></span>
+              </button>
+              <button
+                type="button"
+                @click="studentPeriodFilter = 'archives'"
+                :class="studentPeriodFilter === 'archives' ? 'bg-slate-800 text-white font-black shadow-2xs' : 'bg-white text-slate-700 border border-slate-200 font-bold hover:bg-slate-100'"
+                class="px-3 py-1.5 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5">
+                <span>🗄️ Années précédentes</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-black/10" x-text="getStudentsPeriodCounts().archives"></span>
+              </button>
+              <button
+                type="button"
+                @click="studentPeriodFilter = 'tous'"
+                :class="studentPeriodFilter === 'tous' ? 'bg-indigo-600 text-white font-black shadow-2xs' : 'bg-white text-slate-600 border border-slate-200 font-semibold hover:bg-slate-100'"
+                class="px-3 py-1.5 rounded-xl text-xs transition cursor-pointer">
+                🌍 Tous (<span x-text="getStudentsPeriodCounts().total"></span>)
+              </button>
+            </div>
+
+            <button
+              type="button"
+              @click="nettoyerDoublonsEtAnciensEleves()"
+              :disabled="cleaningStudentsLoading"
+              class="px-3 py-1.5 rounded-xl bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 font-extrabold text-[11px] transition cursor-pointer flex items-center gap-1.5 shrink-0">
+              <span x-show="!cleaningStudentsLoading">🧹</span>
+              <span x-show="cleaningStudentsLoading" class="animate-spin">⏳</span>
+              <span x-text="cleaningStudentsLoading ? 'Nettoyage...' : 'Fusionner doublons & Ranger inactifs'"></span>
+            </button>
+          </div>
+
+          <div x-show="cleaningStudentsFeedback" class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold flex items-center justify-between">
+            <span x-text="cleaningStudentsFeedback"></span>
+            <button type="button" @click="cleaningStudentsFeedback = ''" class="text-emerald-700 font-black cursor-pointer">&times;</button>
+          </div>
+
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
             <div class="flex items-center gap-2.5">
               <span class="text-xl">📡</span>
               <div>
-                <h3 class="font-black text-base text-slate-900">Activité des Élèves en Direct</h3>
-                <p class="text-xs text-slate-500">Repérez d'un coup d'œil qui travaille, qui a terminé et qui a besoin d'aide.</p>
+                <h3 class="font-black text-base text-slate-900">Activité & Bulletins des Élèves en Direct</h3>
+                <p class="text-xs text-slate-500">Cliquez sur la carte d'un élève pour ouvrir sa <strong>Fiche Bulletin complète (/20, compétences, travaux & appréciation)</strong>.</p>
               </div>
             </div>
 
@@ -4487,17 +4540,22 @@
           </div>
 
           <div x-show="getLiveClassStatusList().length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <template x-for="st in getLiveClassStatusList()" :key="st.id || st.nom">
-              <div class="p-3.5 rounded-2xl border border-slate-200 hover:border-indigo-300 transition flex flex-col justify-between gap-2 bg-slate-50/50">
+            <template x-for="st in getLiveClassStatusList()" :key="(st.email || st.id || st.nom) + '_' + (st.classe || '')">
+              <div
+                @click="ouvrirBulletinEleve(st)"
+                class="p-3.5 rounded-2xl border border-slate-200 hover:border-indigo-400 hover:shadow-sm transition flex flex-col justify-between gap-2.5 bg-slate-50/50 hover:bg-white cursor-pointer group">
                 <div class="flex items-start justify-between gap-2">
                   <div class="min-w-0">
-                    <div class="font-black text-xs text-slate-900 truncate" x-text="st.nom"></div>
+                    <div class="font-black text-xs text-slate-900 group-hover:text-indigo-600 transition truncate flex items-center gap-1">
+                      <span x-text="st.nom"></span>
+                      <span x-show="selectedTeacherClass === 'tous'" class="px-1.5 py-0.2 rounded bg-slate-200/70 text-slate-700 text-[9px] font-extrabold" x-text="st.classe"></span>
+                    </div>
                     <div class="text-[10px] text-slate-400 font-mono truncate" x-text="st.email || ('XP : ' + st.xp)"></div>
                   </div>
                   <span
                     :class="st.mastery.badgeClass"
                     class="px-2 py-0.5 rounded-full text-[10px] font-black border shrink-0"
-                    x-text="st.mastery.label"></span>
+                    x-text="st.avgNote20 + '/20 • ' + st.mastery.code"></span>
                 </div>
 
                 <div class="flex items-center justify-between pt-2 border-t border-slate-100">
@@ -4505,14 +4563,17 @@
                     <span x-text="st.badge"></span>
                     <span x-text="st.statusLabel"></span>
                   </span>
-                  <span class="text-[11px] font-extrabold text-slate-600" x-text="st.avgNote + '%'"></span>
+                  <span class="text-[11px] font-extrabold text-indigo-600 group-hover:underline flex items-center gap-1">
+                    <span>📋 Bulletin</span>
+                  </span>
                 </div>
               </div>
             </template>
           </div>
 
           <div x-show="getLiveClassStatusList().length === 0" class="py-8 text-center text-slate-400 text-xs">
-            Aucun élève trouvé pour cette sélection. Cliquez sur <strong>« 🏫 3. Classes & Classroom »</strong> pour importer vos élèves depuis Google Classroom en 1 clic !
+            Aucun élève trouvé dans cette vue (<strong x-text="studentPeriodFilter === 'actifs' ? 'Année en cours (Actifs)' : (studentPeriodFilter === 'inactifs' ? 'Comptes inactifs' : 'Années précédentes')"></strong>).
+            <button type="button" x-show="studentPeriodFilter !== 'tous'" @click="studentPeriodFilter = 'tous'" class="ml-1 text-indigo-600 font-bold underline cursor-pointer">Afficher tous les comptes</button>
           </div>
         </div>
 
@@ -4557,7 +4618,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
               <div>
                 <h3 class="font-extrabold text-base text-slate-900">Matrice de Maîtrise des Acquis (Référentiel SeGEC FMTTN)</h3>
-                <span class="text-xs text-slate-400 font-bold" x-text="classeEleves.length + ' élève(s) suivi(s)'"></span>
+                <span class="text-xs text-slate-400 font-bold" x-text="getFilteredClasseEleves().length + ' élève(s) affiché(s) • Cliquez sur un élève pour ouvrir son Bulletin Scolaire 📋'"></span>
               </div>
 
               <!-- Sélecteur de Chapitre pour la matrice -->
@@ -4582,7 +4643,7 @@
               <table class="w-full text-left text-xs border-collapse min-w-[700px]">
                 <thead>
                   <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
-                    <th class="py-3 px-4">Élève</th>
+                    <th class="py-3 px-4">Élève & Bulletin</th>
                     <th class="py-3 px-4">Escape Game</th>
                     <th class="py-3 px-4">Charte p.10</th>
                     <th class="py-3 px-4">Réseaux NUM-1.D1</th>
@@ -4593,11 +4654,16 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                  <template x-for="eleve in classeEleves" :key="eleve.docKey || eleve.id">
+                  <template x-for="eleve in getFilteredClasseEleves()" :key="eleve.docKey || eleve.id">
                     <tr class="hover:bg-slate-50/70 transition">
                       <td class="py-3.5 px-4 font-extrabold text-slate-900">
-                        <span x-text="eleve.nom"></span>
-                        <span x-show="selectedTeacherClass === 'tous'" class="ml-1 px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 text-[10px]" x-text="eleve.classe_id"></span>
+                        <div class="flex items-center gap-2">
+                          <button type="button" @click="ouvrirBulletinEleve(eleve)" class="hover:text-indigo-600 transition text-left cursor-pointer flex items-center gap-1.5">
+                            <span x-text="eleve.nom"></span>
+                            <span class="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 text-[10px] font-black border border-indigo-200">📋 Bulletin</span>
+                          </button>
+                          <span x-show="selectedTeacherClass === 'tous'" class="px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 text-[10px]" x-text="eleve.classe_id"></span>
+                        </div>
                       </td>
                       <td class="py-3.5 px-4 font-bold text-purple-700" x-text="eleve.eg"></td>
                       <td class="py-3.5 px-4">
@@ -4622,9 +4688,9 @@
                       <td class="py-3.5 px-4 text-right font-black" :class="eleve.score >= 80 ? 'text-emerald-600' : 'text-amber-600'" x-text="eleve.score + '%'"></td>
                     </tr>
                   </template>
-                  <tr x-show="classeEleves.length === 0">
+                  <tr x-show="getFilteredClasseEleves().length === 0">
                     <td colspan="8" class="py-8 text-center text-slate-400 font-medium">
-                      Aucun élève n'a encore enregistré de progression dans cette sélection.
+                      Aucun élève ne correspond au filtre actuel (<span x-text="studentPeriodFilter"></span>).
                     </td>
                   </tr>
                 </tbody>
@@ -4636,7 +4702,7 @@
               <table class="w-full text-left text-xs border-collapse min-w-[700px]">
                 <thead>
                   <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
-                    <th class="py-3 px-4">Élève</th>
+                    <th class="py-3 px-4">Élève & Bulletin</th>
                     <th class="py-3 px-4">Mots de passe D1</th>
                     <th class="py-3 px-4">Sauvegarde 3-2-1 D2</th>
                     <th class="py-3 px-4">Cadenas HTTPS D3</th>
@@ -4647,11 +4713,16 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                  <template x-for="eleve in classeEleves" :key="eleve.docKey || eleve.id">
+                  <template x-for="eleve in getFilteredClasseEleves()" :key="eleve.docKey || eleve.id">
                     <tr class="hover:bg-slate-50/70 transition">
                       <td class="py-3.5 px-4 font-extrabold text-slate-900">
-                        <span x-text="eleve.nom"></span>
-                        <span x-show="selectedTeacherClass === 'tous'" class="ml-1 px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 text-[10px]" x-text="eleve.classe_id"></span>
+                        <div class="flex items-center gap-2">
+                          <button type="button" @click="ouvrirBulletinEleve(eleve)" class="hover:text-indigo-600 transition text-left cursor-pointer flex items-center gap-1.5">
+                            <span x-text="eleve.nom"></span>
+                            <span class="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 text-[10px] font-black border border-indigo-200">📋 Bulletin</span>
+                          </button>
+                          <span x-show="selectedTeacherClass === 'tous'" class="px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 text-[10px]" x-text="eleve.classe_id"></span>
+                        </div>
                       </td>
                       <td class="py-3.5 px-4">
                         <span :class="eleve.num2_d1 === 'acquis' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
@@ -4680,9 +4751,9 @@
                       <td class="py-3.5 px-4 text-right font-black" :class="eleve.score >= 80 ? 'text-emerald-600' : 'text-amber-600'" x-text="eleve.score + '%'"></td>
                     </tr>
                   </template>
-                  <tr x-show="classeEleves.length === 0">
+                  <tr x-show="getFilteredClasseEleves().length === 0">
                     <td colspan="8" class="py-8 text-center text-slate-400 font-medium">
-                      Aucun élève n'a encore enregistré de progression dans cette sélection.
+                      Aucun élève ne correspond au filtre actuel (<span x-text="studentPeriodFilter"></span>).
                     </td>
                   </tr>
                 </tbody>
@@ -4754,7 +4825,7 @@
                 </p>
               </div>
               <div class="flex items-center gap-3">
-                <span class="text-xs text-slate-400 font-bold" x-text="classeEleves.length + ' élève(s)'"></span>
+                <span class="text-xs text-slate-400 font-bold" x-text="getFilteredClasseEleves().length + ' élève(s) affiché(s)'"></span>
                 <button 
                   @click="activeProfSubTab = 'copies'; submissionFilterCourse = profSelectedCourseId"
                   class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5">
@@ -4772,7 +4843,7 @@
               <table class="w-full text-left text-xs border-collapse min-w-[700px]">
                 <thead>
                   <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
-                    <th class="py-3 px-4 w-48">Élève</th>
+                    <th class="py-3 px-4 w-56">Élève & Bulletin</th>
                     <template x-for="exo in profCourseExercises" :key="exo.id">
                       <th class="py-3 px-4 text-center">
                         <div class="flex flex-col items-center">
@@ -4785,10 +4856,13 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                  <template x-for="eleve in classeEleves" :key="eleve.docKey || eleve.id">
+                  <template x-for="eleve in getFilteredClasseEleves()" :key="eleve.docKey || eleve.id">
                     <tr class="hover:bg-slate-50/70 transition">
                       <td class="py-3.5 px-4 font-extrabold text-slate-900">
-                        <div x-text="eleve.nom"></div>
+                        <button type="button" @click="ouvrirBulletinEleve(eleve)" class="hover:text-indigo-600 transition text-left cursor-pointer flex items-center gap-1.5">
+                          <span x-text="eleve.nom"></span>
+                          <span class="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 text-[10px] font-black border border-indigo-200">📋 Bulletin</span>
+                        </button>
                         <div class="text-[10px] text-slate-400 font-normal" x-text="eleve.email || ''"></div>
                       </td>
                       <template x-for="exo in profCourseExercises" :key="exo.id">
@@ -4839,9 +4913,9 @@
                       </td>
                     </tr>
                   </template>
-                  <tr x-show="classeEleves.length === 0">
+                  <tr x-show="getFilteredClasseEleves().length === 0">
                     <td :colspan="profCourseExercises.length + 2" class="py-8 text-center text-slate-400 font-medium">
-                      Aucun élève trouvé dans cette sélection.
+                      Aucun élève trouvé dans cette sélection (<span x-text="studentPeriodFilter"></span>).
                     </td>
                   </tr>
                 </tbody>
@@ -5068,8 +5142,8 @@
         <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-6">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
             <div>
-              <h3 class="font-black text-base sm:text-lg text-slate-900">Mes Classes & Liste des Élèves</h3>
-              <p class="text-xs text-slate-500 mt-0.5">Cliquez sur une classe ci-dessous pour afficher ses élèves, changer un élève de groupe ou inscrire un nouvel élève.</p>
+              <h3 class="font-black text-base sm:text-lg text-slate-900">Mes Classes, Bulletins & Gestion des Élèves</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Cliquez sur <strong>📋 Bulletin</strong> pour ouvrir la fiche récapitulative d'un élève, ou filtrez les comptes inactifs et des années précédentes.</p>
             </div>
 
             <div class="flex items-center gap-2.5 flex-wrap">
@@ -5081,12 +5155,59 @@
                   class="px-3 py-2 pl-8 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-600 w-full sm:w-56 bg-slate-50 focus:bg-white" />
                 <span class="absolute left-2.5 top-2.5 text-slate-400">🔍</span>
               </div>
+              <button
+                type="button"
+                @click="nettoyerDoublonsEtAnciensEleves()"
+                :disabled="cleaningStudentsInProgress"
+                class="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-extrabold rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer">
+                <span x-text="cleaningStudentsInProgress ? '⏳' : '🧹'"></span>
+                <span x-text="cleaningStudentsInProgress ? 'Nettoyage...' : 'Fusionner doublons & Ranger anciens'"></span>
+              </button>
               <button 
                 @click="modalAddStudentOpen = true"
                 class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer">
                 <span>➕</span> Ajouter un élève
               </button>
             </div>
+          </div>
+
+          <!-- Barre de Filtre par Année Scolaire / Statut d'activité -->
+          <div class="bg-slate-50 rounded-2xl p-3 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <button
+                type="button"
+                @click="studentPeriodFilter = 'actifs'"
+                :class="studentPeriodFilter === 'actifs' ? 'bg-indigo-600 text-white font-black shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200'"
+                class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer">
+                <span>🟢 Année <span x-text="currentSchoolYear"></span> (Actifs)</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-black/15" x-text="getStudentsPeriodCounts().actifs"></span>
+              </button>
+              <button
+                type="button"
+                @click="studentPeriodFilter = 'inactifs'"
+                :class="studentPeriodFilter === 'inactifs' ? 'bg-amber-600 text-white font-black shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200'"
+                class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer">
+                <span>💤 Comptes inactifs (0 XP / 0 devoir)</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-black/10" x-text="getStudentsPeriodCounts().inactifs"></span>
+              </button>
+              <button
+                type="button"
+                @click="studentPeriodFilter = 'archives'"
+                :class="studentPeriodFilter === 'archives' ? 'bg-slate-800 text-white font-black shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200'"
+                class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer">
+                <span>🗄️ Années précédentes & Archives</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-black/10" x-text="getStudentsPeriodCounts().archives"></span>
+              </button>
+              <button
+                type="button"
+                @click="studentPeriodFilter = 'tous'"
+                :class="studentPeriodFilter === 'tous' ? 'bg-slate-900 text-white font-black shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-600 font-bold border border-slate-200'"
+                class="px-3 py-2 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer">
+                <span>🌍 Tous</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-black/10" x-text="getStudentsPeriodCounts().tous"></span>
+              </button>
+            </div>
+            <div x-show="studentCleanStatusMsg" class="text-xs font-extrabold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200" x-text="studentCleanStatusMsg"></div>
           </div>
 
           <!-- Cartes / Pastilles de sélection de Classe -->
@@ -5097,7 +5218,7 @@
               :class="selectedTeacherClass === 'tous' ? 'bg-slate-900 text-white shadow-xs font-black' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold'"
               class="px-4 py-2.5 rounded-2xl text-xs transition flex items-center gap-2 shrink-0 cursor-pointer">
               <span>🌍 Toutes les classes</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] bg-white/20" x-text="allSchoolStudents.length"></span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] bg-white/20" x-text="getElevesFiltresGestion().length"></span>
             </button>
 
             <template x-for="card in getClassCardsSummary()" :key="card.id">
@@ -5118,31 +5239,60 @@
 
           <!-- Tableau des Élèves de la classe sélectionnée -->
           <div class="overflow-x-auto rounded-2xl border border-slate-200">
-            <table class="w-full text-left text-xs border-collapse min-w-[600px]">
+            <table class="w-full text-left text-xs border-collapse min-w-[720px]">
               <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider text-[11px]">
                 <tr>
                   <th class="py-3.5 px-4">Élève & Adresse Google</th>
-                  <th class="py-3.5 px-4">Classe actuelle</th>
-                  <th class="py-3.5 px-4">Points XP</th>
-                  <th class="py-3.5 px-4 text-center">Déplacer vers une autre classe</th>
-                  <th class="py-3.5 px-4 text-right">Actions</th>
+                  <th class="py-3.5 px-4">Classe & Période</th>
+                  <th class="py-3.5 px-4">Activité & Moyenne</th>
+                  <th class="py-3.5 px-4 text-center">Changer de classe</th>
+                  <th class="py-3.5 px-4 text-right">Bulletin & Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
                 <template x-for="student in getElevesFiltresGestion()" :key="student.id + '_' + student.classe">
                   <tr class="hover:bg-slate-50/70 transition">
-                    <td class="py-3 px-4 font-bold text-slate-900 flex items-center gap-3">
-                      <span class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-black shrink-0"
-                            x-text="(student.nom || 'E').substring(0, 2).toUpperCase()"></span>
-                      <div>
-                        <div class="font-extrabold text-slate-900" x-text="student.nom"></div>
-                        <div class="text-[11px] text-slate-400 font-mono" x-text="student.email || 'Inscrit manuellement'"></div>
+                    <td class="py-3 px-4 font-bold text-slate-900">
+                      <div class="flex items-center gap-3">
+                        <button
+                          type="button"
+                          @click="ouvrirBulletinEleve(student)"
+                          class="w-9 h-9 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-black shrink-0 cursor-pointer transition"
+                          x-text="(student.nom || 'E').substring(0, 2).toUpperCase()"></button>
+                        <div>
+                          <button
+                            type="button"
+                            @click="ouvrirBulletinEleve(student)"
+                            class="font-extrabold text-slate-900 hover:text-indigo-600 transition text-left cursor-pointer flex items-center gap-1.5">
+                            <span x-text="student.nom"></span>
+                          </button>
+                          <div class="text-[11px] text-slate-400 font-mono" x-text="student.email || 'Inscrit manuellement'"></div>
+                        </div>
                       </div>
                     </td>
                     <td class="py-3 px-4">
-                      <span class="px-2.5 py-1 rounded-full font-black bg-indigo-50 text-indigo-700 text-xs" x-text="'Classe ' + (student.classe || '1A')"></span>
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="px-2.5 py-0.5 rounded-full font-black bg-indigo-50 text-indigo-700 text-xs" x-text="'Classe ' + (student.classe || '1A')"></span>
+                        <span
+                          x-show="getStudentPeriodBucket(student) === 'actifs'"
+                          class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold border border-emerald-200"
+                          x-text="'🟢 ' + (student.annee_scolaire || currentSchoolYear)"></span>
+                        <span
+                          x-show="getStudentPeriodBucket(student) === 'inactifs'"
+                          class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-extrabold border border-amber-200">💤 Inactif</span>
+                        <span
+                          x-show="getStudentPeriodBucket(student) === 'archives'"
+                          class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-extrabold border border-slate-300"
+                          x-text="'🗄️ Archive ' + (student.annee_scolaire || '')"></span>
+                      </div>
                     </td>
-                    <td class="py-3 px-4 font-mono font-bold text-amber-600" x-text="(student.xp || 0) + ' XP'"></td>
+                    <td class="py-3 px-4">
+                      <div class="flex items-center gap-2">
+                        <span class="font-mono font-bold text-amber-600" x-text="(student.xp || 0) + ' XP'"></span>
+                        <span class="text-slate-300">•</span>
+                        <span class="font-black text-indigo-700" x-text="getBulletinDataForStudent(student)?.avgNote20 !== null ? (getBulletinDataForStudent(student).avgNote20 + '/20') : 'Sans note'"></span>
+                      </div>
+                    </td>
                     <td class="py-3 px-4 text-center">
                       <select 
                         @change="changerClasseEleve(student.id, $event.target.value)"
@@ -5156,16 +5306,31 @@
                       <div class="flex items-center justify-end gap-1.5">
                         <button
                           type="button"
+                          @click="ouvrirBulletinEleve(student)"
+                          class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[11px] transition cursor-pointer shadow-2xs flex items-center gap-1"
+                          title="Ouvrir le bulletin complet de cet élève">
+                          <span>📋</span>
+                          <span>Bulletin</span>
+                        </button>
+                        <button
+                          type="button"
                           @click="activeProfSubTab = 'copies'; submissionSearchText = student.nom"
-                          class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] transition cursor-pointer"
+                          class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] transition cursor-pointer"
                           title="Voir les copies de cet élève">
                           📥 Copies
                         </button>
                         <button
                           type="button"
+                          @click="archiverOuRestaurerEleve(student, getStudentPeriodBucket(student) !== 'archives')"
+                          class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-amber-900 font-bold text-[11px] transition cursor-pointer"
+                          :title="getStudentPeriodBucket(student) === 'archives' ? 'Restaurer dans l\'année en cours' : 'Ranger dans Années précédentes / Archives'">
+                          <span x-text="getStudentPeriodBucket(student) === 'archives' ? '↩️ Restaurer' : '🗄️ Archiver'"></span>
+                        </button>
+                        <button
+                          type="button"
                           @click="supprimerEleveModal(student)"
                           class="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition cursor-pointer"
-                          title="Retirer cet élève de la liste">
+                          title="Supprimer définitivement cet élève">
                           🗑️
                         </button>
                       </div>
@@ -5175,9 +5340,15 @@
                 <tr x-show="getElevesFiltresGestion().length === 0">
                   <td colspan="5" class="py-10 text-center text-slate-400 font-medium">
                     <div class="text-2xl mb-1.5">👥</div>
-                    <div>Aucun élève trouvé pour <strong x-text="selectedTeacherClass === 'tous' ? 'cette recherche' : ('la classe ' + selectedTeacherClass)"></strong>.</div>
-                    <div class="mt-2">
-                      Cliquez sur le bouton vert <strong>« 🔄 Tout récupérer depuis Classroom »</strong> ci-dessus pour importer vos classes automatiquement !
+                    <div>Aucun élève dans le filtre <strong x-text="studentPeriodFilter"></strong> pour <strong x-text="selectedTeacherClass === 'tous' ? 'toutes les classes' : ('la classe ' + selectedTeacherClass)"></strong>.</div>
+                    <div class="mt-2 flex items-center justify-center gap-2 flex-wrap">
+                      <button
+                        type="button"
+                        x-show="studentPeriodFilter !== 'tous'"
+                        @click="studentPeriodFilter = 'tous'"
+                        class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer">
+                        🌍 Afficher tous les comptes (y compris inactifs / archives)
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -6863,6 +7034,270 @@
       </div>
 
     </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODALE : BULLETIN SCOLAIRE INDIVIDUEL DE L'ÉLÈVE (VUE SYNTHÉTIQUE)   -->
+  <!-- ==================================================================== -->
+  <div
+    x-show="modalBulletinEleveOpen"
+    x-cloak
+    class="fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+    @keydown.escape.window="fermerBulletinEleve()">
+
+    <template x-if="selectedBulletinStudent && getBulletinDataForStudent(selectedBulletinStudent)">
+      <div
+        @click.outside="fermerBulletinEleve()"
+        class="bg-white rounded-3xl max-w-5xl w-full p-5 sm:p-8 shadow-2xl border border-slate-200 space-y-6 my-auto max-h-[92vh] overflow-y-auto">
+
+        <!-- En-tête du Bulletin Scolaire avec navigation Élève Précédent / Suivant -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200">
+          <div class="flex items-center gap-3.5">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-700 text-white flex items-center justify-center text-xl font-black shadow-md shrink-0"
+                 x-text="(getBulletinDataForStudent(selectedBulletinStudent).nom || 'EL').substring(0, 2).toUpperCase()">
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-black uppercase tracking-wider">
+                  📋 Bulletin Scolaire Numérique
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-extrabold"
+                      x-text="'Classe ' + getBulletinDataForStudent(selectedBulletinStudent).classe"></span>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold border border-emerald-200"
+                      x-text="'Année ' + getBulletinDataForStudent(selectedBulletinStudent).anneeScolaire"></span>
+              </div>
+              <h3 class="font-black text-xl sm:text-2xl text-slate-900 mt-1" x-text="getBulletinDataForStudent(selectedBulletinStudent).nom"></h3>
+              <p class="text-xs text-slate-400 font-mono" x-text="getBulletinDataForStudent(selectedBulletinStudent).email"></p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              @click="bulletinElevePrecedent()"
+              class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
+              title="Élève précédent">
+              ◀ Précédent
+            </button>
+            <button
+              type="button"
+              @click="bulletinEleveSuivant()"
+              class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
+              title="Élève suivant">
+              Suivant ▶
+            </button>
+            <button
+              type="button"
+              onclick="window.print()"
+              class="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-extrabold text-xs border border-indigo-200 transition cursor-pointer">
+              🖨️ Imprimer / PDF
+            </button>
+            <button
+              type="button"
+              @click="fermerBulletinEleve()"
+              class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold cursor-pointer">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Cartes de Synthèse Pédagogique (Moyenne /20, Niveau SeGEC, Travaux, XP & Autonomie) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="p-4 rounded-2xl bg-gradient-to-br from-indigo-950 to-slate-900 text-white shadow-sm">
+            <div class="text-[10px] font-black uppercase tracking-wider text-indigo-300">Moyenne Générale</div>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span class="text-3xl font-black"
+                    x-text="getBulletinDataForStudent(selectedBulletinStudent).avgNote20 !== null ? (getBulletinDataForStudent(selectedBulletinStudent).avgNote20 + ' / 20') : '— / 20'"></span>
+              <span class="text-xs font-bold text-indigo-200"
+                    x-text="'(' + getBulletinDataForStudent(selectedBulletinStudent).avgScore100 + '%)'"></span>
+            </div>
+            <p class="text-[11px] text-slate-300 mt-1.5">
+              Calculée sur les évaluations et missions validées
+            </p>
+          </div>
+
+          <div class="p-4 rounded-2xl border shadow-2xs flex flex-col justify-between"
+               :class="getBulletinDataForStudent(selectedBulletinStudent).niveauMaitrise.color">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-black uppercase tracking-wider opacity-75">Maîtrise SeGEC / FW-B</span>
+              <span class="px-2 py-0.5 rounded-lg bg-white/80 font-black text-xs border"
+                    x-text="'Code ' + getBulletinDataForStudent(selectedBulletinStudent).niveauMaitrise.code"></span>
+            </div>
+            <div class="text-lg font-black mt-1" x-text="getBulletinDataForStudent(selectedBulletinStudent).niveauMaitrise.label"></div>
+            <div class="text-[11px] font-semibold opacity-80 mt-1">
+              Échelle officielle : D (≥85%) • A (≥70%) • EC (≥50%)
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+            <div class="text-[10px] font-black uppercase tracking-wider text-slate-400">Travaux & Missions Rendus</div>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span class="text-2xl font-black text-slate-900" x-text="getBulletinDataForStudent(selectedBulletinStudent).totalTravaux"></span>
+              <span class="text-xs font-bold text-emerald-700"
+                    x-text="getBulletinDataForStudent(selectedBulletinStudent).validatedCount + ' validé(s)'"></span>
+            </div>
+            <div class="text-[11px] text-amber-700 font-bold mt-1"
+                 x-show="getBulletinDataForStudent(selectedBulletinStudent).pendingCount > 0"
+                 x-text="getBulletinDataForStudent(selectedBulletinStudent).pendingCount + ' copie(s) en attente de correction'"></div>
+            <div class="text-[11px] text-slate-500 mt-1"
+                 x-show="getBulletinDataForStudent(selectedBulletinStudent).pendingCount === 0">
+              Toutes les copies remises sont corrigées ✓
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-200">
+            <div class="text-[10px] font-black uppercase tracking-wider text-amber-700">Engagement & Autonomie</div>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span class="text-2xl font-black text-amber-900" x-text="getBulletinDataForStudent(selectedBulletinStudent).xp + ' XP'"></span>
+              <span class="text-xs font-extrabold text-emerald-700"
+                    x-text="'Autonomie ' + getBulletinDataForStudent(selectedBulletinStudent).autonomy + '%'"></span>
+            </div>
+            <p class="text-[11px] text-amber-800/80 mt-1">
+              Barème d'autonomie face au tuteur IA Socratique
+            </p>
+          </div>
+        </div>
+
+        <!-- Grille Bilan des Compétences (FMTTN + Cours actifs) -->
+        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200/90 space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-black text-sm text-slate-900 flex items-center gap-2">
+              <span>🎯</span>
+              <span>Acquisition des Compétences du Programme (Tome 1 & Parcours Numérique)</span>
+            </h4>
+            <span class="text-[11px] font-bold text-slate-500">Statut par attendu du référentiel</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            <template x-for="comp in getBulletinDataForStudent(selectedBulletinStudent).competencesFmttn" :key="comp.code">
+              <div class="p-3 rounded-xl bg-white border border-slate-200/90 flex items-center justify-between gap-2">
+                <div>
+                  <div class="text-[10px] font-black text-indigo-600" x-text="comp.code"></div>
+                  <div class="text-xs font-bold text-slate-800 leading-snug" x-text="comp.label"></div>
+                </div>
+                <span
+                  :class="comp.status === 'acquis' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : (comp.status === 'en_cours' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-rose-100 text-rose-800 border-rose-200')"
+                  class="px-2 py-0.5 rounded-full text-[10px] font-black border shrink-0 uppercase"
+                  x-text="comp.status === 'acquis' ? '✓ Acquis' : (comp.status === 'en_cours' ? 'En cours' : 'À revoir')"></span>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Historique Détaillé des Évaluations & Travaux de l'Élève -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-black text-sm text-slate-900 flex items-center gap-2">
+              <span>📂</span>
+              <span>Détail des Travaux, Quiz et Missions Remises (<span x-text="getBulletinDataForStudent(selectedBulletinStudent).travaux.length"></span>)</span>
+            </h4>
+            <span class="text-xs text-slate-400">Cliquez sur « Corriger / Voir » pour ouvrir la copie dans le SpeedGrader</span>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs border-collapse min-w-[600px]">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider text-[10px]">
+                <tr>
+                  <th class="py-2.5 px-4">Cours / Module</th>
+                  <th class="py-2.5 px-4">Mission / Évaluation</th>
+                  <th class="py-2.5 px-4">Statut</th>
+                  <th class="py-2.5 px-4">Note (/20 & /100)</th>
+                  <th class="py-2.5 px-4">Dernier Feedback IA / Prof</th>
+                  <th class="py-2.5 px-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <template x-for="sub in getBulletinDataForStudent(selectedBulletinStudent).travaux" :key="sub.id">
+                  <tr class="hover:bg-slate-50 transition">
+                    <td class="py-2.5 px-4 font-bold text-indigo-700" x-text="sub.course_id || 'fmttn-1re'"></td>
+                    <td class="py-2.5 px-4 font-extrabold text-slate-900" x-text="sub.exercice_title || sub.exercice_id"></td>
+                    <td class="py-2.5 px-4">
+                      <span
+                        :class="(sub.status === 'valide' || sub.status === 'validee') ? 'bg-emerald-100 text-emerald-800' : ((sub.status === 'a_corriger') ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800')"
+                        class="px-2 py-0.5 rounded-full text-[10px] font-black"
+                        x-text="(sub.status === 'valide' || sub.status === 'validee') ? '✓ Validé' : ((sub.status === 'a_corriger') ? '⚠️ À revoir' : '⏳ À valider')"></span>
+                    </td>
+                    <td class="py-2.5 px-4 font-black text-slate-900">
+                      <span x-text="Math.round(((Number(sub.note_finale ?? sub.note_suggeree ?? 80)) / 5) * 10) / 10 + '/20'"></span>
+                      <span class="text-[10px] text-slate-400 font-normal ml-1" x-text="'(' + (sub.note_finale ?? sub.note_suggeree ?? 80) + '%)'"></span>
+                    </td>
+                    <td class="py-2.5 px-4 text-slate-600 max-w-xs truncate" x-text="sub.commentaire_prof || sub.feedback_ia || '—'"></td>
+                    <td class="py-2.5 px-4 text-right">
+                      <button
+                        type="button"
+                        @click="fermerBulletinEleve(); ouvrirModalCorrection(sub)"
+                        class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[11px] cursor-pointer transition">
+                        🔍 Voir copie
+                      </button>
+                    </td>
+                  </tr>
+                </template>
+                <tr x-show="getBulletinDataForStudent(selectedBulletinStudent).travaux.length === 0">
+                  <td colspan="6" class="py-6 text-center text-slate-400 font-medium">
+                    Aucune copie individuelle remise par cet élève pour le moment.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Appréciation Pédagogique pour le Bulletin (Smartschool / Pronote / Conseil de classe) -->
+        <div class="bg-indigo-50/70 rounded-2xl p-5 border border-indigo-200 space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h4 class="font-black text-sm text-indigo-950 flex items-center gap-2">
+                <span>✍️</span>
+                <span>Appréciation Pédagogique du Professeur (Prête pour le Bulletin / Smartschool)</span>
+              </h4>
+              <p class="text-xs text-indigo-700">
+                Synthèse générée automatiquement selon les acquis de l'élève — modifiable librement avant copie ou sauvegarde.
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                @click="regenererAppreciationAutoBulletin()"
+                class="px-3 py-1.5 rounded-xl bg-white hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-xs transition cursor-pointer">
+                ✨ Régénérer synthèse auto
+              </button>
+              <button
+                type="button"
+                @click="copierAppreciationBulletin()"
+                class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs transition cursor-pointer shadow-2xs">
+                📋 Copier pour le bulletin
+              </button>
+            </div>
+          </div>
+
+          <textarea
+            x-model="bulletinAppreciationText"
+            rows="3"
+            placeholder="Rédigez ou ajustez l'appréciation du bulletin..."
+            class="w-full rounded-xl border border-indigo-200 bg-white p-3.5 text-xs text-slate-800 font-medium leading-relaxed focus:outline-none focus:border-indigo-600"></textarea>
+
+          <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div class="text-xs font-bold text-emerald-700" x-text="bulletinSaveMsg"></div>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                @click="archiverOuRestaurerEleve(selectedBulletinStudent, getStudentPeriodBucket(selectedBulletinStudent) !== 'archives')"
+                class="px-3.5 py-2 rounded-xl bg-white hover:bg-amber-50 text-slate-600 hover:text-amber-900 border border-slate-200 font-bold text-xs transition cursor-pointer">
+                <span x-text="getStudentPeriodBucket(selectedBulletinStudent) === 'archives' ? '↩️ Restaurer dans l\'année active' : '🗄️ Ranger dans Années précédentes'"></span>
+              </button>
+              <button
+                type="button"
+                @click="sauvegarderBulletinEleve()"
+                :disabled="bulletinSaving"
+                class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-black text-xs transition cursor-pointer shadow-xs">
+                <span x-text="bulletinSaving ? '⏳ Sauvegarde...' : '💾 Enregistrer sur la fiche élève'"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </template>
   </div>
 
   <script type="module" src="/src/main.js"></script>

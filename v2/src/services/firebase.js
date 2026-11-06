@@ -388,7 +388,104 @@ export async function chargerProgressionEleveReelle(classeId, email, uid) {
   }
 }
 
-// 6. Écoute temps réel des élèves d'une classe pour la "Météo de classe SeGEC"
+// ============================================================================
+// UTILITAIRES DE DÉDUPLICATION D'ÉLÈVES, DÉTECTION D'ANNÉE SCOLAIRE & ARCHIVES
+// ============================================================================
+export function getCurrentSchoolYearLabel(refDate = new Date()) {
+  const d = refDate instanceof Date && !isNaN(refDate) ? refDate : new Date();
+  const year = d.getFullYear();
+  const month = d.getMonth(); // 0 = Janvier, 7 = Août
+  // L'année scolaire débute à la mi-août / 1er septembre
+  if (month >= 7) {
+    return `${year}-${year + 1}`;
+  }
+  return `${year - 1}-${year}`;
+}
+
+export function extractIsoDateFromFirestoreField(raw) {
+  if (!raw) return null;
+  try {
+    if (typeof raw === 'string') {
+      const parsed = new Date(raw);
+      return !isNaN(parsed.getTime()) ? parsed.toISOString() : null;
+    }
+    if (typeof raw.toDate === 'function') {
+      return raw.toDate().toISOString();
+    }
+    if (typeof raw.seconds === 'number') {
+      return new Date(raw.seconds * 1000).toISOString();
+    }
+    if (typeof raw === 'number') {
+      return new Date(raw).toISOString();
+    }
+  } catch (_) {}
+  return null;
+}
+
+export function normalizeStudentNameTokens(nom = "") {
+  const clean = String(nom || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .trim();
+  if (!clean) return "";
+  const tokens = clean.split(/\s+/).filter(Boolean).sort();
+  return tokens.join(" ");
+}
+
+export function isGhostOrDemoAccount(nom = "", email = "", id = "", xp = 0) {
+  const cleanNom = String(nom || "").trim().toLowerCase();
+  const cleanEmail = String(email || "").trim().toLowerCase();
+  const cleanId = String(id || "").trim().toLowerCase();
+
+  if (cleanEmail === "invite@demo.local" || cleanId.startsWith("guest_")) return true;
+  if (
+    (cleanNom === "élève" || cleanNom === "eleve" || cleanNom === "élève invité" || cleanNom === "eleve invite" || cleanNom === "anonyme") &&
+    !cleanEmail &&
+    Number(xp || 0) <= 20
+  ) {
+    return true;
+  }
+  return false;
+}
+
+export function inferStudentSchoolYearAndStatus({ updatedIso, createdIso, explicitSchoolYear, explicitStatus, archived, xp = 0, fromClassroom = false }) {
+  const currentYear = getCurrentSchoolYearLabel();
+  const startYearNum = parseInt(currentYear.split('-')[0], 10);
+  const currentSchoolYearStartMs = new Date(`${startYearNum}-08-15T00:00:00Z`).getTime();
+  const prevSchoolYearStartMs = new Date(`${startYearNum - 1}-08-15T00:00:00Z`).getTime();
+
+  const bestIso = updatedIso || createdIso || null;
+  const bestMs = bestIso ? new Date(bestIso).getTime() : 0;
+
+  let schoolYear = explicitSchoolYear || currentYear;
+  if (!explicitSchoolYear) {
+    if (bestMs >= currentSchoolYearStartMs) {
+      schoolYear = currentYear;
+    } else if (bestMs >= prevSchoolYearStartMs) {
+      schoolYear = `${startYearNum - 1}-${startYearNum}`;
+    } else if (bestMs > 0) {
+      schoolYear = `${startYearNum - 2}-${startYearNum - 1}`;
+    } else {
+      // Aucune date enregistrée : si aucun XP et non importé de Classroom, c'est un vieux compte inactif
+      schoolYear = (Number(xp || 0) > 0 || fromClassroom) ? currentYear : `${startYearNum - 1}-${startYearNum}`;
+    }
+  }
+
+  const isArchived = Boolean(archived || explicitStatus === 'archive' || schoolYear !== currentYear);
+  const isInactive = !isArchived && Number(xp || 0) === 0 && !fromClassroom && (!bestMs || (Date.now() - bestMs > 60 * 24 * 3600 * 1000));
+
+  return {
+    school_year: schoolYear,
+    isCurrentYear: schoolYear === currentYear && !archived && explicitStatus !== 'archive',
+    isArchived,
+    isInactive,
+    lastActiveIso: bestIso
+  };
+}
+
+// 6. Écoute temps réel des élèves d'une classe pour la "Météo de classe SeGEC" (AVEC DÉDUPLICATION & FILTRE FANTÔMES)
 export function listenToClasseProgressions(classeId, onUpdate) {
   try {
     const isAll = !classeId || classeId === 'tous' || classeId === 'all';
@@ -397,16 +494,43 @@ export function listenToClasseProgressions(classeId, onUpdate) {
       : query(collection(db, "progressions_v2"), where("classe_id", "==", classeId));
 
     return onSnapshot(q, (snapshot) => {
-      const eleves = [];
+      const dedupMap = new Map();
+      const nameToKeyMap = new Map();
+
       snapshot.forEach(docSnap => {
         const d = docSnap.data();
-        
+        const email = (d.eleve_email || '').toLowerCase().trim();
+        const nom = (d.eleve_nom || "Élève").trim();
+        const cl = (d.classe_id || d.classe || (isAll ? '1A' : classeId)).toUpperCase().trim();
+        const xp = Number(d.xp) || 0;
+
+        // Ignorer les sessions invités / fantômes vides
+        if (isGhostOrDemoAccount(nom, email, d.eleve_id || docSnap.id, xp)) {
+          return;
+        }
+
+        const normName = normalizeStudentNameTokens(nom);
+        const nameLookupKey = normName && normName !== 'eleve' ? `${cl}::${normName}` : '';
+
+        let canonicalKey = email || (nameLookupKey && nameToKeyMap.get(nameLookupKey)) || nameLookupKey || `${cl}::${d.eleve_id || docSnap.id}`;
+        if (email && nameLookupKey) {
+          const prevKey = nameToKeyMap.get(nameLookupKey);
+          if (prevKey && prevKey !== email && dedupMap.has(prevKey)) {
+            const prevEntry = dedupMap.get(prevKey);
+            dedupMap.delete(prevKey);
+            dedupMap.set(email, prevEntry);
+          }
+          nameToKeyMap.set(nameLookupKey, email);
+        } else if (nameLookupKey && !nameToKeyMap.has(nameLookupKey)) {
+          nameToKeyMap.set(nameLookupKey, canonicalKey);
+        }
+
         let egRatio = d.escape_game?.finished ? "5/5" : `${d.escape_game?.dossierUnlocked?.length || 1}/5`;
         let charteEtat = d.charte?.finished ? "acquis" : (d.charte?.score > 0 ? "en_cours" : "a_renforcer");
         let d5Etat = d.competences?.['NUM-1.D5'] || "en_cours";
         let d6Etat = d.competences?.['NUM-1.D6'] || "en_cours";
         let p2Etat = d.competences?.['NUM-1.P2'] || (d.email_sim?.validationResults?.scoreGlobal >= 5 ? "acquis" : "a_renforcer");
-        
+
         // Chapitre 2 : Sécurité & Données
         let num2_d1 = d.competences?.['NUM-2.D1'] || "en_cours";
         let num2_d2 = d.competences?.['NUM-2.D2'] || "en_cours";
@@ -422,14 +546,24 @@ export function listenToClasseProgressions(classeId, onUpdate) {
         if (num2_d3 === "acquis") score += 5;
         if (num2_d4 === "acquis") score += 5;
 
-        eleves.push({
+        const updatedIso = extractIsoDateFromFirestoreField(d.updated_at);
+        const yearMeta = inferStudentSchoolYearAndStatus({
+          updatedIso,
+          explicitSchoolYear: d.school_year,
+          explicitStatus: d.status,
+          archived: d.archived,
+          xp
+        });
+
+        const candidate = {
           docKey: docSnap.id,
+          progDocKeys: [docSnap.id],
           id: d.eleve_id || docSnap.id,
           uid: d.uid || '',
-          classe_id: d.classe_id || d.classe || (isAll ? '1A' : classeId),
-          classe: d.classe_id || d.classe || (isAll ? '1A' : classeId),
-          email: d.eleve_email || '',
-          nom: d.eleve_nom || "Élève",
+          classe_id: cl,
+          classe: cl,
+          email,
+          nom,
           eg: egRatio,
           charte: charteEtat,
           d5: d5Etat,
@@ -442,7 +576,7 @@ export function listenToClasseProgressions(classeId, onUpdate) {
           num2_d5,
           num2_m1,
           score: Math.min(100, score),
-          xp: d.xp || 0,
+          xp,
           rewarded_activities: Array.isArray(d.rewarded_activities) ? d.rewarded_activities : [],
           spam_warning: d.spam_warning || null,
           spam_attempts: Number(d.spam_attempts) || 0,
@@ -459,10 +593,35 @@ export function listenToClasseProgressions(classeId, onUpdate) {
           hints_used_count: Number(d.hints_used_count) || 0,
           active_course_id: d.active_course_id || 'fmttn-1re',
           active_exercise_id: d.active_exercise_id || '',
-          updated_at: d.updated_at
-        });
+          bulletin_appreciation: d.bulletin_appreciation || '',
+          bulletin_custom_note20: d.bulletin_custom_note20 ?? null,
+          updated_at: updatedIso,
+          ...yearMeta
+        };
+
+        if (!dedupMap.has(canonicalKey)) {
+          dedupMap.set(canonicalKey, candidate);
+        } else {
+          const existing = dedupMap.get(canonicalKey);
+          const allProgKeys = Array.from(new Set([...(existing.progDocKeys || []), docSnap.id]));
+          const preferNew = (candidate.xp > existing.xp) || (candidate.score > existing.score) || (!existing.email && candidate.email);
+          const merged = preferNew ? { ...existing, ...candidate } : { ...candidate, ...existing };
+          merged.progDocKeys = allProgKeys;
+          merged.xp = Math.max(existing.xp || 0, candidate.xp || 0);
+          merged.score = Math.max(existing.score || 50, candidate.score || 50);
+          merged.email = existing.email || candidate.email || '';
+          merged.nom = (existing.nom && existing.nom !== 'Élève') ? existing.nom : candidate.nom;
+          merged.competences = { ...(candidate.competences || {}), ...(existing.competences || {}) };
+          merged.bulletin_appreciation = existing.bulletin_appreciation || candidate.bulletin_appreciation || '';
+          if (candidate.updated_at && (!existing.updated_at || candidate.updated_at > existing.updated_at)) {
+            merged.updated_at = candidate.updated_at;
+            merged.lastActiveIso = candidate.updated_at;
+          }
+          dedupMap.set(canonicalKey, merged);
+        }
       });
 
+      const eleves = Array.from(dedupMap.values()).sort((a, b) => (a.nom || '').localeCompare(b.nom || ''));
       onUpdate(eleves);
     }, (error) => {
       console.warn("[Firestore] Écoute classe :", error.message);
@@ -474,11 +633,32 @@ export function listenToClasseProgressions(classeId, onUpdate) {
   }
 }
 
-// 7. GESTION DES ÉLÈVES & CLASSES (SYSTÈME V1 ÉTENDU + DÉDUPLICATION PAR EMAIL)
+// 7. GESTION DES ÉLÈVES & CLASSES (SYSTÈME V1/V2 UNIFIÉ + DÉDUPLICATION MULTI-CLÉS NOM/EMAIL + ANNÉE SCOLAIRE)
 export async function getRealClassStudents(classeId) {
   try {
     const isAll = !classeId || classeId === 'all' || classeId === 'tous';
-    const studentMap = {};
+    const studentMap = new Map();
+    const nameIndex = new Map();
+
+    const findCanonicalKey = (emailKey, normName, cl, fallbackId) => {
+      if (emailKey && studentMap.has(emailKey)) return emailKey;
+      const nameKey = normName && normName !== 'eleve' ? `${cl}::${normName}` : '';
+      if (nameKey && nameIndex.has(nameKey)) {
+        const mapped = nameIndex.get(nameKey);
+        if (emailKey && mapped !== emailKey && studentMap.has(mapped)) {
+          // Promouvoir la clé vers l'email
+          const prev = studentMap.get(mapped);
+          studentMap.delete(mapped);
+          studentMap.set(emailKey, prev);
+          nameIndex.set(nameKey, emailKey);
+          return emailKey;
+        }
+        return mapped;
+      }
+      const chosen = emailKey || nameKey || `${cl}::${fallbackId}`;
+      if (nameKey) nameIndex.set(nameKey, chosen);
+      return chosen;
+    };
 
     // 1. Récupérer depuis 'users'
     const qUsers = isAll
@@ -489,16 +669,53 @@ export async function getRealClassStudents(classeId) {
     snapUsers.forEach(docSnap => {
       const u = docSnap.data();
       const emailKey = (u.email || "").toLowerCase().trim();
-      const mapKey = emailKey || docSnap.id;
-      studentMap[mapKey] = {
-        id: docSnap.id,
-        userDocId: docSnap.id,
-        nom: u.nom || u.displayName || docSnap.id,
-        email: emailKey,
-        classe: u.classe || (isAll ? "1A" : classeId),
-        status: u.status || "actif",
-        xp: u.xp || 0
-      };
+      const nom = (u.nom || u.displayName || docSnap.id).trim();
+      const cl = (u.classe || (isAll ? "1A" : classeId)).toUpperCase().trim();
+      const xp = Number(u.xp) || 0;
+
+      if (isGhostOrDemoAccount(nom, emailKey, docSnap.id, xp)) return;
+
+      const normName = normalizeStudentNameTokens(nom);
+      const mapKey = findCanonicalKey(emailKey, normName, cl, docSnap.id);
+      const updatedIso = extractIsoDateFromFirestoreField(u.updated_at || u.lastLogin || u.created_at);
+      const yearMeta = inferStudentSchoolYearAndStatus({
+        updatedIso,
+        explicitSchoolYear: u.school_year,
+        explicitStatus: u.status,
+        archived: u.archived,
+        xp,
+        fromClassroom: Boolean(u.classroom_course_name)
+      });
+
+      if (!studentMap.has(mapKey)) {
+        studentMap.set(mapKey, {
+          id: docSnap.id,
+          userDocId: docSnap.id,
+          userDocIds: [docSnap.id],
+          progDocKeys: [],
+          nom,
+          email: emailKey,
+          classe: cl,
+          status: u.status || "actif",
+          archived: Boolean(u.archived || u.status === 'archive'),
+          classroom_course_name: u.classroom_course_name || '',
+          xp,
+          bulletin_appreciation: u.bulletin_appreciation || '',
+          bulletin_custom_note20: u.bulletin_custom_note20 ?? null,
+          ...yearMeta
+        });
+      } else {
+        const ex = studentMap.get(mapKey);
+        ex.userDocIds = Array.from(new Set([...(ex.userDocIds || []), docSnap.id]));
+        if (!ex.email && emailKey) ex.email = emailKey;
+        if (nom && nom !== docSnap.id && (!ex.nom || ex.nom === ex.id)) ex.nom = nom;
+        if (xp > (ex.xp || 0)) ex.xp = xp;
+        if (u.classroom_course_name) ex.classroom_course_name = u.classroom_course_name;
+        if (u.bulletin_appreciation) ex.bulletin_appreciation = u.bulletin_appreciation;
+        if (updatedIso && (!ex.lastActiveIso || updatedIso > ex.lastActiveIso)) {
+          Object.assign(ex, yearMeta);
+        }
+      }
     });
 
     // 2. Récupérer depuis 'progressions_v2' pour fusionner les scores réels
@@ -510,33 +727,71 @@ export async function getRealClassStudents(classeId) {
     snapProg.forEach(docSnap => {
       const p = docSnap.data();
       const emailKey = (p.eleve_email || "").toLowerCase().trim();
-      const elId = emailKey || p.eleve_id || docSnap.id;
-      if (!studentMap[elId]) {
-        studentMap[elId] = {
+      const nom = (p.eleve_nom || "Élève").trim();
+      const cl = (p.classe_id || p.classe || (isAll ? "1A" : classeId)).toUpperCase().trim();
+      const xp = Number(p.xp) || 0;
+
+      if (isGhostOrDemoAccount(nom, emailKey, p.eleve_id || docSnap.id, xp)) return;
+
+      const normName = normalizeStudentNameTokens(nom);
+      const mapKey = findCanonicalKey(emailKey, normName, cl, p.eleve_id || docSnap.id);
+      const updatedIso = extractIsoDateFromFirestoreField(p.updated_at);
+      const yearMeta = inferStudentSchoolYearAndStatus({
+        updatedIso,
+        explicitSchoolYear: p.school_year,
+        explicitStatus: p.status,
+        archived: p.archived,
+        xp
+      });
+
+      if (!studentMap.has(mapKey)) {
+        studentMap.set(mapKey, {
           id: p.eleve_id || docSnap.id,
           progDocKey: docSnap.id,
-          nom: p.eleve_nom || "Élève",
-          email: emailKey || (elId.includes('@') ? elId : ""),
-          classe: p.classe_id || p.classe || (isAll ? "1A" : classeId),
-          status: "actif",
-          xp: p.xp || 0
-        };
+          userDocIds: [],
+          progDocKeys: [docSnap.id],
+          nom,
+          email: emailKey || ((p.eleve_id || '').includes('@') ? p.eleve_id : ""),
+          classe: cl,
+          status: p.status || "actif",
+          archived: Boolean(p.archived || p.status === 'archive'),
+          xp,
+          progression: p,
+          bulletin_appreciation: p.bulletin_appreciation || '',
+          bulletin_custom_note20: p.bulletin_custom_note20 ?? null,
+          ...yearMeta
+        });
       } else {
-        studentMap[elId].progDocKey = docSnap.id;
-        if (!studentMap[elId].email && emailKey) {
-          studentMap[elId].email = emailKey;
+        const ex = studentMap.get(mapKey);
+        ex.progDocKey = ex.progDocKey || docSnap.id;
+        ex.progDocKeys = Array.from(new Set([...(ex.progDocKeys || []), docSnap.id]));
+        if (!ex.email && emailKey) ex.email = emailKey;
+        if (nom && nom !== "Élève" && (!ex.nom || ex.nom === "Élève" || ex.nom === ex.id)) {
+          ex.nom = nom;
         }
-        if (p.eleve_nom && (!studentMap[elId].nom || studentMap[elId].nom === "Élève")) {
-          studentMap[elId].nom = p.eleve_nom;
+        if (!ex.progression || (xp >= (ex.xp || 0))) {
+          ex.progression = p;
         }
-      }
-      studentMap[elId].progression = p;
-      if ((p.xp || 0) > (studentMap[elId].xp || 0)) {
-        studentMap[elId].xp = p.xp;
+        if (xp > (ex.xp || 0)) ex.xp = xp;
+        if (p.bulletin_appreciation) ex.bulletin_appreciation = p.bulletin_appreciation;
+        if (p.bulletin_custom_note20 !== undefined) ex.bulletin_custom_note20 = p.bulletin_custom_note20;
+        if (updatedIso && (!ex.lastActiveIso || updatedIso > ex.lastActiveIso)) {
+          Object.assign(ex, inferStudentSchoolYearAndStatus({
+            updatedIso,
+            explicitSchoolYear: p.school_year || ex.school_year,
+            explicitStatus: p.status || ex.status,
+            archived: p.archived || ex.archived,
+            xp: ex.xp,
+            fromClassroom: Boolean(ex.classroom_course_name)
+          }));
+        }
       }
     });
 
-    return Object.values(studentMap).sort((a, b) => (a.nom || '').localeCompare(b.nom || ''));
+    return Array.from(studentMap.values()).map(st => ({
+      ...st,
+      duplicateDocsCount: Math.max(0, (st.userDocIds?.length || 0) - 1) + Math.max(0, (st.progDocKeys?.length || 0) - 1)
+    })).sort((a, b) => (a.nom || '').localeCompare(b.nom || ''));
   } catch (err) {
     console.error("[Firestore] Erreur chargement élèves réels :", err);
     return [];
@@ -549,9 +804,13 @@ export async function addRealStudent(nom, classe, email = "") {
     const cleanEmail = (email || "").trim().toLowerCase();
     const cleanNom = (nom || "Élève").trim();
     const cleanClasse = (classe || "1A").trim().toUpperCase();
+    const normName = normalizeStudentNameTokens(cleanNom);
     const studentId = cleanEmail
       ? 'st_' + cleanEmail.replace(/[^a-z0-9]/g, '_')
-      : 'el_' + Math.random().toString(36).substring(2, 9);
+      : 'st_' + (normName || cleanNom.toLowerCase()).replace(/[^a-z0-9]/g, '_');
+
+    const schoolYear = getCurrentSchoolYearLabel();
+    const nowIso = new Date().toISOString();
 
     const userDocRef = doc(db, "users", studentId);
     await setDoc(userDocRef, {
@@ -559,6 +818,8 @@ export async function addRealStudent(nom, classe, email = "") {
       classe: cleanClasse,
       email: cleanEmail,
       status: "actif",
+      archived: false,
+      school_year: schoolYear,
       updated_at: serverTimestamp()
     }, { merge: true });
 
@@ -572,7 +833,10 @@ export async function addRealStudent(nom, classe, email = "") {
       eleve_id: studentId,
       eleve_nom: cleanNom,
       eleve_email: cleanEmail,
-      updated_at: new Date().toISOString()
+      status: "actif",
+      archived: false,
+      school_year: schoolYear,
+      updated_at: nowIso
     }, { merge: true });
 
     return { success: true, id: studentId };
@@ -588,6 +852,8 @@ export async function upsertClassroomRosterBatch(studentsList = [], classeId = "
     return { success: true, count: 0 };
   }
   const cleanClasse = String(classeId || "1A").trim().toUpperCase();
+  const schoolYear = getCurrentSchoolYearLabel();
+  const nowIso = new Date().toISOString();
   const batch = writeBatch(db);
   let count = 0;
 
@@ -596,9 +862,10 @@ export async function upsertClassroomRosterBatch(studentsList = [], classeId = "
     const cleanNom = String(st.fullName || st.nom || "Élève").trim();
     if (!cleanNom && !cleanEmail) continue;
 
+    const normName = normalizeStudentNameTokens(cleanNom);
     const studentId = cleanEmail
       ? 'st_' + cleanEmail.replace(/[^a-z0-9]/g, '_')
-      : 'st_' + cleanNom.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      : 'st_' + (normName || cleanNom.toLowerCase()).replace(/[^a-z0-9]/g, '_');
 
     const userRef = doc(db, "users", studentId);
     batch.set(userRef, {
@@ -608,6 +875,8 @@ export async function upsertClassroomRosterBatch(studentsList = [], classeId = "
       photoURL: st.photoUrl || "",
       classroom_course_name: classroomCourseName || "",
       status: "actif",
+      archived: false,
+      school_year: schoolYear,
       updated_at: serverTimestamp()
     }, { merge: true });
 
@@ -621,7 +890,10 @@ export async function upsertClassroomRosterBatch(studentsList = [], classeId = "
       eleve_id: studentId,
       eleve_nom: cleanNom,
       eleve_email: cleanEmail,
-      updated_at: new Date().toISOString()
+      status: "actif",
+      archived: false,
+      school_year: schoolYear,
+      updated_at: nowIso
     }, { merge: true });
 
     count++;
@@ -631,29 +903,203 @@ export async function upsertClassroomRosterBatch(studentsList = [], classeId = "
   return { success: true, count };
 }
 
-// Supprimer un élève d'une classe (nettoyage des profils de test ou doublons)
+// Supprimer un élève d'une classe (supprime TOUTES ses entrées fusionnées dans users et progressions_v2)
 export async function deleteStudentFromClassInDb(student) {
   try {
     if (!student) return false;
-    if (student.userDocId || (student.id && !student.id.includes('@'))) {
+    const uIds = Array.from(new Set([
+      ...(student.userDocIds || []),
+      ...(student.userDocId ? [student.userDocId] : []),
+      ...(student.id && !student.id.includes('@') ? [student.id] : [])
+    ]));
+    for (const uid of uIds) {
       try {
-        await deleteDoc(doc(db, "users", student.userDocId || student.id));
+        await deleteDoc(doc(db, "users", uid));
       } catch (_) {}
     }
-    if (student.progDocKey) {
+
+    const pKeys = Array.from(new Set([
+      ...(student.progDocKeys || []),
+      ...(student.progDocKey ? [student.progDocKey] : []),
+      ...(student.docKey ? [student.docKey] : [])
+    ]));
+    if (student.classe && (student.email || student.id)) {
+      pKeys.push(`${student.classe}_${student.email || student.id}`.replace(/[^a-zA-Z0-9_-]/g, '_'));
+    }
+    for (const pk of pKeys) {
       try {
-        await deleteDoc(doc(db, "progressions_v2", student.progDocKey));
-      } catch (_) {}
-    } else if (student.classe && (student.email || student.id)) {
-      const key = `${student.classe}_${student.email || student.id}`.replace(/[^a-zA-Z0-9_-]/g, '_');
-      try {
-        await deleteDoc(doc(db, "progressions_v2", key));
+        await deleteDoc(doc(db, "progressions_v2", pk));
       } catch (_) {}
     }
     return true;
   } catch (err) {
     console.error("[deleteStudentFromClassInDb] Erreur :", err);
     return false;
+  }
+}
+
+// Archiver un élève vers "Années précédentes" ou le restaurer dans l'année en cours
+export async function archiveOrRestoreStudentInDb(student, archive = true) {
+  try {
+    if (!student) return false;
+    const currentYear = getCurrentSchoolYearLabel();
+    const startYear = parseInt(currentYear.split('-')[0], 10);
+    const targetSchoolYear = archive ? `${startYear - 1}-${startYear}` : currentYear;
+    const targetStatus = archive ? "archive" : "actif";
+
+    const uIds = Array.from(new Set([
+      ...(student.userDocIds || []),
+      ...(student.userDocId ? [student.userDocId] : []),
+      ...(student.id && !student.id.includes('@') ? [student.id] : [])
+    ]));
+    for (const uid of uIds) {
+      try {
+        await setDoc(doc(db, "users", uid), {
+          status: targetStatus,
+          archived: archive,
+          school_year: targetSchoolYear,
+          updated_at: serverTimestamp()
+        }, { merge: true });
+      } catch (_) {}
+    }
+
+    const pKeys = Array.from(new Set([
+      ...(student.progDocKeys || []),
+      ...(student.progDocKey ? [student.progDocKey] : []),
+      ...(student.docKey ? [student.docKey] : [])
+    ]));
+    for (const pk of pKeys) {
+      try {
+        await setDoc(doc(db, "progressions_v2", pk), {
+          status: targetStatus,
+          archived: archive,
+          school_year: targetSchoolYear
+        }, { merge: true });
+      } catch (_) {}
+    }
+    return true;
+  } catch (err) {
+    console.error("[archiveOrRestoreStudentInDb] Erreur :", err);
+    return false;
+  }
+}
+
+// Enregistrer l'appréciation et/ou la note ajustée du Bulletin d'un élève
+export async function saveStudentBulletinInDb(student, { appreciation = "", customNote20 = null } = {}) {
+  try {
+    if (!student) return false;
+    const payload = {
+      bulletin_appreciation: appreciation,
+      bulletin_custom_note20: customNote20,
+      bulletin_updated_at: new Date().toISOString()
+    };
+
+    const pKeys = Array.from(new Set([
+      ...(student.progDocKeys || []),
+      ...(student.progDocKey ? [student.progDocKey] : []),
+      ...(student.docKey ? [student.docKey] : [])
+    ]));
+    if (pKeys.length > 0) {
+      for (const pk of pKeys) {
+        try {
+          await setDoc(doc(db, "progressions_v2", pk), payload, { merge: true });
+        } catch (_) {}
+      }
+    }
+
+    const uIds = Array.from(new Set([
+      ...(student.userDocIds || []),
+      ...(student.userDocId ? [student.userDocId] : [])
+    ]));
+    for (const uid of uIds) {
+      try {
+        await setDoc(doc(db, "users", uid), payload, { merge: true });
+      } catch (_) {}
+    }
+    return true;
+  } catch (err) {
+    console.error("[saveStudentBulletinInDb] Erreur :", err);
+    return false;
+  }
+}
+
+// Assainissement 1-clic de la base élèves : supprime les comptes fantômes ("Élève", "Invité"), fusionne les doublons Firestore et archive les anciens comptes inactifs
+export async function cleanDuplicatesAndArchiveOldStudentsInDb() {
+  let ghostsDeleted = 0;
+  let duplicatesMerged = 0;
+  let oldArchived = 0;
+
+  try {
+    const snapUsers = await getDocs(collection(db, "users"));
+    const snapProg = await getDocs(collection(db, "progressions_v2"));
+
+    // 1. Supprimer les profils fantômes / démos dans 'users' et 'progressions_v2'
+    for (const dSnap of snapUsers.docs) {
+      const u = dSnap.data();
+      if (isGhostOrDemoAccount(u.nom || u.displayName, u.email, dSnap.id, u.xp)) {
+        try {
+          await deleteDoc(doc(db, "users", dSnap.id));
+          ghostsDeleted++;
+        } catch (_) {}
+      }
+    }
+    for (const pSnap of snapProg.docs) {
+      const p = pSnap.data();
+      if (isGhostOrDemoAccount(p.eleve_nom, p.eleve_email, p.eleve_id || pSnap.id, p.xp)) {
+        try {
+          await deleteDoc(doc(db, "progressions_v2", pSnap.id));
+          ghostsDeleted++;
+        } catch (_) {}
+      }
+    }
+
+    // 2. Recharger la liste dédupliquée et nettoyer les documents redondants + archiver les anciens comptes inactifs
+    const dedupList = await getRealClassStudents('all');
+    for (const st of dedupList) {
+      // S'il y a plusieurs userDocIds pour la même personne, garder le 1er (ou celui avec email) et supprimer les autres
+      if (Array.isArray(st.userDocIds) && st.userDocIds.length > 1) {
+        const keepId = st.userDocIds.find(id => id.startsWith('st_')) || st.userDocIds[0];
+        await setDoc(doc(db, "users", keepId), {
+          nom: st.nom,
+          email: st.email || '',
+          classe: st.classe || '1A',
+          xp: st.xp || 0
+        }, { merge: true });
+
+        for (const uid of st.userDocIds) {
+          if (uid !== keepId) {
+            try {
+              await deleteDoc(doc(db, "users", uid));
+              duplicatesMerged++;
+            } catch (_) {}
+          }
+        }
+      }
+
+      // S'il y a plusieurs progDocKeys pour la même personne, garder celui avec le meilleur XP et supprimer les doublons
+      if (Array.isArray(st.progDocKeys) && st.progDocKeys.length > 1) {
+        const keepProgKey = st.progDocKey || st.progDocKeys[0];
+        for (const pk of st.progDocKeys) {
+          if (pk !== keepProgKey) {
+            try {
+              await deleteDoc(doc(db, "progressions_v2", pk));
+              duplicatesMerged++;
+            } catch (_) {}
+          }
+        }
+      }
+
+      // Si le compte est inactif ou date d'une année précédente et n'est pas encore marqué archivé
+      if ((st.isArchived || st.isInactive) && !st.archived) {
+        await archiveOrRestoreStudentInDb(st, true);
+        oldArchived++;
+      }
+    }
+
+    return { ghostsDeleted, duplicatesMerged, oldArchived };
+  } catch (err) {
+    console.error("[cleanDuplicatesAndArchiveOldStudentsInDb] Erreur :", err);
+    throw err;
   }
 }
 

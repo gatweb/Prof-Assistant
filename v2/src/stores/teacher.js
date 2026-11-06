@@ -4,6 +4,11 @@ import {
   addRealStudent,
   updateStudentClassInDb,
   deleteStudentFromClassInDb,
+  archiveOrRestoreStudentInDb,
+  saveStudentBulletinInDb,
+  cleanDuplicatesAndArchiveOldStudentsInDb,
+  getCurrentSchoolYearLabel,
+  normalizeStudentNameTokens,
   listerEnseignantsCloud,
   enregistrerEnseignantCloud,
   supprimerEnseignantCloud,
@@ -68,6 +73,20 @@ export function createTeacherStore() {
     allSchoolStudents: [],
     allClassStudents: [],
     searchStudentQuery: '',
+    // Filtre par année scolaire & activité : 'actifs' (Année en cours) | 'inactifs' (0 activité) | 'archives' (Années précédentes) | 'tous'
+    studentPeriodFilter: 'actifs',
+    studentArchiveYearFilter: 'tous',
+    cleaningStudentsLoading: false,
+    cleaningStudentsFeedback: '',
+
+    // Vue « 📋 Bulletin Scolaire Individuel »
+    modalBulletinEleveOpen: false,
+    selectedBulletinStudent: null,
+    bulletinAppreciationDraft: '',
+    bulletinCustomNote20: '',
+    bulletinSaving: false,
+    bulletinSaveFeedback: '',
+
     modalAddStudentOpen: false,
     newStudentData: {
       nom: '',
@@ -76,6 +95,84 @@ export function createTeacherStore() {
     },
 
     classeEleves: [],
+
+    getCurrentSchoolYear() {
+      return getCurrentSchoolYearLabel();
+    },
+
+    /**
+     * Détermine si un élève a au moins 1 copie remise ou une activité réelle
+     */
+    hasStudentRealActivity(st) {
+      if (!st) return false;
+      if ((Number(st.xp) || 0) > 0) return true;
+      if (st.classroom_course_name) return true;
+      if (st.eg === '5/5' || st.charte === 'acquis' || st.p2 === 'acquis') return true;
+      const normName = normalizeStudentNameTokens(st.nom || '');
+      const email = (st.email || '').toLowerCase().trim();
+      return (this.teacherSubmissions || []).some(s => {
+        if (email && s.email_eleve && s.email_eleve.toLowerCase().trim() === email) return true;
+        if (normName && s.nom_eleve && normalizeStudentNameTokens(s.nom_eleve) === normName) return true;
+        return false;
+      });
+    },
+
+    /**
+     * Classe un élève dans l'une des 3 catégories : 'actifs' | 'inactifs' | 'archives'
+     */
+    getStudentPeriodBucket(st) {
+      if (!st) return 'inactifs';
+      const currentYear = getCurrentSchoolYearLabel();
+      const isExplicitlyArchived = Boolean(st.archived || st.status === 'archive');
+      const isOldYear = Boolean(st.school_year && st.school_year !== currentYear);
+
+      if (isExplicitlyArchived || isOldYear) {
+        return 'archives';
+      }
+      if (this.hasStudentRealActivity(st)) {
+        return 'actifs';
+      }
+      return 'inactifs';
+    },
+
+    matchesCurrentStudentPeriodFilter(st) {
+      const bucket = this.getStudentPeriodBucket(st);
+      if (this.studentPeriodFilter === 'tous') return true;
+      if (this.studentPeriodFilter === 'actifs') return bucket === 'actifs';
+      if (this.studentPeriodFilter === 'inactifs') return bucket === 'inactifs';
+      if (this.studentPeriodFilter === 'archives') {
+        if (bucket !== 'archives') return false;
+        if (this.studentArchiveYearFilter && this.studentArchiveYearFilter !== 'tous') {
+          return (st.school_year || '') === this.studentArchiveYearFilter;
+        }
+        return true;
+      }
+      return true;
+    },
+
+    getStudentsPeriodCounts() {
+      const baseList = this.allClassStudents || [];
+      let actifs = 0;
+      let inactifs = 0;
+      let archives = 0;
+      let duplicates = 0;
+
+      for (const st of baseList) {
+        const b = this.getStudentPeriodBucket(st);
+        if (b === 'actifs') actifs++;
+        else if (b === 'inactifs') inactifs++;
+        else if (b === 'archives') archives++;
+        duplicates += Number(st.duplicateDocsCount || 0);
+      }
+
+      return {
+        actifs,
+        inactifs,
+        archives,
+        total: baseList.length,
+        duplicates
+      };
+    },
 
     changerClasseEnseignant(newClass) {
       const target = newClass || 'tous';
@@ -134,6 +231,8 @@ export function createTeacherStore() {
     getClassCardsSummary() {
       const countByClass = {};
       for (const st of (this.allSchoolStudents || [])) {
+        // Ne compter dans les pastilles principales que les élèves correspondant au filtre actif (par défaut : actifs de l'année en cours)
+        if (!this.matchesCurrentStudentPeriodFilter(st)) continue;
         const cl = st.classe || '1A';
         countByClass[cl] = (countByClass[cl] || 0) + 1;
       }
@@ -311,18 +410,52 @@ export function createTeacherStore() {
 
     async supprimerEleveModal(student) {
       if (!student) return;
-      if (!confirm(`Retirer l'élève « ${student.nom} » (${student.classe || '1A'}) de la liste ?`)) return;
+      if (!confirm(`Supprimer définitivement le compte de « ${student.nom} » (${student.classe || '1A'}) ?\nAstuce : vous pouvez aussi cliquer sur 🗄️ Archiver pour simplement le déplacer dans « Années précédentes ».`)) return;
       const ok = await deleteStudentFromClassInDb(student);
       if (ok) {
+        if (this.selectedBulletinStudent?.id === student.id) {
+          this.modalBulletinEleveOpen = false;
+        }
         await this.chargerTousLesElevesEcole();
         await this.chargerElevesReels();
         this.activerEcouteClasse(this.selectedTeacherClass);
       }
     },
 
+    async archiverOuRestaurerEleve(student, archive = true) {
+      if (!student) return;
+      const ok = await archiveOrRestoreStudentInDb(student, archive);
+      if (ok) {
+        this.cleaningStudentsFeedback = archive
+          ? `🗄️ « ${student.nom} » a été déplacé dans « Années précédentes & Archives ».`
+          : `✅ « ${student.nom} » a été restauré dans l'année en cours (${this.getCurrentSchoolYear()}).`;
+        setTimeout(() => { this.cleaningStudentsFeedback = ''; }, 5000);
+        await this.chargerTousLesElevesEcole();
+        await this.chargerElevesReels();
+        this.activerEcouteClasse(this.selectedTeacherClass);
+      }
+    },
+
+    async nettoyerDoublonsEtAnciensEleves() {
+      this.cleaningStudentsLoading = true;
+      this.cleaningStudentsFeedback = '⏳ Fusion des doublons, suppression des comptes fantômes et archivage des anciens comptes...';
+      try {
+        const res = await cleanDuplicatesAndArchiveOldStudentsInDb();
+        await this.chargerTousLesElevesEcole();
+        await this.chargerElevesReels();
+        this.activerEcouteClasse(this.selectedTeacherClass);
+        this.cleaningStudentsFeedback = `✨ Base assainie : ${res.duplicatesMerged} doublon(s) fusionné(s), ${res.ghostsDeleted} compte(s) fantôme(s) supprimé(s), et ${res.oldArchived} compte(s) inactif(s)/ancien(s) rangé(s) dans « Années précédentes » !`;
+      } catch (err) {
+        alert("Erreur lors du nettoyage des élèves : " + err.message);
+        this.cleaningStudentsFeedback = '';
+      } finally {
+        this.cleaningStudentsLoading = false;
+      }
+    },
+
     getElevesFiltresGestion() {
       const q = this.searchStudentQuery.toLowerCase().trim();
-      const baseList = this.allClassStudents || [];
+      const baseList = (this.allClassStudents || []).filter(s => this.matchesCurrentStudentPeriodFilter(s));
       if (!q) return baseList;
       return baseList.filter(s => 
         (s.nom || '').toLowerCase().includes(q) ||
@@ -331,15 +464,21 @@ export function createTeacherStore() {
       );
     },
 
+    getFilteredClasseEleves() {
+      const list = this.classeEleves || [];
+      return list.filter(el => this.matchesCurrentStudentPeriodFilter(el));
+    },
+
     getProgressionMoyenneClasse() {
-      if (!this.classeEleves || this.classeEleves.length === 0) return 0;
-      const total = this.classeEleves.reduce((acc, el) => acc + (el.score || 0), 0);
-      return Math.round(total / this.classeEleves.length);
+      const list = this.getFilteredClasseEleves();
+      if (!list.length) return 0;
+      const total = list.reduce((acc, el) => acc + (el.score || 0), 0);
+      return Math.round(total / list.length);
     },
 
     getNbElevesTermineEG() {
-      if (!this.classeEleves) return 0;
-      return this.classeEleves.filter(el => el.eg === "5/5").length;
+      const list = this.getFilteredClasseEleves();
+      return list.filter(el => el.eg === "5/5").length;
     },
 
     genererRemediationProf() {
@@ -831,45 +970,81 @@ export function createTeacherStore() {
     // ==========================================
     getLiveClassStatusList() {
       const mergedMap = new Map();
+      const nameToKey = new Map();
+
+      const resolveKey = (item) => {
+        const email = (item.email || '').toLowerCase().trim();
+        const cl = (item.classe || item.classe_id || '1A').toUpperCase().trim();
+        const normName = normalizeStudentNameTokens(item.nom || '');
+        const nameKey = normName && normName !== 'eleve' ? `${cl}::${normName}` : '';
+
+        if (email && mergedMap.has(email)) return email;
+        if (nameKey && nameToKey.has(nameKey)) {
+          const prevKey = nameToKey.get(nameKey);
+          if (email && prevKey !== email && mergedMap.has(prevKey)) {
+            const prevVal = mergedMap.get(prevKey);
+            mergedMap.delete(prevKey);
+            mergedMap.set(email, prevVal);
+            nameToKey.set(nameKey, email);
+            return email;
+          }
+          return prevKey;
+        }
+        const chosen = email || nameKey || `${cl}::${(item.id || item.nom || '').toLowerCase()}`;
+        if (nameKey) nameToKey.set(nameKey, chosen);
+        return chosen;
+      };
 
       (this.allClassStudents || []).forEach(st => {
-        const key = (st.email || st.id || st.nom).toLowerCase();
+        const key = resolveKey(st);
         mergedMap.set(key, {
+          ...st,
           id: st.id,
           nom: st.nom,
+          classe: st.classe || '1A',
           email: st.email || '',
           xp: st.xp || 0,
           score: st.progression?.score || 50,
           tutor_calls_count: Number(st.progression?.tutor_calls_count) || 0,
           hints_used_count: Number(st.progression?.hints_used_count) || 0,
-          updated_at: st.progression?.updated_at || null
+          updated_at: st.progression?.updated_at || st.lastActiveIso || null
         });
       });
 
       (this.classeEleves || []).forEach(ce => {
-        const key = (ce.email || ce.id || ce.nom).toLowerCase();
+        const key = resolveKey(ce);
         const existing = mergedMap.get(key) || {};
         mergedMap.set(key, {
           ...existing,
+          ...ce,
           id: ce.id || existing.id,
-          nom: ce.nom || existing.nom,
+          userDocIds: existing.userDocIds || [],
+          progDocKeys: Array.from(new Set([...(existing.progDocKeys || []), ...(ce.progDocKeys || [ce.docKey].filter(Boolean))])),
+          nom: (ce.nom && ce.nom !== 'Élève') ? ce.nom : (existing.nom || ce.nom),
+          classe: ce.classe || existing.classe || '1A',
           email: ce.email || existing.email || '',
           xp: Math.max(ce.xp || 0, existing.xp || 0),
-          score: ce.score || existing.score || 50,
+          score: Math.max(ce.score || 50, existing.score || 50),
+          archived: Boolean(existing.archived || ce.archived),
+          status: existing.status === 'archive' || ce.status === 'archive' ? 'archive' : (existing.status || ce.status || 'actif'),
+          school_year: existing.school_year || ce.school_year,
+          bulletin_appreciation: existing.bulletin_appreciation || ce.bulletin_appreciation || '',
+          bulletin_custom_note20: existing.bulletin_custom_note20 ?? ce.bulletin_custom_note20 ?? null,
           tutor_calls_count: Math.max(Number(ce.tutor_calls_count) || 0, existing.tutor_calls_count || 0),
           hints_used_count: Math.max(Number(ce.hints_used_count) || 0, existing.hints_used_count || 0),
           updated_at: ce.updated_at || existing.updated_at || null
         });
       });
 
-      const students = Array.from(mergedMap.values());
+      const students = Array.from(mergedMap.values()).filter(el => this.matchesCurrentStudentPeriodFilter(el));
       const now = Date.now();
 
       return students.map(el => {
-        // Chercher les soumissions de cet élève dans la classe
+        const normElName = normalizeStudentNameTokens(el.nom || '');
+        // Chercher les soumissions de cet élève
         const subs = (this.teacherSubmissions || []).filter(s => {
-          const sameEmail = el.email && s.email_eleve && s.email_eleve.toLowerCase() === el.email.toLowerCase();
-          const sameName = el.nom && s.nom_eleve && s.nom_eleve.trim().toLowerCase() === el.nom.trim().toLowerCase();
+          const sameEmail = el.email && s.email_eleve && s.email_eleve.toLowerCase().trim() === el.email.toLowerCase().trim();
+          const sameName = normElName && s.nom_eleve && normalizeStudentNameTokens(s.nom_eleve) === normElName;
           return sameEmail || sameName;
         });
 
@@ -894,7 +1069,7 @@ export function createTeacherStore() {
           badge = '🟠';
           label = `Bloqué (${tutorCalls} appels IA / ${hintsUsed} indices)`;
           colorClass = 'bg-orange-100 text-orange-900 border-orange-300 font-black animate-pulse';
-          priority = 1; // Afficher les élèves bloqués en premier !
+          priority = 1;
         } else if (hasPending) {
           badge = '🟣';
           label = 'Soumis (À valider)';
@@ -915,6 +1090,7 @@ export function createTeacherStore() {
         const avgNote = subs.length > 0
           ? Math.round(subs.reduce((acc, s) => acc + (Number(s.note_suggeree) || 75), 0) / subs.length)
           : (el.score || 0);
+        const avgNote20 = Math.round((avgNote / 5) * 2) / 2;
 
         return {
           ...el,
@@ -925,9 +1101,265 @@ export function createTeacherStore() {
           isStuck,
           subsCount: subs.length,
           avgNote,
+          avgNote20,
           mastery: this.getMasteryLevelFromScore(avgNote)
         };
       }).sort((a, b) => a.priority - b.priority || (a.nom || '').localeCompare(b.nom || ''));
+    },
+
+    // ==========================================
+    // 📋 BULLETIN SCOLAIRE INDIVIDUEL PAR ÉLÈVE
+    // ==========================================
+    ouvrirBulletinEleve(student) {
+      if (!student) return;
+      this.selectedBulletinStudent = student;
+      const report = this.getBulletinDataForStudent(student);
+      this.bulletinAppreciationDraft = student.bulletin_appreciation || report.autoAppreciation;
+      this.bulletinCustomNote20 = student.bulletin_custom_note20 !== null && student.bulletin_custom_note20 !== undefined
+        ? String(student.bulletin_custom_note20)
+        : '';
+      this.bulletinSaveFeedback = '';
+      this.modalBulletinEleveOpen = true;
+    },
+
+    fermerBulletinEleve() {
+      this.modalBulletinEleveOpen = false;
+    },
+
+    bulletinEleveSuivant() {
+      const list = this.getLiveClassStatusList();
+      if (!list.length || !this.selectedBulletinStudent) return;
+      const normCurr = normalizeStudentNameTokens(this.selectedBulletinStudent.nom || '');
+      const idx = list.findIndex(s =>
+        (s.email && this.selectedBulletinStudent.email && s.email === this.selectedBulletinStudent.email) ||
+        normalizeStudentNameTokens(s.nom || '') === normCurr
+      );
+      const nextIdx = (idx !== -1 && idx < list.length - 1) ? idx + 1 : 0;
+      this.ouvrirBulletinEleve(list[nextIdx]);
+    },
+
+    bulletinElevePrecedent() {
+      const list = this.getLiveClassStatusList();
+      if (!list.length || !this.selectedBulletinStudent) return;
+      const normCurr = normalizeStudentNameTokens(this.selectedBulletinStudent.nom || '');
+      const idx = list.findIndex(s =>
+        (s.email && this.selectedBulletinStudent.email && s.email === this.selectedBulletinStudent.email) ||
+        normalizeStudentNameTokens(s.nom || '') === normCurr
+      );
+      const prevIdx = idx > 0 ? idx - 1 : list.length - 1;
+      this.ouvrirBulletinEleve(list[prevIdx]);
+    },
+
+    getBulletinDataForStudent(student) {
+      const st = student || this.selectedBulletinStudent;
+      if (!st) {
+        return {
+          nom: 'Élève',
+          classe: '1A',
+          email: '',
+          schoolYear: this.getCurrentSchoolYear(),
+          bucket: 'actifs',
+          moyenne100: 0,
+          moyenne20: 0,
+          mastery: this.getMasteryLevelFromScore(0),
+          xp: 0,
+          legitXp: 0,
+          autonomyPct: 100,
+          tutorCalls: 0,
+          hintsUsed: 0,
+          submissions: [],
+          validatedCount: 0,
+          pendingCount: 0,
+          fmttnSummary: null,
+          coursesBreakdown: [],
+          autoAppreciation: ''
+        };
+      }
+
+      const normName = normalizeStudentNameTokens(st.nom || '');
+      const email = (st.email || '').toLowerCase().trim();
+
+      // Fusionner avec la fiche temps réel de classeEleves si disponible
+      const liveProg = (this.classeEleves || []).find(ce =>
+        (email && ce.email && ce.email.toLowerCase().trim() === email) ||
+        (normName && normalizeStudentNameTokens(ce.nom || '') === normName)
+      ) || st.progression || {};
+
+      // Récupérer et dédupliquer les soumissions de l'élève
+      const rawSubs = (this.teacherSubmissions || []).filter(s => {
+        if (email && s.email_eleve && s.email_eleve.toLowerCase().trim() === email) return true;
+        if (normName && s.nom_eleve && normalizeStudentNameTokens(s.nom_eleve) === normName) return true;
+        return false;
+      });
+
+      const subMap = new Map();
+      for (const s of rawSubs) {
+        const exKey = `${s.course_id || s.id_course || 'cours'}::${(s.id_exercice || s.titre_exercice || s.id).toLowerCase()}`;
+        if (!subMap.has(exKey) || (s.status === 'valide' && subMap.get(exKey).status !== 'valide')) {
+          subMap.set(exKey, s);
+        }
+      }
+      const uniqueSubs = Array.from(subMap.values()).sort(
+        (a, b) => new Date(b.date_soumission || 0) - new Date(a.date_soumission || 0)
+      );
+
+      const validatedCount = uniqueSubs.filter(s => s.status === 'valide' || s.status === 'validee').length;
+      const pendingCount = uniqueSubs.filter(s => s.status === 'a_valider' || s.status === 'pending').length;
+
+      // Calcul de la moyenne globale (/100 et /20)
+      const fmttnScore = Number(liveProg.score || st.score || 0);
+      let moyenne100 = fmttnScore || 50;
+      if (uniqueSubs.length > 0) {
+        const avgSubs = Math.round(uniqueSubs.reduce((acc, s) => acc + (Number(s.note_suggeree) || 75), 0) / uniqueSubs.length);
+        moyenne100 = fmttnScore > 50 ? Math.round((avgSubs * 0.65) + (fmttnScore * 0.35)) : avgSubs;
+      }
+
+      const custom20 = st.bulletin_custom_note20 !== null && st.bulletin_custom_note20 !== undefined && st.bulletin_custom_note20 !== ''
+        ? Number(st.bulletin_custom_note20)
+        : null;
+      const moyenne20 = custom20 !== null && !isNaN(custom20)
+        ? custom20
+        : Math.round((moyenne100 / 5) * 2) / 2;
+
+      if (custom20 !== null && !isNaN(custom20)) {
+        moyenne100 = Math.round(custom20 * 5);
+      }
+
+      const mastery = this.getMasteryLevelFromScore(moyenne100);
+
+      // Synthèse des compétences FMTTN
+      const eg = liveProg.eg || (liveProg.escape_game?.finished ? '5/5' : `${liveProg.escape_game?.dossierUnlocked?.length || 1}/5`);
+      const charte = liveProg.charte || (liveProg.charte_obj?.finished ? 'acquis' : 'en_cours');
+      const p2 = liveProg.p2 || liveProg.competences?.['NUM-1.P2'] || 'en_cours';
+      const d5 = liveProg.d5 || liveProg.competences?.['NUM-1.D5'] || 'en_cours';
+      const num2_d3 = liveProg.num2_d3 || liveProg.competences?.['NUM-2.D3'] || 'en_cours';
+      const num2_d4 = liveProg.num2_d4 || liveProg.competences?.['NUM-2.D4'] || 'en_cours';
+      const num2_m1 = liveProg.num2_m1 || liveProg.competences?.['NUM-2.M1'] || 'en_cours';
+
+      const fmttnItems = [
+        { label: 'Charte & Sécurité du poste (M0)', status: charte },
+        { label: `Investigation Escape Game (${eg})`, status: eg === '5/5' ? 'acquis' : 'en_cours' },
+        { label: 'Anatomie Courriel & Nétiquette (D5)', status: d5 },
+        { label: 'Simulateur E-mail & Cci / RGPD (P2)', status: p2 },
+        { label: 'Protocole HTTPS & Cadenas TLS (D3)', status: num2_d3 },
+        { label: 'Traces Actives vs Passives (D4)', status: num2_d4 },
+        { label: 'Campagne Stop Cyberharcèlement (M1)', status: num2_m1 }
+      ];
+
+      // Répartition par cours pour les travaux remis
+      const byCourseMap = new Map();
+      for (const s of uniqueSubs) {
+        const cid = s.course_id || s.id_course || 'bureautique-3e';
+        const cObj = (this.coursesList || []).find(c => c.id === cid);
+        const cTitle = cObj?.title || cid;
+        if (!byCourseMap.has(cid)) {
+          byCourseMap.set(cid, { id: cid, title: cTitle, count: 0, totalScore: 0 });
+        }
+        const entry = byCourseMap.get(cid);
+        entry.count++;
+        entry.totalScore += (Number(s.note_suggeree) || 75);
+      }
+      const coursesBreakdown = Array.from(byCourseMap.values()).map(c => {
+        const avg = Math.round(c.totalScore / c.count);
+        return {
+          ...c,
+          avg100: avg,
+          avg20: Math.round((avg / 5) * 2) / 2
+        };
+      });
+
+      const tutorCalls = Number(liveProg.tutor_calls_count ?? st.tutor_calls_count ?? 0);
+      const hintsUsed = Number(liveProg.hints_used_count ?? st.hints_used_count ?? 0);
+      const totalHelps = tutorCalls + hintsUsed;
+      const autonomyPct = totalHelps === 0 ? 100 : (totalHelps <= 2 ? 85 : (totalHelps <= 5 ? 70 : 55));
+
+      const xp = Math.max(Number(st.xp) || 0, Number(liveProg.xp) || 0);
+      const legitXp = this.calculerXpLegitimeEleve({ ...st, ...liveProg });
+
+      // Appréciation automatique personnalisée pour le bulletin
+      const strengths = [];
+      const improvements = [];
+      if (charte === 'acquis') strengths.push("la charte informatique");
+      if (eg === '5/5') strengths.push("l'investigation Escape Game (5/5)");
+      if (p2 === 'acquis') strengths.push("la rédaction professionnelle d'e-mails (Cci)");
+      else improvements.push("l'usage du champ Cci et les règles de courriel");
+      if (num2_d4 === 'acquis') strengths.push("l'analyse des traces numériques");
+      else improvements.push("la distinction entre traces actives et passives");
+
+      let autoAppreciation = `${st.nom} atteint le niveau « ${mastery.label} » (${moyenne20}/20). `;
+      if (validatedCount > 0) {
+        autoAppreciation += `${validatedCount} travail(aux) pratique(s) validé(s) avec sérieux. `;
+      }
+      if (strengths.length > 0) {
+        autoAppreciation += `Bonne maîtrise de ${strengths.slice(0, 2).join(' et de ')}. `;
+      }
+      if (improvements.length > 0 && moyenne20 < 16) {
+        autoAppreciation += `Point à consolider : ${improvements[0]}.`;
+      } else {
+        autoAppreciation += `Belle autonomie (${autonomyPct}%), poursuis sur cette lancée !`;
+      }
+
+      return {
+        nom: st.nom || 'Élève',
+        classe: st.classe || st.classe_id || '1A',
+        email: email || 'Inscrit manuellement',
+        schoolYear: st.school_year || this.getCurrentSchoolYear(),
+        bucket: this.getStudentPeriodBucket(st),
+        moyenne100,
+        moyenne20,
+        mastery,
+        xp,
+        legitXp,
+        autonomyPct,
+        tutorCalls,
+        hintsUsed,
+        submissions: uniqueSubs,
+        validatedCount,
+        pendingCount,
+        fmttnItems,
+        coursesBreakdown,
+        autoAppreciation
+      };
+    },
+
+    regenererAppreciationAutoBulletin() {
+      if (!this.selectedBulletinStudent) return;
+      const report = this.getBulletinDataForStudent(this.selectedBulletinStudent);
+      this.bulletinAppreciationDraft = report.autoAppreciation;
+    },
+
+    async sauvegarderBulletinEleve() {
+      if (!this.selectedBulletinStudent) return;
+      this.bulletinSaving = true;
+      this.bulletinSaveFeedback = '';
+      try {
+        const custom20 = this.bulletinCustomNote20 !== '' && !isNaN(Number(this.bulletinCustomNote20))
+          ? Math.min(20, Math.max(0, Number(this.bulletinCustomNote20)))
+          : null;
+        await saveStudentBulletinInDb(this.selectedBulletinStudent, {
+          appreciation: this.bulletinAppreciationDraft,
+          customNote20: custom20
+        });
+        this.selectedBulletinStudent.bulletin_appreciation = this.bulletinAppreciationDraft;
+        this.selectedBulletinStudent.bulletin_custom_note20 = custom20;
+        this.bulletinSaveFeedback = '✅ Bulletin (note & appréciation) enregistré dans le dossier de l\'élève !';
+        await this.chargerElevesReels();
+      } catch (err) {
+        alert("Erreur lors de la sauvegarde du bulletin : " + err.message);
+      } finally {
+        this.bulletinSaving = false;
+      }
+    },
+
+    async copierAppreciationBulletin() {
+      const report = this.getBulletinDataForStudent(this.selectedBulletinStudent);
+      const textToCopy = `${report.nom} (${report.classe}) — Note : ${report.moyenne20}/20 (${report.mastery.label}) : ${this.bulletinAppreciationDraft || report.autoAppreciation}`;
+      try {
+        await navigator.clipboard.writeText(textToCopy);
+        this.bulletinSaveFeedback = '📋 Appréciation et note copiées dans le presse-papiers (prêt à coller dans Smartschool / Pronote) !';
+      } catch (_) {
+        this.bulletinSaveFeedback = 'ℹ️ Sélectionnez le texte ci-dessus et faites Ctrl+C.';
+      }
     },
 
     // ==========================================
