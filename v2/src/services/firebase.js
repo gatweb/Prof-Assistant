@@ -23,7 +23,7 @@ import {
   serverTimestamp 
 } from "firebase/firestore";
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { isTeacherEmailAllowed, getTeacherProfile } from "./teachers-config.js";
+import { isTeacherEmailAllowed, getTeacherProfile, ALLOWED_TEACHERS } from "./teachers-config.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCccJvi75RxyaiW4meP9yVz_--k4UUFaps",
@@ -482,14 +482,22 @@ export function isGhostOrDemoAccount(nom = "", email = "", id = "", xp = 0) {
   const cleanEmail = String(email || "").trim().toLowerCase();
   const cleanId = String(id || "").trim().toLowerCase();
 
-  if (cleanEmail === "invite@demo.local" || cleanId.startsWith("guest_") || cleanId === "el_student") return true;
-
-  // Exclure les adresses e-mail des professeurs de la liste des élèves (ex: tests avec gatweb@gmail.com)
-  if (cleanEmail && ALLOWED_TEACHERS.some(t => t.email.toLowerCase() === cleanEmail)) {
+  if (cleanEmail === "invite@demo.local" || cleanEmail === "anonyme@eleve.local" || cleanId.startsWith("guest_") || cleanId === "el_student") {
     return true;
   }
 
-  // Exclure TOUS les profils génériques "Élève", "Anonyme", "Invité" (même s'ils avaient 50 XP par défaut)
+  // Exclure les adresses e-mail des professeurs de la liste des élèves (ex: tests avec gatweb@gmail.com)
+  if (cleanEmail && Array.isArray(ALLOWED_TEACHERS) && ALLOWED_TEACHERS.some(t => t.email.toLowerCase() === cleanEmail)) {
+    return true;
+  }
+
+  // IMPORTANT : Si l'élève possède une vraie adresse e-mail d'école/Google (ex: a.osel@iscdl.be),
+  // ce n'est JAMAIS un compte fantôme même si son nom temporaire était resté sur "Élève" !
+  if (cleanEmail && cleanEmail.includes("@")) {
+    return false;
+  }
+
+  // Sans adresse e-mail valide : exclure les profils génériques "Élève", "Anonyme", "Invité" (même s'ils avaient 50 XP par défaut)
   if (
     !cleanNom ||
     cleanNom === "élève" ||
@@ -505,6 +513,21 @@ export function isGhostOrDemoAccount(nom = "", email = "", id = "", xp = 0) {
     return true;
   }
   return false;
+}
+
+export function formatReadableNameFromEmail(email = "", fallbackNom = "") {
+  const cleanNom = String(fallbackNom || "").trim();
+  if (cleanNom && !["élève", "eleve", "anonyme", "invité", "invite", "el_student"].includes(cleanNom.toLowerCase())) {
+    return cleanNom;
+  }
+  const cleanEmail = String(email || "").trim().toLowerCase();
+  if (!cleanEmail || !cleanEmail.includes("@")) return cleanNom || "Élève";
+  const localPart = cleanEmail.split("@")[0];
+  return localPart
+    .split(/[._-]+/)
+    .filter(Boolean)
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ") || cleanEmail;
 }
 
 /**
@@ -580,14 +603,15 @@ export function listenToClasseProgressions(classeId, onUpdate) {
       snapshot.forEach(docSnap => {
         const d = docSnap.data();
         const email = (d.eleve_email || '').toLowerCase().trim();
-        const nom = (d.eleve_nom || "Élève").trim();
+        const rawNom = (d.eleve_nom || "Élève").trim();
         const cl = (d.classe_id || d.classe || (isAll ? '1A' : targetCl)).toUpperCase().trim();
         const xp = Number(d.xp) || 0;
 
         // Ignorer les sessions invités / fantômes / comptes profs
-        if (isGhostOrDemoAccount(nom, email, d.eleve_id || docSnap.id, xp)) {
+        if (isGhostOrDemoAccount(rawNom, email, d.eleve_id || docSnap.id, xp)) {
           return;
         }
+        const nom = formatReadableNameFromEmail(email, rawNom);
 
         const normName = normalizeStudentNameTokens(nom);
         const nameLookupKey = normName && normName !== 'eleve' ? normName : '';
@@ -754,11 +778,12 @@ export async function getRealClassStudents(classeId) {
     snapUsers.forEach(docSnap => {
       const u = docSnap.data();
       const emailKey = (u.email || "").toLowerCase().trim();
-      const nom = (u.nom || u.displayName || docSnap.id).trim();
+      const rawNom = (u.nom || u.displayName || docSnap.id).trim();
       const cl = (u.classe || "1A").toUpperCase().trim();
       const xp = Number(u.xp) || 0;
 
-      if (isGhostOrDemoAccount(nom, emailKey, docSnap.id, xp)) return;
+      if (isGhostOrDemoAccount(rawNom, emailKey, docSnap.id, xp)) return;
+      const nom = formatReadableNameFromEmail(emailKey, rawNom);
 
       const normName = normalizeStudentNameTokens(nom);
       const mapKey = findCanonicalKey(emailKey, normName, cl, docSnap.id);
@@ -809,11 +834,12 @@ export async function getRealClassStudents(classeId) {
     snapProg.forEach(docSnap => {
       const p = docSnap.data();
       const emailKey = (p.eleve_email || "").toLowerCase().trim();
-      const nom = (p.eleve_nom || "Élève").trim();
+      const rawNom = (p.eleve_nom || "Élève").trim();
       const cl = (p.classe_id || p.classe || "1A").toUpperCase().trim();
       const xp = Number(p.xp) || 0;
 
-      if (isGhostOrDemoAccount(nom, emailKey, p.eleve_id || docSnap.id, xp)) return;
+      if (isGhostOrDemoAccount(rawNom, emailKey, p.eleve_id || docSnap.id, xp)) return;
+      const nom = formatReadableNameFromEmail(emailKey, rawNom);
 
       const normName = normalizeStudentNameTokens(nom);
       const mapKey = findCanonicalKey(emailKey, normName, cl, p.eleve_id || docSnap.id);
@@ -870,6 +896,53 @@ export async function getRealClassStudents(classeId) {
         }
       }
     });
+
+    // 3. Récupérer aussi depuis 'submissions' pour reconstruire / compléter tout élève ayant remis au moins une copie
+    try {
+      const snapSubs = await getDocs(collection(db, "submissions"));
+      snapSubs.forEach(docSnap => {
+        const s = docSnap.data();
+        const emailKey = (s.email_eleve || "").toLowerCase().trim();
+        const rawNom = (s.nom_eleve || "Élève").trim();
+        const cl = (s.classe_id || s.classe || "1A").toUpperCase().trim();
+
+        if (isGhostOrDemoAccount(rawNom, emailKey, s.uid_eleve || s.id_eleve || docSnap.id, 30)) return;
+        const nom = formatReadableNameFromEmail(emailKey, rawNom);
+        const normName = normalizeStudentNameTokens(nom);
+        const mapKey = findCanonicalKey(emailKey, normName, cl, s.uid_eleve || s.id_eleve || docSnap.id);
+        const subIso = extractIsoDateFromFirestoreField(s.date_soumission || s.date_correction);
+
+        if (!studentMap.has(mapKey)) {
+          const yearMeta = inferStudentSchoolYearAndStatus({
+            updatedIso: subIso,
+            xp: 50
+          });
+          studentMap.set(mapKey, {
+            id: s.uid_eleve || s.id_eleve || ('st_' + (emailKey || normName || docSnap.id).replace(/[^a-z0-9]/g, '_')),
+            userDocIds: [],
+            progDocKeys: [],
+            nom,
+            email: emailKey,
+            classe: cl,
+            status: "actif",
+            archived: false,
+            xp: 50,
+            bulletin_appreciation: '',
+            bulletin_custom_note20: null,
+            ...yearMeta
+          });
+        } else {
+          const ex = studentMap.get(mapKey);
+          ex.classe = resolveBestStudentClass(ex.classe, cl, Boolean(ex.classroom_course_name), false);
+          if (!ex.email && emailKey) ex.email = emailKey;
+          if (nom && nom !== "Élève" && (!ex.nom || ex.nom === "Élève")) ex.nom = nom;
+          if ((ex.xp || 0) === 0) ex.xp = 30;
+          if (subIso && (!ex.lastActiveIso || subIso > ex.lastActiveIso)) {
+            ex.lastActiveIso = subIso;
+          }
+        }
+      });
+    } catch (_) {}
 
     let results = Array.from(studentMap.values()).map(st => ({
       ...st,

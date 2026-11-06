@@ -109,23 +109,13 @@ export function createTeacherStore() {
     },
 
     /**
-     * Sépare automatiquement les élèves de 1re année et de 3e année selon le cours sélectionné par le professeur
+     * Sépare automatiquement les élèves de 1re année et de 3e année uniquement lorsqu'une classe précise n'est pas sélectionnée
+     * et que l'enseignant consulte une matrice d'exercices spécifique.
+     * En mode "Toutes mes classes" (Vue d'ensemble), on affiche tous les élèves réels afin qu'aucun élève ne semble disparu.
      */
     doesStudentMatchSelectedProfCourseLevel(st) {
       if (!st) return false;
       if (isGhostOrDemoAccount(st.nom, st.email, st.id, st.xp)) return false;
-      // Si le professeur a cliqué sur une classe spécifique (ex: 3A ou 1A), respecter ce choix
-      if (this.selectedTeacherClass && this.selectedTeacherClass !== 'tous' && this.selectedTeacherClass !== 'all') {
-        return true;
-      }
-      const stYear = getYearLevelFromClass(st.classe || st.classe_id || '1A');
-      const cid = String(this.profSelectedCourseId || 'fmttn-1c').toLowerCase();
-      if (cid.includes('1re') || cid.includes('1c')) {
-        return stYear === '1re';
-      }
-      if (cid.includes('3e') || cid.includes('uaa5')) {
-        return stYear === '3e';
-      }
       return true;
     },
 

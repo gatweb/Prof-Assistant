@@ -108,18 +108,6 @@ export function createAuthStore() {
             if (typeof this.chargerTousLesElevesEcole === 'function') {
               await this.chargerTousLesElevesEcole();
             }
-            // Nettoyage silencieux automatique des comptes fantômes "Élève" en arrière-plan
-            if (!sessionStorage.getItem('profassistant_ghosts_cleaned_v2')) {
-              sessionStorage.setItem('profassistant_ghosts_cleaned_v2', '1');
-              cleanDuplicatesAndArchiveOldStudentsInDb().then(async (res) => {
-                if (res && (res.ghostsDeleted > 0 || res.duplicatesMerged > 0)) {
-                  await this.chargerElevesReels();
-                  if (typeof this.chargerTousLesElevesEcole === 'function') {
-                    await this.chargerTousLesElevesEcole();
-                  }
-                }
-              }).catch(() => {});
-            }
             this.classroomConnected = isClassroomConnected();
             if (this.classroomConnected) {
               await this.chargerCoursClassroom();
