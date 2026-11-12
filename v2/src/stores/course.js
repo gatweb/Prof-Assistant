@@ -386,7 +386,7 @@ export function createCourseStore() {
 
       if (this.currentCourse?.workspaceType === 'fmttn') {
         const targetMod = moduleParam || exParam;
-        if (targetMod && ['module-0', 'escape-game', 'ch1-communication', 'ch2-securite'].includes(targetMod)) {
+        if (targetMod && ['module-0', 'escape-game', 'ch1-communication', 'ch2-securite', 'ch3-ia', 'ch4-donnees', 'ch5-creation'].includes(targetMod)) {
           if (typeof this.selectFmttnModule === 'function') {
             this.selectFmttnModule(targetMod, 'cours');
           } else {

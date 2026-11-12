@@ -1,0 +1,238 @@
+{
+  "questions": [
+    {
+      "id": "t1b_ch3_q1",
+      "chapter": "ch3",
+      "question": "Quelle est la différence principale entre une IA classique et une IA générative ?",
+      "options": [
+        "L'IA classique fonctionne uniquement hors ligne, l'IA générative uniquement sur smartphone",
+        "L'IA classique analyse/classe des données existantes, tandis que l'IA générative crée de nouveaux contenus (texte, image, son, code)",
+        "L'IA générative ne fait jamais d'erreurs contrairement à l'IA classique",
+        "L'IA classique sert uniquement à jouer aux échecs"
+      ],
+      "correctIndex": 1,
+      "explanation": "Une IA classique reconnaît, trie ou prédit (filtre anti-spam, Face ID), alors qu'une IA générative produit de nouveaux contenus à partir d'un prompt."
+    },
+    {
+      "id": "t1b_ch3_q2",
+      "chapter": "ch3",
+      "question": "Dans quel ordre se déroulent les 4 étapes du Machine Learning (apprentissage automatique) ?",
+      "options": [
+        "Prédire → Tester → Collecter → S'entraîner",
+        "Collecter les données → S'entraîner → Tester et évaluer → Prédire / Décider",
+        "Tester → Collecter → Prédire → S'entraîner",
+        "S'entraîner → Prédire → Effacer les données → Tester"
+      ],
+      "correctIndex": 1,
+      "explanation": "L'IA commence par collecter des exemples, s'entraîne à repérer des motifs, est testée sur de nouvelles données, puis peut prédire ou décider."
+    },
+    {
+      "id": "t1b_ch3_q3",
+      "chapter": "ch3",
+      "question": "Qu'appelle-t-on une « hallucination » d'une IA générative ?",
+      "options": [
+        "Un virus informatique qui bloque l'écran",
+        "Une réponse inventée et fausse présentée avec beaucoup d'assurance par l'IA",
+        "Une image générée en noir et blanc",
+        "Un bug du câble Ethernet"
+      ],
+      "correctIndex": 1,
+      "explanation": "L'IA générative prédit des mots probables sans vérifier la vérité : elle peut inventer de faux faits, dates ou sources."
+    },
+    {
+      "id": "t1b_ch3_q4",
+      "chapter": "ch3",
+      "question": "Quelles sont les 5 étapes recommandées pour rédiger un bon prompt ?",
+      "options": [
+        "Rôle, Tâche, Contexte, Format, Ajustement",
+        "Bonjour, Question, Merci, Copier, Coller",
+        "Titre, Police, Marge, En-tête, Pied de page",
+        "Mot de passe, Adresse IP, Routeur, Wi-Fi, Export"
+      ],
+      "correctIndex": 0,
+      "explanation": "Le manuel @LT_X structure un prompt efficace en 5 étapes : 1. Rôle, 2. Tâche, 3. Contexte, 4. Format, 5. Ajustement."
+    },
+    {
+      "id": "t1b_ch3_q5",
+      "chapter": "ch3",
+      "question": "Selon la charte éthique « L'IA et moi », quelle information ne faut-il JAMAIS saisir dans un prompt public ?",
+      "options": [
+        "Le niveau scolaire (ex. 1re secondaire)",
+        "Le format souhaité (tableau ou liste)",
+        "Des données personnelles sensibles (nom complet, adresse, mot de passe, photo privée)",
+        "Le sujet d'un exposé d'histoire"
+      ],
+      "correctIndex": 2,
+      "explanation": "Pour respecter la vie privée (engagement n°3), on ne partage jamais de données personnelles ou confidentielles avec une IA en ligne."
+    },
+    {
+      "id": "t1b_ch3_q6",
+      "chapter": "ch3",
+      "question": "Quel usage d'IA générative a l'impact écologique le PLUS élevé ?",
+      "options": [
+        "Résumer un paragraphe de 10 lignes en texte",
+        "Générer 50 images haute définition ou des vidéos",
+        "Corriger 3 fautes d'orthographe dans une phrase",
+        "Traduire un mot en anglais"
+      ],
+      "correctIndex": 1,
+      "explanation": "Générer de nombreuses images ou vidéos demande énormément plus de calculs (et donc d'électricité et d'eau de refroidissement) qu'un court texte."
+    },
+    {
+      "id": "t1b_ch4_q1",
+      "chapter": "ch4",
+      "question": "Quelle affirmation distingue correctement le Hardware du Software ?",
+      "options": [
+        "Le Hardware désigne les logiciels et le Software les câbles",
+        "Le Hardware est la partie physique (clavier, processeur, écran) et le Software désigne les programmes/logiciels",
+        "Le Hardware est uniquement dans le Cloud",
+        "Le Software se nettoie avec un chiffon"
+      ],
+      "correctIndex": 1,
+      "explanation": "Hardware = matériel tangible ; Software = logiciels et systèmes d'exploitation qui font fonctionner le matériel."
+    },
+    {
+      "id": "t1b_ch4_q2",
+      "chapter": "ch4",
+      "question": "Que devient le contenu de la mémoire vive (RAM) lorsque l'ordinateur s'éteint ?",
+      "options": [
+        "Il est gravé automatiquement sur un DVD",
+        "Il est effacé car la RAM est une mémoire temporaire",
+        "Il est envoyé vers l'adresse IP du routeur",
+        "Il est converti en fichier .zip"
+      ],
+      "correctIndex": 1,
+      "explanation": "La RAM est temporaire (volatile) : d'où l'importance d'enregistrer (Ctrl+S) régulièrement son document sur le disque de stockage !"
+    },
+    {
+      "id": "t1b_ch4_q3",
+      "chapter": "ch4",
+      "question": "Quel ordre classe ces unités de la PLUS PETITE à la PLUS GRANDE ?",
+      "options": [
+        "To < Go < Mo < Ko < o",
+        "o < Mo < Ko < Go < To",
+        "o < Ko < Mo < Go < To",
+        "Ko < o < Go < Mo < To"
+      ],
+      "correctIndex": 2,
+      "explanation": "Chaque palier vaut 1 024 fois le précédent : octet (o) < Kilooctet (Ko) < Mégaoctet (Mo) < Gigaoctet (Go) < Téraoctet (To)."
+    },
+    {
+      "id": "t1b_ch4_q4",
+      "chapter": "ch4",
+      "question": "Pourquoi est-il recommandé d'EXPORTER un devoir Word (.docx) en PDF avant de l'envoyer au professeur ?",
+      "options": [
+        "Pour que le professeur puisse modifier tout le texte plus facilement",
+        "Parce que le format .pdf garantit que la mise en page reste identique sur tous les appareils",
+        "Parce que le format .pdf transforme le texte en vidéo .mp4",
+        "Pour augmenter la taille du fichier en Téraoctets"
+      ],
+      "correctIndex": 1,
+      "explanation": "Le format .pdf fige la mise en page et est lisible partout, tandis que le .docx reste idéal pour travailler et modifier le document."
+    },
+    {
+      "id": "t1b_ch4_q5",
+      "chapter": "ch4",
+      "question": "Quel nom de dossier respecte le mieux les bonnes pratiques informatiques vues en cours ?",
+      "options": [
+        "Mes devoirs / école * 2026 ?",
+        "04_documents_scolaires",
+        "Nouveau dossier (2) - copie",
+        "Bureau/trucs"
+      ],
+      "correctIndex": 1,
+      "explanation": "On numérote au début pour l'ordre, on remplace les espaces par des underscores (_) et on évite accents et caractères spéciaux."
+    },
+    {
+      "id": "t1b_ch4_q6",
+      "chapter": "ch4",
+      "question": "Quel appareil dirige les données entre les ordinateurs du réseau local et Internet ?",
+      "options": [
+        "Le routeur (box)",
+        "La mémoire RAM",
+        "Le traitement de texte",
+        "La note de bas de page"
+      ],
+      "correctIndex": 0,
+      "explanation": "Le routeur aiguille le trafic entre les appareils du réseau local (via IP locale) et Internet."
+    },
+    {
+      "id": "t1b_ch5_q1",
+      "chapter": "ch5",
+      "question": "Dans un traitement de texte, quelle commande permet de démarrer proprement le texte suivant sur une nouvelle page ?",
+      "options": [
+        "Appuyer 25 fois sur la touche Entrée",
+        "Insérer un saut de page",
+        "Augmenter la marge gauche à 10 cm",
+        "Ajouter une liste à puces"
+      ],
+      "correctIndex": 1,
+      "explanation": "Le saut de page force le passage propre à la page suivante sans décaler toute la mise en page si on ajoute du texte avant."
+    },
+    {
+      "id": "t1b_ch5_q2",
+      "chapter": "ch5",
+      "question": "Lors d'un trajet en bus, quel élément est une VARIABLE (et non une constante) ?",
+      "options": [
+        "Le numéro de la ligne de bus",
+        "La couleur officielle du bus",
+        "Le nombre de passagers à bord",
+        "Le nom de la société de transport"
+      ],
+      "correctIndex": 2,
+      "explanation": "Une variable change selon le moment ou la situation : le nombre de passagers change à chaque arrêt, contrairement au numéro de la ligne."
+    },
+    {
+      "id": "t1b_ch5_q3",
+      "chapter": "ch5",
+      "question": "La grand-mère de Lina partage un faux remède trouvé sur Internet en pensant sincèrement aider. De quoi s'agit-il ?",
+      "options": [
+        "De désinformation (volonté de manipuler ou nuire)",
+        "De mésinformation (partage sincère d'une information fausse sans intention de tromper)",
+        "D'un logigramme",
+        "D'une extension de fichier"
+      ],
+      "correctIndex": 1,
+      "explanation": "Mésinformation = erreur partagée de bonne foi ; Désinformation = fausse info créée ou partagée volontairement pour tromper ou nuire."
+    },
+    {
+      "id": "t1b_ch5_q4",
+      "chapter": "ch5",
+      "question": "Quel geste numérique réduit le PLUS l'empreinte carbone liée à un smartphone ?",
+      "options": [
+        "Changer de smartphone tous les ans pour avoir le dernier modèle",
+        "Conserver son smartphone le plus longtemps possible (3 à 4 ans ou plus)",
+        "Laisser tous ses e-mails publicitaires stockés à vie",
+        "Envoyer systématiquement des pièces jointes de 20 Mo"
+      ],
+      "correctIndex": 1,
+      "explanation": "Jusqu'à 80 % de l'empreinte carbone d'un smartphone provient de sa fabrication (~80 kg de CO2e) : allonger sa durée de vie est décisif."
+    },
+    {
+      "id": "t1b_ch5_q5",
+      "chapter": "ch5",
+      "question": "Dans un logigramme, quelle forme géométrique représente une DÉCISION / CONDITION (Oui / Non) ?",
+      "options": [
+        "Un ovale",
+        "Un rectangle à coins arrondis",
+        "Un losange",
+        "Un cercle pointillé"
+      ],
+      "correctIndex": 2,
+      "explanation": "Ovale = Début/Fin, Rectangle arrondi = Action/Processus, Losange = Décision/Condition (Oui/Non), Flèche = Liaison/Boucle."
+    },
+    {
+      "id": "t1b_ch5_q6",
+      "chapter": "ch5",
+      "question": "Pour tracer un triangle équilatéral dans Scratch (3 côtés égaux), quel bloc « répéter » faut-il utiliser ?",
+      "options": [
+        "Répéter 4 fois : avancer de 100 pas, tourner de 90°",
+        "Répéter 3 fois : avancer de 100 pas, tourner de 120°",
+        "Répéter 3 fois : avancer de 100 pas, tourner de 60°",
+        "Répéter 5 fois : avancer de 50 pas, tourner de 72°"
+      ],
+      "correctIndex": 1,
+      "explanation": "Un tour complet fait 360° : pour 3 côtés égaux, l'angle de rotation extérieur est 360° ÷ 3 = 120°."
+    }
+  ]
+}

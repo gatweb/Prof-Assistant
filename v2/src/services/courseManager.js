@@ -10,7 +10,7 @@ export const FMTTN_COURSE_DEF = {
   targetYear: "1re",
   accessCode: "FMTTN1",
   title: "Numérique FMTTN 1re (@lt_X)",
-  pitch: "Programme officiel SeGEC — Charte, Escape Game, Communication & Collaboration, Sécurité & Traces numériques.",
+  pitch: "Programme officiel SeGEC (Tomes 1a & 1b) — Charte, Escape Game, Communication, Sécurité, Intelligence Artificielle, Données & Création.",
   systemPrompt: `Tu es le Tuteur Socratique d'@lt_X pour des élèves de 1re secondaire (11-12 ans) en Belgique (programme SeGEC / FMTTN).
 Ton rôle :
 1. Être chaleureux, encourageant et clair (mots simples, phrases courtes).
@@ -25,7 +25,10 @@ Ton rôle :
     { id: "module-0", title: "Module 0 : Bienvenue & Charte informatique" },
     { id: "escape-game", title: "Escape Game : 5 dossiers d'investigation" },
     { id: "ch1-communication", title: "Chapitre 1 : Communication & Collaboration" },
-    { id: "ch2-securite", title: "Chapitre 2 : Sécurité & Données personnelles" }
+    { id: "ch2-securite", title: "Chapitre 2 : Sécurité & Données personnelles" },
+    { id: "ch3-ia", title: "Chapitre 3 : Intelligence Artificielle* (Tome 1b)" },
+    { id: "ch4-donnees", title: "Chapitre 4 : Informations & Données (Tome 1b)" },
+    { id: "ch5-creation", title: "Chapitre 5 : Création de Contenus (Tome 1b)" }
   ]
 };
 

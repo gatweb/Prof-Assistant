@@ -1,0 +1,158 @@
+{
+  "id": "chapitre-3",
+  "numero": 3,
+  "titre": "Intelligence Artificielle*",
+  "tome": "Tome 1b",
+  "pages": "9 - 72",
+  "introduction": "Découvre la différence entre IA classique et IA générative, comprends comment une machine apprend (Machine Learning), identifie ses limites (biais, hallucinations, impact écologique), apprends à rédiger un prompt efficace en 5 étapes et adopte un usage transparent et éthique.",
+  "je_decouvre": {
+    "parties": [
+      {
+        "id": "ch3-p1",
+        "numero": 1,
+        "titre": "IA et IA générative",
+        "description": "Distinguer l'intelligence artificielle classique (reconnaître, classer, prédire) de l'intelligence artificielle générative (créer de nouveaux contenus).",
+        "concepts": [
+          {
+            "id": "ia-classique",
+            "terme": "Intelligence Artificielle (IA)",
+            "definition": "Programme informatique capable de réaliser des tâches qui demandent habituellement de l'intelligence humaine : reconnaître des visages, traduire, recommander des vidéos ou détecter du spam.",
+            "exemples": [
+              "Déverrouillage par reconnaissance faciale (Face ID)",
+              "Filtre anti-spam de la boîte mail",
+              "Recommandations sur YouTube ou Spotify"
+            ],
+            "mots_cles": ["Reconnaître", "Analyser", "Classer", "Prédire"]
+          },
+          {
+            "id": "ia-generative",
+            "terme": "IA générative",
+            "definition": "Catégorie d'IA capable de créer (générer) de nouveaux contenus originaux à partir d'une consigne (prompt) : texte, image, audio, vidéo ou code.",
+            "exemples": [
+              "ChatGPT / Gemini / Mistral (texte et code)",
+              "Midjourney / DALL-E (images)",
+              "Suno (musique)"
+            ],
+            "mots_cles": ["Créer", "Générer", "Prompt", "Contenu nouveau"]
+          },
+          {
+            "id": "reperes-historiques",
+            "terme": "Repères historiques de l'IA",
+            "definition": "L'IA n'est pas née hier : ses bases remontent aux années 1950.",
+            "exemples": [
+              "1950 : Alan Turing propose le test de Turing",
+              "1956 : Conférence de Dartmouth (naissance officielle du terme IA)",
+              "Années 2010-2020 : Essor du Deep Learning et des IA génératives"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ch3-p2",
+        "numero": 2,
+        "titre": "Fonctionnement de l'IA et Machine Learning",
+        "description": "Comprendre les 4 étapes de l'apprentissage automatique (Machine Learning) et le rôle des données.",
+        "etapes_ml": [
+          {
+            "numero": 1,
+            "titre": "Collecter les données",
+            "description": "Rassembler des milliers ou milliards d'exemples variés (images, textes, sons) pour nourrir le modèle."
+          },
+          {
+            "numero": 2,
+            "titre": "S'entraîner",
+            "description": "L'algorithme cherche des motifs (patterns) dans les données et ajuste ses paramètres grâce aux erreurs."
+          },
+          {
+            "numero": 3,
+            "titre": "Tester et évaluer",
+            "description": "On vérifie les performances du modèle sur de nouvelles données qu'il n'a jamais vues."
+          },
+          {
+            "numero": 4,
+            "titre": "Prédire / Décider",
+            "description": "Une fois entraînée, l'IA peut classer une nouvelle image ou générer la suite la plus probable d'un texte."
+          }
+        ]
+      },
+      {
+        "id": "ch3-p3",
+        "numero": 3,
+        "titre": "Limites de l'utilisation de l'IA",
+        "description": "Identifier les pièges courants : hallucinations, biais algorithmiques, clichés et impact écologique.",
+        "limites": [
+          {
+            "id": "hallucination",
+            "titre": "Hallucinations (erreurs inventées)",
+            "detail": "Une IA générative prédit des mots probables sans comprendre la vérité. Elle peut inventer de faux faits, de fausses dates ou de fausses sources avec un ton très sûr d'elle."
+          },
+          {
+            "id": "biais",
+            "titre": "Biais et clichés",
+            "detail": "Si les données d'entraînement contiennent des préjugés humains, l'IA les reproduit (ex. un outil de recrutement entraîné sur d'anciens CV favorisant les hommes, ou des stéréotypes dans les images générées)."
+          },
+          {
+            "id": "ecologie-ia",
+            "titre": "Impact écologique",
+            "detail": "Les centres de données (data centers) consomment beaucoup d'électricité et d'eau pour le refroidissement. Résumer un court texte pollue peu, mais générer 50 images ou vidéos consomme beaucoup plus d'énergie."
+          }
+        ]
+      },
+      {
+        "id": "ch3-p4",
+        "numero": 4,
+        "titre": "Usage transparent et éthique de l'IA",
+        "description": "Adopter la Charte « L'IA et moi » : honnêteté, vérification, vie privée, respect et sobriété.",
+        "charte_ia": [
+          {
+            "numero": 1,
+            "titre": "Dire la vérité (Transparence)",
+            "regle": "Ne jamais faire passer un travail généré par une IA pour son propre travail. Citer l'utilisation de l'IA quand elle a servi."
+          },
+          {
+            "numero": 2,
+            "titre": "Vérifier (Esprit critique)",
+            "regle": "Toujours croiser les réponses de l'IA avec des sources fiables (manuels, sites officiels, encyclopédies)."
+          },
+          {
+            "numero": 3,
+            "titre": "Respecter la vie privée",
+            "regle": "Ne jamais envoyer de données personnelles ou sensibles (nom complet, adresse, mot de passe, photo privée) dans un prompt."
+          },
+          {
+            "numero": 4,
+            "titre": "Ne pas blesser",
+            "regle": "Refuser d'utiliser l'IA pour harceler, usurper une identité (deepfake) ou propager de fausses informations."
+          },
+          {
+            "numero": 5,
+            "titre": "Penser à la planète",
+            "regle": "Utiliser l'IA seulement quand c'est vraiment utile, avec des prompts précis pour éviter les générations inutiles."
+          }
+        ]
+      }
+    ]
+  },
+  "je_pratique": {
+    "methode_prompt": {
+      "titre": "Communiquer efficacement avec une IA (Méthode en 5 étapes)",
+      "etapes": [
+        { "id": "role", "numero": 1, "nom": "Rôle", "description": "Dis à l'IA qui elle doit incarner (ex. « Tu es un professeur d'histoire bienveillant »)." },
+        { "id": "tache", "numero": 2, "nom": "Tâche", "description": "Formule une action précise avec un verbe à l'infinitif ou à l'impératif (ex. « Explique-moi... », « Résume... »)." },
+        { "id": "contexte", "numero": 3, "nom": "Contexte", "description": "Précise le public, le niveau scolaire et le but (ex. « Pour un élève de 1re secondaire qui révise son contrôle »)." },
+        { "id": "format", "numero": 4, "nom": "Format", "description": "Indique la forme attendue (ex. « En 5 points à puces maximum », « Sous forme de tableau comparatif »)." },
+        { "id": "ajustement", "numero": 5, "nom": "Ajustement", "description": "Relis la réponse et affine ta demande si besoin (« Rends le vocabulaire plus simple », « Donne un exemple concret »)." }
+      ]
+    }
+  },
+  "je_maitrise": {
+    "types_outils_ia": [
+      { "categorie": "Texte & Chatbots", "usages": "Résumer, reformuler, traduire, structurer des idées", "exemples": "ChatGPT, Gemini, Claude, Mistral" },
+      { "categorie": "Image", "usages": "Créer des illustrations, schémas ou affiches libres de droits", "exemples": "DALL-E, Midjourney, Adobe Firefly" },
+      { "categorie": "Musique & Son", "usages": "Composer une ambiance sonore ou nettoyer un bruit de fond", "exemples": "Suno, Udio, Adobe Podcast" },
+      { "categorie": "Vidéo", "usages": "Générer de courts clips ou ajouter des sous-titres automatiques", "exemples": "Runway, Sora, CapCut IA" },
+      { "categorie": "Code & Programmation", "usages": "Expliquer une erreur, proposer des exemples de scripts", "exemples": "GitHub Copilot, Gemini Code" },
+      { "categorie": "IA expertes", "usages": "Aider au diagnostic médical, à la météo ou à la biodiversité", "exemples": "AlphaFold, IA d'imagerie médicale" }
+    ]
+  }
+}

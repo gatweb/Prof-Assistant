@@ -1,0 +1,110 @@
+{
+  "id": "chapitre-4",
+  "numero": 4,
+  "titre": "Informations et Données",
+  "tome": "Tome 1b",
+  "pages": "73 - 126",
+  "introduction": "Maîtrise le vocabulaire matériel et logiciel (Hardware, Software, RAM, ROM), reconnais les extensions de fichiers et les logiciels associés, comprends les réseaux (routeur, IP, Wi-Fi, Ethernet), calcule les tailles de fichiers (o, Ko, Mo, Go, To) et organise une arborescence claire.",
+  "je_decouvre": {
+    "parties": [
+      {
+        "id": "ch4-p1",
+        "numero": 1,
+        "titre": "Vocabulaire du hardware et du software",
+        "description": "Distinguer les composants physiques (Hardware) des programmes (Software), et comprendre les différents types de mémoire.",
+        "concepts": [
+          {
+            "terme": "Hardware (Matériel)",
+            "definition": "Tout ce que l'on peut toucher physiquement : écran, clavier, souris, carte mère, processeur, disque dur, clé USB."
+          },
+          {
+            "terme": "Software (Logiciel)",
+            "definition": "Ensemble des programmes et applications qui donnent des instructions au matériel : Windows, macOS, Word, Chrome, Scratch."
+          },
+          {
+            "terme": "Mémoire RAM (Mémoire vive)",
+            "definition": "Mémoire rapide et temporaire utilisée pendant que l'ordinateur est allumé. Elle s'efface dès qu'on éteint l'appareil !"
+          },
+          {
+            "terme": "Mémoire ROM & Stockage",
+            "definition": "La ROM contient les instructions permanentes de démarrage. Le disque dur / SSD (stockage interne) et la clé USB (stockage externe) conservent les fichiers même ordinateur éteint."
+          }
+        ]
+      },
+      {
+        "id": "ch4-p2",
+        "numero": 2,
+        "titre": "Extensions, favoris et plateformes",
+        "description": "Lire l'extension d'un fichier pour connaître son type et gagner du temps avec les favoris.",
+        "extensions": [
+          { "ext": ".docx / .odt", "type": "Document texte", "logiciel": "Microsoft Word / LibreOffice Writer" },
+          { "ext": ".xlsx / .ods", "type": "Tableur / Calculs", "logiciel": "Microsoft Excel / LibreOffice Calc" },
+          { "ext": ".pdf", "type": "Document figé (lecture/impression)", "logiciel": "Adobe Reader / Navigateur web" },
+          { "ext": ".jpg / .png", "type": "Image / Photo", "logiciel": "Photos / Aperçu / GIMP" },
+          { "ext": ".mp3 / .wav", "type": "Fichier audio / Musique", "logiciel": "Lecteur multimédia / VLC" },
+          { "ext": ".mp4", "type": "Fichier vidéo", "logiciel": "VLC Media Player" },
+          { "ext": ".zip", "type": "Archive compressée (plusieurs fichiers)", "logiciel": "Explorateur Windows / 7-Zip" }
+        ],
+        "astuces": [
+          "Favori (Signet) : enregistrer l'adresse d'un site utile avec Ctrl + D (Windows/Linux) ou Cmd + D (Mac).",
+          "Plateforme en ligne : service accessible par navigateur pour consulter ou partager des médias (YouTube, Spotify, Smartschool, Google Classroom)."
+        ]
+      },
+      {
+        "id": "ch4-p4",
+        "numero": 4,
+        "titre": "Vocabulaire du réseau",
+        "description": "Comprendre comment les appareils communiquent entre eux et avec Internet.",
+        "concepts": [
+          { "terme": "Réseau local", "definition": "Ensemble d'appareils reliés entre eux dans un même lieu (maison, école) pour partager des données ou une imprimante." },
+          { "terme": "Routeur (Box)", "definition": "Appareil qui dirige les données entre les appareils du réseau local et Internet." },
+          { "terme": "Adresse IP", "definition": "Numéro d'identification unique attribué à chaque appareil sur un réseau (exemple : 192.168.0.12)." },
+          { "terme": "Ethernet vs Wi-Fi vs Bluetooth", "definition": "Ethernet = câble réseau (rapide et stable). Wi-Fi = sans fil pour Internet à moyenne portée. Bluetooth = sans fil à courte portée (écouteurs, souris)." }
+        ]
+      },
+      {
+        "id": "ch4-p5",
+        "numero": 5,
+        "titre": "Tailles et formats des fichiers",
+        "description": "Comparer et convertir les unités de stockage numérique : octet, Ko, Mo, Go, To.",
+        "unites": [
+          { "unite": "o (Octet)", "equivalence": "Unité de base (1 caractère ≈ 1 octet)", "ordre": 1 },
+          { "unite": "Ko (Kilooctet)", "equivalence": "1 Ko = 1 024 octets (≈ 1 000 octets) — Un petit document texte", "ordre": 2 },
+          { "unite": "Mo (Mégaoctet)", "equivalence": "1 Mo = 1 024 Ko — Une photo ou chanson MP3 (~3-5 Mo)", "ordre": 3 },
+          { "unite": "Go (Gigaoctet)", "equivalence": "1 Go = 1 024 Mo — Un film HD ou une clé USB", "ordre": 4 },
+          { "unite": "To (Téraoctet)", "equivalence": "1 To = 1 024 Go — Un disque dur complet", "ordre": 5 }
+        ]
+      }
+    ]
+  },
+  "je_pratique": {
+    "bonnes_pratiques": [
+      {
+        "titre": "Nommer un fichier ou dossier proprement",
+        "regles": [
+          "Utiliser des underscores (_) au lieu des espaces : 04_documents, devoir_francais_v01.docx",
+          "Éviter les accents et caractères spéciaux (* ? / : < >) dans les noms de fichiers.",
+          "Numéroter pour garder l'ordre : 01_images, 02_videos, 03_audios, 04_documents."
+        ]
+      },
+      {
+        "titre": "Enregistrer (Ctrl + S) vs Exporter (PDF)",
+        "regles": [
+          "Enregistrer (Ctrl+S / Cmd+S) : conserve le document modifiable (.docx) dans ton dossier de travail (jamais tout en vrac sur le Bureau !).",
+          "Exporter en PDF : crée une copie figée (.pdf) lisible partout avec la mise en page garantie pour l'envoyer au professeur ou l'imprimer."
+        ]
+      }
+    ]
+  },
+  "je_maitrise": {
+    "arborescence_modele": {
+      "racine": "Nom_Prenom_1re",
+      "dossiers": [
+        "01_Documents_scolaires (Français, Mathématiques, FMTTN, Sciences)",
+        "02_Images_et_projets",
+        "03_Evenements",
+        "04_Archives_et_donnees"
+      ]
+    }
+  }
+}

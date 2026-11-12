@@ -1,0 +1,80 @@
+{
+  "id": "chapitre-5",
+  "numero": 5,
+  "titre": "Création de Contenus",
+  "tome": "Tome 1b",
+  "pages": "127 - 172",
+  "introduction": "Maîtrise le vocabulaire et la mise en page du traitement de texte, comprends le concept de variable, agis face à l'impact écologique du numérique et aux Fake News (mésinformation vs désinformation), et apprends à lire et concevoir un algorithme puis un logigramme.",
+  "je_decouvre": {
+    "parties": [
+      {
+        "id": "ch5-p1",
+        "numero": 1,
+        "titre": "Vocabulaire et commandes du traitement de texte",
+        "description": "Identifier les outils essentiels pour structurer et présenter proprement un document numérique.",
+        "commandes": [
+          { "nom": "La marge", "role": "Espace vide situé autour du texte sur les quatre bords de la page." },
+          { "nom": "L'en-tête et le pied de page", "role": "Zones répétées en haut et en bas de chaque page (titre du document, nom, numéro de page)." },
+          { "nom": "Le saut de page", "role": "Commande permettant de forcer le texte suivant à commencer sur une nouvelle page (sans appuyer 20 fois sur Entrée !)." },
+          { "nom": "La liste à puces / numéros", "role": "Outil pour organiser une énumération avec des points, symboles ou numéros." },
+          { "nom": "La note de bas de page", "role": "Remarque ou source ajoutée en bas de la page et reliée au texte par un petit numéro." }
+        ]
+      },
+      {
+        "id": "ch5-p2",
+        "numero": 2,
+        "titre": "Le concept de variable",
+        "description": "Reconnaître ce qui peut changer (variable) et ce qui reste fixe (constante) dans une situation ou un programme.",
+        "definition": "Une variable est une information (une « boîte » nommée) dont la valeur peut changer selon la situation ou au fil d'un programme.",
+        "exemples": [
+          { "situation": "Jeu de société", "variables": "Le score de chaque joueur", "constantes": "Les règles du jeu, le nom du jeu" },
+          { "situation": "Trajet en bus", "variables": "Le nombre de passagers, la durée du trajet", "constantes": "Le numéro de la ligne, la couleur du bus" },
+          { "situation": "Météo du matin", "variables": "La température, la quantité de pluie", "constantes": "La position du soleil" },
+          { "situation": "Courses au supermarché", "variables": "Le nombre d'articles, le prix total", "constantes": "L'enseigne du magasin, la monnaie (€)" }
+        ]
+      },
+      {
+        "id": "ch5-p3",
+        "numero": 3,
+        "titre": "Culture numérique* : Écologie & Fake News",
+        "description": "Mesurer l'empreinte carbone de nos usages numériques et distinguer mésinformation et désinformation.",
+        "impact_ecologique": [
+          "Le numérique représente 3 à 4 % des émissions mondiales de gaz à effet de serre (comparable à l'aviation civile).",
+          "Jusqu'à 80 % de l'empreinte carbone d'un smartphone vient de sa fabrication (~80 kg de CO2e) : le garder 3 à 4 ans ou plus est le meilleur geste !",
+          "En Belgique, l'empreinte numérique moyenne est d'environ 350 kg de CO2e par personne et par an.",
+          "Un e-mail avec pièce jointe lourde pollue bien plus qu'un simple lien ; supprimer ses vieux e-mails inutiles réduit le stockage permanent sur les serveurs."
+        ],
+        "fake_news": {
+          "mesinformation": "Information fausse partagée par quelqu'un qui croit sincèrement qu'elle est vraie (sans intention de nuire, ex. partager une fausse astuce santé lue sur un réseau).",
+          "desinformation": "Information fausse créée ou diffusée volontairement pour tromper, manipuler l'opinion ou nuire à quelqu'un (ex. montage photo pour diffamer)."
+        }
+      }
+    ]
+  },
+  "je_pratique": {
+    "algorithme_logigramme": {
+      "definition_algo": "Un algorithme est une suite ordonnée et finie d'étapes précises pour résoudre un problème (comme une recette de cuisine).",
+      "definition_programme": "Un programme est la traduction d'un algorithme dans un langage compris par l'ordinateur (Scratch, Python, MakeCode).",
+      "symboles_logigramme": [
+        { "forme": "Ovale", "signification": "Début ou Fin de l'algorithme" },
+        { "forme": "Rectangle à coins arrondis", "signification": "Action / Processus (étape à exécuter)" },
+        { "forme": "Losange", "signification": "Décision / Condition (question Oui / Non)" },
+        { "forme": "Flèche (de liaison / retour)", "signification": "Sens de lecture et boucle de répétition" }
+      ]
+    }
+  },
+  "je_maitrise": {
+    "mission_omega": {
+      "titre": "Mission Oméga : Création d'un document & Programmation Scratch",
+      "document_etapes": [
+        "1. Page de garde avec titre percutant, image pertinente, nom, prénom, classe et date.",
+        "2. Structure en 3 parties avec titres clairs et liste à puces.",
+        "3. Mise en page soignée : marges, en-tête/pied de page, sauts de page et export en PDF."
+      ],
+      "scratch_geometrie": [
+        "Carré (4 côtés) : répéter 4 fois [avancer de 100 pas, tourner de 90°] (4 × 90° = 360°).",
+        "Triangle équilatéral (3 côtés) : répéter 3 fois [avancer de 100 pas, tourner de 120°] (3 × 120° = 360°)."
+      ]
+    }
+  }
+}

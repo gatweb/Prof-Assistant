@@ -331,7 +331,7 @@
             <span class="text-slate-600">›</span>
             <span class="px-2.5 py-1 rounded-lg bg-emerald-600/20 border border-emerald-500/40 text-emerald-300 font-extrabold flex items-center gap-1.5">
               <span>🎯</span>
-              <span x-text="currentCourse?.workspaceType === 'fmttn' ? (selectedModuleId === 'module-0' ? 'Module 0' : (selectedModuleId === 'escape-game' ? 'Escape Game' : (selectedModuleId === 'ch2-securite' ? 'Chapitre 2' : 'Chapitre 1'))) : (activeTab === 'pratique' && currentExercise ? (currentExercise.titre || 'Mission') : (currentChapter?.title || 'Leçon'))"></span>
+              <span x-text="currentCourse?.workspaceType === 'fmttn' ? getFmttnModuleLabel() : (activeTab === 'pratique' && currentExercise ? (currentExercise.titre || 'Mission') : (currentChapter?.title || 'Leçon'))"></span>
             </span>
           </div>
         </template>
@@ -403,16 +403,34 @@
           class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer">
           <span>🛡️</span> Chapitre 2 : Sécurité & Données
         </button>
+        <button 
+          @click="selectFmttnModule('ch3-ia')"
+          :class="selectedModuleId === 'ch3-ia' ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
+          class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer">
+          <span>🤖</span> Chapitre 3 : IA* (1b)
+        </button>
+        <button 
+          @click="selectFmttnModule('ch4-donnees')"
+          :class="selectedModuleId === 'ch4-donnees' ? 'bg-cyan-600 text-white border-cyan-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
+          class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer">
+          <span>💾</span> Chapitre 4 : Données (1b)
+        </button>
+        <button 
+          @click="selectFmttnModule('ch5-creation')"
+          :class="selectedModuleId === 'ch5-creation' ? 'bg-lime-600 text-white border-lime-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
+          class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer">
+          <span>📝</span> Chapitre 5 : Création (1b)
+        </button>
       </div>
 
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 class="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
-            <span x-text="selectedModuleId === 'module-0' ? '🚀' : (selectedModuleId === 'escape-game' ? '🎮' : (selectedModuleId === 'ch2-securite' ? '🛡️' : '💬'))"></span>
-            <span x-text="selectedModuleId === 'module-0' ? module0.titre : (selectedModuleId === 'escape-game' ? escapeGame.titre : (selectedModuleId === 'ch2-securite' ? chapter2.titre : chapter.titre))"></span>
+            <span x-text="getFmttnModuleIcon()"></span>
+            <span x-text="getFmttnModuleTitle()"></span>
           </h2>
           <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl" 
-             x-text="selectedModuleId === 'module-0' ? module0.sous_titre : (selectedModuleId === 'escape-game' ? escapeGame.contexte : (selectedModuleId === 'ch2-securite' ? chapter2.introduction : chapter.introduction))"></p>
+             x-text="getFmttnModuleIntro()"></p>
         </div>
 
         <!-- Onglets du module FMTTN actif (modèle UAA3 : 1. Leçon & Théorie / 2. Atelier & Pratique) -->
@@ -2881,6 +2899,502 @@
         </div>
       </div>
 
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- CHAPITRE 3 (TOME 1b) : INTELLIGENCE ARTIFICIELLE*       -->
+    <!-- ======================================================= -->
+    <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab !== 'prof' && selectedModuleId === 'ch3-ia'" class="space-y-8">
+      <!-- 1. LEÇON & THÉORIE CH. 3 -->
+      <div x-show="activeTab !== 'pratique'" class="space-y-6">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 rounded-2xl bg-indigo-100 text-indigo-700 text-lg font-black">🤖</div>
+            <div>
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600">Tome 1b • Manuel @lt_X (p. 9 - 72)</span>
+              <h3 class="font-black text-lg text-slate-900">Chapitre 3 : Intelligence Artificielle*</h3>
+            </div>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed" x-text="chapter3.introduction"></p>
+        </div>
+
+        <!-- Parties Je découvre Ch. 3 -->
+        <template x-for="partie in chapter3.je_decouvre.parties" :key="partie.id">
+          <section class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-4">
+            <div class="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
+              <div class="flex items-center gap-3">
+                <span class="w-9 h-9 rounded-2xl bg-indigo-600 text-white font-black text-sm flex items-center justify-center shrink-0" x-text="'3.' + partie.numero"></span>
+                <div>
+                  <h4 class="font-black text-base text-slate-900" x-text="partie.titre"></h4>
+                  <p class="text-xs text-slate-500" x-text="partie.description"></p>
+                </div>
+              </div>
+              <button type="button" @click="lireTexteVocal(partie.titre + '. ' + partie.description)" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold transition cursor-pointer shrink-0">🔊 Écouter</button>
+            </div>
+
+            <!-- Concepts P1 -->
+            <template x-if="partie.concepts">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <template x-for="c in partie.concepts" :key="c.id">
+                  <div class="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 space-y-2">
+                    <h5 class="font-black text-sm text-indigo-950" x-text="c.terme"></h5>
+                    <p class="text-xs text-slate-700 leading-relaxed" x-text="c.definition"></p>
+                    <ul class="space-y-1 text-[11px] text-slate-600 list-disc pl-4">
+                      <template x-for="ex in c.exemples" :key="ex"><li x-text="ex"></li></template>
+                    </ul>
+                  </div>
+                </template>
+              </div>
+            </template>
+
+            <!-- Étapes Machine Learning P2 -->
+            <template x-if="partie.etapes_ml">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <template x-for="et in partie.etapes_ml" :key="et.numero">
+                  <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                    <span class="inline-block px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-black" x-text="'Étape ' + et.numero"></span>
+                    <h5 class="font-black text-sm text-slate-900" x-text="et.titre"></h5>
+                    <p class="text-xs text-slate-600" x-text="et.description"></p>
+                  </div>
+                </template>
+              </div>
+            </template>
+
+            <!-- Limites P3 -->
+            <template x-if="partie.limites">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <template x-for="lim in partie.limites" :key="lim.id">
+                  <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-1.5">
+                    <h5 class="font-black text-sm text-amber-950" x-text="'⚠️ ' + lim.titre"></h5>
+                    <p class="text-xs text-slate-700 leading-relaxed" x-text="lim.detail"></p>
+                  </div>
+                </template>
+              </div>
+            </template>
+
+            <!-- Charte éthique P4 -->
+            <template x-if="partie.charte_ia">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                <template x-for="ch in partie.charte_ia" :key="ch.numero">
+                  <div class="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-1">
+                    <span class="text-[10px] font-black text-emerald-700" x-text="'Engagement ' + ch.numero"></span>
+                    <h5 class="font-black text-xs text-slate-900" x-text="ch.titre"></h5>
+                    <p class="text-[11px] text-slate-700" x-text="ch.regle"></p>
+                  </div>
+                </template>
+              </div>
+            </template>
+          </section>
+        </template>
+
+        <!-- Je pratique & Je maîtrise Ch. 3 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <section class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-3">
+            <h4 class="font-black text-base text-slate-900">🎯 Méthode du Prompt en 5 étapes</h4>
+            <div class="space-y-2">
+              <template x-for="ep in chapter3.je_pratique.methode_prompt.etapes" :key="ep.id">
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-2.5">
+                  <span class="w-6 h-6 rounded-lg bg-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0" x-text="ep.numero"></span>
+                  <div>
+                    <span class="font-black text-xs text-slate-900" x-text="ep.nom"></span>
+                    <p class="text-xs text-slate-600" x-text="ep.description"></p>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </section>
+          <section class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-3">
+            <h4 class="font-black text-base text-slate-900">🧰 Les 6 grandes familles d'outils d'IA</h4>
+            <div class="space-y-2">
+              <template x-for="tool in chapter3.je_maitrise.types_outils_ia" :key="tool.categorie">
+                <div class="p-3 rounded-xl bg-indigo-50/40 border border-indigo-100">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="font-black text-xs text-indigo-950" x-text="tool.categorie"></span>
+                    <span class="text-[11px] font-semibold text-indigo-700" x-text="tool.exemples"></span>
+                  </div>
+                  <p class="text-xs text-slate-600 mt-0.5" x-text="tool.usages"></p>
+                </div>
+              </template>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- 2. ATELIER & PRATIQUE CH. 3 -->
+      <div x-show="activeTab === 'pratique'" class="space-y-6">
+        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-wrap gap-2">
+          <template x-for="m in getCurrentFmttnModuleMissions()" :key="m.id">
+            <button type="button" @click="selectFmttnMission(m.id, true)"
+              :class="activeFmttnMissionId === m.id ? 'bg-indigo-600 text-white border-indigo-600' : (m.status === 'valide' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-50 text-slate-700 border-slate-200')"
+              class="px-3.5 py-2 rounded-xl border text-xs font-extrabold transition cursor-pointer flex items-center gap-1.5">
+              <span x-text="m.status === 'valide' ? '✓' : m.num + '.'"></span>
+              <span x-text="m.shortTitle"></span>
+            </button>
+          </template>
+        </div>
+
+        <!-- Mission 1 : Quizz Ch. 3 -->
+        <div x-show="activeFmttnMissionId === 'ch3-quizz-ia'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-5">
+          <div class="flex items-center justify-between gap-3">
+            <h4 class="font-black text-lg text-slate-900">🤖 Quizz @lt_X : Intelligence Artificielle*</h4>
+            <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-black" x-text="'Question ' + (tome1bQuiz.ch3.idx + 1) + ' / ' + getTome1bQuizQuestions('ch3').length + ' • Score : ' + tome1bQuiz.ch3.score"></span>
+          </div>
+          <template x-if="getCurrentTome1bQuestion('ch3')">
+            <div class="space-y-4">
+              <p class="font-bold text-slate-800 text-sm sm:text-base" x-text="getCurrentTome1bQuestion('ch3').question"></p>
+              <div class="space-y-2.5">
+                <template x-for="(opt, oIdx) in getCurrentTome1bQuestion('ch3').options" :key="oIdx">
+                  <button type="button" @click="if(!tome1bQuiz.ch3.submitted) tome1bQuiz.ch3.selected = oIdx"
+                    :class="tome1bQuiz.ch3.submitted ? (oIdx === getCurrentTome1bQuestion('ch3').correctIndex ? 'bg-emerald-50 border-emerald-500 text-emerald-900' : (tome1bQuiz.ch3.selected === oIdx ? 'bg-rose-50 border-rose-400 text-rose-900' : 'bg-slate-50 border-slate-200 text-slate-500')) : (tome1bQuiz.ch3.selected === oIdx ? 'bg-indigo-50 border-indigo-500 text-indigo-950' : 'bg-white border-slate-200 hover:border-indigo-300 text-slate-800')"
+                    class="w-full text-left p-4 rounded-2xl border-2 text-xs sm:text-sm font-semibold transition cursor-pointer" x-text="opt"></button>
+                </template>
+              </div>
+              <div x-show="tome1bQuiz.ch3.submitted" class="p-4 rounded-2xl border text-xs sm:text-sm" :class="tome1bQuiz.ch3.isCorrect ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'">
+                <strong x-text="tome1bQuiz.ch3.isCorrect ? '✅ Bonne réponse ! (+10 XP) ' : '💡 À retenir : '"></strong>
+                <span x-text="getCurrentTome1bQuestion('ch3').explanation"></span>
+              </div>
+              <div class="flex flex-wrap gap-3">
+                <button type="button" x-show="!tome1bQuiz.ch3.submitted" @click="submitTome1bQuizAnswer('ch3')" :disabled="tome1bQuiz.ch3.selected === null" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-black text-xs cursor-pointer">Valider ma réponse</button>
+                <button type="button" x-show="tome1bQuiz.ch3.submitted && tome1bQuiz.ch3.idx < getTome1bQuizQuestions('ch3').length - 1" @click="nextTome1bQuizQuestion('ch3')" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-black text-xs cursor-pointer">Question suivante ➔</button>
+                <button type="button" x-show="tome1bQuiz.ch3.submitted && tome1bQuiz.ch3.idx >= getTome1bQuizQuestions('ch3').length - 1" @click="resetTome1bQuiz('ch3')" class="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs cursor-pointer">↺ Recommencer le quizz</button>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <!-- Mission 2 : Atelier Prompt 5 étapes Ch. 3 -->
+        <div x-show="activeFmttnMissionId === 'ch3-atelier-prompt'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-4">
+          <h4 class="font-black text-lg text-slate-900">🎯 Atelier : Construis ton Prompt en 5 étapes</h4>
+          <p class="text-xs text-slate-600">Adapte chaque étape pour créer une consigne précise, responsable et sans données personnelles.</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">1. Rôle</label><input type="text" x-model="tome1bAtelier.ch3.role" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs" /></div>
+            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">2. Tâche</label><input type="text" x-model="tome1bAtelier.ch3.tache" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs" /></div>
+            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">3. Contexte</label><input type="text" x-model="tome1bAtelier.ch3.contexte" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs" /></div>
+            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">4. Format attendu</label><input type="text" x-model="tome1bAtelier.ch3.format" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs" /></div>
+            <div class="md:col-span-2"><label class="block text-xs font-extrabold text-slate-700 mb-1">5. Ajustement</label><input type="text" x-model="tome1bAtelier.ch3.ajustement" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs" /></div>
+          </div>
+          <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs text-indigo-950">
+            <strong>Aperçu de ton prompt complet :</strong>
+            <p class="mt-1 italic" x-text="tome1bAtelier.ch3.role + '. ' + tome1bAtelier.ch3.tache + ' (' + tome1bAtelier.ch3.contexte + '). ' + tome1bAtelier.ch3.format + '. ' + tome1bAtelier.ch3.ajustement + '.'"></p>
+          </div>
+          <div x-show="tome1bAtelier.ch3.feedback" class="p-3.5 rounded-xl text-xs font-bold" :class="tome1bAtelier.ch3.validated ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'" x-text="tome1bAtelier.ch3.feedback"></div>
+          <button type="button" @click="validerTome1bAtelier('ch3')" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs cursor-pointer">Valider mon Prompt (+20 XP)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- CHAPITRE 4 (TOME 1b) : INFORMATIONS ET DONNÉES          -->
+    <!-- ======================================================= -->
+    <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab !== 'prof' && selectedModuleId === 'ch4-donnees'" class="space-y-8">
+      <!-- 1. LEÇON & THÉORIE CH. 4 -->
+      <div x-show="activeTab !== 'pratique'" class="space-y-6">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 rounded-2xl bg-cyan-100 text-cyan-700 text-lg font-black">💾</div>
+            <div>
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-cyan-700">Tome 1b • Manuel @lt_X (p. 73 - 126)</span>
+              <h3 class="font-black text-lg text-slate-900">Chapitre 4 : Informations et Données</h3>
+            </div>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed" x-text="chapter4.introduction"></p>
+        </div>
+
+        <template x-for="partie in chapter4.je_decouvre.parties" :key="partie.id">
+          <section class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-4">
+            <div class="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
+              <div class="flex items-center gap-3">
+                <span class="w-9 h-9 rounded-2xl bg-cyan-600 text-white font-black text-sm flex items-center justify-center shrink-0" x-text="'4.' + partie.numero"></span>
+                <div>
+                  <h4 class="font-black text-base text-slate-900" x-text="partie.titre"></h4>
+                  <p class="text-xs text-slate-500" x-text="partie.description"></p>
+                </div>
+              </div>
+              <button type="button" @click="lireTexteVocal(partie.titre + '. ' + partie.description)" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold transition cursor-pointer shrink-0">🔊 Écouter</button>
+            </div>
+
+            <template x-if="partie.concepts">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <template x-for="c in partie.concepts" :key="c.terme">
+                  <div class="p-4 rounded-2xl bg-cyan-50/50 border border-cyan-100 space-y-1">
+                    <h5 class="font-black text-sm text-cyan-950" x-text="c.terme"></h5>
+                    <p class="text-xs text-slate-700 leading-relaxed" x-text="c.definition"></p>
+                  </div>
+                </template>
+              </div>
+            </template>
+
+            <template x-if="partie.extensions">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <template x-for="ext in partie.extensions" :key="ext.ext">
+                  <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                    <span class="font-black text-xs px-2 py-0.5 rounded bg-cyan-100 text-cyan-900" x-text="ext.ext"></span>
+                    <p class="font-bold text-xs text-slate-800 mt-1.5" x-text="ext.type"></p>
+                    <p class="text-[11px] text-slate-600" x-text="'Logiciel : ' + ext.logiciel"></p>
+                  </div>
+                </template>
+              </div>
+            </template>
+
+            <template x-if="partie.unites">
+              <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                <template x-for="u in partie.unites" :key="u.unite">
+                  <div class="p-3.5 rounded-2xl bg-cyan-50/70 border border-cyan-200 space-y-1">
+                    <span class="font-black text-sm text-cyan-950" x-text="u.unite"></span>
+                    <p class="text-[11px] text-slate-700" x-text="u.equivalence"></p>
+                  </div>
+                </template>
+              </div>
+            </template>
+          </section>
+        </template>
+
+        <section class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+          <h4 class="font-black text-base text-slate-900">📁 Enregistrer (Ctrl + S), Exporter (PDF) &amp; Arborescence</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <template x-for="bp in chapter4.je_pratique.bonnes_pratiques" :key="bp.titre">
+              <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <h5 class="font-black text-sm text-slate-900" x-text="bp.titre"></h5>
+                <ul class="space-y-1 text-xs text-slate-700 list-disc pl-4">
+                  <template x-for="r in bp.regles" :key="r"><li x-text="r"></li></template>
+                </ul>
+              </div>
+            </template>
+          </div>
+        </section>
+      </div>
+
+      <!-- 2. ATELIER & PRATIQUE CH. 4 -->
+      <div x-show="activeTab === 'pratique'" class="space-y-6">
+        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-wrap gap-2">
+          <template x-for="m in getCurrentFmttnModuleMissions()" :key="m.id">
+            <button type="button" @click="selectFmttnMission(m.id, true)"
+              :class="activeFmttnMissionId === m.id ? 'bg-cyan-600 text-white border-cyan-600' : (m.status === 'valide' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-50 text-slate-700 border-slate-200')"
+              class="px-3.5 py-2 rounded-xl border text-xs font-extrabold transition cursor-pointer flex items-center gap-1.5">
+              <span x-text="m.status === 'valide' ? '✓' : m.num + '.'"></span>
+              <span x-text="m.shortTitle"></span>
+            </button>
+          </template>
+        </div>
+
+        <!-- Mission 1 : Quizz Ch. 4 -->
+        <div x-show="activeFmttnMissionId === 'ch4-quizz-donnees'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-5">
+          <div class="flex items-center justify-between gap-3">
+            <h4 class="font-black text-lg text-slate-900">💾 Quizz @lt_X : Informations &amp; Données</h4>
+            <span class="px-3 py-1 rounded-full bg-cyan-100 text-cyan-800 text-xs font-black" x-text="'Question ' + (tome1bQuiz.ch4.idx + 1) + ' / ' + getTome1bQuizQuestions('ch4').length + ' • Score : ' + tome1bQuiz.ch4.score"></span>
+          </div>
+          <template x-if="getCurrentTome1bQuestion('ch4')">
+            <div class="space-y-4">
+              <p class="font-bold text-slate-800 text-sm sm:text-base" x-text="getCurrentTome1bQuestion('ch4').question"></p>
+              <div class="space-y-2.5">
+                <template x-for="(opt, oIdx) in getCurrentTome1bQuestion('ch4').options" :key="oIdx">
+                  <button type="button" @click="if(!tome1bQuiz.ch4.submitted) tome1bQuiz.ch4.selected = oIdx"
+                    :class="tome1bQuiz.ch4.submitted ? (oIdx === getCurrentTome1bQuestion('ch4').correctIndex ? 'bg-emerald-50 border-emerald-500 text-emerald-900' : (tome1bQuiz.ch4.selected === oIdx ? 'bg-rose-50 border-rose-400 text-rose-900' : 'bg-slate-50 border-slate-200 text-slate-500')) : (tome1bQuiz.ch4.selected === oIdx ? 'bg-cyan-50 border-cyan-500 text-cyan-950' : 'bg-white border-slate-200 hover:border-cyan-300 text-slate-800')"
+                    class="w-full text-left p-4 rounded-2xl border-2 text-xs sm:text-sm font-semibold transition cursor-pointer" x-text="opt"></button>
+                </template>
+              </div>
+              <div x-show="tome1bQuiz.ch4.submitted" class="p-4 rounded-2xl border text-xs sm:text-sm" :class="tome1bQuiz.ch4.isCorrect ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'">
+                <strong x-text="tome1bQuiz.ch4.isCorrect ? '✅ Bonne réponse ! (+10 XP) ' : '💡 À retenir : '"></strong>
+                <span x-text="getCurrentTome1bQuestion('ch4').explanation"></span>
+              </div>
+              <div class="flex flex-wrap gap-3">
+                <button type="button" x-show="!tome1bQuiz.ch4.submitted" @click="submitTome1bQuizAnswer('ch4')" :disabled="tome1bQuiz.ch4.selected === null" class="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 disabled:opacity-40 text-white font-black text-xs cursor-pointer">Valider ma réponse</button>
+                <button type="button" x-show="tome1bQuiz.ch4.submitted && tome1bQuiz.ch4.idx < getTome1bQuizQuestions('ch4').length - 1" @click="nextTome1bQuizQuestion('ch4')" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-black text-xs cursor-pointer">Question suivante ➔</button>
+                <button type="button" x-show="tome1bQuiz.ch4.submitted && tome1bQuiz.ch4.idx >= getTome1bQuizQuestions('ch4').length - 1" @click="resetTome1bQuiz('ch4')" class="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs cursor-pointer">↺ Recommencer le quizz</button>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <!-- Mission 2 : Atelier Fichiers Ch. 4 -->
+        <div x-show="activeFmttnMissionId === 'ch4-atelier-fichiers'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-4">
+          <h4 class="font-black text-lg text-slate-900">📁 Atelier : Unités, Dossier propre &amp; Export</h4>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-extrabold text-slate-700 mb-1">1. Ordre croissant des unités de stockage :</label>
+              <select x-model="tome1bAtelier.ch4.order" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs">
+                <option value="To < Go < Mo < Ko < o">To &lt; Go &lt; Mo &lt; Ko &lt; o</option>
+                <option value="o < Ko < Mo < Go < To">o &lt; Ko &lt; Mo &lt; Go &lt; To</option>
+                <option value="o < Mo < Ko < Go < To">o &lt; Mo &lt; Ko &lt; Go &lt; To</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-extrabold text-slate-700 mb-1">2. Format d'export idéal pour remettre un travail fini avec mise en page garantie :</label>
+              <select x-model="tome1bAtelier.ch4.exportFormat" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs">
+                <option value=".pdf">.pdf (Portable Document Format)</option>
+                <option value=".mp3">.mp3 (Audio)</option>
+                <option value=".jpg">.jpg (Image)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-extrabold text-slate-700 mb-1">3. Propose un nom de dossier sans espace (utilise _) :</label>
+              <input type="text" x-model="tome1bAtelier.ch4.folderName" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs" />
+            </div>
+          </div>
+          <div x-show="tome1bAtelier.ch4.feedback" class="p-3.5 rounded-xl text-xs font-bold" :class="tome1bAtelier.ch4.validated ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'" x-text="tome1bAtelier.ch4.feedback"></div>
+          <button type="button" @click="validerTome1bAtelier('ch4')" class="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-black text-xs cursor-pointer">Valider l'atelier (+20 XP)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- CHAPITRE 5 (TOME 1b) : CRÉATION DE CONTENUS             -->
+    <!-- ======================================================= -->
+    <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab !== 'prof' && selectedModuleId === 'ch5-creation'" class="space-y-8">
+      <!-- 1. LEÇON & THÉORIE CH. 5 -->
+      <div x-show="activeTab !== 'pratique'" class="space-y-6">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 rounded-2xl bg-lime-100 text-lime-700 text-lg font-black">📝</div>
+            <div>
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-lime-700">Tome 1b • Manuel @lt_X (p. 127 - 172)</span>
+              <h3 class="font-black text-lg text-slate-900">Chapitre 5 : Création de Contenus</h3>
+            </div>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed" x-text="chapter5.introduction"></p>
+        </div>
+
+        <template x-for="partie in chapter5.je_decouvre.parties" :key="partie.id">
+          <section class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-4">
+            <div class="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
+              <div class="flex items-center gap-3">
+                <span class="w-9 h-9 rounded-2xl bg-lime-600 text-white font-black text-sm flex items-center justify-center shrink-0" x-text="'5.' + partie.numero"></span>
+                <div>
+                  <h4 class="font-black text-base text-slate-900" x-text="partie.titre"></h4>
+                  <p class="text-xs text-slate-500" x-text="partie.description"></p>
+                </div>
+              </div>
+              <button type="button" @click="lireTexteVocal(partie.titre + '. ' + partie.description)" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold transition cursor-pointer shrink-0">🔊 Écouter</button>
+            </div>
+
+            <template x-if="partie.commandes">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <template x-for="cmd in partie.commandes" :key="cmd.nom">
+                  <div class="p-4 rounded-2xl bg-lime-50/60 border border-lime-200 space-y-1">
+                    <h5 class="font-black text-sm text-lime-950" x-text="cmd.nom"></h5>
+                    <p class="text-xs text-slate-700" x-text="cmd.role"></p>
+                  </div>
+                </template>
+              </div>
+            </template>
+
+            <template x-if="partie.exemples">
+              <div class="space-y-3">
+                <p class="text-xs font-bold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200" x-text="partie.definition"></p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <template x-for="ex in partie.exemples" :key="ex.situation">
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1">
+                      <span class="font-black text-slate-900" x-text="ex.situation"></span>
+                      <p class="text-emerald-700"><strong>Variables :</strong> <span x-text="ex.variables"></span></p>
+                      <p class="text-slate-500"><strong>Constantes :</strong> <span x-text="ex.constantes"></span></p>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
+
+            <template x-if="partie.impact_ecologique">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-2">
+                  <h5 class="font-black text-sm text-emerald-950">🌍 Impact écologique du numérique</h5>
+                  <ul class="space-y-1 text-xs text-slate-700 list-disc pl-4">
+                    <template x-for="pt in partie.impact_ecologique" :key="pt"><li x-text="pt"></li></template>
+                  </ul>
+                </div>
+                <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-2">
+                  <h5 class="font-black text-sm text-amber-950">📰 Fake News : Mésinformation vs Désinformation</h5>
+                  <p class="text-xs text-slate-700"><strong>Mésinformation :</strong> <span x-text="partie.fake_news.mesinformation"></span></p>
+                  <p class="text-xs text-slate-700"><strong>Désinformation :</strong> <span x-text="partie.fake_news.desinformation"></span></p>
+                </div>
+              </div>
+            </template>
+          </section>
+        </template>
+
+        <section class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+          <h4 class="font-black text-base text-slate-900">🔀 Algorithme, Logigramme &amp; Scratch</h4>
+          <p class="text-xs text-slate-700" x-text="chapter5.je_pratique.algorithme_logigramme.definition_algo + ' ' + chapter5.je_pratique.algorithme_logigramme.definition_programme"></p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <template x-for="sym in chapter5.je_pratique.algorithme_logigramme.symboles_logigramme" :key="sym.forme">
+              <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                <span class="font-black text-xs text-lime-800" x-text="sym.forme"></span>
+                <p class="text-xs text-slate-700 mt-1" x-text="sym.signification"></p>
+              </div>
+            </template>
+          </div>
+        </section>
+      </div>
+
+      <!-- 2. ATELIER & PRATIQUE CH. 5 -->
+      <div x-show="activeTab === 'pratique'" class="space-y-6">
+        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-wrap gap-2">
+          <template x-for="m in getCurrentFmttnModuleMissions()" :key="m.id">
+            <button type="button" @click="selectFmttnMission(m.id, true)"
+              :class="activeFmttnMissionId === m.id ? 'bg-lime-600 text-white border-lime-600' : (m.status === 'valide' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-50 text-slate-700 border-slate-200')"
+              class="px-3.5 py-2 rounded-xl border text-xs font-extrabold transition cursor-pointer flex items-center gap-1.5">
+              <span x-text="m.status === 'valide' ? '✓' : m.num + '.'"></span>
+              <span x-text="m.shortTitle"></span>
+            </button>
+          </template>
+        </div>
+
+        <!-- Mission 1 : Quizz Ch. 5 -->
+        <div x-show="activeFmttnMissionId === 'ch5-quizz-creation'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-5">
+          <div class="flex items-center justify-between gap-3">
+            <h4 class="font-black text-lg text-slate-900">📝 Quizz @lt_X : Création de Contenus &amp; Logigramme</h4>
+            <span class="px-3 py-1 rounded-full bg-lime-100 text-lime-800 text-xs font-black" x-text="'Question ' + (tome1bQuiz.ch5.idx + 1) + ' / ' + getTome1bQuizQuestions('ch5').length + ' • Score : ' + tome1bQuiz.ch5.score"></span>
+          </div>
+          <template x-if="getCurrentTome1bQuestion('ch5')">
+            <div class="space-y-4">
+              <p class="font-bold text-slate-800 text-sm sm:text-base" x-text="getCurrentTome1bQuestion('ch5').question"></p>
+              <div class="space-y-2.5">
+                <template x-for="(opt, oIdx) in getCurrentTome1bQuestion('ch5').options" :key="oIdx">
+                  <button type="button" @click="if(!tome1bQuiz.ch5.submitted) tome1bQuiz.ch5.selected = oIdx"
+                    :class="tome1bQuiz.ch5.submitted ? (oIdx === getCurrentTome1bQuestion('ch5').correctIndex ? 'bg-emerald-50 border-emerald-500 text-emerald-900' : (tome1bQuiz.ch5.selected === oIdx ? 'bg-rose-50 border-rose-400 text-rose-900' : 'bg-slate-50 border-slate-200 text-slate-500')) : (tome1bQuiz.ch5.selected === oIdx ? 'bg-lime-50 border-lime-500 text-lime-950' : 'bg-white border-slate-200 hover:border-lime-300 text-slate-800')"
+                    class="w-full text-left p-4 rounded-2xl border-2 text-xs sm:text-sm font-semibold transition cursor-pointer" x-text="opt"></button>
+                </template>
+              </div>
+              <div x-show="tome1bQuiz.ch5.submitted" class="p-4 rounded-2xl border text-xs sm:text-sm" :class="tome1bQuiz.ch5.isCorrect ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'">
+                <strong x-text="tome1bQuiz.ch5.isCorrect ? '✅ Bonne réponse ! (+10 XP) ' : '💡 À retenir : '"></strong>
+                <span x-text="getCurrentTome1bQuestion('ch5').explanation"></span>
+              </div>
+              <div class="flex flex-wrap gap-3">
+                <button type="button" x-show="!tome1bQuiz.ch5.submitted" @click="submitTome1bQuizAnswer('ch5')" :disabled="tome1bQuiz.ch5.selected === null" class="px-5 py-2.5 rounded-xl bg-lime-600 hover:bg-lime-700 disabled:opacity-40 text-white font-black text-xs cursor-pointer">Valider ma réponse</button>
+                <button type="button" x-show="tome1bQuiz.ch5.submitted && tome1bQuiz.ch5.idx < getTome1bQuizQuestions('ch5').length - 1" @click="nextTome1bQuizQuestion('ch5')" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-black text-xs cursor-pointer">Question suivante ➔</button>
+                <button type="button" x-show="tome1bQuiz.ch5.submitted && tome1bQuiz.ch5.idx >= getTome1bQuizQuestions('ch5').length - 1" @click="resetTome1bQuiz('ch5')" class="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs cursor-pointer">↺ Recommencer le quizz</button>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <!-- Mission 2 : Atelier Logigramme & Scratch Ch. 5 -->
+        <div x-show="activeFmttnMissionId === 'ch5-atelier-algo'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-4">
+          <h4 class="font-black text-lg text-slate-900">🔀 Atelier : Logigramme, Culture numérique &amp; Scratch</h4>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-extrabold text-slate-700 mb-1">1. Forme utilisée pour une condition (Oui/Non) dans un logigramme :</label>
+              <select x-model="tome1bAtelier.ch5.logigrammeCondition" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs">
+                <option value="Ovale">Ovale</option>
+                <option value="Rectangle à coins arrondis">Rectangle à coins arrondis</option>
+                <option value="Losange">Losange</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-extrabold text-slate-700 mb-1">2. Partager de bonne foi une fausse astuce santé lue en ligne sans vouloir tromper :</label>
+              <select x-model="tome1bAtelier.ch5.fakeNewsType" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs">
+                <option value="mesinformation">Mésinformation</option>
+                <option value="desinformation">Désinformation</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-extrabold text-slate-700 mb-1">3. Angle de rotation Scratch (en degrés) pour tracer un triangle équilatéral (360° ÷ 3) :</label>
+              <input type="text" x-model="tome1bAtelier.ch5.scratchAngle" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs" />
+            </div>
+          </div>
+          <div x-show="tome1bAtelier.ch5.feedback" class="p-3.5 rounded-xl text-xs font-bold" :class="tome1bAtelier.ch5.validated ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'" x-text="tome1bAtelier.ch5.feedback"></div>
+          <button type="button" @click="validerTome1bAtelier('ch5')" class="px-5 py-2.5 rounded-xl bg-lime-600 hover:bg-lime-700 text-white font-black text-xs cursor-pointer">Valider l'atelier (+20 XP)</button>
+        </div>
+      </div>
     </div>
 
     <!-- ======================================================= -->

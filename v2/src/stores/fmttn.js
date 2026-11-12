@@ -1,8 +1,12 @@
 import chapterData from '../data/chapitre-1-communication.json';
 import chapter2Data from '../data/chapitre-2-securite.json';
+import chapter3Data from '../data/chapitre-3-ia.json';
+import chapter4Data from '../data/chapitre-4-donnees.json';
+import chapter5Data from '../data/chapitre-5-creation.json';
 import competencesData from '../data/competences-fmttn.json';
 import module0Data from '../data/module-0-introduction.json';
 import altxBank from '../data/altx-bank.json';
+import altxTome1bBank from '../data/altx-tome1b-bank.json';
 import escapeGameData from '../data/escape-game-data.json';
 import { marked } from 'marked';
 import { savePresentationConfig } from '../services/firebase.js';
@@ -132,10 +136,25 @@ export function createFmttnStore() {
     module0: module0Data,
     chapter: chapterData,
     chapter2: chapter2Data,
+    chapter3: chapter3Data,
+    chapter4: chapter4Data,
+    chapter5: chapter5Data,
     competences: competencesData.chapitres[0].competences,
     competencesCh2: competencesData.chapitres[1]?.competences,
     altxBank: altxBank,
+    altxTome1b: altxTome1bBank,
     escapeGame: escapeGameData,
+
+    tome1bQuiz: {
+      ch3: { idx: 0, selected: null, submitted: false, isCorrect: false, score: 0, completed: false },
+      ch4: { idx: 0, selected: null, submitted: false, isCorrect: false, score: 0, completed: false },
+      ch5: { idx: 0, selected: null, submitted: false, isCorrect: false, score: 0, completed: false }
+    },
+    tome1bAtelier: {
+      ch3: { role: 'Tu es un professeur de sciences bienveillant', tache: 'Explique la photosynthèse', contexte: 'Pour un élève de 1re secondaire', format: 'En 4 points à puces simples', ajustement: 'Ajoute une analogie du quotidien', feedback: '', validated: false },
+      ch4: { order: 'o < Ko < Mo < Go < To', exportFormat: '.pdf', folderName: '04_documents_scolaires', feedback: '', validated: false },
+      ch5: { logigrammeCondition: 'Losange', fakeNewsType: 'mesinformation', scratchAngle: '120', feedback: '', validated: false }
+    },
 
     activeSlideIndex: 0,
     notebooklmUrl: 'https://notebooklm.google.com',
@@ -967,6 +986,75 @@ export function createFmttnStore() {
         ];
       }
 
+      if (mod === 'ch3-ia') {
+        return [
+          {
+            id: 'ch3-quizz-ia',
+            moduleId: 'ch3-ia',
+            num: 1,
+            titre: 'Quizz @lt_X : Intelligence Artificielle, Limites & Éthique (6 questions)',
+            shortTitle: 'Quizz Chapitre 3 (IA)',
+            isQuizz: true,
+            status: (this.tome1bQuiz?.ch3?.completed || this.isRewardedKey('quiz:tome1b-ch3')) ? 'valide' : null
+          },
+          {
+            id: 'ch3-atelier-prompt',
+            moduleId: 'ch3-ia',
+            num: 2,
+            titre: 'Atelier Pratique : Construire un Prompt en 5 étapes (Rôle, Tâche, Contexte, Format, Ajustement)',
+            shortTitle: 'Atelier Prompt 5 étapes',
+            isQuizz: false,
+            status: (this.tome1bAtelier?.ch3?.validated || this.isRewardedKey('atelier:tome1b-ch3')) ? 'valide' : null
+          }
+        ];
+      }
+
+      if (mod === 'ch4-donnees') {
+        return [
+          {
+            id: 'ch4-quizz-donnees',
+            moduleId: 'ch4-donnees',
+            num: 1,
+            titre: 'Quizz @lt_X : Hardware, Extensions, Réseau & Tailles de fichiers (6 questions)',
+            shortTitle: 'Quizz Chapitre 4 (Données)',
+            isQuizz: true,
+            status: (this.tome1bQuiz?.ch4?.completed || this.isRewardedKey('quiz:tome1b-ch4')) ? 'valide' : null
+          },
+          {
+            id: 'ch4-atelier-fichiers',
+            moduleId: 'ch4-donnees',
+            num: 2,
+            titre: 'Atelier Pratique : Unités (o → To), Nommage de dossiers & Export PDF',
+            shortTitle: 'Atelier Fichiers & Export',
+            isQuizz: false,
+            status: (this.tome1bAtelier?.ch4?.validated || this.isRewardedKey('atelier:tome1b-ch4')) ? 'valide' : null
+          }
+        ];
+      }
+
+      if (mod === 'ch5-creation') {
+        return [
+          {
+            id: 'ch5-quizz-creation',
+            moduleId: 'ch5-creation',
+            num: 1,
+            titre: 'Quizz @lt_X : Traitement de texte, Variables, Fake News & Logigramme (6 questions)',
+            shortTitle: 'Quizz Chapitre 5 (Création)',
+            isQuizz: true,
+            status: (this.tome1bQuiz?.ch5?.completed || this.isRewardedKey('quiz:tome1b-ch5')) ? 'valide' : null
+          },
+          {
+            id: 'ch5-atelier-algo',
+            moduleId: 'ch5-creation',
+            num: 2,
+            titre: 'Atelier Pratique : Logigramme, Culture numérique & Scratch (Triangle 120°)',
+            shortTitle: 'Atelier Logigramme & Scratch',
+            isQuizz: false,
+            status: (this.tome1bAtelier?.ch5?.validated || this.isRewardedKey('atelier:tome1b-ch5')) ? 'valide' : null
+          }
+        ];
+      }
+
       return [];
     },
 
@@ -1055,7 +1143,7 @@ export function createFmttnStore() {
         return;
       }
       // Sinon passer à la leçon du module suivant
-      const order = ['module-0', 'escape-game', 'ch1-communication', 'ch2-securite'];
+      const order = ['module-0', 'escape-game', 'ch1-communication', 'ch2-securite', 'ch3-ia', 'ch4-donnees', 'ch5-creation'];
       const mIdx = order.indexOf(this.selectedModuleId);
       if (mIdx !== -1 && mIdx < order.length - 1) {
         this.selectFmttnModule(order[mIdx + 1], 'cours');
@@ -1073,7 +1161,7 @@ export function createFmttnStore() {
         this.activeTab = 'cours';
         return;
       }
-      const order = ['module-0', 'escape-game', 'ch1-communication', 'ch2-securite'];
+      const order = ['module-0', 'escape-game', 'ch1-communication', 'ch2-securite', 'ch3-ia', 'ch4-donnees', 'ch5-creation'];
       const mIdx = order.indexOf(this.selectedModuleId);
       if (mIdx > 0) {
         this.selectFmttnModule(order[mIdx - 1], 'cours');
@@ -1714,6 +1802,155 @@ export function createFmttnStore() {
       }
       await savePresentationConfig(moduleId, { notebooklm_url: newUrl });
       alert('Lien NotebookLM enregistré avec succès dans Firestore !');
+    },
+
+    getFmttnModuleLabel(moduleId = this.selectedModuleId) {
+      const map = {
+        'module-0': 'Module 0',
+        'escape-game': 'Escape Game',
+        'ch1-communication': 'Chapitre 1',
+        'ch2-securite': 'Chapitre 2',
+        'ch3-ia': 'Chapitre 3',
+        'ch4-donnees': 'Chapitre 4',
+        'ch5-creation': 'Chapitre 5'
+      };
+      return map[moduleId] || 'Chapitre 1';
+    },
+
+    getFmttnModuleIcon(moduleId = this.selectedModuleId) {
+      const map = {
+        'module-0': '🚀',
+        'escape-game': '🎮',
+        'ch1-communication': '💬',
+        'ch2-securite': '🛡️',
+        'ch3-ia': '🤖',
+        'ch4-donnees': '💾',
+        'ch5-creation': '📝'
+      };
+      return map[moduleId] || '💬';
+    },
+
+    getFmttnModuleTitle(moduleId = this.selectedModuleId) {
+      if (moduleId === 'module-0') return this.module0.titre;
+      if (moduleId === 'escape-game') return this.escapeGame.titre;
+      if (moduleId === 'ch2-securite') return this.chapter2.titre;
+      if (moduleId === 'ch3-ia') return `Chapitre 3 : ${this.chapter3.titre}`;
+      if (moduleId === 'ch4-donnees') return `Chapitre 4 : ${this.chapter4.titre}`;
+      if (moduleId === 'ch5-creation') return `Chapitre 5 : ${this.chapter5.titre}`;
+      return this.chapter.titre;
+    },
+
+    getFmttnModuleIntro(moduleId = this.selectedModuleId) {
+      if (moduleId === 'module-0') return this.module0.sous_titre;
+      if (moduleId === 'escape-game') return this.escapeGame.contexte;
+      if (moduleId === 'ch2-securite') return this.chapter2.introduction;
+      if (moduleId === 'ch3-ia') return this.chapter3.introduction;
+      if (moduleId === 'ch4-donnees') return this.chapter4.introduction;
+      if (moduleId === 'ch5-creation') return this.chapter5.introduction;
+      return this.chapter.introduction;
+    },
+
+    getTome1bQuizQuestions(chKey) {
+      return (this.altxTome1b?.questions || []).filter(q => q.chapter === chKey);
+    },
+
+    getCurrentTome1bQuestion(chKey) {
+      const qs = this.getTome1bQuizQuestions(chKey);
+      const st = this.tome1bQuiz?.[chKey];
+      if (!qs.length || !st) return null;
+      return qs[st.idx] || qs[0];
+    },
+
+    submitTome1bQuizAnswer(chKey) {
+      const st = this.tome1bQuiz?.[chKey];
+      const q = this.getCurrentTome1bQuestion(chKey);
+      if (!st || !q || st.selected === null || st.submitted) return;
+      st.submitted = true;
+      st.isCorrect = st.selected === q.correctIndex;
+      if (st.isCorrect) {
+        st.score += 1;
+        if (typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(`quiz:${q.id}`, 10, `Quizz Tome 1b (${chKey.toUpperCase()})`);
+        }
+      }
+      const qs = this.getTome1bQuizQuestions(chKey);
+      if (st.idx >= qs.length - 1) {
+        st.completed = true;
+        if (typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(`quiz:tome1b-${chKey}`, 20, `Quizz complet Tome 1b (${chKey.toUpperCase()})`);
+        }
+      }
+      this.syncCurrentStudentProgress();
+    },
+
+    nextTome1bQuizQuestion(chKey) {
+      const st = this.tome1bQuiz?.[chKey];
+      const qs = this.getTome1bQuizQuestions(chKey);
+      if (!st || !qs.length) return;
+      if (st.idx < qs.length - 1) {
+        st.idx += 1;
+        st.selected = null;
+        st.submitted = false;
+        st.isCorrect = false;
+      } else {
+        st.completed = true;
+        if (typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(`quiz:tome1b-${chKey}`, 20, `Quizz complet Tome 1b (${chKey.toUpperCase()})`);
+        }
+        this.syncCurrentStudentProgress();
+      }
+    },
+
+    resetTome1bQuiz(chKey) {
+      const st = this.tome1bQuiz?.[chKey];
+      if (!st) return;
+      st.idx = 0;
+      st.selected = null;
+      st.submitted = false;
+      st.isCorrect = false;
+      st.score = 0;
+    },
+
+    validerTome1bAtelier(chKey) {
+      const at = this.tome1bAtelier?.[chKey];
+      if (!at) return;
+      if (chKey === 'ch3') {
+        const ok = [at.role, at.tache, at.contexte, at.format, at.ajustement].every(v => String(v || '').trim().length >= 4);
+        if (!ok) {
+          at.feedback = '❌ Complète bien les 5 étapes (Rôle, Tâche, Contexte, Format, Ajustement) avec au moins quelques mots chacune.';
+          return;
+        }
+        at.validated = true;
+        at.feedback = '✅ Bravo ! Ton prompt en 5 étapes est clair, structuré et respecte la méthode @lt_X (+20 XP) !';
+        if (typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique('atelier:tome1b-ch3', 20, 'Atelier Prompt 5 étapes (Ch. 3)');
+        }
+      } else if (chKey === 'ch4') {
+        const orderOk = at.order === 'o < Ko < Mo < Go < To';
+        const fmtOk = at.exportFormat === '.pdf';
+        const folderOk = String(at.folderName || '').trim().length > 0 && !String(at.folderName).includes(' ');
+        if (!orderOk || !fmtOk || !folderOk) {
+          at.feedback = '❌ Vérifie tes choix : ordre croissant des unités (o < Ko < Mo < Go < To), format figé d\'envoi (.pdf) et nom de dossier sans espace (_).';
+          return;
+        }
+        at.validated = true;
+        at.feedback = '✅ Parfait ! Tu maîtrises les ordres de grandeur numériques, le nommage propre et l\'export PDF (+20 XP) !';
+        if (typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique('atelier:tome1b-ch4', 20, 'Atelier Fichiers & Export PDF (Ch. 4)');
+        }
+      } else if (chKey === 'ch5') {
+        const ok = at.logigrammeCondition === 'Losange' && at.fakeNewsType === 'mesinformation' && String(at.scratchAngle) === '120';
+        if (!ok) {
+          at.feedback = '❌ Indice : dans un logigramme la condition est un Losange, partager de bonne foi est de la mésinformation, et pour un triangle équilatéral 360° ÷ 3 = 120° !';
+          return;
+        }
+        at.validated = true;
+        at.feedback = '✅ Excellent ! Logigramme, Culture numérique et programmation Scratch validés (+20 XP) !';
+        if (typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique('atelier:tome1b-ch5', 20, 'Atelier Logigramme & Scratch (Ch. 5)');
+        }
+      }
+      this.syncCurrentStudentProgress();
     }
   };
 }
