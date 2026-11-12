@@ -2907,15 +2907,22 @@
     <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab !== 'prof' && selectedModuleId === 'ch3-ia'" class="space-y-8">
       <!-- 1. LEÇON & THÉORIE CH. 3 -->
       <div x-show="activeTab !== 'pratique'" class="space-y-6">
-        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-4">
-          <div class="flex items-center gap-3">
-            <div class="p-2.5 rounded-2xl bg-indigo-100 text-indigo-700 text-lg font-black">🤖</div>
-            <div>
-              <span class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600">Tome 1b • Manuel @lt_X (p. 9 - 72)</span>
-              <h3 class="font-black text-lg text-slate-900">Chapitre 3 : Intelligence Artificielle*</h3>
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <div class="lg:col-span-7 space-y-3">
+              <div class="flex items-center gap-3">
+                <div class="p-2.5 rounded-2xl bg-indigo-100 text-indigo-700 text-lg font-black">🤖</div>
+                <div>
+                  <span class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600">Tome 1b • Manuel @lt_X (p. 9 - 72)</span>
+                  <h3 class="font-black text-lg sm:text-xl text-slate-900">Chapitre 3 : Intelligence Artificielle*</h3>
+                </div>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-600 leading-relaxed" x-text="chapter3.introduction"></p>
+            </div>
+            <div class="lg:col-span-5">
+              <img src="/img/tome1b/ch3-ia-hero.jpg" alt="Assistant IA et élève" class="w-full h-44 sm:h-48 object-cover rounded-2xl border border-indigo-100 shadow-xs" loading="lazy" />
             </div>
           </div>
-          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed" x-text="chapter3.introduction"></p>
         </div>
 
         <!-- Parties Je découvre Ch. 3 -->
@@ -2974,14 +2981,26 @@
 
             <!-- Charte éthique P4 -->
             <template x-if="partie.charte_ia">
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                <template x-for="ch in partie.charte_ia" :key="ch.numero">
-                  <div class="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-1">
-                    <span class="text-[10px] font-black text-emerald-700" x-text="'Engagement ' + ch.numero"></span>
-                    <h5 class="font-black text-xs text-slate-900" x-text="ch.titre"></h5>
-                    <p class="text-[11px] text-slate-700" x-text="ch.regle"></p>
+              <div class="space-y-4">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center p-4 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200">
+                  <div class="lg:col-span-5">
+                    <img src="/img/tome1b/ch3-ia-ethics.jpg" alt="Vérifier l'IA avec esprit critique, vie privée et écologie" class="w-full h-40 object-cover rounded-xl border border-emerald-200 shadow-xs" loading="lazy" />
                   </div>
-                </template>
+                  <div class="lg:col-span-7 space-y-1.5">
+                    <span class="inline-block px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-black uppercase">Réflexe Citoyen</span>
+                    <h5 class="font-black text-sm text-emerald-950">Ma Charte Personnelle « L'IA et moi »</h5>
+                    <p class="text-xs text-slate-700 leading-relaxed">L'IA est un super copilote, mais c'est toujours toi qui gardes la loupe ! Vérifie ses réponses, protège tes données personnelles et pense à la planète.</p>
+                  </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                  <template x-for="ch in partie.charte_ia" :key="ch.numero">
+                    <div class="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-1">
+                      <span class="text-[10px] font-black text-emerald-700" x-text="'Engagement ' + ch.numero"></span>
+                      <h5 class="font-black text-xs text-slate-900" x-text="ch.titre"></h5>
+                      <p class="text-[11px] text-slate-700" x-text="ch.regle"></p>
+                    </div>
+                  </template>
+                </div>
               </div>
             </template>
           </section>
@@ -3089,15 +3108,22 @@
     <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab !== 'prof' && selectedModuleId === 'ch4-donnees'" class="space-y-8">
       <!-- 1. LEÇON & THÉORIE CH. 4 -->
       <div x-show="activeTab !== 'pratique'" class="space-y-6">
-        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-4">
-          <div class="flex items-center gap-3">
-            <div class="p-2.5 rounded-2xl bg-cyan-100 text-cyan-700 text-lg font-black">💾</div>
-            <div>
-              <span class="text-[11px] font-extrabold uppercase tracking-wider text-cyan-700">Tome 1b • Manuel @lt_X (p. 73 - 126)</span>
-              <h3 class="font-black text-lg text-slate-900">Chapitre 4 : Informations et Données</h3>
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <div class="lg:col-span-7 space-y-3">
+              <div class="flex items-center gap-3">
+                <div class="p-2.5 rounded-2xl bg-cyan-100 text-cyan-700 text-lg font-black">💾</div>
+                <div>
+                  <span class="text-[11px] font-extrabold uppercase tracking-wider text-cyan-700">Tome 1b • Manuel @lt_X (p. 73 - 126)</span>
+                  <h3 class="font-black text-lg sm:text-xl text-slate-900">Chapitre 4 : Informations et Données</h3>
+                </div>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-600 leading-relaxed" x-text="chapter4.introduction"></p>
+            </div>
+            <div class="lg:col-span-5">
+              <img src="/img/tome1b/ch4-donnees-hero.jpg" alt="Dossiers organisés, fichiers, clé USB et Wi-Fi" class="w-full h-44 sm:h-48 object-cover rounded-2xl border border-cyan-100 shadow-xs" loading="lazy" />
             </div>
           </div>
-          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed" x-text="chapter4.introduction"></p>
         </div>
 
         <template x-for="partie in chapter4.je_decouvre.parties" :key="partie.id">
@@ -3151,15 +3177,32 @@
 
         <section class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4">
           <h4 class="font-black text-base text-slate-900">📁 Enregistrer (Ctrl + S), Exporter (PDF) &amp; Arborescence</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <template x-for="bp in chapter4.je_pratique.bonnes_pratiques" :key="bp.titre">
-              <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                <h5 class="font-black text-sm text-slate-900" x-text="bp.titre"></h5>
-                <ul class="space-y-1 text-xs text-slate-700 list-disc pl-4">
-                  <template x-for="r in bp.regles" :key="r"><li x-text="r"></li></template>
-                </ul>
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <div class="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <template x-for="bp in chapter4.je_pratique.bonnes_pratiques" :key="bp.titre">
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                  <h5 class="font-black text-sm text-slate-900" x-text="bp.titre"></h5>
+                  <ul class="space-y-1 text-xs text-slate-700 list-disc pl-4">
+                    <template x-for="r in bp.regles" :key="r"><li x-text="r"></li></template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+            <!-- Schéma visuel d'arborescence -->
+            <div class="lg:col-span-5 p-4 rounded-2xl bg-cyan-50/70 border border-cyan-200 space-y-2">
+              <span class="text-[10px] font-black uppercase tracking-wider text-cyan-800">Exemple de rangement parfait</span>
+              <div class="font-mono text-xs space-y-1.5 text-slate-800">
+                <div class="font-black text-cyan-950">📂 Nom_Prenom_1re</div>
+                <div class="pl-4 border-l-2 border-cyan-300 space-y-1">
+                  <div>📁 <span class="font-bold text-amber-700">01_Documents_scolaires</span></div>
+                  <div class="pl-4 text-[11px] text-slate-600">↳ 📄 devoir_fmttn_v01.docx</div>
+                  <div class="pl-4 text-[11px] text-emerald-700 font-bold">↳ 📕 devoir_fmttn_final.pdf</div>
+                  <div>📁 <span class="font-bold text-pink-700">02_Images_et_projets</span></div>
+                  <div>📁 <span class="font-bold text-indigo-700">03_Evenements</span></div>
+                  <div>📁 <span class="font-bold text-slate-700">04_Archives_et_donnees</span></div>
+                </div>
               </div>
-            </template>
+            </div>
           </div>
         </section>
       </div>
@@ -3243,15 +3286,22 @@
     <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab !== 'prof' && selectedModuleId === 'ch5-creation'" class="space-y-8">
       <!-- 1. LEÇON & THÉORIE CH. 5 -->
       <div x-show="activeTab !== 'pratique'" class="space-y-6">
-        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-4">
-          <div class="flex items-center gap-3">
-            <div class="p-2.5 rounded-2xl bg-lime-100 text-lime-700 text-lg font-black">📝</div>
-            <div>
-              <span class="text-[11px] font-extrabold uppercase tracking-wider text-lime-700">Tome 1b • Manuel @lt_X (p. 127 - 172)</span>
-              <h3 class="font-black text-lg text-slate-900">Chapitre 5 : Création de Contenus</h3>
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <div class="lg:col-span-7 space-y-3">
+              <div class="flex items-center gap-3">
+                <div class="p-2.5 rounded-2xl bg-lime-100 text-lime-700 text-lg font-black">📝</div>
+                <div>
+                  <span class="text-[11px] font-extrabold uppercase tracking-wider text-lime-700">Tome 1b • Manuel @lt_X (p. 127 - 172)</span>
+                  <h3 class="font-black text-lg sm:text-xl text-slate-900">Chapitre 5 : Création de Contenus</h3>
+                </div>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-600 leading-relaxed" x-text="chapter5.introduction"></p>
+            </div>
+            <div class="lg:col-span-5">
+              <img src="/img/tome1b/ch5-creation-hero.jpg" alt="Création de document, logigramme et blocs Scratch" class="w-full h-44 sm:h-48 object-cover rounded-2xl border border-lime-200 shadow-xs" loading="lazy" />
             </div>
           </div>
-          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed" x-text="chapter5.introduction"></p>
         </div>
 
         <template x-for="partie in chapter5.je_decouvre.parties" :key="partie.id">
@@ -3311,7 +3361,7 @@
           </section>
         </template>
 
-        <section class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+        <section class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-5">
           <h4 class="font-black text-base text-slate-900">🔀 Algorithme, Logigramme &amp; Scratch</h4>
           <p class="text-xs text-slate-700" x-text="chapter5.je_pratique.algorithme_logigramme.definition_algo + ' ' + chapter5.je_pratique.algorithme_logigramme.definition_programme"></p>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -3321,6 +3371,30 @@
                 <p class="text-xs text-slate-700 mt-1" x-text="sym.signification"></p>
               </div>
             </template>
+          </div>
+          <!-- Schéma visuel Logigramme + Blocs Scratch -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col items-center gap-2 text-center">
+              <span class="text-[10px] font-black uppercase tracking-wider text-slate-500">Schéma Logigramme (Triangle)</span>
+              <div class="px-5 py-1.5 rounded-full bg-sky-500 text-white font-black text-xs shadow-2xs">DÉBUT</div>
+              <span class="text-slate-400 font-black">↓</span>
+              <div class="px-4 py-2 rounded-xl bg-amber-300 text-amber-950 font-bold text-xs border border-amber-400">Avancer de 100 pas • Tourner de 120°</div>
+              <span class="text-slate-400 font-black">↓</span>
+              <div class="px-4 py-2 bg-emerald-500 text-white font-black text-xs rounded-lg transform skew-x-[-6deg] shadow-2xs">◆ Côtés tracés = 3 ? (Oui / Non ↺)</div>
+              <span class="text-slate-400 font-black">↓</span>
+              <div class="px-5 py-1.5 rounded-full bg-sky-500 text-white font-black text-xs shadow-2xs">FIN</div>
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+              <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 block">Blocs Scratch correspondants (360° ÷ 3 = 120°)</span>
+              <div class="space-y-1.5 font-bold text-xs text-white max-w-xs">
+                <div class="px-3 py-1.5 rounded-t-xl rounded-b-md bg-amber-400 text-amber-950 shadow-2xs">🚩 quand drapeau vert cliqué</div>
+                <div class="p-2 rounded-lg bg-orange-500 space-y-1.5 shadow-2xs">
+                  <div>🔁 répéter <span class="px-1.5 py-0.5 rounded bg-white text-orange-700 font-black">3</span> fois</div>
+                  <div class="ml-4 px-3 py-1 rounded-md bg-blue-500">avancer de <span class="px-1 rounded bg-white text-blue-700">100</span> pas</div>
+                  <div class="ml-4 px-3 py-1 rounded-md bg-blue-500">tourner ↻ de <span class="px-1 rounded bg-white text-blue-700">120</span> degrés</div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </div>
