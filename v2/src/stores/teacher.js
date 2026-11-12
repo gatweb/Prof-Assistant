@@ -6,6 +6,7 @@ import {
   deleteStudentFromClassInDb,
   archiveOrRestoreStudentInDb,
   saveStudentBulletinInDb,
+  saveTeacherStudentCorrectionInDb,
   cleanDuplicatesAndArchiveOldStudentsInDb,
   getCurrentSchoolYearLabel,
   normalizeStudentNameTokens,
@@ -21,7 +22,7 @@ import {
   purgerDoublonsSubmissionsFirestore,
   appliquerSanctionEtAvertissementEleve
 } from '../services/firebase.js';
-import { courseManagerV2 } from '../services/courseManager.js';
+import { courseManagerV2, DEFAULT_EXERCISES_BY_COURSE } from '../services/courseManager.js';
 
 export function createTeacherStore() {
   return {
@@ -91,6 +92,9 @@ export function createTeacherStore() {
     bulletinAppreciationDraft: '',
     bulletinAppreciationText: '',
     bulletinCustomNote20: '',
+    bulletinXpInput: 0,
+    bulletinCorrectionSaving: false,
+    bulletinCorrectionMsg: '',
     bulletinSaving: false,
     bulletinSaveFeedback: '',
     bulletinSaveMsg: '',
@@ -1177,9 +1181,185 @@ export function createTeacherStore() {
       this.bulletinCustomNote20 = student.bulletin_custom_note20 !== null && student.bulletin_custom_note20 !== undefined
         ? String(student.bulletin_custom_note20)
         : '';
+      const reportXp = Number(report.xp ?? student.xp ?? 0);
+      this.bulletinXpInput = isNaN(reportXp) ? 0 : reportXp;
+      this.bulletinCorrectionMsg = '';
       this.bulletinSaveFeedback = '';
       this.bulletinSaveMsg = '';
       this.modalBulletinEleveOpen = true;
+    },
+
+    getStudentCoursesProgressSummary(student) {
+      if (!student) return [];
+      const stYear = getYearLevelFromClass(student.classe || student.classe_id || '1A');
+      const email = (student.email || '').toLowerCase().trim();
+      const normName = normalizeStudentNameTokens(student.nom || '');
+      const liveProg = (this.classeEleves || []).find(ce =>
+        (email && ce.email && ce.email.toLowerCase().trim() === email) ||
+        (normName && normName !== 'eleve' && normalizeStudentNameTokens(ce.nom || '') === normName)
+      ) || student.progression || {};
+
+      const manualCourses = Array.from(new Set([
+        ...(Array.isArray(student.manual_completed_courses) ? student.manual_completed_courses : []),
+        ...(Array.isArray(liveProg.manual_completed_courses) ? liveProg.manual_completed_courses : [])
+      ]));
+      const manualExos = Array.from(new Set([
+        ...(Array.isArray(student.manual_completed_exos) ? student.manual_completed_exos : []),
+        ...(Array.isArray(liveProg.manual_completed_exos) ? liveProg.manual_completed_exos : [])
+      ]));
+      const rewards = Array.from(new Set([
+        ...(Array.isArray(student.rewarded_activities) ? student.rewarded_activities : []),
+        ...(Array.isArray(liveProg.rewarded_activities) ? liveProg.rewarded_activities : [])
+      ]));
+
+      const studentSubs = (this.teacherSubmissions || []).filter(s => {
+        if (email && s.email_eleve && s.email_eleve.toLowerCase().trim() === email) return true;
+        if (normName && normName !== 'eleve' && s.nom_eleve && normalizeStudentNameTokens(s.nom_eleve) === normName) return true;
+        return false;
+      });
+
+      const courses = (this.coursesList || []).filter(c => {
+        const targetYear = c.targetYear || courseManagerV2.inferCourseTargetYear(c);
+        const hasManual = manualCourses.includes(c.id);
+        const hasSub = studentSubs.some(s => (s.course_id || s.id_course) === c.id);
+        return targetYear === 'all' || targetYear === stYear || hasManual || hasSub;
+      });
+
+      return courses.map(c => {
+        const isManual = manualCourses.includes(c.id);
+        let percent = 0;
+        let doneCount = 0;
+        let totalCount = 1;
+
+        if (isManual) {
+          percent = 100;
+          doneCount = 1;
+          totalCount = 1;
+        } else if (c.id === 'fmttn-1re' || c.workspaceType === 'fmttn') {
+          let pts = 0;
+          const comp = liveProg.competences || {};
+          if (liveProg.charte_obj?.finished || liveProg.charte?.finished || rewards.includes('module0:charte-complete')) pts += 25;
+          if (liveProg.escape_game?.finished || liveProg.eg === '5/5' || rewards.includes('eg:dossier-5')) pts += 25;
+          else if ((liveProg.escape_game?.dossierUnlocked?.length || 1) > 1) pts += Math.min(20, liveProg.escape_game.dossierUnlocked.length * 4);
+          if (comp['NUM-1.P2'] === 'acquis' || liveProg.p2 === 'acquis' || rewards.includes('atelier:email-sim') || rewards.includes('atelier:mission-app')) pts += 25;
+          if (comp['NUM-2.D4'] === 'acquis' || comp['NUM-2.M1'] === 'acquis' || liveProg.num2_d4 === 'acquis' || liveProg.num2_m1 === 'acquis' || rewards.includes('atelier:mission-secu')) pts += 25;
+          percent = Math.min(100, pts);
+          doneCount = Math.round(percent / 25);
+          totalCount = 4;
+        } else {
+          const exos = DEFAULT_EXERCISES_BY_COURSE[c.id] || [];
+          totalCount = Math.max(1, exos.length);
+          const doneIds = new Set();
+          studentSubs.filter(s => (s.course_id || s.id_course) === c.id).forEach(s => {
+            const k = s.id_exercice || s.exercice_id || s.titre_exercice;
+            if (k) doneIds.add(String(k));
+          });
+          exos.forEach(ex => {
+            if (manualExos.includes(ex.id) || rewards.includes(`exo:${ex.id}`)) {
+              doneIds.add(String(ex.id));
+            }
+          });
+          doneCount = doneIds.size;
+          percent = Math.min(100, Math.round((doneCount / totalCount) * 100));
+        }
+
+        return {
+          id: c.id,
+          title: c.title,
+          icon: c.theme?.icon || '📚',
+          percent,
+          doneCount,
+          totalCount,
+          isCompleted: isManual || percent >= 100,
+          isInProgress: !isManual && percent > 0 && percent < 100,
+          isManual
+        };
+      });
+    },
+
+    async appliquerCorrectionXpEleve(explicitXp = null) {
+      const st = this.selectedBulletinStudent;
+      if (!st) return;
+      const targetXp = explicitXp !== null ? Number(explicitXp) : Number(this.bulletinXpInput);
+      if (isNaN(targetXp) || targetXp < 0) {
+        alert("Veuillez entrer un nombre de points XP valide (0 ou plus).");
+        return;
+      }
+      this.bulletinCorrectionSaving = true;
+      this.bulletinCorrectionMsg = '';
+      try {
+        const cleanXp = Math.round(targetXp);
+        const ok = await saveTeacherStudentCorrectionInDb(st, { newXp: cleanXp });
+        if (ok) {
+          st.xp = cleanXp;
+          this.bulletinXpInput = cleanXp;
+          this.bulletinCorrectionMsg = `✅ XP mis à jour à ${cleanXp} XP pour ${st.nom} !`;
+          await this.chargerTousLesElevesEcole();
+          await this.chargerElevesReels();
+        }
+      } catch (err) {
+        alert("Erreur lors de la mise à jour des XP : " + err.message);
+      } finally {
+        this.bulletinCorrectionSaving = false;
+      }
+    },
+
+    async recalculerXpAutoEleve() {
+      const st = this.selectedBulletinStudent;
+      if (!st) return;
+      const report = this.getBulletinDataForStudent(st);
+      const email = (st.email || '').toLowerCase().trim();
+      const normName = normalizeStudentNameTokens(st.nom || '');
+      const liveProg = (this.classeEleves || []).find(ce =>
+        (email && ce.email && ce.email.toLowerCase().trim() === email) ||
+        (normName && normName !== 'eleve' && normalizeStudentNameTokens(ce.nom || '') === normName)
+      ) || st.progression || {};
+
+      const rewardsCount = Array.isArray(liveProg.rewarded_activities) ? liveProg.rewarded_activities.length : 0;
+      const subsCount = report.totalTravaux || 0;
+      const compAcquis = Object.values(liveProg.competences || {}).filter(v => v === 'acquis').length;
+      const estimated = Math.max(report.legitXp || 0, (rewardsCount * 15) + (compAcquis * 15), subsCount * 25);
+      this.bulletinXpInput = estimated;
+      await this.appliquerCorrectionXpEleve(estimated);
+    },
+
+    async basculerValidationCoursEleve(courseId) {
+      const st = this.selectedBulletinStudent;
+      if (!st || !courseId) return;
+      this.bulletinCorrectionSaving = true;
+      this.bulletinCorrectionMsg = '';
+      try {
+        const current = Array.isArray(st.manual_completed_courses) ? [...st.manual_completed_courses] : [];
+        const exists = current.includes(courseId);
+        const updated = exists ? current.filter(id => id !== courseId) : [...current, courseId];
+        const ok = await saveTeacherStudentCorrectionInDb(st, { manualCompletedCourses: updated });
+        if (ok) {
+          st.manual_completed_courses = updated;
+          this.bulletinCorrectionMsg = exists
+            ? `↩️ Validation manuelle retirée pour le cours « ${courseId} ».`
+            : `✅ Cours « ${courseId} » marqué en VERT (Terminé) pour ${st.nom} !`;
+          await this.chargerTousLesElevesEcole();
+          await this.chargerElevesReels();
+        }
+      } catch (err) {
+        alert("Erreur lors de la mise à jour du cours : " + err.message);
+      } finally {
+        this.bulletinCorrectionSaving = false;
+      }
+    },
+
+    async validerExerciceManuellementMatrice(eleve, exo) {
+      if (!eleve || !exo) return;
+      const current = Array.isArray(eleve.manual_completed_exos) ? [...eleve.manual_completed_exos] : [];
+      const exists = current.includes(exo.id);
+      const actionLabel = exists ? `Retirer la validation manuelle de « ${exo.title || exo.titre} » pour ${eleve.nom} ?` : `Marquer l'exercice « ${exo.title || exo.titre} » comme FAIT (Vert) pour ${eleve.nom} ?`;
+      if (!confirm(actionLabel)) return;
+      const updated = exists ? current.filter(id => id !== exo.id) : [...current, exo.id];
+      const ok = await saveTeacherStudentCorrectionInDb(eleve, { manualCompletedExos: updated });
+      if (ok) {
+        eleve.manual_completed_exos = updated;
+        await this.chargerElevesReels();
+      }
     },
 
     fermerBulletinEleve() {
@@ -1656,11 +1836,15 @@ export function createTeacherStore() {
     },
 
     getStudentCourseProgress(eleve) {
+      if (Array.isArray(eleve?.manual_completed_courses) && eleve.manual_completed_courses.includes(this.profSelectedCourseId)) {
+        return 100;
+      }
       if (!this.profCourseExercises || this.profCourseExercises.length === 0) return 0;
+      const manualExos = Array.isArray(eleve?.manual_completed_exos) ? eleve.manual_completed_exos : [];
       let validated = 0;
       for (const ex of this.profCourseExercises) {
         const sub = this.getStudentExerciseSubmission(eleve, ex);
-        if (sub && (sub.status === 'valide' || sub.status === 'validee')) {
+        if ((sub && (sub.status === 'valide' || sub.status === 'validee')) || manualExos.includes(ex.id)) {
           validated++;
         }
       }

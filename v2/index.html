@@ -124,12 +124,13 @@
               title="Score d'autonomie sur la mission en cours (100 / 80 / 60 / 40)"
               x-text="getAutonomyBadgeInfo().label"></span>
 
-            <!-- Bouton Déconnexion -->
+            <!-- Bouton Quitter / Déconnexion -->
             <button 
               @click="deconnexionUtilisateur()" 
-              class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-              title="Déconnexion (fermer la session de la salle informatique)">
+              class="px-2 py-1 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer flex items-center gap-1 text-xs font-bold"
+              title="Quitter / Déconnexion (fermer la session de la salle informatique)">
               <span class="text-sm">🚪</span>
+              <span class="hidden xl:inline">Quitter</span>
             </button>
           </div>
         </template>
@@ -551,13 +552,29 @@
         <template x-for="course in getFilteredHubCourses()" :key="course.id">
           <div
             @click="ouvrirCarteCours(course.id)"
-            :class="course.unlocked ? 'bg-white border-slate-200/90 hover:border-blue-400 hover:shadow-xl' : 'bg-slate-100/80 border-slate-200 opacity-75 hover:opacity-100'"
+            :class="!course.unlocked
+              ? 'bg-slate-100/80 border-slate-200 opacity-75 hover:opacity-100'
+              : (course.progressPercent >= 100
+                  ? 'bg-emerald-50/80 border-emerald-400 hover:border-emerald-500 hover:shadow-xl'
+                  : (course.progressPercent > 0
+                      ? 'bg-white border-blue-200 hover:border-blue-400 hover:shadow-xl'
+                      : 'bg-white border-slate-200/90 hover:border-blue-400 hover:shadow-xl'))"
             class="rounded-3xl p-6 border shadow-xs transition-all duration-200 flex flex-col justify-between cursor-pointer group">
             <div>
               <div class="flex items-center justify-between gap-2 mb-4">
-                <div class="w-12 h-12 rounded-2xl bg-slate-100 group-hover:bg-blue-50 flex items-center justify-center text-2xl transition"
-                     x-text="course.unlocked ? (course.theme?.icon || '📚') : '🔒'"></div>
+                <div :class="course.unlocked && course.progressPercent >= 100 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 group-hover:bg-blue-50'"
+                     class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl transition"
+                     x-text="course.unlocked ? (course.progressPercent >= 100 ? '✅' : (course.theme?.icon || '📚')) : '🔒'"></div>
                 <div class="flex items-center gap-1.5 flex-wrap justify-end">
+                  <span x-show="course.unlocked && course.progressPercent >= 100" class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-600 text-white shadow-2xs">
+                    ✅ Terminé (100%)
+                  </span>
+                  <span x-show="course.unlocked && course.progressPercent > 0 && course.progressPercent < 100" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-800">
+                    🟢 En cours (<span x-text="course.progressPercent + '%'"></span>)
+                  </span>
+                  <span x-show="course.unlocked && course.progressPercent === 0" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-600">
+                    ⚪ À faire
+                  </span>
                   <span x-show="course.unlocked && course.recommended" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">
                     ✓ Ton cours (<span x-text="user.classe"></span>)
                   </span>
@@ -578,14 +595,15 @@
                 <div class="space-y-2">
                   <div class="flex items-center justify-between text-xs font-bold">
                     <span class="text-slate-500">Progression</span>
-                    <span class="text-blue-600 font-black" x-text="course.progressPercent + '%'"></span>
+                    <span :class="course.progressPercent >= 100 ? 'text-emerald-700' : 'text-blue-600'" class="font-black" x-text="course.progressPercent + '%'"></span>
                   </div>
                   <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-500"
+                    <div :class="course.progressPercent >= 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-blue-600 to-indigo-600'"
+                         class="h-full rounded-full transition-all duration-500"
                          :style="'width: ' + course.progressPercent + '%'"></div>
                   </div>
-                  <div class="pt-2 flex items-center justify-between text-xs font-extrabold text-blue-600">
-                    <span>Ouvrir la carte du cours</span>
+                  <div :class="course.progressPercent >= 100 ? 'text-emerald-700' : 'text-blue-600'" class="pt-2 flex items-center justify-between text-xs font-extrabold">
+                    <span x-text="course.progressPercent >= 100 ? '✅ Cours validé — Revoir' : 'Ouvrir la carte du cours'"></span>
                     <span class="group-hover:translate-x-1 transition-transform">➔</span>
                   </div>
                 </div>
@@ -639,13 +657,26 @@
       <!-- Liste des modules numérotés avec onglets 📖 Théorie et 🎯 Missions -->
       <div class="space-y-4">
         <template x-for="(mod, mIdx) in (currentCourse?.chapters || [])" :key="mod.id || mIdx">
-          <div class="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs hover:border-blue-300 transition">
+          <div :class="getModuleProgressSummary(mod).state === 'completed' ? 'bg-emerald-50/40 border-emerald-400' : 'bg-white border-slate-200/90 hover:border-blue-300'"
+               class="rounded-3xl p-6 border shadow-xs transition">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div class="flex items-start gap-4">
-                <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs"
-                     x-text="mIdx + 1"></div>
+                <div :class="getModuleProgressSummary(mod).state === 'completed' ? 'bg-emerald-600' : 'bg-blue-600'"
+                     class="w-10 h-10 rounded-2xl text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs"
+                     x-text="getModuleProgressSummary(mod).state === 'completed' ? '✓' : (mIdx + 1)"></div>
                 <div>
-                  <span class="text-[11px] font-extrabold uppercase tracking-wider text-blue-600" x-text="'Module ' + (mIdx + 1)"></span>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span :class="getModuleProgressSummary(mod).state === 'completed' ? 'text-emerald-700' : 'text-blue-600'" class="text-[11px] font-extrabold uppercase tracking-wider" x-text="'Module ' + (mIdx + 1)"></span>
+                    <span x-show="getModuleProgressSummary(mod).total > 0 && getModuleProgressSummary(mod).state === 'completed'"
+                          class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-black"
+                          x-text="'✅ Terminé (' + getModuleProgressSummary(mod).done + '/' + getModuleProgressSummary(mod).total + ')'"></span>
+                    <span x-show="getModuleProgressSummary(mod).state === 'in_progress'"
+                          class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200 text-[10px] font-black"
+                          x-text="'🟢 En cours (' + getModuleProgressSummary(mod).done + '/' + getModuleProgressSummary(mod).total + ')'"></span>
+                    <span x-show="getModuleProgressSummary(mod).total > 0 && getModuleProgressSummary(mod).state === 'todo'"
+                          class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold"
+                          x-text="'⚪ À faire (0/' + getModuleProgressSummary(mod).total + ')'"></span>
+                  </div>
                   <h3 class="text-base sm:text-lg font-black text-slate-900" x-text="mod.title"></h3>
                 </div>
               </div>
@@ -4935,16 +4966,33 @@
                             </div>
                           </template>
                           <template x-if="!getStudentExerciseSubmission(eleve, exo)">
-                            <span class="text-slate-300 font-bold">—</span>
+                            <div>
+                              <button
+                                type="button"
+                                x-show="Array.isArray(eleve.manual_completed_exos) && eleve.manual_completed_exos.includes(exo.id)"
+                                @click="validerExerciceManuellementMatrice(eleve, exo)"
+                                class="px-2.5 py-1 rounded-lg text-[11px] font-black bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300 transition cursor-pointer"
+                                title="Validé manuellement par le professeur — cliquer pour modifier">
+                                ✅ Fait (Prof)
+                              </button>
+                              <button
+                                type="button"
+                                x-show="!Array.isArray(eleve.manual_completed_exos) || !eleve.manual_completed_exos.includes(exo.id)"
+                                @click="validerExerciceManuellementMatrice(eleve, exo)"
+                                class="px-2 py-0.5 rounded-lg text-slate-300 hover:text-emerald-700 hover:bg-emerald-50 font-bold transition cursor-pointer"
+                                title="Non remis — cliquer pour marquer manuellement comme FAIT (Vert)">
+                                —
+                              </button>
+                            </div>
                           </template>
                         </td>
                       </template>
                       <td class="py-3.5 px-4 text-right">
                         <div class="flex items-center justify-end gap-2">
                           <div class="w-16 bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-indigo-600 h-full rounded-full transition-all duration-300" :style="'width: ' + getStudentCourseProgress(eleve) + '%'"></div>
+                            <div :class="getStudentCourseProgress(eleve) >= 100 ? 'bg-emerald-500' : 'bg-indigo-600'" class="h-full rounded-full transition-all duration-300" :style="'width: ' + getStudentCourseProgress(eleve) + '%'"></div>
                           </div>
-                          <span class="font-black text-slate-900" x-text="getStudentCourseProgress(eleve) + '%'"></span>
+                          <span :class="getStudentCourseProgress(eleve) >= 100 ? 'text-emerald-700' : 'text-slate-900'" class="font-black" x-text="getStudentCourseProgress(eleve) + '%'"></span>
                         </div>
                       </td>
                     </tr>
@@ -5327,6 +5375,22 @@
                         <span class="font-mono font-bold text-amber-600" x-text="(student.xp || 0) + ' XP'"></span>
                         <span class="text-slate-300">•</span>
                         <span class="font-black text-indigo-700" x-text="getBulletinDataForStudent(student)?.avgNote20 !== null ? (getBulletinDataForStudent(student).avgNote20 + '/20') : 'Sans note'"></span>
+                      </div>
+                      <div class="flex flex-wrap gap-1 mt-1.5">
+                        <template x-for="cp in getStudentCoursesProgressSummary(student)" :key="cp.id">
+                          <span
+                            :class="cp.isCompleted
+                              ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                              : (cp.isInProgress
+                                  ? 'bg-blue-50 text-blue-800 border-blue-200'
+                                  : 'bg-slate-100 text-slate-500 border-slate-200')"
+                            class="px-1.5 py-0.5 rounded-md border text-[10px] font-extrabold inline-flex items-center gap-1"
+                            :title="cp.title + ' : ' + cp.percent + '%'">
+                            <span x-text="cp.isCompleted ? '✅' : (cp.isInProgress ? '🟢' : '⚪')"></span>
+                            <span class="max-w-[95px] truncate" x-text="cp.title"></span>
+                            <span x-show="!cp.isCompleted && cp.percent > 0" x-text="cp.percent + '%'"></span>
+                          </span>
+                        </template>
                       </div>
                     </td>
                     <td class="py-3 px-4 text-center">
@@ -7191,6 +7255,80 @@
             <p class="text-[11px] text-amber-800/80 mt-1">
               Barème d'autonomie face au tuteur IA Socratique
             </p>
+          </div>
+        </div>
+
+        <!-- 🛠️ OUTILS PROFESSEUR : CORRIGER LES XP & MARQUER LES COURS TERMINÉS EN VERT -->
+        <div class="bg-amber-50/70 rounded-2xl p-5 border border-amber-200 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h4 class="font-black text-sm text-amber-950 flex items-center gap-2">
+                <span>🛠️</span>
+                <span>Outils Professeur : Corriger les XP &amp; Statut des Cours (Vert)</span>
+              </h4>
+              <p class="text-xs text-amber-800">
+                Rétablissez des XP perdus ou cochez manuellement un cours comme terminé (vert) si un élève l'a déjà effectué.
+              </p>
+            </div>
+            <span x-show="bulletinCorrectionMsg" class="text-xs font-extrabold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-xl border border-emerald-200" x-text="bulletinCorrectionMsg"></span>
+          </div>
+
+          <!-- Correction XP -->
+          <div class="bg-white rounded-xl p-4 border border-amber-200/80 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-black text-slate-700">Solde XP :</span>
+              <input
+                type="number"
+                min="0"
+                step="5"
+                x-model.number="bulletinXpInput"
+                class="w-24 px-3 py-1.5 rounded-xl border border-slate-300 text-sm font-black text-amber-900 focus:outline-none focus:border-amber-500" />
+              <button type="button" @click="bulletinXpInput = (Number(bulletinXpInput) || 0) + 10" class="px-2.5 py-1.5 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-black cursor-pointer">+10</button>
+              <button type="button" @click="bulletinXpInput = (Number(bulletinXpInput) || 0) + 25" class="px-2.5 py-1.5 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-black cursor-pointer">+25</button>
+              <button type="button" @click="bulletinXpInput = (Number(bulletinXpInput) || 0) + 50" class="px-2.5 py-1.5 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-black cursor-pointer">+50</button>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                @click="recalculerXpAutoEleve()"
+                :disabled="bulletinCorrectionSaving"
+                class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition cursor-pointer">
+                🔄 Recalculer XP auto
+              </button>
+              <button
+                type="button"
+                @click="appliquerCorrectionXpEleve()"
+                :disabled="bulletinCorrectionSaving"
+                class="px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-black transition cursor-pointer shadow-2xs">
+                💾 Appliquer XP
+              </button>
+            </div>
+          </div>
+
+          <!-- Suivi par cours + validation manuelle en vert -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <template x-for="cp in getStudentCoursesProgressSummary(selectedBulletinStudent)" :key="cp.id">
+              <div :class="cp.isCompleted ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-slate-200'"
+                   class="p-3 rounded-xl border flex items-center justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span x-text="cp.icon"></span>
+                    <span class="text-xs font-black text-slate-900 truncate" x-text="cp.title"></span>
+                  </div>
+                  <div class="text-[11px] font-bold mt-0.5"
+                       :class="cp.isCompleted ? 'text-emerald-700' : (cp.isInProgress ? 'text-blue-700' : 'text-slate-400')"
+                       x-text="cp.isCompleted ? (cp.isManual ? '✅ Validé manuellement par le prof (100%)' : '✅ Terminé (100%)') : (cp.isInProgress ? '🟢 En cours (' + cp.percent + '%)' : '⚪ Non commencé (0%)')"></div>
+                </div>
+                <button
+                  type="button"
+                  @click="basculerValidationCoursEleve(cp.id)"
+                  :disabled="bulletinCorrectionSaving"
+                  :class="cp.isManual ? 'bg-white hover:bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600'"
+                  class="px-2.5 py-1.5 rounded-xl border text-[11px] font-black shrink-0 transition cursor-pointer">
+                  <span x-text="cp.isManual ? '↩️ Retirer vert' : '✅ Marquer fait (Vert)'"></span>
+                </button>
+              </div>
+            </template>
           </div>
         </div>
 

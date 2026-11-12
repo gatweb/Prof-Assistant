@@ -300,6 +300,16 @@ export function createCourseStore() {
             });
           } catch (_) {}
         }
+        if (typeof this.recordLocalStudentSubmission === 'function') {
+          this.recordLocalStudentSubmission({
+            id_exercice: exId,
+            titre_exercice: this.currentExercise?.titre || 'Quiz',
+            course_id: this.currentCourse?.id || 'dactylo-3e',
+            type: 'quizz',
+            status: 'valide',
+            note_suggeree: pct
+          });
+        }
         this.syncCurrentStudentProgress();
       }
     },
@@ -598,32 +608,78 @@ export function createCourseStore() {
     },
 
     /**
+     * Enregistre immédiatement une soumission dans l'historique local de l'élève
+     * pour que le module et le cours passent au vert sans rechargement de page.
+     */
+    recordLocalStudentSubmission({ id_exercice, titre_exercice, course_id, type = 'office', status = 'pending', note_suggeree = 80 }) {
+      if (!Array.isArray(this.studentSubmissionsHistory)) {
+        this.studentSubmissionsHistory = [];
+      }
+      const exId = String(id_exercice || '').trim();
+      const idx = this.studentSubmissionsHistory.findIndex(s =>
+        (s.id_exercice && s.id_exercice === exId) || (s.exercice_id && s.exercice_id === exId)
+      );
+      const entry = {
+        id: idx >= 0 ? this.studentSubmissionsHistory[idx].id : ('local_' + Date.now()),
+        id_exercice: exId,
+        exercice_id: exId,
+        titre_exercice: titre_exercice || exId,
+        course_id: course_id || this.currentCourse?.id || '',
+        type,
+        status: (idx >= 0 && this.studentSubmissionsHistory[idx].status === 'valide') ? 'valide' : status,
+        note_suggeree,
+        date_soumission: new Date().toISOString()
+      };
+      if (idx >= 0) {
+        this.studentSubmissionsHistory[idx] = { ...this.studentSubmissionsHistory[idx], ...entry };
+      } else {
+        this.studentSubmissionsHistory.unshift(entry);
+      }
+    },
+
+    /**
      * Calcule le % de progression d'un cours pour le Hub « Mes cours »
      */
     getCourseCompletionPercent(course) {
       if (!course) return 0;
+      if (Array.isArray(this.manualCompletedCourses) && this.manualCompletedCourses.includes(course.id)) {
+        return 100;
+      }
       if (course.id === 'fmttn-1re' || course.workspaceType === 'fmttn') {
         let pts = 0;
-        if (this.charteState?.finished) pts += 25;
-        if (this.egState?.finished) pts += 25;
-        else if (this.egState?.dossierUnlocked?.length > 1) pts += (this.egState.dossierUnlocked.length * 4);
-        if (this.eleveCompetences?.['NUM-1.P2'] === 'acquis') pts += 25;
-        if (this.eleveCompetences?.['NUM-2.D4'] === 'acquis' || this.eleveCompetences?.['NUM-2.M1'] === 'acquis') pts += 25;
+        if (this.charteState?.finished || this.m0DecoState?.completed || this.isRewardedKey?.('module0:charte-complete')) pts += 25;
+        if (this.egState?.finished || this.isRewardedKey?.('eg:dossier-5')) pts += 25;
+        else if (this.egState?.dossierUnlocked?.length > 1) pts += Math.min(20, this.egState.dossierUnlocked.length * 4);
+        if (this.eleveCompetences?.['NUM-1.P2'] === 'acquis' || this.bilanCh1Validated || this.isRewardedKey?.('atelier:email-sim') || this.isRewardedKey?.('atelier:mission-app')) pts += 25;
+        if (this.eleveCompetences?.['NUM-2.D4'] === 'acquis' || this.eleveCompetences?.['NUM-2.M1'] === 'acquis' || this.bilanCh2Validated || this.isRewardedKey?.('atelier:mission-secu')) pts += 25;
         return Math.min(100, pts);
       }
 
       const defaultExos = DEFAULT_EXERCISES_BY_COURSE[course.id] || [];
-      const totalExos = (this.currentCourse?.id === course.id && this.courseExercises.length > 0)
-        ? this.courseExercises.length
-        : Math.max(1, defaultExos.length);
+      const activeExos = (this.currentCourse?.id === course.id && this.courseExercises.length > 0)
+        ? this.courseExercises
+        : defaultExos;
+      const totalExos = Math.max(1, activeExos.length);
 
+      const doneIds = new Set();
       const subs = (this.studentSubmissionsHistory || []).filter(
         s => (s.course_id || s.id_course) === course.id
       );
-      if (subs.length === 0) return 0;
+      subs.forEach(s => {
+        const k = s.id_exercice || s.exercice_id || s.titre_exercice;
+        if (k) doneIds.add(String(k));
+      });
 
-      const uniqueExosDone = new Set(subs.map(s => s.id_exercice || s.exercice_id)).size;
-      return Math.min(100, Math.round((uniqueExosDone / totalExos) * 100));
+      const manualExos = Array.isArray(this.manualCompletedExercises) ? this.manualCompletedExercises : [];
+      const rewards = Array.isArray(this.rewardedActivities) ? this.rewardedActivities : [];
+      activeExos.forEach(ex => {
+        if (manualExos.includes(ex.id) || rewards.includes(`exo:${ex.id}`)) {
+          doneIds.add(String(ex.id));
+        }
+      });
+
+      if (doneIds.size === 0) return 0;
+      return Math.min(100, Math.round((doneIds.size / totalExos) * 100));
     },
 
     /**
@@ -695,21 +751,45 @@ export function createCourseStore() {
      */
     getStudentExerciseStatus(ex) {
       if (!ex) return null;
+      if (this.currentCourse && Array.isArray(this.manualCompletedCourses) && this.manualCompletedCourses.includes(this.currentCourse.id)) {
+        return 'valide';
+      }
+      if (Array.isArray(this.manualCompletedExercises) && this.manualCompletedExercises.includes(ex.id)) {
+        return 'valide';
+      }
       const subs = this.studentSubmissionsHistory || [];
       const found = subs.find(s =>
         (s.id_exercice && s.id_exercice === ex.id) ||
         (s.exercice_id && s.exercice_id === ex.id) ||
         (s.titre_exercice && ex.titre && s.titre_exercice.toLowerCase() === ex.titre.toLowerCase())
       );
-      if (!found) return null;
-      if (found.status === 'valide' || found.status === 'validee' || found.status === 'publie') return 'valide';
-      return 'pending';
+      if (found) {
+        if (found.status === 'valide' || found.status === 'validee' || found.status === 'publie' || found.type === 'quizz') {
+          return 'valide';
+        }
+        return 'pending';
+      }
+      if (Array.isArray(this.rewardedActivities) && this.rewardedActivities.includes(`exo:${ex.id}`)) {
+        return 'valide';
+      }
+      return null;
     },
 
     /**
      * Statut d'avancement d'un module/chapitre entier ('completed' | 'in_progress' | 'todo')
      */
     getChapterProgressState(chapter) {
+      if (this.currentCourse && Array.isArray(this.manualCompletedCourses) && this.manualCompletedCourses.includes(this.currentCourse.id)) {
+        return 'completed';
+      }
+      if (this.currentCourse?.workspaceType === 'fmttn' && typeof this.getFmttnMissionsForModule === 'function') {
+        const missions = this.getFmttnMissionsForModule(chapter?.id);
+        if (!missions.length) return 'todo';
+        const done = missions.filter(m => m.status === 'valide').length;
+        if (done === missions.length) return 'completed';
+        if (done > 0) return 'in_progress';
+        return 'todo';
+      }
       const exos = this.getExercisesForChapter(chapter);
       if (exos.length === 0) return 'todo';
       let doneCount = 0;
@@ -719,6 +799,23 @@ export function createCourseStore() {
       if (doneCount === exos.length) return 'completed';
       if (doneCount > 0) return 'in_progress';
       return 'todo';
+    },
+
+    getModuleProgressSummary(chapter) {
+      if (!chapter) return { done: 0, total: 0, state: 'todo' };
+      const isManualCourseDone = this.currentCourse && Array.isArray(this.manualCompletedCourses) && this.manualCompletedCourses.includes(this.currentCourse.id);
+      if (this.currentCourse?.workspaceType === 'fmttn' && typeof this.getFmttnMissionsForModule === 'function') {
+        const missions = this.getFmttnMissionsForModule(chapter.id);
+        const done = isManualCourseDone ? missions.length : missions.filter(m => m.status === 'valide').length;
+        const total = missions.length;
+        const state = total > 0 && done >= total ? 'completed' : (done > 0 ? 'in_progress' : 'todo');
+        return { done, total, state };
+      }
+      const exos = this.getExercisesForChapter(chapter);
+      const done = isManualCourseDone ? exos.length : exos.filter(ex => Boolean(this.getStudentExerciseStatus(ex))).length;
+      const total = exos.length;
+      const state = total > 0 && done >= total ? 'completed' : (done > 0 ? 'in_progress' : 'todo');
+      return { done, total, state };
     },
 
     async changerCours(courseId, goToFocus = true, skipLockCheck = false) {
@@ -933,6 +1030,14 @@ export function createCourseStore() {
         if (!res?.rateLimited && !res?.alreadyValidated && typeof this.attribuerXpUnique === 'function') {
           this.attribuerXpUnique(`exo:${exId}`, 30, this.currentExercise?.titre || 'Mission Code');
         }
+        this.recordLocalStudentSubmission({
+          id_exercice: exId,
+          titre_exercice: this.currentExercise?.titre || this.currentExercise?.title || 'Code Web',
+          course_id: this.currentCourse?.id || 'js-uaa5-classic',
+          type: 'code',
+          status: note >= 60 ? 'valide' : 'pending',
+          note_suggeree: note
+        });
         this.studentTutorCallsCount = 0;
         this.studentHintsUsedCount = 0;
         this.syncCurrentStudentProgress();
@@ -942,6 +1047,14 @@ export function createCourseStore() {
         if (typeof this.attribuerXpUnique === 'function') {
           this.attribuerXpUnique(`exo:${exId}`, 20, this.currentExercise?.titre || 'Mission Code');
         }
+        this.recordLocalStudentSubmission({
+          id_exercice: exId,
+          titre_exercice: this.currentExercise?.titre || this.currentExercise?.title || 'Code Web',
+          course_id: this.currentCourse?.id || 'js-uaa5-classic',
+          type: 'code',
+          status: 'pending',
+          note_suggeree: 80
+        });
         this.syncCurrentStudentProgress();
       } finally {
         this.codingSubmitting = false;
@@ -994,6 +1107,14 @@ export function createCourseStore() {
         if (!res?.rateLimited && !res?.alreadyValidated && typeof this.attribuerXpUnique === 'function') {
           this.attribuerXpUnique(`exo:${exId}`, 25, this.currentExercise?.titre || 'Mission Bureautique');
         }
+        this.recordLocalStudentSubmission({
+          id_exercice: exId,
+          titre_exercice: this.currentExercise?.titre || this.currentExercise?.title || 'Devoir Office',
+          course_id: this.currentCourse?.id || 'bureautique-3e',
+          type: 'office',
+          status: 'pending',
+          note_suggeree: res?.evaluation?.note_suggeree || 80
+        });
         this.studentTutorCallsCount = 0;
         this.studentHintsUsedCount = 0;
         this.syncCurrentStudentProgress();
@@ -1004,6 +1125,14 @@ export function createCourseStore() {
         if (typeof this.attribuerXpUnique === 'function') {
           this.attribuerXpUnique(`exo:${exId}`, 20, this.currentExercise?.titre || 'Mission Bureautique');
         }
+        this.recordLocalStudentSubmission({
+          id_exercice: exId,
+          titre_exercice: this.currentExercise?.titre || this.currentExercise?.title || 'Devoir Office',
+          course_id: this.currentCourse?.id || 'bureautique-3e',
+          type: 'office',
+          status: 'pending',
+          note_suggeree: 80
+        });
         this.syncCurrentStudentProgress();
       } finally {
         this.officeSubmitting = false;
@@ -1045,6 +1174,14 @@ export function createCourseStore() {
         if (!res?.rateLimited && !res?.alreadyValidated && typeof this.attribuerXpUnique === 'function') {
           this.attribuerXpUnique(`exo:${exId}`, 30, this.currentExercise?.titre || 'Mission Créative');
         }
+        this.recordLocalStudentSubmission({
+          id_exercice: exId,
+          titre_exercice: this.currentExercise?.titre || this.currentExercise?.title || 'Projet Créatif',
+          course_id: this.currentCourse?.id || 'studio-creatif',
+          type: 'creative',
+          status: 'pending',
+          note_suggeree: res?.evaluation?.note_suggeree || 85
+        });
         this.studentTutorCallsCount = 0;
         this.studentHintsUsedCount = 0;
         this.syncCurrentStudentProgress();
@@ -1055,6 +1192,14 @@ export function createCourseStore() {
         if (typeof this.attribuerXpUnique === 'function') {
           this.attribuerXpUnique(`exo:${exId}`, 20, this.currentExercise?.titre || 'Mission Créative');
         }
+        this.recordLocalStudentSubmission({
+          id_exercice: exId,
+          titre_exercice: this.currentExercise?.titre || this.currentExercise?.title || 'Projet Créatif',
+          course_id: this.currentCourse?.id || 'studio-creatif',
+          type: 'creative',
+          status: 'pending',
+          note_suggeree: 80
+        });
         this.syncCurrentStudentProgress();
       } finally {
         this.creativeSubmitting = false;

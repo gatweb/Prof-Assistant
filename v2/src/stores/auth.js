@@ -36,6 +36,9 @@ export function createAuthStore() {
     studentSubmissionsHistory: [],
     studentTutorCallsCount: 0,
     studentHintsUsedCount: 0,
+    progressionLoaded: false,
+    manualCompletedCourses: [],
+    manualCompletedExercises: [],
 
     // 🛡️ BOUCLIER ANTI-SPAM & SUIVI D'UNICITÉ DES XP
     rewardedActivities: [],
@@ -217,9 +220,18 @@ export function createAuthStore() {
     },
 
     async deconnexionUtilisateur() {
+      if (this.unsubscribeOwnProgression) {
+        try { this.unsubscribeOwnProgression(); } catch (_) {}
+        this.unsubscribeOwnProgression = null;
+      }
+      this.progressionLoaded = false;
       await deconnexionGlobale();
       this.isLoggedIn = false;
       this.isGuestMode = false;
+      this.rewardedActivities = [];
+      this.manualCompletedCourses = [];
+      this.manualCompletedExercises = [];
+      this.studentSubmissionsHistory = [];
       this.user = {
         id: '',
         email: '',
@@ -266,10 +278,14 @@ export function createAuthStore() {
           const cachedState = JSON.parse(localStorage.getItem(stateCacheKey) || 'null');
           if (cachedState && typeof cachedState === 'object') {
             this.appliquerEtatProgressionFmttn(cachedState);
+            if (typeof cachedState.xp === 'number' && cachedState.xp > (Number(this.user.xp) || 0)) {
+              this.user.xp = cachedState.xp;
+            }
           }
         } catch (_) {}
 
         const data = await chargerProgressionEleveReelle(this.user.classe, this.user.email, this.user.id);
+        let hasTeacherOverride = false;
         if (data) {
           if (data.officialClasse) {
             this.user.classe = data.officialClasse;
@@ -278,15 +294,26 @@ export function createAuthStore() {
           }
           if (data.progression) {
             const p = data.progression;
+            hasTeacherOverride = Boolean(p.xp_teacher_override);
             if (p.classe_id && !data.officialClasse) {
               this.user.classe = p.classe_id;
               localStorage.setItem('profassistant_student_classe', p.classe_id);
             }
-            if (typeof p.xp === 'number') this.user.xp = p.xp;
+            if (typeof p.xp === 'number') {
+              this.user.xp = hasTeacherOverride
+                ? p.xp
+                : Math.max(Number(this.user.xp) || 0, p.xp);
+            }
             this.appliquerEtatProgressionFmttn(p);
             if (Array.isArray(p.rewarded_activities)) {
               this.rewardedActivities = Array.from(new Set([...this.rewardedActivities, ...p.rewarded_activities]));
               localStorage.setItem(storageKey, JSON.stringify(this.rewardedActivities));
+            }
+            if (Array.isArray(p.manual_completed_courses)) {
+              this.manualCompletedCourses = Array.from(new Set(p.manual_completed_courses));
+            }
+            if (Array.isArray(p.manual_completed_exos)) {
+              this.manualCompletedExercises = Array.from(new Set(p.manual_completed_exos));
             }
             if (p.spam_warning) {
               this.studentSpamWarning = p.spam_warning;
@@ -301,6 +328,19 @@ export function createAuthStore() {
             console.log(`[Progression] ${data.submissions.length} travaux trouvés (${validated} validés)`);
           }
         }
+
+        // Réconciliation anti-zéro : si l'élève a déjà remis des travaux ou activités récompensées mais XP=0 (hors sanction prof), recalculer son plancher XP
+        if (!hasTeacherOverride && (Number(this.user.xp) || 0) === 0) {
+          const fromRewards = (this.rewardedActivities || []).length * 15;
+          const uniqueSubCount = new Set((this.studentSubmissionsHistory || []).map(s => s.id_exercice || s.exercice_id || s.titre_exercice)).size;
+          const fromSubs = uniqueSubCount * 25;
+          const floorXp = Math.max(fromRewards, fromSubs);
+          if (floorXp > 0) {
+            this.user.xp = floorXp;
+          }
+        }
+
+        this.progressionLoaded = true;
 
         // Orienter immédiatement l'élève vers le cours correspondant à son niveau (1re vs 3e)
         if (typeof this.verifierEtOrienterCoursSelonClasseEleve === 'function') {
@@ -317,12 +357,22 @@ export function createAuthStore() {
           this.user.id,
           (liveProg) => {
             if (!liveProg) return;
-            if (typeof liveProg.xp === 'number' && liveProg.xp !== this.user.xp) {
-              this.user.xp = liveProg.xp;
+            if (typeof liveProg.xp === 'number') {
+              if (liveProg.xp_teacher_override) {
+                this.user.xp = liveProg.xp;
+              } else {
+                this.user.xp = Math.max(Number(this.user.xp) || 0, liveProg.xp);
+              }
             }
             if (Array.isArray(liveProg.rewarded_activities)) {
-              this.rewardedActivities = liveProg.rewarded_activities;
+              this.rewardedActivities = Array.from(new Set([...(this.rewardedActivities || []), ...liveProg.rewarded_activities]));
               localStorage.setItem(storageKey, JSON.stringify(this.rewardedActivities));
+            }
+            if (Array.isArray(liveProg.manual_completed_courses)) {
+              this.manualCompletedCourses = Array.from(new Set(liveProg.manual_completed_courses));
+            }
+            if (Array.isArray(liveProg.manual_completed_exos)) {
+              this.manualCompletedExercises = Array.from(new Set(liveProg.manual_completed_exos));
             }
             if (liveProg.spam_warning) {
               this.studentSpamWarning = liveProg.spam_warning;
@@ -330,6 +380,7 @@ export function createAuthStore() {
           }
         );
       } catch (e) {
+        this.progressionLoaded = true;
         console.warn("[chargerProgressionEleveReelleDepuisDb] Erreur :", e);
       }
     },
@@ -476,6 +527,10 @@ export function createAuthStore() {
     },
 
     async syncCurrentStudentProgress() {
+      if (!this.isLoggedIn && !this.isGuestMode) return;
+      if (this.isLoggedIn && !this.isGuestMode && !this.progressionLoaded) {
+        return;
+      }
       const unlockedBadges = typeof this.getUnlockedAltxBadgesIds === 'function' ? this.getUnlockedAltxBadgesIds() : [];
       this.fmttnUnlockedBadges = Array.from(new Set([...(this.fmttnUnlockedBadges || []), ...unlockedBadges]));
 
@@ -486,6 +541,8 @@ export function createAuthStore() {
         xp: this.user.xp,
         competences: this.eleveCompetences,
         rewarded_activities: this.rewardedActivities || [],
+        manual_completed_courses: this.manualCompletedCourses || [],
+        manual_completed_exos: this.manualCompletedExercises || [],
         defis_ludiques: this.defisLudiques || null,
         badges_altx: this.fmttnUnlockedBadges,
         spam_attempts: this.studentSpamAttempts || 0,

@@ -282,6 +282,34 @@ export async function saveEleveProgression(classeId, eleveId, data) {
       : `${cleanClasse}_${eleveId}`.replace(/[^a-zA-Z0-9_-]/g, '_');
     const docRef = doc(db, "progressions_v2", docKey);
 
+    // Protection anti-remise à zéro : ne jamais écraser un XP > 0 déjà en base par 0
+    // (sauf si le professeur a explicitement appliqué une correction)
+    let safeXp = Number(data.xp) || 0;
+    let safeRewards = Array.isArray(data.rewarded_activities) ? data.rewarded_activities : [];
+    let safeManualCourses = Array.isArray(data.manual_completed_courses) ? data.manual_completed_courses : undefined;
+    let safeManualExos = Array.isArray(data.manual_completed_exos) ? data.manual_completed_exos : undefined;
+
+    if (safeXp === 0 && !data.xp_teacher_override) {
+      try {
+        const existingSnap = await getDoc(docRef);
+        if (existingSnap.exists()) {
+          const exData = existingSnap.data();
+          if ((Number(exData.xp) || 0) > 0) {
+            safeXp = Number(exData.xp) || 0;
+          }
+          if (Array.isArray(exData.rewarded_activities) && exData.rewarded_activities.length > 0) {
+            safeRewards = Array.from(new Set([...exData.rewarded_activities, ...safeRewards]));
+          }
+          if (Array.isArray(exData.manual_completed_courses) && safeManualCourses === undefined) {
+            safeManualCourses = exData.manual_completed_courses;
+          }
+          if (Array.isArray(exData.manual_completed_exos) && safeManualExos === undefined) {
+            safeManualExos = exData.manual_completed_exos;
+          }
+        }
+      } catch (_) {}
+    }
+
     const payload = {
       uid: uid,
       classe_id: cleanClasse,
@@ -291,7 +319,7 @@ export async function saveEleveProgression(classeId, eleveId, data) {
       eleve_email: email,
       updated_at: new Date().toISOString(),
       timestamp: serverTimestamp(),
-      xp: data.xp || 0,
+      xp: safeXp,
       charte: data.charte || null,
       escape_game: data.escape_game || null,
       email_sim: data.email_sim || null,
@@ -302,7 +330,7 @@ export async function saveEleveProgression(classeId, eleveId, data) {
       mission_secu: data.mission_secu || null,
       bilan_personnel_ch2: data.bilan_personnel_ch2 || null,
       competences: data.competences || {},
-      rewarded_activities: Array.isArray(data.rewarded_activities) ? data.rewarded_activities : [],
+      rewarded_activities: safeRewards,
       defis_ludiques: data.defis_ludiques || null,
       badges_altx: Array.isArray(data.badges_altx) ? data.badges_altx : [],
       spam_attempts: Number(data.spam_attempts) || 0,
@@ -312,6 +340,8 @@ export async function saveEleveProgression(classeId, eleveId, data) {
       active_exercise_id: data.active_exercise_id || ''
     };
 
+    if (safeManualCourses !== undefined) payload.manual_completed_courses = safeManualCourses;
+    if (safeManualExos !== undefined) payload.manual_completed_exos = safeManualExos;
     if (data.spam_warning !== undefined) {
       payload.spam_warning = data.spam_warning;
     }
@@ -389,9 +419,47 @@ export async function chargerProgressionEleveReelle(classeId, email, uid) {
         } else {
           const currCl = String(progressionData.classe_id || progressionData.classe || '').toUpperCase().trim();
           const bestCl = resolveBestStudentClass(currCl, dCl);
-          if (dCl === bestCl && ((Number(d.xp) || 0) >= (Number(progressionData.xp) || 0) || currCl === '1A')) {
-            progressionData = { ...progressionData, ...d, classe_id: bestCl, classe: bestCl };
+          const mergedRewards = Array.from(new Set([
+            ...(Array.isArray(progressionData.rewarded_activities) ? progressionData.rewarded_activities : []),
+            ...(Array.isArray(d.rewarded_activities) ? d.rewarded_activities : [])
+          ]));
+          const mergedBadges = Array.from(new Set([
+            ...(Array.isArray(progressionData.badges_altx) ? progressionData.badges_altx : []),
+            ...(Array.isArray(d.badges_altx) ? d.badges_altx : [])
+          ]));
+          const mergedManualCourses = Array.from(new Set([
+            ...(Array.isArray(progressionData.manual_completed_courses) ? progressionData.manual_completed_courses : []),
+            ...(Array.isArray(d.manual_completed_courses) ? d.manual_completed_courses : [])
+          ]));
+          const mergedManualExos = Array.from(new Set([
+            ...(Array.isArray(progressionData.manual_completed_exos) ? progressionData.manual_completed_exos : []),
+            ...(Array.isArray(d.manual_completed_exos) ? d.manual_completed_exos : [])
+          ]));
+          const mergedComp = { ...(progressionData.competences || {}), ...(d.competences || {}) };
+          for (const k of Object.keys(progressionData.competences || {})) {
+            if (progressionData.competences[k] === 'acquis') mergedComp[k] = 'acquis';
           }
+          // Ne jamais perdre les XP lors de la fusion entre deux classes (ex: 1A -> 3A)
+          let bestXp = Math.max(Number(progressionData.xp) || 0, Number(d.xp) || 0);
+          if (d.xp_teacher_override && (!progressionData.xp_teacher_override || (d.xp_teacher_override_at || '') >= (progressionData.xp_teacher_override_at || ''))) {
+            bestXp = Number(d.xp) || 0;
+          } else if (progressionData.xp_teacher_override && !d.xp_teacher_override) {
+            bestXp = Number(progressionData.xp) || 0;
+          }
+          const base = (Number(d.xp) || 0) >= (Number(progressionData.xp) || 0)
+            ? { ...progressionData, ...d }
+            : { ...d, ...progressionData };
+          progressionData = {
+            ...base,
+            classe_id: bestCl,
+            classe: bestCl,
+            xp: bestXp,
+            rewarded_activities: mergedRewards,
+            badges_altx: mergedBadges,
+            manual_completed_courses: mergedManualCourses,
+            manual_completed_exos: mergedManualExos,
+            competences: mergedComp
+          };
         }
       });
     }
@@ -409,16 +477,28 @@ export async function chargerProgressionEleveReelle(classeId, email, uid) {
       progressionData.classe = progressionData.classe_id;
     }
 
-    // Charger l'historique des soumissions de devoirs de l'élève
-    const submissions = [];
+    // Charger l'historique des soumissions de devoirs de l'élève (par email ET par uid)
+    const submissionsMap = new Map();
     if (normalizedEmail) {
       const qSub = query(collection(db, "submissions"), where("email_eleve", "==", normalizedEmail));
       const subSnap = await getDocs(qSub);
       subSnap.forEach(d => {
-        submissions.push({ id: d.id, ...d.data() });
+        submissionsMap.set(d.id, { id: d.id, ...d.data() });
       });
-      submissions.sort((a, b) => new Date(b.date_soumission || 0) - new Date(a.date_soumission || 0));
     }
+    if (uid) {
+      try {
+        const qSubUid = query(collection(db, "submissions"), where("uid_eleve", "==", uid));
+        const subUidSnap = await getDocs(qSubUid);
+        subUidSnap.forEach(d => {
+          if (!submissionsMap.has(d.id)) {
+            submissionsMap.set(d.id, { id: d.id, ...d.data() });
+          }
+        });
+      } catch (_) {}
+    }
+    const submissions = Array.from(submissionsMap.values());
+    submissions.sort((a, b) => new Date(b.date_soumission || 0) - new Date(a.date_soumission || 0));
 
     return {
       officialClasse: officialClasse || (progressionData?.classe_id || ''),
@@ -682,6 +762,8 @@ export function listenToClasseProgressions(classeId, onUpdate) {
           score: Math.min(100, score),
           xp,
           rewarded_activities: Array.isArray(d.rewarded_activities) ? d.rewarded_activities : [],
+          manual_completed_courses: Array.isArray(d.manual_completed_courses) ? d.manual_completed_courses : [],
+          manual_completed_exos: Array.isArray(d.manual_completed_exos) ? d.manual_completed_exos : [],
           spam_warning: d.spam_warning || null,
           spam_attempts: Number(d.spam_attempts) || 0,
           competences: d.competences || {},
@@ -720,6 +802,9 @@ export function listenToClasseProgressions(classeId, onUpdate) {
           merged.email = existing.email || candidate.email || '';
           merged.nom = (existing.nom && existing.nom !== 'Élève') ? existing.nom : candidate.nom;
           merged.competences = { ...(candidate.competences || {}), ...(existing.competences || {}) };
+          merged.rewarded_activities = Array.from(new Set([...(existing.rewarded_activities || []), ...(candidate.rewarded_activities || [])]));
+          merged.manual_completed_courses = Array.from(new Set([...(existing.manual_completed_courses || []), ...(candidate.manual_completed_courses || [])]));
+          merged.manual_completed_exos = Array.from(new Set([...(existing.manual_completed_exos || []), ...(candidate.manual_completed_exos || [])]));
           merged.bulletin_appreciation = existing.bulletin_appreciation || candidate.bulletin_appreciation || '';
           if (candidate.updated_at && (!existing.updated_at || candidate.updated_at > existing.updated_at)) {
             merged.updated_at = candidate.updated_at;
@@ -1181,6 +1266,68 @@ export async function saveStudentBulletinInDb(student, { appreciation = "", cust
     return true;
   } catch (err) {
     console.error("[saveStudentBulletinInDb] Erreur :", err);
+    return false;
+  }
+}
+
+// Correction / Rétablissement manuel par le professeur (XP, cours terminés en vert, exercices validés)
+export async function saveTeacherStudentCorrectionInDb(student, { newXp = null, manualCompletedCourses = null, manualCompletedExos = null } = {}) {
+  try {
+    if (!student) return false;
+    const nowIso = new Date().toISOString();
+    const payload = {
+      updated_at: nowIso,
+      xp_teacher_override_at: nowIso
+    };
+    if (newXp !== null && newXp !== undefined && !isNaN(Number(newXp))) {
+      payload.xp = Math.max(0, Math.round(Number(newXp)));
+      payload.xp_teacher_override = true;
+    }
+    if (Array.isArray(manualCompletedCourses)) {
+      payload.manual_completed_courses = Array.from(new Set(manualCompletedCourses));
+    }
+    if (Array.isArray(manualCompletedExos)) {
+      payload.manual_completed_exos = Array.from(new Set(manualCompletedExos));
+    }
+
+    const cl = (student.classe || student.classe_id || '1A').toUpperCase().trim();
+    const fallbackProgKey = (student.email || student.id)
+      ? `${cl}_${(student.email || student.id)}`.replace(/[^a-zA-Z0-9_-]/g, '_')
+      : null;
+
+    const pKeys = Array.from(new Set([
+      ...(student.progDocKeys || []),
+      ...(student.progDocKey ? [student.progDocKey] : []),
+      ...(student.docKey ? [student.docKey] : []),
+      ...(fallbackProgKey ? [fallbackProgKey] : [])
+    ]));
+
+    for (const pk of pKeys) {
+      try {
+        await setDoc(doc(db, "progressions_v2", pk), {
+          ...payload,
+          classe_id: cl,
+          classe: cl,
+          eleve_nom: student.nom || 'Élève',
+          eleve_email: (student.email || '').toLowerCase().trim()
+        }, { merge: true });
+      } catch (_) {}
+    }
+
+    const uIds = Array.from(new Set([
+      ...(student.userDocIds || []),
+      ...(student.userDocId ? [student.userDocId] : []),
+      ...(student.email ? ['st_' + student.email.toLowerCase().trim().replace(/[^a-z0-9]/g, '_')] : [])
+    ]));
+    for (const uid of uIds) {
+      try {
+        await setDoc(doc(db, "users", uid), payload, { merge: true });
+      } catch (_) {}
+    }
+
+    return true;
+  } catch (err) {
+    console.error("[saveTeacherStudentCorrectionInDb] Erreur :", err);
     return false;
   }
 }
