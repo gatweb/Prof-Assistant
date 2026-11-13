@@ -377,49 +377,49 @@
   <div x-show="studentViewMode === 'focus' && (!currentCourse || currentCourse.workspaceType === 'fmttn')" class="bg-slate-900 text-white border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       
-      <!-- Sélecteur de Module -->
-      <div class="flex items-center gap-2 mb-3 overflow-x-auto pb-1">
+      <!-- Sélecteur de Module (Optimisé Tablette & Chromebook : tactile min-h-[44px]) -->
+      <div class="flex flex-wrap items-center gap-2 mb-4">
         <button 
           @click="selectFmttnModule('module-0')"
-          :class="selectedModuleId === 'module-0' ? 'bg-blue-600 text-white border-blue-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
-          class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0">
-          <span>🚀</span> Module 0 : Bienvenue & Charte
+          :class="selectedModuleId === 'module-0' ? 'bg-blue-600 text-white border-blue-400 shadow-sm ring-2 ring-blue-400/30' : 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white hover:bg-slate-700/80'"
+          class="min-h-[42px] px-3.5 py-2 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer touch-manipulation">
+          <span>🚀</span> Module 0 : Charte
         </button>
         <button 
           @click="selectFmttnModule('escape-game')"
-          :class="selectedModuleId === 'escape-game' ? 'bg-purple-600 text-white border-purple-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
-          class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0">
-          <span>🎮</span> Escape Game : Les 5 Dossiers Perdus
+          :class="selectedModuleId === 'escape-game' ? 'bg-purple-600 text-white border-purple-400 shadow-sm ring-2 ring-purple-400/30' : 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white hover:bg-slate-700/80'"
+          class="min-h-[42px] px-3.5 py-2 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer touch-manipulation">
+          <span>🎮</span> Escape Game
         </button>
         <button 
           @click="selectFmttnModule('ch1-communication')"
-          :class="selectedModuleId === 'ch1-communication' ? 'bg-blue-600 text-white border-blue-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
-          class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer">
-          <span>💬</span> Chapitre 1 : Communication & E-mail
+          :class="selectedModuleId === 'ch1-communication' ? 'bg-blue-600 text-white border-blue-400 shadow-sm ring-2 ring-blue-400/30' : 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white hover:bg-slate-700/80'"
+          class="min-h-[42px] px-3.5 py-2 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer touch-manipulation">
+          <span>💬</span> Ch. 1 : Communication
         </button>
         <button 
           @click="selectFmttnModule('ch2-securite')"
-          :class="selectedModuleId === 'ch2-securite' ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
-          class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer">
-          <span>🛡️</span> Chapitre 2 : Sécurité & Données
+          :class="selectedModuleId === 'ch2-securite' ? 'bg-emerald-600 text-white border-emerald-400 shadow-sm ring-2 ring-emerald-400/30' : 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white hover:bg-slate-700/80'"
+          class="min-h-[42px] px-3.5 py-2 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer touch-manipulation">
+          <span>🛡️</span> Ch. 2 : Sécurité
         </button>
         <button 
           @click="selectFmttnModule('ch3-ia')"
-          :class="selectedModuleId === 'ch3-ia' ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
-          class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer">
-          <span>🤖</span> Chapitre 3 : IA* (1b)
+          :class="selectedModuleId === 'ch3-ia' ? 'bg-indigo-600 text-white border-indigo-400 shadow-sm ring-2 ring-indigo-400/30' : 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white hover:bg-slate-700/80'"
+          class="min-h-[42px] px-3.5 py-2 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer touch-manipulation">
+          <span>🤖</span> Ch. 3 : IA* (1b)
         </button>
         <button 
           @click="selectFmttnModule('ch4-donnees')"
-          :class="selectedModuleId === 'ch4-donnees' ? 'bg-cyan-600 text-white border-cyan-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
-          class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer">
-          <span>💾</span> Chapitre 4 : Données (1b)
+          :class="selectedModuleId === 'ch4-donnees' ? 'bg-cyan-600 text-white border-cyan-400 shadow-sm ring-2 ring-cyan-400/30' : 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white hover:bg-slate-700/80'"
+          class="min-h-[42px] px-3.5 py-2 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer touch-manipulation">
+          <span>💾</span> Ch. 4 : Données (1b)
         </button>
         <button 
           @click="selectFmttnModule('ch5-creation')"
-          :class="selectedModuleId === 'ch5-creation' ? 'bg-lime-600 text-white border-lime-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
-          class="px-3 py-1.5 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer">
-          <span>📝</span> Chapitre 5 : Création (1b)
+          :class="selectedModuleId === 'ch5-creation' ? 'bg-lime-600 text-white border-lime-400 shadow-sm ring-2 ring-lime-400/30' : 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white hover:bg-slate-700/80'"
+          class="min-h-[42px] px-3.5 py-2 rounded-xl text-xs font-extrabold border transition flex items-center gap-1.5 shrink-0 cursor-pointer touch-manipulation">
+          <span>📝</span> Ch. 5 : Création (1b)
         </button>
       </div>
 
@@ -433,20 +433,20 @@
              x-text="getFmttnModuleIntro()"></p>
         </div>
 
-        <!-- Onglets du module FMTTN actif (modèle UAA3 : 1. Leçon & Théorie / 2. Atelier & Pratique) -->
+        <!-- Onglets du module FMTTN actif (Tactiles tablette & Chromebook) -->
         <template x-if="activeTab !== 'prof'">
-          <nav class="flex bg-slate-800/90 p-1 rounded-xl border border-slate-700/60 self-start md:self-auto gap-1 shrink-0">
+          <nav class="flex bg-slate-800/90 p-1.5 rounded-2xl border border-slate-700/60 self-start md:self-auto gap-1.5 shrink-0">
             <button
               @click="selectFmttnModule(selectedModuleId, 'cours')"
               :class="activeTab !== 'pratique' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer">
+              class="min-h-[42px] px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition flex items-center gap-1.5 cursor-pointer touch-manipulation">
               <span>📖</span>
               <span>1. Leçon &amp; Théorie</span>
             </button>
             <button
               @click="ouvrirAtelierFmttn()"
               :class="activeTab === 'pratique' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-300 hover:text-white'"
-              class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer">
+              class="min-h-[42px] px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition flex items-center gap-1.5 cursor-pointer touch-manipulation">
               <span>🎯</span>
               <span>2. Atelier &amp; Pratique</span>
               <span class="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-black/25 text-white"
@@ -791,45 +791,59 @@
     </div>
 
     <!-- ======================================================= -->
-    <!-- BARRE DES MISSIONS FMTTN (UNE MISSION À LA FOIS — MODÈLE UAA3) -->
+    <!-- BARRE DES MISSIONS FMTTN (LUDIQUE, CLAIRE & TACTILE)    -->
     <!-- ======================================================= -->
     <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab === 'pratique'"
-         class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-3">
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-2">
-          <span class="text-xs font-extrabold text-slate-500">🎯 Missions du module :</span>
-          <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black"
-                x-text="getCurrentFmttnModuleMissions().filter(m => m.status === 'valide').length + ' / ' + getCurrentFmttnModuleMissions().length + ' terminées'"></span>
+         class="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200/90 shadow-xs space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <img src="/img/tome1b/atelier-mission-hero.jpg" alt="Atelier pratique et missions" class="w-20 h-14 sm:w-24 sm:h-16 object-cover rounded-2xl border border-amber-200 shadow-2xs shrink-0" loading="lazy" />
+          <div class="space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-xs font-black uppercase tracking-wider text-indigo-600">🎯 Atelier &amp; Pratique</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black"
+                    x-text="getCurrentFmttnModuleMissions().filter(m => m.status === 'valide').length + ' / ' + getCurrentFmttnModuleMissions().length + ' terminées'"></span>
+            </div>
+            <div class="w-48 sm:w-64 h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+              <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300"
+                   :style="'width: ' + (getCurrentFmttnModuleMissions().length ? Math.round((getCurrentFmttnModuleMissions().filter(m => m.status === 'valide').length / getCurrentFmttnModuleMissions().length) * 100) : 0) + '%'"></div>
+            </div>
+          </div>
         </div>
         <button
           type="button"
           @click="relireLeconFmttn()"
-          class="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-extrabold transition cursor-pointer flex items-center gap-1 shrink-0">
+          class="min-h-[42px] px-4 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-extrabold transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 touch-manipulation">
           <span>📖</span>
           <span>Relire la leçon</span>
         </button>
       </div>
+
       <div class="flex flex-wrap items-center gap-2">
         <template x-for="m in getCurrentFmttnModuleMissions()" :key="m.id">
           <button
             type="button"
             @click="selectFmttnMission(m.id)"
             :class="activeFmttnMissionId === m.id
-              ? 'bg-slate-900 text-white shadow-xs ring-2 ring-slate-900/20'
+              ? 'bg-slate-900 text-white shadow-sm ring-2 ring-slate-900/20'
               : (m.status === 'valide' ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100' : 'bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100')"
-            class="px-3 py-2 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer">
+            class="min-h-[42px] px-3.5 py-2 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer touch-manipulation">
             <span x-text="m.status === 'valide' ? '✅' : (m.isQuizz ? '⚡' : '🎯')"></span>
             <span x-text="m.num + '. ' + m.shortTitle"></span>
           </button>
         </template>
       </div>
-      <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
-        <h3 class="font-black text-sm sm:text-base text-slate-900"
-            x-text="'Mission ' + (getCurrentFmttnMission()?.num || 1) + ' — ' + (getCurrentFmttnMission()?.titre || '')"></h3>
+
+      <div class="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-amber-50/80 to-indigo-50/70 border border-amber-200/80 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5">
+          <span class="px-2.5 py-1 rounded-lg bg-amber-400 text-amber-950 text-[11px] font-black uppercase shrink-0">👉 À toi de jouer</span>
+          <h3 class="font-black text-sm sm:text-base text-slate-900"
+              x-text="'Mission ' + (getCurrentFmttnMission()?.num || 1) + ' — ' + (getCurrentFmttnMission()?.titre || '')"></h3>
+        </div>
         <span x-show="getCurrentFmttnMission()?.status === 'valide'"
               class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black">✓ Terminé</span>
         <span x-show="getCurrentFmttnMission()?.status !== 'valide'"
-              class="px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-black">À réaliser</span>
+              class="px-3 py-1 rounded-full bg-white text-amber-800 border border-amber-300 text-xs font-black">À réaliser</span>
       </div>
     </div>
 
@@ -839,18 +853,18 @@
     <div x-show="(!currentCourse || currentCourse.workspaceType === 'fmttn') && activeTab !== 'prof' && selectedModuleId === 'module-0'" class="space-y-8">
       
       <!-- Bandeau Bienvenue & Mascotte -->
-      <div x-show="activeTab !== 'pratique'" class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
-        <div>
+      <div x-show="activeTab !== 'pratique'" class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-md grid grid-cols-1 lg:grid-cols-12 items-center gap-6">
+        <div class="lg:col-span-7">
           <span class="px-3 py-1 bg-white/20 text-blue-100 rounded-full text-xs font-extrabold uppercase tracking-wider">
-            Semaines 1 & 2 • Manuel @lt_X
+            Semaines 1 &amp; 2 • Manuel @lt_X
           </span>
           <h3 class="text-2xl font-black mt-2">Démarrons l'année du bon pied</h3>
           <p class="text-xs sm:text-sm text-blue-100 mt-2 max-w-xl leading-relaxed">
             Pour bien commencer en salle informatique : validez la charte, apprenez à choisir un bon mot de passe et mémorisez la règle d'or de déconnexion.
           </p>
         </div>
-        <div class="w-20 h-20 bg-white/10 rounded-3xl flex items-center justify-center text-4xl shadow-inner border border-white/20 animate-pulse">
-          🤖
+        <div class="lg:col-span-5">
+          <img src="/img/tome1b/m0-welcome-hero.jpg" alt="Mascotte robot scolaire et ordinateur" class="w-full h-44 sm:h-48 object-cover rounded-2xl border-2 border-white/30 shadow-md" loading="lazy" />
         </div>
       </div>
 
@@ -1526,19 +1540,26 @@
 
       <!-- ==================== 1. LEÇON & THÉORIE (PLEINE LARGEUR) ==================== -->
       <div x-show="activeTab !== 'pratique'" class="space-y-6">
-        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-4">
-          <div class="flex items-center gap-3">
-            <div class="p-2.5 rounded-2xl bg-blue-100 text-blue-700 text-lg font-black">📖</div>
-            <div>
-              <span class="text-[11px] font-extrabold uppercase tracking-wider text-blue-600">Leçon complète • Manuel @lt_X</span>
-              <h3 class="font-black text-lg text-slate-900">Chapitre 1 : Communication &amp; Collaboration</h3>
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <div class="lg:col-span-7 space-y-3">
+              <div class="flex items-center gap-3">
+                <div class="p-2.5 rounded-2xl bg-blue-100 text-blue-700 text-lg font-black">📖</div>
+                <div>
+                  <span class="text-[11px] font-extrabold uppercase tracking-wider text-blue-600">Leçon complète • Manuel @lt_X</span>
+                  <h3 class="font-black text-lg sm:text-xl text-slate-900">Chapitre 1 : Communication &amp; Collaboration</h3>
+                </div>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-600 leading-relaxed" x-text="chapter.introduction"></p>
+            </div>
+            <div class="lg:col-span-5">
+              <img src="/img/tome1b/ch1-comm-hero.jpg" alt="Élèves échangeant des messages numériques" class="w-full h-44 sm:h-48 object-cover rounded-2xl border border-blue-100 shadow-xs" loading="lazy" />
             </div>
           </div>
-          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed" x-text="chapter.introduction"></p>
           <div class="flex flex-wrap gap-2">
             <template x-for="sec in [{key:'reseaux', mission:'ch1-q-reseaux', num:'1.1'},{key:'messagerie', mission:'ch1-q-messagerie', num:'1.2'},{key:'ethique', mission:'ch1-q-ethique', num:'1.3'},{key:'collaboration', mission:'ch1-q-collab', num:'1.4'}]" :key="sec.key">
               <a :href="'#lecon-comm-' + sec.key"
-                 class="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 text-xs font-extrabold transition"
+                 class="min-h-[38px] px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 text-xs font-extrabold transition flex items-center"
                  x-text="sec.num + ' ' + (altxBank.comm[sec.key]?.icon || '') + ' ' + (altxBank.comm[sec.key]?.label || sec.key)"></a>
             </template>
           </div>
@@ -2137,19 +2158,26 @@
 
       <!-- ==================== 1. LEÇON & THÉORIE (PLEINE LARGEUR) ==================== -->
       <div x-show="activeTab !== 'pratique'" class="space-y-6">
-        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-4">
-          <div class="flex items-center gap-3">
-            <div class="p-2.5 rounded-2xl bg-emerald-100 text-emerald-700 text-lg font-black">📖</div>
-            <div>
-              <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-600">Leçon complète • Manuel @lt_X</span>
-              <h3 class="font-black text-lg text-slate-900">Chapitre 2 : Sécurité &amp; Protection des données</h3>
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <div class="lg:col-span-7 space-y-3">
+              <div class="flex items-center gap-3">
+                <div class="p-2.5 rounded-2xl bg-emerald-100 text-emerald-700 text-lg font-black">🛡️</div>
+                <div>
+                  <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-600">Leçon complète • Manuel @lt_X</span>
+                  <h3 class="font-black text-lg sm:text-xl text-slate-900">Chapitre 2 : Sécurité &amp; Protection des données</h3>
+                </div>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-600 leading-relaxed" x-text="chapter2.introduction"></p>
+            </div>
+            <div class="lg:col-span-5">
+              <img src="/img/tome1b/ch2-secu-hero.jpg" alt="Bouclier de sécurité et protection contre l'hameçonnage" class="w-full h-44 sm:h-48 object-cover rounded-2xl border border-emerald-100 shadow-xs" loading="lazy" />
             </div>
           </div>
-          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed" x-text="chapter2.introduction"></p>
           <div class="flex flex-wrap gap-2">
             <template x-for="sec in [{key:'profil', mission:'ch2-q-profil', num:'2.1'},{key:'signaletique', mission:'ch2-q-signaletique', num:'2.2'},{key:'cyber', mission:'ch2-q-cyber', num:'2.3'},{key:'confidentialite', mission:'ch2-q-attention', num:'2.4'},{key:'identite', mission:'ch2-q-traces', num:'2.5'}]" :key="sec.key">
               <a :href="'#lecon-secu-' + sec.key"
-                 class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-extrabold transition"
+                 class="min-h-[38px] px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-extrabold transition flex items-center"
                  x-text="sec.num + ' ' + (altxBank.secu[sec.key]?.icon || '') + ' ' + (altxBank.secu[sec.key]?.label || sec.key)"></a>
             </template>
           </div>
@@ -3041,63 +3069,60 @@
 
       <!-- 2. ATELIER & PRATIQUE CH. 3 -->
       <div x-show="activeTab === 'pratique'" class="space-y-6">
-        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-wrap gap-2">
-          <template x-for="m in getCurrentFmttnModuleMissions()" :key="m.id">
-            <button type="button" @click="selectFmttnMission(m.id, true)"
-              :class="activeFmttnMissionId === m.id ? 'bg-indigo-600 text-white border-indigo-600' : (m.status === 'valide' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-50 text-slate-700 border-slate-200')"
-              class="px-3.5 py-2 rounded-xl border text-xs font-extrabold transition cursor-pointer flex items-center gap-1.5">
-              <span x-text="m.status === 'valide' ? '✓' : m.num + '.'"></span>
-              <span x-text="m.shortTitle"></span>
-            </button>
-          </template>
-        </div>
-
         <!-- Mission 1 : Quizz Ch. 3 -->
         <div x-show="activeFmttnMissionId === 'ch3-quizz-ia'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-5">
-          <div class="flex items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center justify-between gap-3">
             <h4 class="font-black text-lg text-slate-900">🤖 Quizz @lt_X : Intelligence Artificielle*</h4>
-            <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-black" x-text="'Question ' + (tome1bQuiz.ch3.idx + 1) + ' / ' + getTome1bQuizQuestions('ch3').length + ' • Score : ' + tome1bQuiz.ch3.score"></span>
+            <span class="px-3.5 py-1.5 rounded-full bg-indigo-100 text-indigo-800 text-xs font-black" x-text="'Question ' + (tome1bQuiz.ch3.idx + 1) + ' / ' + getTome1bQuizQuestions('ch3').length + ' • Score : ' + tome1bQuiz.ch3.score"></span>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs text-indigo-950 font-bold">
+            👉 Action : Touche ou clique sur la bonne réponse, puis appuie sur « Valider ma réponse » pour gagner +10 XP !
           </div>
           <template x-if="getCurrentTome1bQuestion('ch3')">
             <div class="space-y-4">
-              <p class="font-bold text-slate-800 text-sm sm:text-base" x-text="getCurrentTome1bQuestion('ch3').question"></p>
-              <div class="space-y-2.5">
+              <p class="font-black text-slate-900 text-base sm:text-lg" x-text="getCurrentTome1bQuestion('ch3').question"></p>
+              <div class="space-y-3">
                 <template x-for="(opt, oIdx) in getCurrentTome1bQuestion('ch3').options" :key="oIdx">
                   <button type="button" @click="if(!tome1bQuiz.ch3.submitted) tome1bQuiz.ch3.selected = oIdx"
-                    :class="tome1bQuiz.ch3.submitted ? (oIdx === getCurrentTome1bQuestion('ch3').correctIndex ? 'bg-emerald-50 border-emerald-500 text-emerald-900' : (tome1bQuiz.ch3.selected === oIdx ? 'bg-rose-50 border-rose-400 text-rose-900' : 'bg-slate-50 border-slate-200 text-slate-500')) : (tome1bQuiz.ch3.selected === oIdx ? 'bg-indigo-50 border-indigo-500 text-indigo-950' : 'bg-white border-slate-200 hover:border-indigo-300 text-slate-800')"
-                    class="w-full text-left p-4 rounded-2xl border-2 text-xs sm:text-sm font-semibold transition cursor-pointer" x-text="opt"></button>
+                    :class="tome1bQuiz.ch3.submitted ? (oIdx === getCurrentTome1bQuestion('ch3').correctIndex ? 'bg-emerald-50 border-emerald-500 text-emerald-900' : (tome1bQuiz.ch3.selected === oIdx ? 'bg-rose-50 border-rose-400 text-rose-900' : 'bg-slate-50 border-slate-200 text-slate-500')) : (tome1bQuiz.ch3.selected === oIdx ? 'bg-indigo-50 border-indigo-500 text-indigo-950 ring-2 ring-indigo-500/20' : 'bg-white border-slate-200 hover:border-indigo-300 text-slate-800')"
+                    class="w-full min-h-[48px] text-left p-4 rounded-2xl border-2 text-xs sm:text-sm font-semibold transition cursor-pointer touch-manipulation flex items-center gap-3">
+                    <span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-black text-xs flex items-center justify-center shrink-0" x-text="['A','B','C','D'][oIdx] || (oIdx+1)"></span>
+                    <span x-text="opt"></span>
+                  </button>
                 </template>
               </div>
               <div x-show="tome1bQuiz.ch3.submitted" class="p-4 rounded-2xl border text-xs sm:text-sm" :class="tome1bQuiz.ch3.isCorrect ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'">
                 <strong x-text="tome1bQuiz.ch3.isCorrect ? '✅ Bonne réponse ! (+10 XP) ' : '💡 À retenir : '"></strong>
                 <span x-text="getCurrentTome1bQuestion('ch3').explanation"></span>
               </div>
-              <div class="flex flex-wrap gap-3">
-                <button type="button" x-show="!tome1bQuiz.ch3.submitted" @click="submitTome1bQuizAnswer('ch3')" :disabled="tome1bQuiz.ch3.selected === null" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-black text-xs cursor-pointer">Valider ma réponse</button>
-                <button type="button" x-show="tome1bQuiz.ch3.submitted && tome1bQuiz.ch3.idx < getTome1bQuizQuestions('ch3').length - 1" @click="nextTome1bQuizQuestion('ch3')" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-black text-xs cursor-pointer">Question suivante ➔</button>
-                <button type="button" x-show="tome1bQuiz.ch3.submitted && tome1bQuiz.ch3.idx >= getTome1bQuizQuestions('ch3').length - 1" @click="resetTome1bQuiz('ch3')" class="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs cursor-pointer">↺ Recommencer le quizz</button>
+              <div class="flex flex-wrap gap-3 pt-2">
+                <button type="button" x-show="!tome1bQuiz.ch3.submitted" @click="submitTome1bQuizAnswer('ch3')" :disabled="tome1bQuiz.ch3.selected === null" class="min-h-[46px] px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-black text-xs sm:text-sm cursor-pointer touch-manipulation shadow-xs">✓ Valider ma réponse</button>
+                <button type="button" x-show="tome1bQuiz.ch3.submitted && tome1bQuiz.ch3.idx < getTome1bQuizQuestions('ch3').length - 1" @click="nextTome1bQuizQuestion('ch3')" class="min-h-[46px] px-6 py-3 rounded-xl bg-slate-900 text-white font-black text-xs sm:text-sm cursor-pointer touch-manipulation">Question suivante ➔</button>
+                <button type="button" x-show="tome1bQuiz.ch3.submitted && tome1bQuiz.ch3.idx >= getTome1bQuizQuestions('ch3').length - 1" @click="resetTome1bQuiz('ch3')" class="min-h-[46px] px-5 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs cursor-pointer touch-manipulation">↺ Recommencer le quizz</button>
               </div>
             </div>
           </template>
         </div>
 
         <!-- Mission 2 : Atelier Prompt 5 étapes Ch. 3 -->
-        <div x-show="activeFmttnMissionId === 'ch3-atelier-prompt'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-4">
+        <div x-show="activeFmttnMissionId === 'ch3-atelier-prompt'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-5">
           <h4 class="font-black text-lg text-slate-900">🎯 Atelier : Construis ton Prompt en 5 étapes</h4>
-          <p class="text-xs text-slate-600">Adapte chaque étape pour créer une consigne précise, responsable et sans données personnelles.</p>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">1. Rôle</label><input type="text" x-model="tome1bAtelier.ch3.role" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs" /></div>
-            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">2. Tâche</label><input type="text" x-model="tome1bAtelier.ch3.tache" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs" /></div>
-            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">3. Contexte</label><input type="text" x-model="tome1bAtelier.ch3.contexte" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs" /></div>
-            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">4. Format attendu</label><input type="text" x-model="tome1bAtelier.ch3.format" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs" /></div>
-            <div class="md:col-span-2"><label class="block text-xs font-extrabold text-slate-700 mb-1">5. Ajustement</label><input type="text" x-model="tome1bAtelier.ch3.ajustement" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs" /></div>
+          <div class="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs text-indigo-950 font-bold">
+            👉 Action : Complète ou adapte les 5 cases ci-dessous (sans jamais mettre de données personnelles !), puis clique sur « Valider mon Prompt » (+20 XP).
           </div>
-          <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs text-indigo-950">
-            <strong>Aperçu de ton prompt complet :</strong>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">1. Rôle</label><input type="text" x-model="tome1bAtelier.ch3.role" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" /></div>
+            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">2. Tâche</label><input type="text" x-model="tome1bAtelier.ch3.tache" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" /></div>
+            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">3. Contexte</label><input type="text" x-model="tome1bAtelier.ch3.contexte" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" /></div>
+            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">4. Format attendu</label><input type="text" x-model="tome1bAtelier.ch3.format" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" /></div>
+            <div class="md:col-span-2"><label class="block text-xs font-extrabold text-slate-700 mb-1">5. Ajustement</label><input type="text" x-model="tome1bAtelier.ch3.ajustement" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" /></div>
+          </div>
+          <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs sm:text-sm text-indigo-950">
+            <strong>💡 Aperçu de ton prompt complet :</strong>
             <p class="mt-1 italic" x-text="tome1bAtelier.ch3.role + '. ' + tome1bAtelier.ch3.tache + ' (' + tome1bAtelier.ch3.contexte + '). ' + tome1bAtelier.ch3.format + '. ' + tome1bAtelier.ch3.ajustement + '.'"></p>
           </div>
           <div x-show="tome1bAtelier.ch3.feedback" class="p-3.5 rounded-xl text-xs font-bold" :class="tome1bAtelier.ch3.validated ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'" x-text="tome1bAtelier.ch3.feedback"></div>
-          <button type="button" @click="validerTome1bAtelier('ch3')" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs cursor-pointer">Valider mon Prompt (+20 XP)</button>
+          <button type="button" @click="validerTome1bAtelier('ch3')" class="min-h-[46px] px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm cursor-pointer touch-manipulation shadow-xs">✓ Valider mon Prompt (+20 XP)</button>
         </div>
       </div>
     </div>
@@ -3209,53 +3234,51 @@
 
       <!-- 2. ATELIER & PRATIQUE CH. 4 -->
       <div x-show="activeTab === 'pratique'" class="space-y-6">
-        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-wrap gap-2">
-          <template x-for="m in getCurrentFmttnModuleMissions()" :key="m.id">
-            <button type="button" @click="selectFmttnMission(m.id, true)"
-              :class="activeFmttnMissionId === m.id ? 'bg-cyan-600 text-white border-cyan-600' : (m.status === 'valide' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-50 text-slate-700 border-slate-200')"
-              class="px-3.5 py-2 rounded-xl border text-xs font-extrabold transition cursor-pointer flex items-center gap-1.5">
-              <span x-text="m.status === 'valide' ? '✓' : m.num + '.'"></span>
-              <span x-text="m.shortTitle"></span>
-            </button>
-          </template>
-        </div>
-
         <!-- Mission 1 : Quizz Ch. 4 -->
         <div x-show="activeFmttnMissionId === 'ch4-quizz-donnees'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-5">
-          <div class="flex items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center justify-between gap-3">
             <h4 class="font-black text-lg text-slate-900">💾 Quizz @lt_X : Informations &amp; Données</h4>
-            <span class="px-3 py-1 rounded-full bg-cyan-100 text-cyan-800 text-xs font-black" x-text="'Question ' + (tome1bQuiz.ch4.idx + 1) + ' / ' + getTome1bQuizQuestions('ch4').length + ' • Score : ' + tome1bQuiz.ch4.score"></span>
+            <span class="px-3.5 py-1.5 rounded-full bg-cyan-100 text-cyan-800 text-xs font-black" x-text="'Question ' + (tome1bQuiz.ch4.idx + 1) + ' / ' + getTome1bQuizQuestions('ch4').length + ' • Score : ' + tome1bQuiz.ch4.score"></span>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-cyan-50/70 border border-cyan-200 text-xs text-cyan-950 font-bold">
+            👉 Action : Touche ou clique sur la bonne réponse, puis appuie sur « Valider ma réponse » (+10 XP).
           </div>
           <template x-if="getCurrentTome1bQuestion('ch4')">
             <div class="space-y-4">
-              <p class="font-bold text-slate-800 text-sm sm:text-base" x-text="getCurrentTome1bQuestion('ch4').question"></p>
-              <div class="space-y-2.5">
+              <p class="font-black text-slate-900 text-base sm:text-lg" x-text="getCurrentTome1bQuestion('ch4').question"></p>
+              <div class="space-y-3">
                 <template x-for="(opt, oIdx) in getCurrentTome1bQuestion('ch4').options" :key="oIdx">
                   <button type="button" @click="if(!tome1bQuiz.ch4.submitted) tome1bQuiz.ch4.selected = oIdx"
-                    :class="tome1bQuiz.ch4.submitted ? (oIdx === getCurrentTome1bQuestion('ch4').correctIndex ? 'bg-emerald-50 border-emerald-500 text-emerald-900' : (tome1bQuiz.ch4.selected === oIdx ? 'bg-rose-50 border-rose-400 text-rose-900' : 'bg-slate-50 border-slate-200 text-slate-500')) : (tome1bQuiz.ch4.selected === oIdx ? 'bg-cyan-50 border-cyan-500 text-cyan-950' : 'bg-white border-slate-200 hover:border-cyan-300 text-slate-800')"
-                    class="w-full text-left p-4 rounded-2xl border-2 text-xs sm:text-sm font-semibold transition cursor-pointer" x-text="opt"></button>
+                    :class="tome1bQuiz.ch4.submitted ? (oIdx === getCurrentTome1bQuestion('ch4').correctIndex ? 'bg-emerald-50 border-emerald-500 text-emerald-900' : (tome1bQuiz.ch4.selected === oIdx ? 'bg-rose-50 border-rose-400 text-rose-900' : 'bg-slate-50 border-slate-200 text-slate-500')) : (tome1bQuiz.ch4.selected === oIdx ? 'bg-cyan-50 border-cyan-500 text-cyan-950 ring-2 ring-cyan-500/20' : 'bg-white border-slate-200 hover:border-cyan-300 text-slate-800')"
+                    class="w-full min-h-[48px] text-left p-4 rounded-2xl border-2 text-xs sm:text-sm font-semibold transition cursor-pointer touch-manipulation flex items-center gap-3">
+                    <span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-black text-xs flex items-center justify-center shrink-0" x-text="['A','B','C','D'][oIdx] || (oIdx+1)"></span>
+                    <span x-text="opt"></span>
+                  </button>
                 </template>
               </div>
               <div x-show="tome1bQuiz.ch4.submitted" class="p-4 rounded-2xl border text-xs sm:text-sm" :class="tome1bQuiz.ch4.isCorrect ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'">
                 <strong x-text="tome1bQuiz.ch4.isCorrect ? '✅ Bonne réponse ! (+10 XP) ' : '💡 À retenir : '"></strong>
                 <span x-text="getCurrentTome1bQuestion('ch4').explanation"></span>
               </div>
-              <div class="flex flex-wrap gap-3">
-                <button type="button" x-show="!tome1bQuiz.ch4.submitted" @click="submitTome1bQuizAnswer('ch4')" :disabled="tome1bQuiz.ch4.selected === null" class="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 disabled:opacity-40 text-white font-black text-xs cursor-pointer">Valider ma réponse</button>
-                <button type="button" x-show="tome1bQuiz.ch4.submitted && tome1bQuiz.ch4.idx < getTome1bQuizQuestions('ch4').length - 1" @click="nextTome1bQuizQuestion('ch4')" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-black text-xs cursor-pointer">Question suivante ➔</button>
-                <button type="button" x-show="tome1bQuiz.ch4.submitted && tome1bQuiz.ch4.idx >= getTome1bQuizQuestions('ch4').length - 1" @click="resetTome1bQuiz('ch4')" class="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs cursor-pointer">↺ Recommencer le quizz</button>
+              <div class="flex flex-wrap gap-3 pt-2">
+                <button type="button" x-show="!tome1bQuiz.ch4.submitted" @click="submitTome1bQuizAnswer('ch4')" :disabled="tome1bQuiz.ch4.selected === null" class="min-h-[46px] px-6 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-700 disabled:opacity-40 text-white font-black text-xs sm:text-sm cursor-pointer touch-manipulation shadow-xs">✓ Valider ma réponse</button>
+                <button type="button" x-show="tome1bQuiz.ch4.submitted && tome1bQuiz.ch4.idx < getTome1bQuizQuestions('ch4').length - 1" @click="nextTome1bQuizQuestion('ch4')" class="min-h-[46px] px-6 py-3 rounded-xl bg-slate-900 text-white font-black text-xs sm:text-sm cursor-pointer touch-manipulation">Question suivante ➔</button>
+                <button type="button" x-show="tome1bQuiz.ch4.submitted && tome1bQuiz.ch4.idx >= getTome1bQuizQuestions('ch4').length - 1" @click="resetTome1bQuiz('ch4')" class="min-h-[46px] px-5 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs cursor-pointer touch-manipulation">↺ Recommencer le quizz</button>
               </div>
             </div>
           </template>
         </div>
 
         <!-- Mission 2 : Atelier Fichiers Ch. 4 -->
-        <div x-show="activeFmttnMissionId === 'ch4-atelier-fichiers'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-4">
+        <div x-show="activeFmttnMissionId === 'ch4-atelier-fichiers'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-5">
           <h4 class="font-black text-lg text-slate-900">📁 Atelier : Unités, Dossier propre &amp; Export</h4>
+          <div class="p-3.5 rounded-2xl bg-cyan-50/70 border border-cyan-200 text-xs text-cyan-950 font-bold">
+            👉 Action : Choisis les bonnes réponses aux 3 étapes puis clique sur « Valider l'atelier » (+20 XP).
+          </div>
           <div class="space-y-4">
             <div>
               <label class="block text-xs font-extrabold text-slate-700 mb-1">1. Ordre croissant des unités de stockage :</label>
-              <select x-model="tome1bAtelier.ch4.order" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs">
+              <select x-model="tome1bAtelier.ch4.order" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm">
                 <option value="To < Go < Mo < Ko < o">To &lt; Go &lt; Mo &lt; Ko &lt; o</option>
                 <option value="o < Ko < Mo < Go < To">o &lt; Ko &lt; Mo &lt; Go &lt; To</option>
                 <option value="o < Mo < Ko < Go < To">o &lt; Mo &lt; Ko &lt; Go &lt; To</option>
@@ -3263,7 +3286,7 @@
             </div>
             <div>
               <label class="block text-xs font-extrabold text-slate-700 mb-1">2. Format d'export idéal pour remettre un travail fini avec mise en page garantie :</label>
-              <select x-model="tome1bAtelier.ch4.exportFormat" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs">
+              <select x-model="tome1bAtelier.ch4.exportFormat" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm">
                 <option value=".pdf">.pdf (Portable Document Format)</option>
                 <option value=".mp3">.mp3 (Audio)</option>
                 <option value=".jpg">.jpg (Image)</option>
@@ -3271,11 +3294,11 @@
             </div>
             <div>
               <label class="block text-xs font-extrabold text-slate-700 mb-1">3. Propose un nom de dossier sans espace (utilise _) :</label>
-              <input type="text" x-model="tome1bAtelier.ch4.folderName" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs" />
+              <input type="text" x-model="tome1bAtelier.ch4.folderName" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" />
             </div>
           </div>
           <div x-show="tome1bAtelier.ch4.feedback" class="p-3.5 rounded-xl text-xs font-bold" :class="tome1bAtelier.ch4.validated ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'" x-text="tome1bAtelier.ch4.feedback"></div>
-          <button type="button" @click="validerTome1bAtelier('ch4')" class="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-black text-xs cursor-pointer">Valider l'atelier (+20 XP)</button>
+          <button type="button" @click="validerTome1bAtelier('ch4')" class="min-h-[46px] px-6 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-black text-xs sm:text-sm cursor-pointer touch-manipulation shadow-xs">✓ Valider l'atelier (+20 XP)</button>
         </div>
       </div>
     </div>
@@ -3401,53 +3424,51 @@
 
       <!-- 2. ATELIER & PRATIQUE CH. 5 -->
       <div x-show="activeTab === 'pratique'" class="space-y-6">
-        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-wrap gap-2">
-          <template x-for="m in getCurrentFmttnModuleMissions()" :key="m.id">
-            <button type="button" @click="selectFmttnMission(m.id, true)"
-              :class="activeFmttnMissionId === m.id ? 'bg-lime-600 text-white border-lime-600' : (m.status === 'valide' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-50 text-slate-700 border-slate-200')"
-              class="px-3.5 py-2 rounded-xl border text-xs font-extrabold transition cursor-pointer flex items-center gap-1.5">
-              <span x-text="m.status === 'valide' ? '✓' : m.num + '.'"></span>
-              <span x-text="m.shortTitle"></span>
-            </button>
-          </template>
-        </div>
-
         <!-- Mission 1 : Quizz Ch. 5 -->
         <div x-show="activeFmttnMissionId === 'ch5-quizz-creation'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-5">
-          <div class="flex items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center justify-between gap-3">
             <h4 class="font-black text-lg text-slate-900">📝 Quizz @lt_X : Création de Contenus &amp; Logigramme</h4>
-            <span class="px-3 py-1 rounded-full bg-lime-100 text-lime-800 text-xs font-black" x-text="'Question ' + (tome1bQuiz.ch5.idx + 1) + ' / ' + getTome1bQuizQuestions('ch5').length + ' • Score : ' + tome1bQuiz.ch5.score"></span>
+            <span class="px-3.5 py-1.5 rounded-full bg-lime-100 text-lime-800 text-xs font-black" x-text="'Question ' + (tome1bQuiz.ch5.idx + 1) + ' / ' + getTome1bQuizQuestions('ch5').length + ' • Score : ' + tome1bQuiz.ch5.score"></span>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-lime-50/70 border border-lime-200 text-xs text-lime-950 font-bold">
+            👉 Action : Touche ou clique sur la bonne réponse, puis appuie sur « Valider ma réponse » (+10 XP).
           </div>
           <template x-if="getCurrentTome1bQuestion('ch5')">
             <div class="space-y-4">
-              <p class="font-bold text-slate-800 text-sm sm:text-base" x-text="getCurrentTome1bQuestion('ch5').question"></p>
-              <div class="space-y-2.5">
+              <p class="font-black text-slate-900 text-base sm:text-lg" x-text="getCurrentTome1bQuestion('ch5').question"></p>
+              <div class="space-y-3">
                 <template x-for="(opt, oIdx) in getCurrentTome1bQuestion('ch5').options" :key="oIdx">
                   <button type="button" @click="if(!tome1bQuiz.ch5.submitted) tome1bQuiz.ch5.selected = oIdx"
-                    :class="tome1bQuiz.ch5.submitted ? (oIdx === getCurrentTome1bQuestion('ch5').correctIndex ? 'bg-emerald-50 border-emerald-500 text-emerald-900' : (tome1bQuiz.ch5.selected === oIdx ? 'bg-rose-50 border-rose-400 text-rose-900' : 'bg-slate-50 border-slate-200 text-slate-500')) : (tome1bQuiz.ch5.selected === oIdx ? 'bg-lime-50 border-lime-500 text-lime-950' : 'bg-white border-slate-200 hover:border-lime-300 text-slate-800')"
-                    class="w-full text-left p-4 rounded-2xl border-2 text-xs sm:text-sm font-semibold transition cursor-pointer" x-text="opt"></button>
+                    :class="tome1bQuiz.ch5.submitted ? (oIdx === getCurrentTome1bQuestion('ch5').correctIndex ? 'bg-emerald-50 border-emerald-500 text-emerald-900' : (tome1bQuiz.ch5.selected === oIdx ? 'bg-rose-50 border-rose-400 text-rose-900' : 'bg-slate-50 border-slate-200 text-slate-500')) : (tome1bQuiz.ch5.selected === oIdx ? 'bg-lime-50 border-lime-500 text-lime-950 ring-2 ring-lime-500/20' : 'bg-white border-slate-200 hover:border-lime-300 text-slate-800')"
+                    class="w-full min-h-[48px] text-left p-4 rounded-2xl border-2 text-xs sm:text-sm font-semibold transition cursor-pointer touch-manipulation flex items-center gap-3">
+                    <span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-black text-xs flex items-center justify-center shrink-0" x-text="['A','B','C','D'][oIdx] || (oIdx+1)"></span>
+                    <span x-text="opt"></span>
+                  </button>
                 </template>
               </div>
               <div x-show="tome1bQuiz.ch5.submitted" class="p-4 rounded-2xl border text-xs sm:text-sm" :class="tome1bQuiz.ch5.isCorrect ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'">
                 <strong x-text="tome1bQuiz.ch5.isCorrect ? '✅ Bonne réponse ! (+10 XP) ' : '💡 À retenir : '"></strong>
                 <span x-text="getCurrentTome1bQuestion('ch5').explanation"></span>
               </div>
-              <div class="flex flex-wrap gap-3">
-                <button type="button" x-show="!tome1bQuiz.ch5.submitted" @click="submitTome1bQuizAnswer('ch5')" :disabled="tome1bQuiz.ch5.selected === null" class="px-5 py-2.5 rounded-xl bg-lime-600 hover:bg-lime-700 disabled:opacity-40 text-white font-black text-xs cursor-pointer">Valider ma réponse</button>
-                <button type="button" x-show="tome1bQuiz.ch5.submitted && tome1bQuiz.ch5.idx < getTome1bQuizQuestions('ch5').length - 1" @click="nextTome1bQuizQuestion('ch5')" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-black text-xs cursor-pointer">Question suivante ➔</button>
-                <button type="button" x-show="tome1bQuiz.ch5.submitted && tome1bQuiz.ch5.idx >= getTome1bQuizQuestions('ch5').length - 1" @click="resetTome1bQuiz('ch5')" class="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs cursor-pointer">↺ Recommencer le quizz</button>
+              <div class="flex flex-wrap gap-3 pt-2">
+                <button type="button" x-show="!tome1bQuiz.ch5.submitted" @click="submitTome1bQuizAnswer('ch5')" :disabled="tome1bQuiz.ch5.selected === null" class="min-h-[46px] px-6 py-3 rounded-xl bg-lime-600 hover:bg-lime-700 disabled:opacity-40 text-white font-black text-xs sm:text-sm cursor-pointer touch-manipulation shadow-xs">✓ Valider ma réponse</button>
+                <button type="button" x-show="tome1bQuiz.ch5.submitted && tome1bQuiz.ch5.idx < getTome1bQuizQuestions('ch5').length - 1" @click="nextTome1bQuizQuestion('ch5')" class="min-h-[46px] px-6 py-3 rounded-xl bg-slate-900 text-white font-black text-xs sm:text-sm cursor-pointer touch-manipulation">Question suivante ➔</button>
+                <button type="button" x-show="tome1bQuiz.ch5.submitted && tome1bQuiz.ch5.idx >= getTome1bQuizQuestions('ch5').length - 1" @click="resetTome1bQuiz('ch5')" class="min-h-[46px] px-5 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs cursor-pointer touch-manipulation">↺ Recommencer le quizz</button>
               </div>
             </div>
           </template>
         </div>
 
         <!-- Mission 2 : Atelier Logigramme & Scratch Ch. 5 -->
-        <div x-show="activeFmttnMissionId === 'ch5-atelier-algo'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-4">
+        <div x-show="activeFmttnMissionId === 'ch5-atelier-algo'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-5">
           <h4 class="font-black text-lg text-slate-900">🔀 Atelier : Logigramme, Culture numérique &amp; Scratch</h4>
+          <div class="p-3.5 rounded-2xl bg-lime-50/70 border border-lime-200 text-xs text-lime-950 font-bold">
+            👉 Action : Complète les 3 défis ci-dessous puis appuie sur « Valider l'atelier » (+20 XP).
+          </div>
           <div class="space-y-4">
             <div>
               <label class="block text-xs font-extrabold text-slate-700 mb-1">1. Forme utilisée pour une condition (Oui/Non) dans un logigramme :</label>
-              <select x-model="tome1bAtelier.ch5.logigrammeCondition" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs">
+              <select x-model="tome1bAtelier.ch5.logigrammeCondition" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm">
                 <option value="Ovale">Ovale</option>
                 <option value="Rectangle à coins arrondis">Rectangle à coins arrondis</option>
                 <option value="Losange">Losange</option>
@@ -3455,18 +3476,18 @@
             </div>
             <div>
               <label class="block text-xs font-extrabold text-slate-700 mb-1">2. Partager de bonne foi une fausse astuce santé lue en ligne sans vouloir tromper :</label>
-              <select x-model="tome1bAtelier.ch5.fakeNewsType" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs">
+              <select x-model="tome1bAtelier.ch5.fakeNewsType" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm">
                 <option value="mesinformation">Mésinformation</option>
                 <option value="desinformation">Désinformation</option>
               </select>
             </div>
             <div>
               <label class="block text-xs font-extrabold text-slate-700 mb-1">3. Angle de rotation Scratch (en degrés) pour tracer un triangle équilatéral (360° ÷ 3) :</label>
-              <input type="text" x-model="tome1bAtelier.ch5.scratchAngle" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs" />
+              <input type="text" x-model="tome1bAtelier.ch5.scratchAngle" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" />
             </div>
           </div>
           <div x-show="tome1bAtelier.ch5.feedback" class="p-3.5 rounded-xl text-xs font-bold" :class="tome1bAtelier.ch5.validated ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'" x-text="tome1bAtelier.ch5.feedback"></div>
-          <button type="button" @click="validerTome1bAtelier('ch5')" class="px-5 py-2.5 rounded-xl bg-lime-600 hover:bg-lime-700 text-white font-black text-xs cursor-pointer">Valider l'atelier (+20 XP)</button>
+          <button type="button" @click="validerTome1bAtelier('ch5')" class="min-h-[46px] px-6 py-3 rounded-xl bg-lime-600 hover:bg-lime-700 text-white font-black text-xs sm:text-sm cursor-pointer touch-manipulation shadow-xs">✓ Valider l'atelier (+20 XP)</button>
         </div>
       </div>
     </div>
