@@ -99,7 +99,9 @@ export function createCourseStore() {
 
       const targetYear = course.targetYear || courseManagerV2.inferCourseTargetYear(course);
       if (targetYear === 'all') return true;
-      return targetYear === this.getStudentYearLevel();
+      const stYear = this.getStudentYearLevel();
+      if (stYear === 'none') return false;
+      return targetYear === stYear;
     },
 
     getStudentAccessibleCourses() {

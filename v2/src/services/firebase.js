@@ -628,6 +628,7 @@ export function resolveBestStudentClass(classA = "", classB = "", fromClassroomA
 
 export function getYearLevelFromClass(classe = "") {
   const cl = String(classe || "").toUpperCase().trim();
+  if (!cl || cl === "0") return "none";
   if (cl.startsWith("3")) return "3e";
   if (cl.startsWith("2")) return "2e";
   return "1re";
