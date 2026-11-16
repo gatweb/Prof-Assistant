@@ -73,3 +73,4 @@ ProfAssistant est une plateforme EdTech légère conçue pour les **PC scolaires
   - **3e année** (`3GA`, `3GB`, `3GC`, `3GD`) : accès exclusif à `Dactylographie & Clavier Pro (3e)` et `Bureautique & Google Workspace (3e)`.
   - **1re année** (`S1-A`) : accès exclusif à `Numérique FMTTN 1re (@lt_X)`.
   - **Classe `0`** : anciens comptes / non-inscrits / `QUIT` (aucun cours débloqué).
+

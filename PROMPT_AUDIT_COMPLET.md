@@ -38,3 +38,4 @@ Analyse obligatoirement les **3 axes suivants** :
 3. **Top 5 des améliorations rapides (« Quick Wins »)** à fort impact pédagogique ou ludique.
 4. **Plan d'action priorisé** (Correctifs P0 → P1 → P2) prêt à être exécuté.
 ```
+
