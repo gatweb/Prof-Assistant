@@ -888,7 +888,17 @@ export function createTeacherStore() {
       if (!urlMatch) return null;
       const url = urlMatch[0];
 
-      if (url.includes('docs.google.com/') || url.includes('drive.google.com/')) {
+      // Vérifier le VRAI nom d'hôte : `https://pirate.example/docs.google.com/` ne doit pas
+      // pouvoir s'afficher dans l'espace professeur.
+      let host = '';
+      try {
+        const parsed = new URL(url);
+        if (parsed.protocol !== 'https:') return null;
+        host = parsed.hostname.toLowerCase();
+      } catch (_) {
+        return null;
+      }
+      if (host === 'docs.google.com' || host === 'drive.google.com') {
         return url
           .replace(/\/edit(\?.*)?$/, '/preview')
           .replace(/\/view(\?.*)?$/, '/preview');
@@ -967,7 +977,9 @@ export function createTeacherStore() {
     getBatchEligibleSubmissions() {
       return this.getFilteredSubmissions().filter(sub => {
         const isPending = sub.status === 'a_valider' || sub.status === 'pending';
-        const scoreOk = Number(sub.note_suggeree || 0) >= 80;
+        // Seules les copies réellement évaluées par l'IA côté serveur (marqueur posé par la
+        // Cloud Function, impossible à créer côté élève) sont éligibles à la validation par lot.
+        const scoreOk = sub.ia_evaluated === true && Number(sub.note_suggeree || 0) >= 80;
         const noErrors = !Array.isArray(sub.erreurs_detectees) || sub.erreurs_detectees.length === 0;
         return isPending && scoreOk && noErrors;
       });

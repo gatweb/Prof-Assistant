@@ -8,15 +8,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>body{font-family:Plus Jakarta Sans,sans-serif}</style>
-  <script type="module" crossorigin src="/assets/index-CMRn8sUJ.js"></script>
+  <script type="module" crossorigin src="/assets/index-1G2Qwoi-.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/vendor-alpine-BZYLEBjp.js">
   <link rel="modulepreload" crossorigin href="/assets/vendor-firestore-BMWSATj-.js">
   <link rel="modulepreload" crossorigin href="/assets/vendor-firebase-Bnv8VXuf.js">
   <link rel="modulepreload" crossorigin href="/assets/vendor-markdown-Of0D6mTi.js">
-  <link rel="modulepreload" crossorigin href="/assets/workspace-teacher-D1A-Cb7N.js">
+  <link rel="modulepreload" crossorigin href="/assets/workspace-teacher-CtUNQK9u.js">
   <link rel="modulepreload" crossorigin href="/assets/vendor-katex-CjWbGmc8.js">
   <link rel="modulepreload" crossorigin href="/assets/data-fmttn-eCVxcPhh.js">
-  <link rel="stylesheet" crossorigin href="/assets/index-Dbry-buP.css">
+  <link rel="stylesheet" crossorigin href="/assets/index-DnloxKVI.css">
 </head>
 <body class="h-full flex flex-col bg-slate-50 text-slate-800" x-data="profAssistantApp()">
 
@@ -41,7 +41,7 @@
               :class="studentViewMode === 'hub' && activeTab !== 'prof' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'"
               class="text-xs font-extrabold px-2.5 py-1 border rounded-xl transition cursor-pointer flex items-center gap-1.5 shrink-0">
               <span>🏠</span>
-              <span>Mes cours (<span x-text="getStudentYearLevel()"></span>)</span>
+              <span>Mes cours (<span x-text="getStudentYearLevel() === 'none' ? 'aucun accès' : getStudentYearLevel()"></span>)</span>
             </button>
             <button
               type="button"
@@ -95,9 +95,11 @@
 
             <!-- Sélecteur de classe élève -->
             <button 
-              @click="modalClassChoiceOpen = true"
-              class="px-2 py-1 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 rounded-lg text-xs font-black transition cursor-pointer flex items-center gap-1"
-              :title="classroomDetectedClass ? 'Classe détectée automatiquement via Google Classroom' : 'Changer de classe'">
+              @click="if (!officialClasseLocked) modalClassChoiceOpen = true"
+              :disabled="officialClasseLocked"
+              :class="officialClasseLocked ? 'cursor-default' : 'hover:bg-blue-100 cursor-pointer'"
+              class="px-2 py-1 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-xs font-black transition flex items-center gap-1"
+              :title="officialClasseLocked ? 'Classe attribuée par ton professeur' : (classroomDetectedClass ? 'Classe détectée automatiquement via Google Classroom' : 'Changer de classe')">
               <span x-show="classroomDetectedClass" class="text-[10px]" title="Détectée automatiquement via Google Classroom">✨</span>
               <span x-text="'Classe ' + (user.classe || '1A')"></span>
               <span class="text-[10px]">▾</span>
@@ -4102,7 +4104,7 @@
               <!-- Iframe Sandbox -->
               <iframe 
                 :srcdoc="codingPreviewSrcDoc"
-                sandbox="allow-scripts allow-modals allow-same-origin"
+                sandbox="allow-scripts allow-modals"
                 class="w-full h-80 bg-white border-0"></iframe>
             </div>
 
@@ -7410,7 +7412,7 @@
                   <div class="text-[11px] font-bold text-slate-500">Rendu du code exécuté :</div>
                   <iframe
                     :srcdoc="getSpeedGraderCodeSrcDoc(selectedSubmission)"
-                    sandbox="allow-scripts allow-same-origin"
+                    sandbox="allow-scripts"
                     class="w-full h-64 rounded-xl border border-slate-200 bg-white"></iframe>
                   <pre class="bg-slate-900 text-slate-100 p-3 rounded-xl text-[11px] font-mono overflow-x-auto max-h-48 leading-relaxed" x-text="selectedSubmission?.code_eleve"></pre>
                 </div>
@@ -7439,7 +7441,7 @@
                 <span class="text-xs font-black uppercase tracking-wider text-purple-900">Diagnostic IA Gemini</span>
               </div>
               <div class="flex items-center gap-1.5">
-                <span class="px-2.5 py-0.5 rounded-full bg-purple-600 text-white text-xs font-black" x-text="(selectedSubmission?.note_suggeree || 80) + '/100'"></span>
+                <span class="px-2.5 py-0.5 rounded-full bg-purple-600 text-white text-xs font-black" x-text="selectedSubmission?.note_suggeree !== undefined && selectedSubmission?.note_suggeree !== null ? selectedSubmission.note_suggeree + '/100' : 'Non évaluée par l\'IA'"></span>
                 <button 
                   @click="gradingNote = selectedSubmission?.note_suggeree || 80"
                   class="text-[11px] underline font-bold text-purple-700 hover:text-purple-900 cursor-pointer">
@@ -7581,6 +7583,27 @@
     </div>
   </div>
   <!-- Fin Espace Principal de Travail -->
+
+  <!-- 🚫 ÉCRAN CLASSE « 0 » : compte non rattaché à une classe active (aucun cours) -->
+  <div
+    x-show="isStudentClassZeroBlocked()"
+    class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-50"
+    x-cloak>
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-xl border border-slate-200 text-center space-y-4">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-50 text-3xl flex items-center justify-center">🔒</div>
+      <h3 class="text-xl font-black text-slate-900">Aucun cours disponible</h3>
+      <p class="text-sm text-slate-600 leading-relaxed">
+        Ton compte <strong x-text="user.email"></strong> n'est rattaché à aucune classe cette année.
+        Tes points sont conservés. Demande à ton professeur de t'inscrire dans ta classe.
+      </p>
+      <button
+        type="button"
+        @click="deconnexionUtilisateur()"
+        class="min-h-[44px] px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-extrabold cursor-pointer touch-manipulation">
+        Se déconnecter
+      </button>
+    </div>
+  </div>
 
   <!-- 🏷️ MODALE CHOIX DE CLASSE ÉLÈVE (1RE CONNEXION OU CHANGEMENT) -->
   <div 
@@ -8129,12 +8152,12 @@
           Ce cours est prévu pour les élèves de <strong class="text-indigo-700" x-text="pendingLockedCourse?.targetYear || 'ce niveau'"></strong>, alors que ton profil indique actuellement la classe <strong class="text-slate-900" x-text="user.classe || '1A'"></strong>.
         </p>
         <p>
-          Si tu t'es trompé(e) de classe, change simplement ta classe ci-dessous. Sinon, entre le <strong>code d'accès du cours</strong> donné par ton professeur :
+          <span x-show="!officialClasseLocked">Si tu t'es trompé(e) de classe, change simplement ta classe ci-dessous. Sinon, entre</span><span x-show="officialClasseLocked">Entre</span> le <strong>code d'accès du cours</strong> donné par ton professeur :
         </p>
       </div>
 
       <!-- Raccourci rapide si l'élève n'avait pas choisi la bonne classe (ex: élève de 3e resté sur 1A) -->
-      <div class="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-2">
+      <div x-show="!officialClasseLocked" class="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-2">
         <div class="text-[11px] font-extrabold text-blue-950">
           🏫 Tu es dans une autre classe ? Choisis ta vraie classe pour débloquer automatiquement tes cours :
         </div>

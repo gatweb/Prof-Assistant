@@ -191,6 +191,8 @@ export function createTutorStore() {
         let errMsg = "Le tuteur est très sollicité, réessaie dans 10 s.";
         if (code.includes('resource-exhausted') && err?.message?.includes('heure')) {
           errMsg = err.message;
+        } else if (code.includes('permission-denied') && err?.message) {
+          errMsg = err.message;
         } else if (code.includes('unauthenticated')) {
           errMsg = "Session expirée. Recharge la page pour te reconnecter.";
         } else if (code.includes('invalid-argument') && err?.message) {

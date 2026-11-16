@@ -1,6 +1,6 @@
 import { marked } from 'marked';
 import { courseManagerV2, DEFAULT_EXERCISES_BY_COURSE } from '../services/courseManager.js';
-import { soumettreDevoirCloud } from '../services/firebase.js';
+import { soumettreDevoirCloud, getYearLevelFromClass } from '../services/firebase.js';
 import { renderMarkdownWithKatex } from './multiSubjects.js';
 
 export function createCourseStore() {
@@ -76,16 +76,23 @@ export function createCourseStore() {
     courseAccessCodeInput: '',
     courseAccessCodeError: '',
 
+    // Source unique de vérité : getYearLevelFromClass (classe « 0 » => 'none', aucun cours).
     getStudentYearLevel() {
-      const cl = String(this.user?.classe || '1A').toUpperCase().trim();
-      if (cl.startsWith('3')) return '3e';
-      if (cl.startsWith('2')) return '2e';
-      return '1re';
+      return getYearLevelFromClass(this.user?.classe || '1A');
+    },
+
+    /** Élève connecté rattaché à la classe « 0 » (ancien compte / non inscrit) : aucun accès. */
+    isStudentClassZeroBlocked() {
+      if (this.teacherAuth?.isTeacher || this.isGuestMode) return false;
+      if (!this.isLoggedIn || !this.progressionLoaded) return false;
+      return this.getStudentYearLevel() === 'none';
     },
 
     isCourseUnlockedForStudent(course) {
       if (!course) return false;
       if (this.teacherAuth?.isTeacher) return true;
+      // Classe « 0 » : aucun cours, quels que soient les codes saisis ou le localStorage.
+      if (this.getStudentYearLevel() === 'none') return false;
       if ((this.unlockedCourseIds || []).includes(course.id)) return true;
 
       const cl = String(this.user?.classe || '1A').toUpperCase().trim();
@@ -99,9 +106,7 @@ export function createCourseStore() {
 
       const targetYear = course.targetYear || courseManagerV2.inferCourseTargetYear(course);
       if (targetYear === 'all') return true;
-      const stYear = this.getStudentYearLevel();
-      if (stYear === 'none') return false;
-      return targetYear === stYear;
+      return targetYear === this.getStudentYearLevel();
     },
 
     getStudentAccessibleCourses() {
@@ -115,6 +120,11 @@ export function createCourseStore() {
       if (this.currentCourse && this.isCourseUnlockedForStudent(this.currentCourse)) return;
 
       const studentYear = this.getStudentYearLevel();
+      if (studentYear === 'none') {
+        // Classe « 0 » : aucun cours à ouvrir (un écran dédié informe l'élève).
+        this.studentViewMode = 'hub';
+        return;
+      }
       let preferred = null;
       if (studentYear === '3e') {
         preferred = this.coursesList.find(c => c.id === 'bureautique-3e')
@@ -146,6 +156,10 @@ export function createCourseStore() {
 
     async validerCodeAccesCours() {
       const code = String(this.courseAccessCodeInput || '').toUpperCase().trim();
+      if (this.getStudentYearLevel() === 'none' && !this.teacherAuth?.isTeacher) {
+        this.courseAccessCodeError = "Ton compte n'est rattaché à aucune classe. Adresse-toi à ton professeur.";
+        return;
+      }
       if (!code) {
         this.courseAccessCodeError = "Veuillez entrer le code d'accès communiqué par votre professeur.";
         return;
@@ -154,7 +168,7 @@ export function createCourseStore() {
       let matchedCourse = null;
       if (this.pendingLockedCourse) {
         const expected = (this.pendingLockedCourse.accessCode || courseManagerV2.inferCourseAccessCode(this.pendingLockedCourse)).toUpperCase();
-        if (code === expected || code === 'PROF2026') {
+        if (code === expected) {
           matchedCourse = this.pendingLockedCourse;
         }
       } else {
@@ -164,7 +178,7 @@ export function createCourseStore() {
       }
 
       if (!matchedCourse) {
-        this.courseAccessCodeError = "Code d'accès invalide. Vérifiez le code auprès de votre professeur (ex: FMTTN1, BUREAU3, CODE3).";
+        this.courseAccessCodeError = "Code d'accès invalide. Vérifie le code auprès de ton professeur.";
         return;
       }
 
@@ -1025,9 +1039,9 @@ export function createCourseStore() {
             hints_used: this.studentHintsUsedCount || 0
           }
         });
-        const note = res?.evaluation?.note_suggeree || 85;
+        const note = res?.evaluation?.note_suggeree ?? null;
         const fb = res?.evaluation?.feedback_eleve || "Ton code a été analysé avec succès ! Bien joué pour la structure.";
-        this.codingFeedback = `✅ ${fb} (Note suggérée : ${note}/100 • Autonomie : ${autonomyScore}%)`;
+        this.codingFeedback = `✅ ${fb} (${note !== null ? 'Note suggérée : ' + note + '/100' : 'Note : en attente de ton professeur'} • Autonomie : ${autonomyScore}%)`;
         this.codingScore = note;
         if (!res?.rateLimited && !res?.alreadyValidated && typeof this.attribuerXpUnique === 'function') {
           this.attribuerXpUnique(`exo:${exId}`, 30, this.currentExercise?.titre || 'Mission Code');

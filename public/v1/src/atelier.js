@@ -2866,7 +2866,10 @@ async function showQuizzCompletion() {
             titre_exercice: currentExercice.titre || "Quizz",
             email_eleve: userEmail,
             nom_eleve: userEmail.split('@')[0],
-            status: "valide",
+            // Les règles Firestore n'acceptent plus qu'un élève crée une copie déjà « valide » :
+            // le quizz arrive en attente et le professeur le valide.
+            status: "a_valider",
+            type: "quizz",
             feedback_ia: `L'élève a complété le quizz et obtenu le score de ${quizzState.score}/${total} (${finalPct}%).`,
             note_suggeree: finalPct,
             date_soumission: new Date().toISOString(),

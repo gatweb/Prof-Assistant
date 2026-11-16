@@ -7,7 +7,8 @@ rules_version = '2';
 //  - Les Cloud Functions (Admin SDK) contournent ces règles : corrigerDevoir,
 //    interrogerTuteur, etc. ne sont pas concernées.
 //  - Un élève Google (V1) ne lit/écrit que SES documents (clé = email).
-//  - Un élève anonyme (V2) ne lit/écrit que SA progression (clé = uid).
+//  - Un élève Google (V2) ne lit/écrit que SA progression (propriété = email vérifié),
+//    sans pouvoir toucher aux champs réservés au professeur.
 //  - Tout le reste est réservé aux enseignants.
 //  - Tests : tests/firestore/rules.test.mjs
 // =====================================================================
@@ -98,8 +99,15 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      // Un élève Google peut lire sa propre fiche (clé = email en V1)
-      allow read: if isTeacher() || (isGoogleUser() && userId.lower() == myEmail());
+      // Un élève Google peut lire sa propre fiche :
+      //  - clé = email (V1), ou
+      //  - fiche V2 `st_<email>` dont le champ `email` est le sien (classe officielle).
+      // `resource == null` : lecture d'une fiche inexistante, sans fuite de données.
+      allow read: if isTeacher()
+        || (isGoogleUser() && (
+             userId.lower() == myEmail()
+             || resource == null
+             || resource.data.get('email', '') == myEmail()));
       allow write: if isTeacher();
     }
 
@@ -142,10 +150,13 @@ service cloud.firestore {
     match /submissions/{subId} {
       allow read: if isTeacher() || ownsSubmission(resource.data);
 
-      // Un élève ne peut créer qu'une copie à son nom, jamais déjà « publiée ».
+      // Un élève ne peut créer qu'une copie à son nom, en attente de validation :
+      // jamais déjà validée/publiée, jamais avec une note prof ni le marqueur
+      // `ia_evaluated` (posé uniquement par la Cloud Function corrigerDevoir).
       allow create: if isTeacher()
         || (ownsSubmission(request.resource.data)
-            && request.resource.data.get('status', '') != 'publie');
+            && request.resource.data.get('status', 'brouillon') in ['brouillon', 'a_valider', 'pending']
+            && !request.resource.data.keys().hasAny(['note', 'prof_message', 'ia_evaluated']));
 
       // L'élève ne peut mettre à jour que les compteurs d'autonomie / d'indices.
       allow update: if isTeacher()
@@ -164,22 +175,63 @@ service cloud.firestore {
       allow read, update, delete: if isTeacher();
     }
 
-    // ---------- V2 : progression FMTTN (clé = classe_eleveId) ----------
+    // ---------- V2 : progression élève (clé = <classe>_<email assaini>) ----------
+    // Propriété = adresse e-mail Google vérifiée (plus de reprise des documents sans `uid`,
+    // plus d'écriture par les sessions anonymes : le mode invité reste 100 % local).
+    function myProgressionKey() {
+      return myEmail().replace('[^a-zA-Z0-9_-]', '_');
+    }
+
+    function isMyProgressionId(docId) {
+      return docId.matches('^[A-Za-z0-9-]+_' + myProgressionKey() + '$');
+    }
+
+    function ownsProgression(docId, data) {
+      return isGoogleUser() && (
+        data.get('eleve_email', '') == myEmail()
+        || (data.get('eleve_email', '') == '' && isMyProgressionId(docId))
+      );
+    }
+
+    // Champs réservés au professeur : jamais créés ni modifiés par l'élève.
+    function teacherOnlyProgressionKeys() {
+      return ['manual_completed_courses', 'manual_completed_exos',
+              'xp_teacher_override', 'xp_teacher_override_at',
+              'bulletin_appreciation', 'bulletin_custom_note20', 'bulletin_updated_at',
+              'archived', 'status', 'school_year'];
+    }
+
+    function validXp(data) {
+      return data.get('xp', 0) is number && data.get('xp', 0) >= 0 && data.get('xp', 0) <= 100000;
+    }
+
     match /progressions_v2/{docId} {
       allow read: if isTeacher()
-        || (signedIn() && (resource == null || resource.data.get('uid', '') == request.auth.uid));
+        || (signedIn() && resource == null)
+        || (signedIn() && resource.data.get('uid', '') == request.auth.uid)
+        || (isGoogleUser() && resource.data.get('eleve_email', '') == myEmail());
 
       allow create: if isTeacher()
-        || (signedIn() && request.resource.data.uid == request.auth.uid);
-
-      // L'élève met à jour sa propre progression. Les anciens documents sans `uid`
-      // (créés avant ce correctif) sont rattachés à la session au 1er enregistrement :
-      // leur clé aléatoire n'est pas énumérable (lecture interdite aux autres).
-      allow update: if isTeacher()
-        || (signedIn()
+        || (isGoogleUser()
+            && isMyProgressionId(docId)
             && request.resource.data.uid == request.auth.uid
-            && (resource.data.get('uid', null) == request.auth.uid
-                || !('uid' in resource.data)));
+            && request.resource.data.eleve_email == myEmail()
+            && validXp(request.resource.data)
+            && !request.resource.data.keys().hasAny(teacherOnlyProgressionKeys()));
+
+      // L'élève met à jour SA progression, sans toucher aux champs prof,
+      // sans jamais faire baisser ses XP ni retirer une activité déjà récompensée
+      // (protège aussi contre l'écrasement par un appareil non synchronisé).
+      allow update: if isTeacher()
+        || (ownsProgression(docId, resource.data)
+            && request.resource.data.eleve_email == myEmail()
+            && validXp(request.resource.data)
+            && !request.resource.data.diff(resource.data).affectedKeys().hasAny(teacherOnlyProgressionKeys())
+            && (!(resource.data.get('xp', 0) is number)
+                || request.resource.data.get('xp', 0) >= resource.data.get('xp', 0))
+            && (!(resource.data.get('rewarded_activities', []) is list)
+                || request.resource.data.get('rewarded_activities', [])
+                     .hasAll(resource.data.get('rewarded_activities', []))));
 
       allow delete: if isTeacher();
     }

@@ -33,6 +33,9 @@ export function createAuthStore() {
     loginError: '',
     modalClassChoiceOpen: false,
     classroomDetectedClass: null,
+    // true dès que la classe vient de la fiche officielle `users` (gérée par le professeur) :
+    // l'élève ne peut alors plus la modifier lui-même.
+    officialClasseLocked: false,
     studentSubmissionsHistory: [],
     studentTutorCallsCount: 0,
     studentHintsUsedCount: 0,
@@ -225,6 +228,15 @@ export function createAuthStore() {
         this.unsubscribeOwnProgression = null;
       }
       this.progressionLoaded = false;
+      this.officialClasseLocked = false;
+      this.classroomDetectedClass = null;
+      // Poste partagé : la classe et les cours débloqués du précédent élève ne doivent pas
+      // être hérités par le suivant.
+      try {
+        localStorage.removeItem('profassistant_student_classe');
+        localStorage.removeItem('profassistant_unlocked_courses');
+      } catch (_) {}
+      if (Array.isArray(this.unlockedCourseIds)) this.unlockedCourseIds = [];
       await deconnexionGlobale();
       this.isLoggedIn = false;
       this.isGuestMode = false;
@@ -252,9 +264,17 @@ export function createAuthStore() {
       this.user.classe = '1A';
       this.user.email = 'invite@demo.local';
       initStudentSession();
+      // Un lien profond (?course=) ne doit pas ouvrir un cours d'une autre année en mode invité.
+      if (typeof this.verifierEtOrienterCoursSelonClasseEleve === 'function') {
+        this.verifierEtOrienterCoursSelonClasseEleve();
+      }
     },
 
     async choisirClasseEleve(c) {
+      if (this.officialClasseLocked) {
+        this.modalClassChoiceOpen = false;
+        return;
+      }
       this.user.classe = c;
       localStorage.setItem('profassistant_student_classe', c);
       this.modalClassChoiceOpen = false;
@@ -292,10 +312,11 @@ export function createAuthStore() {
             localStorage.setItem('profassistant_student_classe', data.officialClasse);
             this.modalClassChoiceOpen = false;
           }
+          this.officialClasseLocked = Boolean(data.officialFromUsers);
           if (data.progression) {
             const p = data.progression;
             hasTeacherOverride = Boolean(p.xp_teacher_override);
-            if (p.classe_id && !data.officialClasse) {
+            if (p.classe_id && !data.officialFromUsers && !data.officialClasse) {
               this.user.classe = p.classe_id;
               localStorage.setItem('profassistant_student_classe', p.classe_id);
             }
@@ -519,7 +540,7 @@ export function createAuthStore() {
 
     updateStudentProfile(newNom, newClasse) {
       if (newNom) this.user.nom = newNom.trim();
-      if (newClasse) {
+      if (newClasse && !this.officialClasseLocked) {
         this.user.classe = newClasse;
         localStorage.setItem('profassistant_student_classe', newClasse);
       }

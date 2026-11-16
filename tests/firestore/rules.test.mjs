@@ -95,7 +95,16 @@ test('V1 élève : ne lit PAS les soumissions des autres', async () => {
 });
 
 test('V1 élève : crée une soumission de quiz à son nom', async () => {
-  await assertSucceeds(addDoc(collection(alice(), 'submissions'), { email_eleve: 'alice@eleve.be', status: 'valide' }));
+  await assertSucceeds(addDoc(collection(alice(), 'submissions'), { email_eleve: 'alice@eleve.be', status: 'a_valider', note_suggeree: 80 }));
+});
+
+test('P0 élève : ne crée PAS une copie déjà validée, notée par le prof ou marquée « évaluée par l\'IA »', async () => {
+  const db = alice();
+  await assertFails(addDoc(collection(db, 'submissions'), { email_eleve: 'alice@eleve.be', status: 'valide', note_suggeree: 100 }));
+  await assertFails(addDoc(collection(db, 'submissions'), { email_eleve: 'alice@eleve.be', status: 'validee' }));
+  await assertFails(addDoc(collection(db, 'submissions'), { email_eleve: 'alice@eleve.be', status: 'a_valider', note: 100 }));
+  await assertFails(addDoc(collection(db, 'submissions'), { email_eleve: 'alice@eleve.be', status: 'a_valider', prof_message: 'Bravo' }));
+  await assertFails(addDoc(collection(db, 'submissions'), { email_eleve: 'alice@eleve.be', status: 'a_valider', note_suggeree: 100, ia_evaluated: true }));
 });
 
 test('V1 élève : ne crée pas de soumission au nom d\'un autre ni « publiée »', async () => {
@@ -139,23 +148,98 @@ test('V1 élève : lit sa fiche mais pas l\'annuaire ni la config en écriture',
   await assertFails(setDoc(doc(alice(), 'config/settings'), { activeCourses: [] }));
 });
 
-// =========================== V2 : élève anonyme ===========================
-test('V2 élève anonyme : crée et met à jour SA progression', async () => {
-  const db = anon('anon-2');
-  await assertSucceeds(setDoc(doc(db, 'progressions_v2/1B_el_new'), { uid: 'anon-2', classe_id: '1B', xp: 0 }, { merge: true }));
-  await assertSucceeds(setDoc(doc(db, 'progressions_v2/1B_el_new'), { uid: 'anon-2', xp: 50 }, { merge: true }));
+// =========================== V2 : progression élève (P0) ===========================
+const ALICE_KEY = 'alice_eleve_be';
+const aliceProg = (extra = {}) => ({ uid: 'alice-uid', eleve_email: 'alice@eleve.be', classe_id: '3GB', xp: 0, rewarded_activities: [], ...extra });
+
+test('P0 progression : l\'élève Google crée et fait progresser SA progression', async () => {
+  const db = alice();
+  await assertSucceeds(getDoc(doc(db, `progressions_v2/3GB_${ALICE_KEY}`))); // inexistant
+  await assertSucceeds(setDoc(doc(db, `progressions_v2/3GB_${ALICE_KEY}`), aliceProg(), { merge: true }));
+  await assertSucceeds(setDoc(doc(db, `progressions_v2/3GB_${ALICE_KEY}`), aliceProg({ xp: 30, rewarded_activities: ['a', 'b'] }), { merge: true }));
+  await assertSucceeds(setDoc(doc(db, `progressions_v2/3GB_${ALICE_KEY}`), { spam_warning: { active: false }, updated_at: 'x' }, { merge: true }));
+  await assertSucceeds(getDocs(query(collection(db, 'progressions_v2'), where('eleve_email', '==', 'alice@eleve.be'))));
 });
 
-test('V2 élève anonyme : rattache un ancien document sans uid', async () => {
-  await assertSucceeds(setDoc(doc(anon('anon-3'), 'progressions_v2/1A_el_legacy'), { uid: 'anon-3', xp: 20 }, { merge: true }));
+test('P0 progression : ni baisse d\'XP ni retrait d\'activité récompensée (anti-écrasement)', async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), `progressions_v2/3GB_${ALICE_KEY}`), aliceProg({ xp: 495, rewarded_activities: ['a', 'b', 'c'] }));
+  });
+  const ref = doc(alice(), `progressions_v2/3GB_${ALICE_KEY}`);
+  await assertFails(setDoc(ref, aliceProg({ xp: 10, rewarded_activities: ['a', 'b', 'c', 'd'] }), { merge: true }));
+  await assertFails(setDoc(ref, aliceProg({ xp: 505, rewarded_activities: ['d'] }), { merge: true }));
+  await assertFails(setDoc(ref, aliceProg({ xp: 'beaucoup', rewarded_activities: ['a', 'b', 'c'] }), { merge: true }));
+  await assertSucceeds(setDoc(ref, aliceProg({ xp: 505, rewarded_activities: ['a', 'b', 'c', 'd'] }), { merge: true }));
 });
 
-test('V2 élève anonyme : ne lit ni ne modifie la progression d\'un autre', async () => {
-  const db = anon('anon-intrus');
-  await assertFails(getDoc(doc(db, 'progressions_v2/1A_el_owned')));
+test('P0 progression : les champs réservés au professeur sont intouchables par l\'élève', async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), `progressions_v2/3GB_${ALICE_KEY}`), aliceProg({ xp: 100, bulletin_custom_note20: 9, manual_completed_courses: [] }));
+  });
+  const ref = doc(alice(), `progressions_v2/3GB_${ALICE_KEY}`);
+  await assertFails(updateDoc(ref, { bulletin_custom_note20: 20 }));
+  await assertFails(updateDoc(ref, { bulletin_appreciation: 'Excellent' }));
+  await assertFails(updateDoc(ref, { manual_completed_courses: ['dactylo-3e'] }));
+  await assertFails(updateDoc(ref, { manual_completed_exos: ['ex1'] }));
+  await assertFails(updateDoc(ref, { xp_teacher_override: true }));
+  await assertFails(updateDoc(ref, { archived: false }));
+  // Valeur inchangée renvoyée telle quelle (ancien client en cache) : acceptée
+  await assertSucceeds(updateDoc(ref, { xp: 110, manual_completed_courses: [] }));
+  // À la création non plus
+  await assertFails(setDoc(doc(bob(), 'progressions_v2/3GB_bob_eleve_be'), { uid: 'bob-uid', eleve_email: 'bob@eleve.be', xp: 0, bulletin_custom_note20: 20 }));
+});
+
+test('P0 progression : impossible de lire, voler ou pré-créer la progression d\'un autre', async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    const db = ctx.firestore();
+    await setDoc(doc(db, `progressions_v2/3GB_${ALICE_KEY}`), aliceProg({ xp: 495 }));
+    // Document recréé par le professeur, sans uid
+    await setDoc(doc(db, 'progressions_v2/3GC_carl_eleve_be'), { eleve_email: 'carl@eleve.be', classe_id: '3GC', xp: 200 });
+  });
+  const db = bob();
+  await assertFails(getDoc(doc(db, `progressions_v2/3GB_${ALICE_KEY}`)));
   await assertFails(getDocs(collection(db, 'progressions_v2')));
-  await assertFails(setDoc(doc(db, 'progressions_v2/1A_el_owned'), { uid: 'anon-intrus', xp: 9999 }, { merge: true }));
-  await assertFails(deleteDoc(doc(db, 'progressions_v2/1A_el_owned')));
+  await assertFails(getDocs(query(collection(db, 'progressions_v2'), where('eleve_email', '==', 'alice@eleve.be'))));
+  await assertFails(setDoc(doc(db, `progressions_v2/3GB_${ALICE_KEY}`), { uid: 'bob-uid', eleve_email: 'bob@eleve.be', xp: 9999 }, { merge: true }));
+  await assertFails(getDoc(doc(db, 'progressions_v2/3GC_carl_eleve_be')));
+  await assertFails(setDoc(doc(db, 'progressions_v2/3GC_carl_eleve_be'), { uid: 'bob-uid', xp: 0 }, { merge: true }));
+  await assertFails(setDoc(doc(db, 'progressions_v2/3GC_carl_eleve_be'), { uid: 'bob-uid', eleve_email: 'bob@eleve.be', xp: 200 }, { merge: true }));
+  // Pré-création (squat) du document d'un futur élève
+  await assertFails(setDoc(doc(db, 'progressions_v2/S1-A_dora_eleve_be'), { uid: 'bob-uid', eleve_email: 'bob@eleve.be', xp: 0 }));
+  await assertFails(deleteDoc(doc(db, `progressions_v2/3GB_${ALICE_KEY}`)));
+});
+
+test('P0 progression : l\'élève retrouve SON document recréé par le professeur sans uid', async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), `progressions_v2/3GC_${ALICE_KEY}`), { eleve_email: 'alice@eleve.be', classe_id: '3GC', xp: 200, xp_teacher_override: true });
+  });
+  const ref = doc(alice(), `progressions_v2/3GC_${ALICE_KEY}`);
+  await assertSucceeds(getDoc(ref));
+  await assertSucceeds(setDoc(ref, { uid: 'alice-uid', eleve_email: 'alice@eleve.be', xp: 210, rewarded_activities: ['a'] }, { merge: true }));
+});
+
+test('P0 progression : une session anonyme (mode invité) n\'écrit plus rien', async () => {
+  const db = anon('anon-2');
+  await assertFails(setDoc(doc(db, 'progressions_v2/1B_el_new'), { uid: 'anon-2', classe_id: '1B', xp: 0 }));
+  await assertFails(setDoc(doc(db, 'progressions_v2/S1-A_victime_eleve_be'), { uid: 'anon-2', eleve_email: 'victime@eleve.be', xp: 0 }));
+  await assertFails(setDoc(doc(db, 'progressions_v2/1A_el_legacy'), { uid: 'anon-2', xp: 20 }, { merge: true }));
+  await assertFails(getDoc(doc(db, `progressions_v2/1A_el_legacy`)));
+  await assertFails(getDocs(collection(db, 'progressions_v2')));
+});
+
+test('P0 users : l\'élève lit SA fiche officielle st_<email> (classe), pas celle des autres', async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    const db = ctx.firestore();
+    await setDoc(doc(db, 'users/st_alice_eleve_be'), { email: 'alice@eleve.be', classe: '3GB' });
+    await setDoc(doc(db, 'users/st_bob_eleve_be'), { email: 'bob@eleve.be', classe: '0' });
+  });
+  const db = alice();
+  await assertSucceeds(getDoc(doc(db, 'users/st_alice_eleve_be')));
+  await assertSucceeds(getDoc(doc(db, 'users/st_inexistant_eleve_be')));
+  await assertSucceeds(getDocs(query(collection(db, 'users'), where('email', '==', 'alice@eleve.be'))));
+  await assertFails(getDoc(doc(db, 'users/st_bob_eleve_be')));
+  await assertFails(getDocs(query(collection(db, 'users'), where('email', '==', 'bob@eleve.be'))));
+  await assertFails(setDoc(doc(db, 'users/st_alice_eleve_be'), { classe: '1A' }, { merge: true }));
 });
 
 test('V2 élève anonyme : n\'écrit plus dans l\'annuaire users', async () => {

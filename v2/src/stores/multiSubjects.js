@@ -119,9 +119,9 @@ export function createMultiSubjectsStore() {
             hints_used: this.studentHintsUsedCount || 0
           }
         });
-        const note = res?.evaluation?.note_suggeree || 85;
+        const note = res?.evaluation?.note_suggeree ?? null;
         const fb = res?.evaluation?.feedback_eleve || "Texte argumentatif bien structuré et transmis au professeur !";
-        this.redactionState.feedback = `✅ ${fb} (Note suggérée : ${note}/100 • Autonomie : ${autonomyScore}%)`;
+        this.redactionState.feedback = `✅ ${fb} (${note !== null ? 'Note suggérée : ' + note + '/100' : 'Note : en attente de ton professeur'} • Autonomie : ${autonomyScore}%)`;
         this.redactionState.score = note;
         if (!res?.rateLimited && !res?.alreadyValidated && typeof this.attribuerXpUnique === 'function') {
           this.attribuerXpUnique(`exo:${exId}`, 30, 'Rédaction & Argumentation');
@@ -256,9 +256,9 @@ export function createMultiSubjectsStore() {
             hints_used: this.studentHintsUsedCount || 0
           }
         });
-        const note = res?.evaluation?.note_suggeree || 85;
+        const note = res?.evaluation?.note_suggeree ?? null;
         const fb = res?.evaluation?.feedback_eleve || "Excellent dialogue CECRL !";
-        this.languesState.feedback = `✅ ${fb} (Note suggérée : ${note}/100 • Autonomie : ${autonomyScore}%)`;
+        this.languesState.feedback = `✅ ${fb} (${note !== null ? 'Note suggérée : ' + note + '/100' : 'Note : en attente de ton professeur'} • Autonomie : ${autonomyScore}%)`;
         this.languesState.score = note;
         if (!res?.rateLimited && !res?.alreadyValidated && typeof this.attribuerXpUnique === 'function') {
           this.attribuerXpUnique(`exo:${exId}`, 30, 'Jeu de rôle CECRL');
@@ -332,9 +332,9 @@ export function createMultiSubjectsStore() {
             hints_used: this.studentHintsUsedCount || 0
           }
         });
-        const note = res?.evaluation?.note_suggeree || 85;
+        const note = res?.evaluation?.note_suggeree ?? null;
         const fb = res?.evaluation?.feedback_eleve || "Démarche scientifique claire et rigoureuse !";
-        this.sciencesState.feedback = `✅ ${fb} (Note suggérée : ${note}/100 • Autonomie : ${autonomyScore}%)`;
+        this.sciencesState.feedback = `✅ ${fb} (${note !== null ? 'Note suggérée : ' + note + '/100' : 'Note : en attente de ton professeur'} • Autonomie : ${autonomyScore}%)`;
         this.sciencesState.score = note;
         if (!res?.rateLimited && !res?.alreadyValidated && typeof this.attribuerXpUnique === 'function') {
           this.attribuerXpUnique(`exo:${exId}`, 30, 'Sciences & Maths');

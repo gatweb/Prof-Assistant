@@ -282,33 +282,23 @@ export async function saveEleveProgression(classeId, eleveId, data) {
       : `${cleanClasse}_${eleveId}`.replace(/[^a-zA-Z0-9_-]/g, '_');
     const docRef = doc(db, "progressions_v2", docKey);
 
-    // Protection anti-remise à zéro : ne jamais écraser un XP > 0 déjà en base par 0
-    // (sauf si le professeur a explicitement appliqué une correction)
-    let safeXp = Number(data.xp) || 0;
+    // Fusion systématique avec l'état serveur AVANT écriture : un appareil non synchronisé
+    // (cache vide, 2e onglet, Chromebook partagé) ne peut plus écraser les XP ni les activités
+    // déjà récompensées. Les règles Firestore refusent de toute façon toute baisse côté élève.
+    let safeXp = Math.max(0, Number(data.xp) || 0);
     let safeRewards = Array.isArray(data.rewarded_activities) ? data.rewarded_activities : [];
-    let safeManualCourses = Array.isArray(data.manual_completed_courses) ? data.manual_completed_courses : undefined;
-    let safeManualExos = Array.isArray(data.manual_completed_exos) ? data.manual_completed_exos : undefined;
 
-    if (safeXp === 0 && !data.xp_teacher_override) {
-      try {
-        const existingSnap = await getDoc(docRef);
-        if (existingSnap.exists()) {
-          const exData = existingSnap.data();
-          if ((Number(exData.xp) || 0) > 0) {
-            safeXp = Number(exData.xp) || 0;
-          }
-          if (Array.isArray(exData.rewarded_activities) && exData.rewarded_activities.length > 0) {
-            safeRewards = Array.from(new Set([...exData.rewarded_activities, ...safeRewards]));
-          }
-          if (Array.isArray(exData.manual_completed_courses) && safeManualCourses === undefined) {
-            safeManualCourses = exData.manual_completed_courses;
-          }
-          if (Array.isArray(exData.manual_completed_exos) && safeManualExos === undefined) {
-            safeManualExos = exData.manual_completed_exos;
-          }
+    try {
+      const existingSnap = await getDoc(docRef);
+      if (existingSnap.exists()) {
+        const exData = existingSnap.data();
+        const serverXp = Number(exData.xp) || 0;
+        if (serverXp > safeXp) safeXp = serverXp;
+        if (Array.isArray(exData.rewarded_activities) && exData.rewarded_activities.length > 0) {
+          safeRewards = Array.from(new Set([...exData.rewarded_activities, ...safeRewards]));
         }
-      } catch (_) {}
-    }
+      }
+    } catch (_) {}
 
     const payload = {
       uid: uid,
@@ -340,8 +330,8 @@ export async function saveEleveProgression(classeId, eleveId, data) {
       active_exercise_id: data.active_exercise_id || ''
     };
 
-    if (safeManualCourses !== undefined) payload.manual_completed_courses = safeManualCourses;
-    if (safeManualExos !== undefined) payload.manual_completed_exos = safeManualExos;
+    // `manual_completed_courses` / `manual_completed_exos` sont réservés au professeur
+    // (saveTeacherStudentCorrectionInDb) : l'élève ne les envoie plus.
     if (data.spam_warning !== undefined) {
       payload.spam_warning = data.spam_warning;
     }
@@ -378,40 +368,68 @@ export async function chargerProgressionEleveReelle(classeId, email, uid) {
   try {
     const normalizedEmail = (email || '').toLowerCase().trim();
     let officialClasse = '';
+    let officialFromUsers = false;
     let progressionData = null;
 
     // 1. Vérifier d'abord dans 'users' quelle est la classe officielle de l'élève (ex: importée depuis Google Classroom)
+    // Chaque lecture est isolée : un refus de permission sur une étape ne doit plus
+    // faire échouer tout le chargement (cause historique des profils en double).
     if (normalizedEmail) {
-      const stDocId = 'st_' + normalizedEmail.replace(/[^a-z0-9]/g, '_');
-      const userSnap = await getDoc(doc(db, "users", stDocId));
-      if (userSnap.exists() && userSnap.data()?.classe) {
-        officialClasse = String(userSnap.data().classe).toUpperCase().trim();
-      } else {
-        const qUser = query(collection(db, "users"), where("email", "==", normalizedEmail));
-        const qUserSnap = await getDocs(qUser);
-        qUserSnap.forEach(d => {
-          const cl = String(d.data()?.classe || '').toUpperCase().trim();
-          if (cl) {
-            officialClasse = resolveBestStudentClass(officialClasse, cl, false, Boolean(d.data()?.classroom_course_name));
-          }
-        });
+      const readClasse = (snap) => (snap.exists() && snap.data()?.classe !== undefined && snap.data()?.classe !== null)
+        ? String(snap.data().classe).toUpperCase().trim()
+        : '';
+      try {
+        const stDocId = 'st_' + normalizedEmail.replace(/[^a-z0-9]/g, '_');
+        officialClasse = readClasse(await getDoc(doc(db, "users", stDocId)));
+      } catch (e) {
+        console.warn("[chargerProgressionEleveReelle] users/st_ illisible :", e.message);
       }
+      if (!officialClasse) {
+        try {
+          officialClasse = readClasse(await getDoc(doc(db, "users", normalizedEmail)));
+        } catch (_) {}
+      }
+      if (!officialClasse) {
+        try {
+          const qUser = query(collection(db, "users"), where("email", "==", normalizedEmail));
+          const qUserSnap = await getDocs(qUser);
+          qUserSnap.forEach(d => {
+            const cl = String(d.data()?.classe ?? '').toUpperCase().trim();
+            if (cl) {
+              officialClasse = resolveBestStudentClass(officialClasse, cl, false, Boolean(d.data()?.classroom_course_name));
+            }
+          });
+        } catch (e) {
+          console.warn("[chargerProgressionEleveReelle] Recherche users par email refusée :", e.message);
+        }
+      }
+      officialFromUsers = Boolean(officialClasse);
     }
 
-    const bestTargetClasse = resolveBestStudentClass(classeId, officialClasse);
+    // La classe officielle (fiche `users`) prime toujours sur la classe locale / déclarée.
+    const bestTargetClasse = officialFromUsers ? officialClasse : resolveBestStudentClass(classeId, officialClasse);
 
     if (bestTargetClasse && normalizedEmail) {
-      const docKey = `${bestTargetClasse}_${normalizedEmail}`.replace(/[^a-zA-Z0-9_-]/g, '_');
-      const snap = await getDoc(doc(db, "progressions_v2", docKey));
-      if (snap.exists()) {
-        progressionData = snap.data();
+      try {
+        const docKey = `${bestTargetClasse}_${normalizedEmail}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+        const snap = await getDoc(doc(db, "progressions_v2", docKey));
+        if (snap.exists()) {
+          progressionData = snap.data();
+        }
+      } catch (e) {
+        console.warn("[chargerProgressionEleveReelle] Progression principale illisible :", e.message);
       }
     }
 
     if (normalizedEmail) {
-      const q = query(collection(db, "progressions_v2"), where("eleve_email", "==", normalizedEmail));
-      const qSnap = await getDocs(q);
-      qSnap.forEach(dSnap => {
+      let qDocs = [];
+      try {
+        const q = query(collection(db, "progressions_v2"), where("eleve_email", "==", normalizedEmail));
+        qDocs = (await getDocs(q)).docs;
+      } catch (e) {
+        console.warn("[chargerProgressionEleveReelle] Recherche des progressions par email refusée :", e.message);
+      }
+      qDocs.forEach(dSnap => {
         const d = dSnap.data();
         const dCl = String(d.classe_id || d.classe || '').toUpperCase().trim();
         if (!progressionData) {
@@ -465,26 +483,32 @@ export async function chargerProgressionEleveReelle(classeId, email, uid) {
     }
 
     if (!progressionData && uid) {
-      const q = query(collection(db, "progressions_v2"), where("uid", "==", uid));
-      const qSnap = await getDocs(q);
-      if (!qSnap.empty) {
-        progressionData = qSnap.docs[0].data();
-      }
+      try {
+        const q = query(collection(db, "progressions_v2"), where("uid", "==", uid));
+        const qSnap = await getDocs(q);
+        if (!qSnap.empty) {
+          progressionData = qSnap.docs[0].data();
+        }
+      } catch (_) {}
     }
 
     if (progressionData && officialClasse) {
-      progressionData.classe_id = resolveBestStudentClass(progressionData.classe_id, officialClasse, false, true);
-      progressionData.classe = progressionData.classe_id;
+      progressionData.classe_id = officialClasse;
+      progressionData.classe = officialClasse;
     }
 
     // Charger l'historique des soumissions de devoirs de l'élève (par email ET par uid)
     const submissionsMap = new Map();
     if (normalizedEmail) {
-      const qSub = query(collection(db, "submissions"), where("email_eleve", "==", normalizedEmail));
-      const subSnap = await getDocs(qSub);
-      subSnap.forEach(d => {
-        submissionsMap.set(d.id, { id: d.id, ...d.data() });
-      });
+      try {
+        const qSub = query(collection(db, "submissions"), where("email_eleve", "==", normalizedEmail));
+        const subSnap = await getDocs(qSub);
+        subSnap.forEach(d => {
+          submissionsMap.set(d.id, { id: d.id, ...d.data() });
+        });
+      } catch (e) {
+        console.warn("[chargerProgressionEleveReelle] Historique des soumissions illisible :", e.message);
+      }
     }
     if (uid) {
       try {
@@ -502,6 +526,7 @@ export async function chargerProgressionEleveReelle(classeId, email, uid) {
 
     return {
       officialClasse: officialClasse || (progressionData?.classe_id || ''),
+      officialFromUsers,
       progression: progressionData,
       submissions
     };
@@ -1860,6 +1885,9 @@ export async function appliquerSanctionEtAvertissementEleve({
 
   if (newXp !== null && newXp !== undefined) {
     updatePayload.xp = Math.max(0, Number(newXp) || 0);
+    // Sans ce drapeau, le client élève conservait son ancien total (max local/serveur).
+    updatePayload.xp_teacher_override = true;
+    updatePayload.xp_teacher_override_at = new Date().toISOString();
   }
   if (Array.isArray(rewardedActivities)) {
     updatePayload.rewarded_activities = rewardedActivities;
