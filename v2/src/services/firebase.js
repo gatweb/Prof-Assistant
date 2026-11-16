@@ -15,6 +15,7 @@ import {
   updateDoc, 
   deleteDoc,
   writeBatch,
+  runTransaction,
   collection, 
   query, 
   where, 
@@ -262,7 +263,7 @@ export async function supprimerEnseignantCloud(email) {
 }
 
 // 5. Sauvegarde de la progression élève dans Firestore (/progressions_v2)
-export async function saveEleveProgression(classeId, eleveId, data) {
+export async function saveEleveProgression(classeId, eleveId, data, { xpDelta = 0 } = {}) {
   try {
     if (!auth.currentUser) await initStudentSession();
     if (!auth.currentUser) throw new Error("Aucune session Firebase");
@@ -281,64 +282,93 @@ export async function saveEleveProgression(classeId, eleveId, data) {
       ? `${cleanClasse}_${email}`.replace(/[^a-zA-Z0-9_-]/g, '_')
       : `${cleanClasse}_${eleveId}`.replace(/[^a-zA-Z0-9_-]/g, '_');
     const docRef = doc(db, "progressions_v2", docKey);
+    const safeDelta = Math.max(0, Math.round(Number(xpDelta) || 0));
+    const localRewards = Array.isArray(data.rewarded_activities) ? data.rewarded_activities : [];
 
-    // Fusion systématique avec l'état serveur AVANT écriture : un appareil non synchronisé
-    // (cache vide, 2e onglet, Chromebook partagé) ne peut plus écraser les XP ni les activités
-    // déjà récompensées. Les règles Firestore refusent de toute façon toute baisse côté élève.
-    let safeXp = Math.max(0, Number(data.xp) || 0);
-    let safeRewards = Array.isArray(data.rewarded_activities) ? data.rewarded_activities : [];
+    // Écriture ATOMIQUE (transaction) : les XP sont appliqués comme un incrément sur la valeur
+    // serveur (`xp serveur + gains non encore envoyés`) et les activités récompensées comme une
+    // union. Deux appareils ou deux onglets ne peuvent donc plus s'écraser mutuellement.
+    const attemptTransaction = () => runTransaction(db, async (tx) => {
+      const snap = await tx.get(docRef);
+      const ex = snap.exists() ? snap.data() : null;
 
-    try {
-      const existingSnap = await getDoc(docRef);
-      if (existingSnap.exists()) {
-        const exData = existingSnap.data();
-        const serverXp = Number(exData.xp) || 0;
-        if (serverXp > safeXp) safeXp = serverXp;
-        if (Array.isArray(exData.rewarded_activities) && exData.rewarded_activities.length > 0) {
-          safeRewards = Array.from(new Set([...exData.rewarded_activities, ...safeRewards]));
-        }
+      // Document existant : valeur serveur + incrément. Nouveau document (1re connexion ou
+      // changement de classe) : on reprend le total connu localement, gains compris.
+      const newXp = ex
+        ? (Number(ex.xp) || 0) + safeDelta
+        : Math.max(0, Math.round(Number(data.xp) || 0));
+
+      const newRewards = Array.from(new Set([
+        ...(ex && Array.isArray(ex.rewarded_activities) ? ex.rewarded_activities : []),
+        ...localRewards
+      ]));
+
+      // Une compétence « acquise » sur un autre appareil ne redevient jamais « en cours ».
+      const mergedComp = { ...(ex?.competences || {}), ...(data.competences || {}) };
+      for (const k of Object.keys(ex?.competences || {})) {
+        if (ex.competences[k] === 'acquis') mergedComp[k] = 'acquis';
       }
-    } catch (_) {}
+      const mergedBadges = Array.from(new Set([
+        ...(ex && Array.isArray(ex.badges_altx) ? ex.badges_altx : []),
+        ...(Array.isArray(data.badges_altx) ? data.badges_altx : [])
+      ]));
 
-    const payload = {
-      uid: uid,
-      classe_id: cleanClasse,
-      classe: cleanClasse,
-      eleve_id: eleveId,
-      eleve_nom: nom,
-      eleve_email: email,
-      updated_at: new Date().toISOString(),
-      timestamp: serverTimestamp(),
-      xp: safeXp,
-      charte: data.charte || null,
-      escape_game: data.escape_game || null,
-      email_sim: data.email_sim || null,
-      bilan_personnel: data.bilan_personnel || null,
-      mission_app: data.mission_app || null,
-      http_sim: data.http_sim || null,
-      tri_donnees: data.tri_donnees || null,
-      mission_secu: data.mission_secu || null,
-      bilan_personnel_ch2: data.bilan_personnel_ch2 || null,
-      competences: data.competences || {},
-      rewarded_activities: safeRewards,
-      defis_ludiques: data.defis_ludiques || null,
-      badges_altx: Array.isArray(data.badges_altx) ? data.badges_altx : [],
-      spam_attempts: Number(data.spam_attempts) || 0,
-      tutor_calls_count: Number(data.tutor_calls_count) || 0,
-      hints_used_count: Number(data.hints_used_count) || 0,
-      active_course_id: data.active_course_id || 'fmttn-1re',
-      active_exercise_id: data.active_exercise_id || ''
-    };
+      const payload = {
+        uid: uid,
+        classe_id: cleanClasse,
+        classe: cleanClasse,
+        eleve_id: eleveId,
+        eleve_nom: nom,
+        eleve_email: email,
+        updated_at: new Date().toISOString(),
+        timestamp: serverTimestamp(),
+        xp: newXp,
+        charte: data.charte || null,
+        escape_game: data.escape_game || null,
+        email_sim: data.email_sim || null,
+        bilan_personnel: data.bilan_personnel || null,
+        mission_app: data.mission_app || null,
+        http_sim: data.http_sim || null,
+        tri_donnees: data.tri_donnees || null,
+        mission_secu: data.mission_secu || null,
+        bilan_personnel_ch2: data.bilan_personnel_ch2 || null,
+        competences: mergedComp,
+        rewarded_activities: newRewards,
+        defis_ludiques: data.defis_ludiques || null,
+        badges_altx: mergedBadges,
+        spam_attempts: Number(data.spam_attempts) || 0,
+        tutor_calls_count: Number(data.tutor_calls_count) || 0,
+        hints_used_count: Number(data.hints_used_count) || 0,
+        active_course_id: data.active_course_id || 'fmttn-1re',
+        active_exercise_id: data.active_exercise_id || ''
+      };
+      if (data.tome1b !== undefined) payload.tome1b = data.tome1b;
+      if (data.m0_deco !== undefined) payload.m0_deco = data.m0_deco;
+      if (typeof data.bilan_ch1_validated === 'boolean') payload.bilan_ch1_validated = data.bilan_ch1_validated;
+      if (typeof data.bilan_ch2_validated === 'boolean') payload.bilan_ch2_validated = data.bilan_ch2_validated;
+      // `manual_completed_*`, `bulletin_*`, `xp_teacher_override` sont réservés au professeur.
 
-    // `manual_completed_courses` / `manual_completed_exos` sont réservés au professeur
-    // (saveTeacherStudentCorrectionInDb) : l'élève ne les envoie plus.
-    if (data.spam_warning !== undefined) {
-      payload.spam_warning = data.spam_warning;
+      tx.set(docRef, payload, { merge: true });
+      return { xp: newXp, rewarded_activities: newRewards, competences: mergedComp, appliedDelta: ex ? safeDelta : null };
+    });
+
+    // Deux appareils (ou deux onglets) peuvent synchroniser en même temps : l'écriture arrivée en
+    // second est alors refusée par les règles (elle ne contient pas encore les gains de l'autre).
+    // On relit et on rejoue l'incrément sur l'état à jour.
+    let result;
+    for (let attempt = 1; ; attempt++) {
+      try {
+        result = await attemptTransaction();
+        break;
+      } catch (txErr) {
+        const retryable = ['permission-denied', 'aborted', 'failed-precondition'].includes(txErr?.code);
+        if (!retryable || attempt >= 3) throw txErr;
+        await new Promise(resolve => setTimeout(resolve, 150 * attempt + Math.random() * 200));
+      }
     }
 
-    await setDoc(docRef, payload, { merge: true });
     console.log(`[Firestore] Progression synchronisée pour ${nom} (${email || eleveId} - ${classeId})`);
-    return true;
+    return { ok: true, ...result };
   } catch (err) {
     console.warn("[Firestore] Mode local actif :", err.message);
     return false;

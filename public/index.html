@@ -8,12 +8,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>body{font-family:Plus Jakarta Sans,sans-serif}</style>
-  <script type="module" crossorigin src="/assets/index-1G2Qwoi-.js"></script>
+  <script type="module" crossorigin src="/assets/index-IESswL99.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/vendor-alpine-BZYLEBjp.js">
-  <link rel="modulepreload" crossorigin href="/assets/vendor-firestore-BMWSATj-.js">
-  <link rel="modulepreload" crossorigin href="/assets/vendor-firebase-Bnv8VXuf.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-firestore-bdQSUY7q.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-firebase-DUlQSBFI.js">
   <link rel="modulepreload" crossorigin href="/assets/vendor-markdown-Of0D6mTi.js">
-  <link rel="modulepreload" crossorigin href="/assets/workspace-teacher-CtUNQK9u.js">
+  <link rel="modulepreload" crossorigin href="/assets/workspace-teacher-C2LMhtvB.js">
   <link rel="modulepreload" crossorigin href="/assets/vendor-katex-CjWbGmc8.js">
   <link rel="modulepreload" crossorigin href="/assets/data-fmttn-eCVxcPhh.js">
   <link rel="stylesheet" crossorigin href="/assets/index-DnloxKVI.css">
@@ -3109,6 +3109,7 @@
                 <button type="button" x-show="tome1bQuiz.ch3.submitted && tome1bQuiz.ch3.idx < getTome1bQuizQuestions('ch3').length - 1" @click="nextTome1bQuizQuestion('ch3')" class="min-h-[46px] px-6 py-3 rounded-xl bg-slate-900 text-white font-black text-xs sm:text-sm cursor-pointer touch-manipulation">Question suivante ➔</button>
                 <button type="button" x-show="tome1bQuiz.ch3.submitted && tome1bQuiz.ch3.idx >= getTome1bQuizQuestions('ch3').length - 1" @click="resetTome1bQuiz('ch3')" class="min-h-[46px] px-5 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs cursor-pointer touch-manipulation">↺ Recommencer le quizz</button>
               </div>
+              <div x-show="tome1bQuiz.ch3.finished" class="p-4 rounded-2xl border text-xs sm:text-sm font-bold" role="status" :class="tome1bQuiz.ch3.score >= getTome1bQuizPassMark('ch3') ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'" x-text="getTome1bQuizResultText('ch3')"></div>
             </div>
           </template>
         </div>
@@ -3117,18 +3118,18 @@
         <div x-show="activeFmttnMissionId === 'ch3-atelier-prompt'" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-5">
           <h4 class="font-black text-lg text-slate-900">🎯 Atelier : Construis ton Prompt en 5 étapes</h4>
           <div class="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs text-indigo-950 font-bold">
-            👉 Action : Complète ou adapte les 5 cases ci-dessous (sans jamais mettre de données personnelles !), puis clique sur « Valider mon Prompt » (+20 XP).
+            👉 Action : Choisis un sujet de cours et écris toi-même les 5 étapes de ton prompt (sans jamais mettre de données personnelles !), puis clique sur « Valider mon Prompt » (+20 XP).
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">1. Rôle</label><input type="text" x-model="tome1bAtelier.ch3.role" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" /></div>
-            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">2. Tâche</label><input type="text" x-model="tome1bAtelier.ch3.tache" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" /></div>
-            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">3. Contexte</label><input type="text" x-model="tome1bAtelier.ch3.contexte" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" /></div>
-            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">4. Format attendu</label><input type="text" x-model="tome1bAtelier.ch3.format" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" /></div>
-            <div class="md:col-span-2"><label class="block text-xs font-extrabold text-slate-700 mb-1">5. Ajustement</label><input type="text" x-model="tome1bAtelier.ch3.ajustement" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" /></div>
+            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">1. Rôle</label><input type="text" x-model="tome1bAtelier.ch3.role" maxlength="200" placeholder="Ex. : Tu es un guide de musée…" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" /></div>
+            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">2. Tâche</label><input type="text" x-model="tome1bAtelier.ch3.tache" maxlength="200" placeholder="Que doit faire l'IA ?" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" /></div>
+            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">3. Contexte</label><input type="text" x-model="tome1bAtelier.ch3.contexte" maxlength="200" placeholder="Pour qui ? Dans quelle situation ?" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" /></div>
+            <div><label class="block text-xs font-extrabold text-slate-700 mb-1">4. Format attendu</label><input type="text" x-model="tome1bAtelier.ch3.format" maxlength="200" placeholder="Sous quelle forme veux-tu la réponse ?" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" /></div>
+            <div class="md:col-span-2"><label class="block text-xs font-extrabold text-slate-700 mb-1">5. Ajustement</label><input type="text" x-model="tome1bAtelier.ch3.ajustement" maxlength="200" placeholder="Que veux-tu ajouter ou corriger ?" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" /></div>
           </div>
           <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs sm:text-sm text-indigo-950">
             <strong>💡 Aperçu de ton prompt complet :</strong>
-            <p class="mt-1 italic" x-text="tome1bAtelier.ch3.role + '. ' + tome1bAtelier.ch3.tache + ' (' + tome1bAtelier.ch3.contexte + '). ' + tome1bAtelier.ch3.format + '. ' + tome1bAtelier.ch3.ajustement + '.'"></p>
+            <p class="mt-1 italic" x-text="[tome1bAtelier.ch3.role, tome1bAtelier.ch3.tache, tome1bAtelier.ch3.contexte, tome1bAtelier.ch3.format, tome1bAtelier.ch3.ajustement].map(v => String(v || '').trim()).filter(Boolean).join('. ') || 'Ton prompt apparaîtra ici au fur et à mesure.'"></p>
           </div>
           <div x-show="tome1bAtelier.ch3.feedback" class="p-3.5 rounded-xl text-xs font-bold" :class="tome1bAtelier.ch3.validated ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'" x-text="tome1bAtelier.ch3.feedback"></div>
           <button type="button" @click="validerTome1bAtelier('ch3')" class="min-h-[46px] px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm cursor-pointer touch-manipulation shadow-xs">✓ Valider mon Prompt (+20 XP)</button>
@@ -3274,6 +3275,7 @@
                 <button type="button" x-show="tome1bQuiz.ch4.submitted && tome1bQuiz.ch4.idx < getTome1bQuizQuestions('ch4').length - 1" @click="nextTome1bQuizQuestion('ch4')" class="min-h-[46px] px-6 py-3 rounded-xl bg-slate-900 text-white font-black text-xs sm:text-sm cursor-pointer touch-manipulation">Question suivante ➔</button>
                 <button type="button" x-show="tome1bQuiz.ch4.submitted && tome1bQuiz.ch4.idx >= getTome1bQuizQuestions('ch4').length - 1" @click="resetTome1bQuiz('ch4')" class="min-h-[46px] px-5 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs cursor-pointer touch-manipulation">↺ Recommencer le quizz</button>
               </div>
+              <div x-show="tome1bQuiz.ch4.finished" class="p-4 rounded-2xl border text-xs sm:text-sm font-bold" role="status" :class="tome1bQuiz.ch4.score >= getTome1bQuizPassMark('ch4') ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'" x-text="getTome1bQuizResultText('ch4')"></div>
             </div>
           </template>
         </div>
@@ -3288,6 +3290,7 @@
             <div>
               <label class="block text-xs font-extrabold text-slate-700 mb-1">1. Ordre croissant des unités de stockage :</label>
               <select x-model="tome1bAtelier.ch4.order" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm">
+                <option value="" disabled>— Choisis ta réponse —</option>
                 <option value="To < Go < Mo < Ko < o">To &lt; Go &lt; Mo &lt; Ko &lt; o</option>
                 <option value="o < Ko < Mo < Go < To">o &lt; Ko &lt; Mo &lt; Go &lt; To</option>
                 <option value="o < Mo < Ko < Go < To">o &lt; Mo &lt; Ko &lt; Go &lt; To</option>
@@ -3296,6 +3299,7 @@
             <div>
               <label class="block text-xs font-extrabold text-slate-700 mb-1">2. Format d'export idéal pour remettre un travail fini avec mise en page garantie :</label>
               <select x-model="tome1bAtelier.ch4.exportFormat" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm">
+                <option value="" disabled>— Choisis ta réponse —</option>
                 <option value=".pdf">.pdf (Portable Document Format)</option>
                 <option value=".mp3">.mp3 (Audio)</option>
                 <option value=".jpg">.jpg (Image)</option>
@@ -3303,7 +3307,7 @@
             </div>
             <div>
               <label class="block text-xs font-extrabold text-slate-700 mb-1">3. Propose un nom de dossier sans espace (utilise _) :</label>
-              <input type="text" x-model="tome1bAtelier.ch4.folderName" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" />
+              <input type="text" x-model="tome1bAtelier.ch4.folderName" maxlength="60" placeholder="Ton nom de dossier" autocapitalize="off" autocomplete="off" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" />
             </div>
           </div>
           <div x-show="tome1bAtelier.ch4.feedback" class="p-3.5 rounded-xl text-xs font-bold" :class="tome1bAtelier.ch4.validated ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'" x-text="tome1bAtelier.ch4.feedback"></div>
@@ -3464,6 +3468,7 @@
                 <button type="button" x-show="tome1bQuiz.ch5.submitted && tome1bQuiz.ch5.idx < getTome1bQuizQuestions('ch5').length - 1" @click="nextTome1bQuizQuestion('ch5')" class="min-h-[46px] px-6 py-3 rounded-xl bg-slate-900 text-white font-black text-xs sm:text-sm cursor-pointer touch-manipulation">Question suivante ➔</button>
                 <button type="button" x-show="tome1bQuiz.ch5.submitted && tome1bQuiz.ch5.idx >= getTome1bQuizQuestions('ch5').length - 1" @click="resetTome1bQuiz('ch5')" class="min-h-[46px] px-5 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs cursor-pointer touch-manipulation">↺ Recommencer le quizz</button>
               </div>
+              <div x-show="tome1bQuiz.ch5.finished" class="p-4 rounded-2xl border text-xs sm:text-sm font-bold" role="status" :class="tome1bQuiz.ch5.score >= getTome1bQuizPassMark('ch5') ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'" x-text="getTome1bQuizResultText('ch5')"></div>
             </div>
           </template>
         </div>
@@ -3478,6 +3483,7 @@
             <div>
               <label class="block text-xs font-extrabold text-slate-700 mb-1">1. Forme utilisée pour une condition (Oui/Non) dans un logigramme :</label>
               <select x-model="tome1bAtelier.ch5.logigrammeCondition" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm">
+                <option value="" disabled>— Choisis ta réponse —</option>
                 <option value="Ovale">Ovale</option>
                 <option value="Rectangle à coins arrondis">Rectangle à coins arrondis</option>
                 <option value="Losange">Losange</option>
@@ -3486,13 +3492,14 @@
             <div>
               <label class="block text-xs font-extrabold text-slate-700 mb-1">2. Partager de bonne foi une fausse astuce santé lue en ligne sans vouloir tromper :</label>
               <select x-model="tome1bAtelier.ch5.fakeNewsType" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm">
+                <option value="" disabled>— Choisis ta réponse —</option>
                 <option value="mesinformation">Mésinformation</option>
                 <option value="desinformation">Désinformation</option>
               </select>
             </div>
             <div>
-              <label class="block text-xs font-extrabold text-slate-700 mb-1">3. Angle de rotation Scratch (en degrés) pour tracer un triangle équilatéral (360° ÷ 3) :</label>
-              <input type="text" x-model="tome1bAtelier.ch5.scratchAngle" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" />
+              <label class="block text-xs font-extrabold text-slate-700 mb-1">3. Angle de rotation Scratch (en degrés) pour tracer un triangle équilatéral :</label>
+              <input type="text" inputmode="numeric" x-model="tome1bAtelier.ch5.scratchAngle" maxlength="6" placeholder="Nombre de degrés" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" />
             </div>
           </div>
           <div x-show="tome1bAtelier.ch5.feedback" class="p-3.5 rounded-xl text-xs font-bold" :class="tome1bAtelier.ch5.validated ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'" x-text="tome1bAtelier.ch5.feedback"></div>
@@ -5240,7 +5247,7 @@
                   <span
                     :class="st.mastery.badgeClass"
                     class="px-2 py-0.5 rounded-full text-[10px] font-black border shrink-0"
-                    x-text="st.avgNote20 + '/20 • ' + st.mastery.code"></span>
+                    x-text="st.avgNote20 === null ? 'Pas de note validée' : (st.avgNote20 + '/20 • ' + st.mastery.code)"></span>
                 </div>
 
                 <div class="flex items-center justify-between pt-2 border-t border-slate-100">
@@ -7848,10 +7855,11 @@
               <span class="text-3xl font-black"
                     x-text="getBulletinDataForStudent(selectedBulletinStudent).avgNote20 !== null ? (getBulletinDataForStudent(selectedBulletinStudent).avgNote20 + ' / 20') : '— / 20'"></span>
               <span class="text-xs font-bold text-indigo-200"
+                    x-show="getBulletinDataForStudent(selectedBulletinStudent).avgScore100 !== null"
                     x-text="'(' + getBulletinDataForStudent(selectedBulletinStudent).avgScore100 + '%)'"></span>
             </div>
             <p class="text-[11px] text-slate-300 mt-1.5">
-              Calculée sur les évaluations et missions validées
+              Moyenne des seules copies validées par le professeur (ou note manuelle). Aucune note par défaut.
             </p>
           </div>
 

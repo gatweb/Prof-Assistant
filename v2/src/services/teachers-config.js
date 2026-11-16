@@ -28,13 +28,14 @@ export const ALLOWED_TEACHERS = [
 ];
 
 /**
- * Classes actives réelles de l'établissement (1re, 2e, 3e, 4e)
+ * Classes de l'année scolaire en cours (repli statique, alignement 2026).
+ * La liste réelle est complétée automatiquement au chargement avec les classes trouvées dans
+ * Firestore (`classes`, liaisons Classroom, fiches élèves) : inutile de modifier ce fichier
+ * quand une classe est créée depuis l'Espace Professeur.
  */
 export const AVAILABLE_CLASSES = [
-  "1A", "1B", "1F",
-  "2B",
-  "3A", "3B", "3C", "3GB", "3CB",
-  "4GT"
+  "S1-A",
+  "3GA", "3GB", "3GC", "3GD"
 ];
 
 /**

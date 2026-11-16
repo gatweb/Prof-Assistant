@@ -1070,7 +1070,7 @@ export function createTeacherStore() {
           classe_id: bestClasse,
           email: st.email || existing.email || '',
           xp: Math.max(st.xp || 0, existing.xp || 0),
-          score: Math.max(st.progression?.score || 50, existing.score || 50),
+          score: Math.max(st.progression?.score || 0, existing.score || 0),
           tutor_calls_count: Math.max(Number(st.progression?.tutor_calls_count) || 0, existing.tutor_calls_count || 0),
           hints_used_count: Math.max(Number(st.progression?.hints_used_count) || 0, existing.hints_used_count || 0),
           updated_at: st.progression?.updated_at || st.lastActiveIso || existing.updated_at || null
@@ -1093,7 +1093,7 @@ export function createTeacherStore() {
           classe_id: bestClasse,
           email: ce.email || existing.email || '',
           xp: Math.max(ce.xp || 0, existing.xp || 0),
-          score: Math.max(ce.score || 50, existing.score || 50),
+          score: Math.max(ce.score || 0, existing.score || 0),
           archived: Boolean(existing.archived || ce.archived),
           status: existing.status === 'archive' || ce.status === 'archive' ? 'archive' : (existing.status || ce.status || 'actif'),
           school_year: existing.school_year || ce.school_year,
@@ -1160,10 +1160,9 @@ export function createTeacherStore() {
           priority = 4;
         }
 
-        const avgNote = subs.length > 0
-          ? Math.round(subs.reduce((acc, s) => acc + (Number(s.note_suggeree) || 75), 0) / subs.length)
-          : (el.score || 0);
-        const avgNote20 = Math.round((avgNote / 5) * 2) / 2;
+        // Uniquement les notes validées par le professeur : ni suggestion IA, ni valeur par défaut.
+        const avgNote = this.getValidatedAverage(subs);
+        const avgNote20 = avgNote === null ? null : Math.round((avgNote / 5) * 2) / 2;
 
         return {
           ...el,
@@ -1472,19 +1471,16 @@ export function createTeacherStore() {
       const pendingCount = uniqueSubs.filter(s => s.status === 'a_valider' || s.status === 'pending').length;
 
       // Calcul de la moyenne globale (/100 et /20)
-      const fmttnScore = Number(liveProg.score || st.score || 0);
-      let moyenne100 = fmttnScore || 50;
-      if (uniqueSubs.length > 0) {
-        const avgSubs = Math.round(uniqueSubs.reduce((acc, s) => acc + (Number(s.note_suggeree) || 75), 0) / uniqueSubs.length);
-        moyenne100 = fmttnScore > 50 ? Math.round((avgSubs * 0.65) + (fmttnScore * 0.35)) : avgSubs;
-      }
+      // Seules les notes validées par le professeur comptent. Sans copie validée ni note
+      // manuelle : pas de moyenne (jamais de 50 % ou 75 % par défaut).
+      let moyenne100 = this.getValidatedAverage(uniqueSubs);
 
       const custom20 = st.bulletin_custom_note20 !== null && st.bulletin_custom_note20 !== undefined && st.bulletin_custom_note20 !== ''
         ? Number(st.bulletin_custom_note20)
         : null;
       const moyenne20 = custom20 !== null && !isNaN(custom20)
         ? custom20
-        : Math.round((moyenne100 / 5) * 2) / 2;
+        : (moyenne100 === null ? null : Math.round((moyenne100 / 5) * 2) / 2);
 
       if (custom20 !== null && !isNaN(custom20)) {
         moyenne100 = Math.round(custom20 * 5);
@@ -1518,18 +1514,22 @@ export function createTeacherStore() {
         const cObj = (this.coursesList || []).find(c => c.id === cid);
         const cTitle = cObj?.title || cid;
         if (!byCourseMap.has(cid)) {
-          byCourseMap.set(cid, { id: cid, title: cTitle, count: 0, totalScore: 0 });
+          byCourseMap.set(cid, { id: cid, title: cTitle, count: 0, gradedCount: 0, totalScore: 0 });
         }
         const entry = byCourseMap.get(cid);
         entry.count++;
-        entry.totalScore += (Number(s.note_suggeree) || 75);
+        const validatedNote = this.getValidatedNote(s);
+        if (validatedNote !== null) {
+          entry.gradedCount++;
+          entry.totalScore += validatedNote;
+        }
       }
       const coursesBreakdown = Array.from(byCourseMap.values()).map(c => {
-        const avg = Math.round(c.totalScore / c.count);
+        const avg = c.gradedCount > 0 ? Math.round(c.totalScore / c.gradedCount) : null;
         return {
           ...c,
           avg100: avg,
-          avg20: Math.round((avg / 5) * 2) / 2
+          avg20: avg === null ? null : Math.round((avg / 5) * 2) / 2
         };
       });
 
@@ -1551,14 +1551,16 @@ export function createTeacherStore() {
       if (num2_d4 === 'acquis') strengths.push("l'analyse des traces numériques");
       else improvements.push("la distinction entre traces actives et passives");
 
-      let autoAppreciation = `${st.nom} atteint le niveau « ${mastery.label} » (${moyenne20}/20). `;
+      let autoAppreciation = moyenne20 === null
+        ? `${st.nom} n'a pas encore de travail noté et validé. `
+        : `${st.nom} atteint le niveau « ${mastery.label} » (${moyenne20}/20). `;
       if (validatedCount > 0) {
         autoAppreciation += `${validatedCount} travail(aux) pratique(s) validé(s) avec sérieux. `;
       }
       if (strengths.length > 0) {
         autoAppreciation += `Bonne maîtrise de ${strengths.slice(0, 2).join(' et de ')}. `;
       }
-      if (improvements.length > 0 && moyenne20 < 16) {
+      if (improvements.length > 0 && (moyenne20 === null || moyenne20 < 16)) {
         autoAppreciation += `Point à consolider : ${improvements[0]}.`;
       } else {
         autoAppreciation += `Belle autonomie (${autonomyPct}%), poursuis sur cette lancée !`;
@@ -1634,7 +1636,7 @@ export function createTeacherStore() {
     async copierAppreciationBulletin() {
       const report = this.getBulletinDataForStudent(this.selectedBulletinStudent);
       const text = this.bulletinAppreciationText || this.bulletinAppreciationDraft || report.autoAppreciation;
-      const textToCopy = `${report.nom} (${report.classe}) — Note : ${report.moyenne20}/20 (${report.mastery.label}) : ${text}`;
+      const textToCopy = `${report.nom} (${report.classe}) — Note : ${report.moyenne20 === null ? 'pas encore de note' : report.moyenne20 + '/20'} (${report.mastery.label}) : ${text}`;
       try {
         await navigator.clipboard.writeText(textToCopy);
         const copiedMsg = '📋 Appréciation et note copiées dans le presse-papiers (prêt à coller dans Smartschool / Pronote) !';
@@ -1649,7 +1651,28 @@ export function createTeacherStore() {
     // ==========================================
     // PHASE 11 : ÉCHELLE DE MAÎTRISE & EXPORT BULLETIN CSV
     // ==========================================
+    /** Note /100 validée par le professeur (null tant que la copie n'est pas validée/publiée). */
+    getValidatedNote(sub) {
+      if (!sub) return null;
+      const validated = ['valide', 'validee', 'publie'].includes(sub.status);
+      if (!validated) return null;
+      const raw = sub.note_suggeree;
+      if (raw === null || raw === undefined || raw === '') return null;
+      const n = Number(raw);
+      return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : null;
+    },
+
+    /** Moyenne /100 des notes validées d'une liste de copies ; null s'il n'y en a aucune. */
+    getValidatedAverage(subs) {
+      const notes = (subs || []).map(s => this.getValidatedNote(s)).filter(n => n !== null);
+      if (notes.length === 0) return null;
+      return Math.round(notes.reduce((a, n) => a + n, 0) / notes.length);
+    },
+
     getMasteryLevelFromScore(score) {
+      if (score === null || score === undefined || score === '') {
+        return { code: '—', label: 'Pas encore évalué', badgeClass: 'bg-slate-100 text-slate-600 border-slate-200' };
+      }
       const s = Number(score) || 0;
       if (s >= 90) {
         return { code: 'D', label: 'Dépassé', badgeClass: 'bg-indigo-100 text-indigo-800 border-indigo-200' };
@@ -1702,7 +1725,7 @@ export function createTeacherStore() {
           `"${(st.nom || '').replace(/"/g, '""')}"`,
           `"${(st.email || '').replace(/"/g, '""')}"`,
           `"${courseTitle.replace(/"/g, '""')}"`,
-          `"${st.avgNote}"`,
+          `"${st.avgNote === null || st.avgNote === undefined ? '' : st.avgNote}"`,
           `"${m.label}"`,
           `"${m.code}"`,
           `"${st.subsCount}"`,

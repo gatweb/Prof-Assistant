@@ -1,6 +1,7 @@
 // Tests des règles Firestore — ProfAssistant (V1 + V2)
 // Lancer l'émulateur puis : FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 npm test
 import { test, before, after, beforeEach } from 'node:test';
+import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import {
@@ -8,6 +9,7 @@ import {
 } from '@firebase/rules-unit-testing';
 import {
   doc, getDoc, setDoc, updateDoc, addDoc, deleteDoc, collection, query, where, getDocs,
+  runTransaction,
 } from 'firebase/firestore';
 
 const RULES = readFileSync(fileURLToPath(new URL('../../firestore.rules', import.meta.url)), 'utf8');
@@ -170,6 +172,45 @@ test('P0 progression : ni baisse d\'XP ni retrait d\'activité récompensée (an
   await assertFails(setDoc(ref, aliceProg({ xp: 505, rewarded_activities: ['d'] }), { merge: true }));
   await assertFails(setDoc(ref, aliceProg({ xp: 'beaucoup', rewarded_activities: ['a', 'b', 'c'] }), { merge: true }));
   await assertSucceeds(setDoc(ref, aliceProg({ xp: 505, rewarded_activities: ['a', 'b', 'c', 'd'] }), { merge: true }));
+});
+
+test('P1 progression : incrément d\'XP en transaction (lecture puis écriture) avec l\'état Tome 1b', async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), `progressions_v2/3GB_${ALICE_KEY}`), aliceProg({ xp: 200, rewarded_activities: ['a'] }));
+  });
+  const db = alice();
+  const ref = doc(db, `progressions_v2/3GB_${ALICE_KEY}`);
+  // Même stratégie que le client (saveEleveProgression) : relire et rejouer si l'écriture
+  // concurrente arrivée en second est refusée.
+  const increment = async (delta, key) => {
+    for (let attempt = 1; ; attempt++) {
+      try { return await incrementOnce(delta, key); } catch (e) {
+        if (attempt >= 3) throw e;
+        await new Promise(r => setTimeout(r, 100 * attempt));
+      }
+    }
+  };
+  const incrementOnce = (delta, key) => runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    const ex = snap.data();
+    tx.set(ref, {
+      ...aliceProg({ xp: ex.xp + delta, rewarded_activities: Array.from(new Set([...ex.rewarded_activities, key])) }),
+      tome1b: { quiz: { ch3: { completed: true } }, atelier: { ch4: { order: 'o < Ko < Mo < Go < To', validated: true } } },
+      m0_deco: { completed: true }
+    }, { merge: true });
+  });
+  // Deux « appareils » en parallèle : aucun gain ne doit être perdu.
+  await assertSucceeds(Promise.all([increment(10, 'b'), increment(20, 'c')]));
+  const after = await getDoc(ref);
+  assert.equal(after.data().xp, 230);
+  assert.deepEqual([...after.data().rewarded_activities].sort(), ['a', 'b', 'c']);
+  // Transaction sur un document encore inexistant (première connexion).
+  const fresh = doc(db, `progressions_v2/S1-A_${ALICE_KEY}`);
+  await assertSucceeds(runTransaction(db, async (tx) => {
+    const snap = await tx.get(fresh);
+    assert.equal(snap.exists(), false);
+    tx.set(fresh, aliceProg({ classe_id: 'S1-A', xp: 15, rewarded_activities: ['a'] }), { merge: true });
+  }));
 });
 
 test('P0 progression : les champs réservés au professeur sont intouchables par l\'élève', async () => {

@@ -24,7 +24,7 @@ import {
 
 export function createAuthStore() {
   return {
-    availableClasses: AVAILABLE_CLASSES,
+    availableClasses: [...AVAILABLE_CLASSES],
     classMappings: [],
     authReady: false,
     isLoggedIn: false,
@@ -50,6 +50,11 @@ export function createAuthStore() {
     studentSpamWarning: null,
     spamWarningCommitmentChecked: false,
     unsubscribeOwnProgression: null,
+    // XP gagnés localement et pas encore confirmés par le serveur (envoyés comme incrément).
+    pendingXpDelta: 0,
+    _syncInFlight: false,
+    _syncQueued: false,
+    _onlineSyncBound: false,
     xpToast: {
       visible: false,
       message: '',
@@ -223,37 +228,49 @@ export function createAuthStore() {
     },
 
     async deconnexionUtilisateur() {
+      // 1. Dernière synchronisation : ne rien perdre de ce qui vient d'être fait.
+      let lastSyncOk = this.isGuestMode;
+      try {
+        if (this.isLoggedIn && !this.isGuestMode && this.progressionLoaded) {
+          const res = await this._syncStudentProgressOnce();
+          lastSyncOk = Boolean(res && res.ok) && !(Number(this.pendingXpDelta) > 0);
+        } else {
+          lastSyncOk = true;
+        }
+      } catch (_) {}
+
       if (this.unsubscribeOwnProgression) {
         try { this.unsubscribeOwnProgression(); } catch (_) {}
         this.unsubscribeOwnProgression = null;
       }
-      this.progressionLoaded = false;
-      this.officialClasseLocked = false;
-      this.classroomDetectedClass = null;
-      // Poste partagé : la classe et les cours débloqués du précédent élève ne doivent pas
-      // être hérités par le suivant.
+
+      // 2. Poste partagé : effacer tout ce qui appartient à cet élève (classe, cours débloqués,
+      //    caches de progression, bilans personnels). Si la dernière synchronisation a échoué
+      //    (hors ligne), on conserve ses caches pour ne pas perdre ses gains.
+      const userKey = this.user.email || this.user.id || '';
       try {
         localStorage.removeItem('profassistant_student_classe');
         localStorage.removeItem('profassistant_unlocked_courses');
+        localStorage.removeItem('profassistant_v2_active_course');
+        if (lastSyncOk && userKey) {
+          localStorage.removeItem(`profassistant_rewarded_${userKey}`);
+          localStorage.removeItem(`profassistant_fmttn_state_${userKey}`);
+          localStorage.removeItem(`profassistant_pending_xp_${userKey}`);
+        }
       } catch (_) {}
-      if (Array.isArray(this.unlockedCourseIds)) this.unlockedCourseIds = [];
+      try { sessionStorage.clear(); } catch (_) {}
+
+      this.progressionLoaded = false;
       await deconnexionGlobale();
+
+      // 3. Rechargement : garantit qu'AUCUN état en mémoire (compétences, bilans, escape game,
+      //    ateliers...) n'est hérité par l'élève suivant.
+      if (typeof window !== 'undefined' && window.location) {
+        window.location.assign(window.location.pathname);
+        return;
+      }
       this.isLoggedIn = false;
       this.isGuestMode = false;
-      this.rewardedActivities = [];
-      this.manualCompletedCourses = [];
-      this.manualCompletedExercises = [];
-      this.studentSubmissionsHistory = [];
-      this.user = {
-        id: '',
-        email: '',
-        nom: 'Élève',
-        classe: '1A',
-        photoURL: '',
-        xp: 0,
-        avatar: 'robot',
-        isLoggedIn: false
-      };
     },
 
     activerModeInvite() {
@@ -284,12 +301,37 @@ export function createAuthStore() {
       this.syncCurrentStudentProgress();
     },
 
+    _pendingXpStorageKey() {
+      return `profassistant_pending_xp_${this.user.email || this.user.id || 'guest'}`;
+    },
+
+    /** Lit le reliquat d'XP non synchronisé (null = aucun enregistrement sur cet appareil). */
+    _readStoredPendingXp() {
+      try {
+        const raw = localStorage.getItem(this._pendingXpStorageKey());
+        if (raw === null) return null;
+        const n = Number(raw);
+        return Number.isFinite(n) && n > 0 ? Math.round(n) : 0;
+      } catch (_) {
+        return null;
+      }
+    },
+
+    _setPendingXp(n) {
+      this.pendingXpDelta = Math.max(0, Math.round(Number(n) || 0));
+      try {
+        localStorage.setItem(this._pendingXpStorageKey(), String(this.pendingXpDelta));
+      } catch (_) {}
+    },
+
     async chargerProgressionEleveReelleDepuisDb() {
       if (!this.user.email && !this.user.id) return;
       try {
         const userKey = this.user.email || this.user.id;
         const storageKey = `profassistant_rewarded_${userKey}`;
         const stateCacheKey = `profassistant_fmttn_state_${userKey}`;
+        const storedPending = this._readStoredPendingXp();
+        this.pendingXpDelta = storedPending || 0;
         try {
           const cachedRewards = JSON.parse(localStorage.getItem(storageKey) || '[]');
           if (Array.isArray(cachedRewards)) {
@@ -321,9 +363,14 @@ export function createAuthStore() {
               localStorage.setItem('profassistant_student_classe', p.classe_id);
             }
             if (typeof p.xp === 'number') {
-              this.user.xp = hasTeacherOverride
-                ? p.xp
-                : Math.max(Number(this.user.xp) || 0, p.xp);
+              // Le serveur fait foi. Seuls les gains pas encore envoyés s'y ajoutent.
+              // 1er passage sur cet appareil (aucun reliquat enregistré) : l'éventuel surplus du
+              // cache local hérité de l'ancienne version est converti une seule fois en reliquat.
+              if (storedPending === null) {
+                const legacySurplus = hasTeacherOverride ? 0 : Math.max(0, (Number(this.user.xp) || 0) - p.xp);
+                this._setPendingXp(legacySurplus);
+              }
+              this.user.xp = p.xp + this.pendingXpDelta;
             }
             this.appliquerEtatProgressionFmttn(p);
             if (Array.isArray(p.rewarded_activities)) {
@@ -350,18 +397,23 @@ export function createAuthStore() {
           }
         }
 
-        // Réconciliation anti-zéro : si l'élève a déjà remis des travaux ou activités récompensées mais XP=0 (hors sanction prof), recalculer son plancher XP
-        if (!hasTeacherOverride && (Number(this.user.xp) || 0) === 0) {
-          const fromRewards = (this.rewardedActivities || []).length * 15;
-          const uniqueSubCount = new Set((this.studentSubmissionsHistory || []).map(s => s.id_exercice || s.exercice_id || s.titre_exercice)).size;
-          const fromSubs = uniqueSubCount * 25;
-          const floorXp = Math.max(fromRewards, fromSubs);
-          if (floorXp > 0) {
-            this.user.xp = floorXp;
-          }
+        // Aucun document serveur trouvé : tout le total local reste « à envoyer » (il sera écrit
+        // tel quel à la création du document).
+        if (storedPending === null && !(data && data.progression)) {
+          this._setPendingXp(0);
         }
 
         this.progressionLoaded = true;
+
+        // Gains restés en attente (coupure réseau, onglet fermé) : les envoyer maintenant,
+        // puis à chaque retour de connexion.
+        if (this.pendingXpDelta > 0) this.syncCurrentStudentProgress();
+        if (!this._onlineSyncBound && typeof window !== 'undefined') {
+          this._onlineSyncBound = true;
+          window.addEventListener('online', () => {
+            if (this.isLoggedIn && this.pendingXpDelta > 0) this.syncCurrentStudentProgress();
+          });
+        }
 
         // Orienter immédiatement l'élève vers le cours correspondant à son niveau (1re vs 3e)
         if (typeof this.verifierEtOrienterCoursSelonClasseEleve === 'function') {
@@ -379,11 +431,9 @@ export function createAuthStore() {
           (liveProg) => {
             if (!liveProg) return;
             if (typeof liveProg.xp === 'number') {
-              if (liveProg.xp_teacher_override) {
-                this.user.xp = liveProg.xp;
-              } else {
-                this.user.xp = Math.max(Number(this.user.xp) || 0, liveProg.xp);
-              }
+              // Valeur serveur (gains d'un autre appareil ou correction du professeur comprise)
+              // + gains locaux pas encore confirmés.
+              this.user.xp = liveProg.xp + (Number(this.pendingXpDelta) || 0);
             }
             if (Array.isArray(liveProg.rewarded_activities)) {
               this.rewardedActivities = Array.from(new Set([...(this.rewardedActivities || []), ...liveProg.rewarded_activities]));
@@ -437,7 +487,9 @@ export function createAuthStore() {
       }
 
       this.rewardedActivities.push(cleanKey);
-      this.user.xp = (Number(this.user.xp) || 0) + (Number(amount) || 0);
+      const gain = Math.max(0, Number(amount) || 0);
+      this.user.xp = (Number(this.user.xp) || 0) + gain;
+      this._setPendingXp((Number(this.pendingXpDelta) || 0) + gain);
 
       try {
         const storageKey = `profassistant_rewarded_${this.user.email || this.user.id || 'guest'}`;
@@ -508,6 +560,7 @@ export function createAuthStore() {
       if (p.tri_donnees) this.triDonnees = { ...this.triDonnees, ...p.tri_donnees };
       if (p.mission_secu) this.missionSecu = { ...this.missionSecu, ...p.mission_secu };
       if (p.m0_deco) this.m0DecoState = { ...this.m0DecoState, ...p.m0_deco };
+      if (p.tome1b && typeof this.applyTome1bSavedState === 'function') this.applyTome1bSavedState(p.tome1b);
       if (typeof p.bilan_ch1_validated === 'boolean') this.bilanCh1Validated = p.bilan_ch1_validated;
       if (typeof p.bilan_ch2_validated === 'boolean') this.bilanCh2Validated = p.bilan_ch2_validated;
       if (Array.isArray(p.badges_altx)) {
@@ -552,6 +605,25 @@ export function createAuthStore() {
       if (this.isLoggedIn && !this.isGuestMode && !this.progressionLoaded) {
         return;
       }
+      // Une seule synchronisation à la fois : sinon deux envois simultanés appliqueraient
+      // deux fois le même incrément d'XP. Les appels concurrents sont regroupés.
+      if (this._syncInFlight) {
+        this._syncQueued = true;
+        return;
+      }
+      this._syncInFlight = true;
+      try {
+        await this._syncStudentProgressOnce();
+      } finally {
+        this._syncInFlight = false;
+        if (this._syncQueued) {
+          this._syncQueued = false;
+          this.syncCurrentStudentProgress();
+        }
+      }
+    },
+
+    async _syncStudentProgressOnce() {
       const unlockedBadges = typeof this.getUnlockedAltxBadgesIds === 'function' ? this.getUnlockedAltxBadgesIds() : [];
       this.fmttnUnlockedBadges = Array.from(new Set([...(this.fmttnUnlockedBadges || []), ...unlockedBadges]));
 
@@ -572,6 +644,7 @@ export function createAuthStore() {
         bilan_ch1_validated: Boolean(this.bilanCh1Validated),
         bilan_ch2_validated: Boolean(this.bilanCh2Validated),
         m0_deco: this.m0DecoState || null,
+        tome1b: typeof this.getTome1bStateForSave === 'function' ? this.getTome1bStateForSave() : undefined,
         charte: {
           score: this.charteState.score,
           finished: this.charteState.finished
@@ -608,7 +681,23 @@ export function createAuthStore() {
         localStorage.setItem(`profassistant_fmttn_state_${userKey}`, JSON.stringify(dataToSave));
       } catch (_) {}
 
-      await saveEleveProgression(this.user.classe, this.user.email || this.user.id || 'el_student', dataToSave);
+      const sentDelta = Number(this.pendingXpDelta) || 0;
+      const res = await saveEleveProgression(
+        this.user.classe,
+        this.user.email || this.user.id || 'el_student',
+        dataToSave,
+        { xpDelta: sentDelta }
+      );
+
+      if (res && res.ok) {
+        // Les gains envoyés sont confirmés ; ceux gagnés pendant l'envoi restent en attente.
+        this._setPendingXp((Number(this.pendingXpDelta) || 0) - sentDelta);
+        this.user.xp = res.xp + this.pendingXpDelta;
+        if (Array.isArray(res.rewarded_activities)) {
+          this.rewardedActivities = Array.from(new Set([...(this.rewardedActivities || []), ...res.rewarded_activities]));
+        }
+      }
+      return res;
     },
 
     ouvrirEspaceProf() {

@@ -40,6 +40,34 @@ Object.values(altxBank.secu || {}).forEach(sub => {
   });
 });
 
+// Tome 1b : mélanger aussi les options (la bonne réponse n'est plus toujours à la même place).
+(altxTome1bBank.questions || []).forEach(q => {
+  if (!Array.isArray(q.options) || q.options.length < 2 || typeof q.correctIndex !== 'number') return;
+  const tagged = shuffleChoicesArray(q.options.map((text, i) => ({ text, ok: i === q.correctIndex })));
+  q.options = tagged.map(o => o.text);
+  q.correctIndex = tagged.findIndex(o => o.ok);
+});
+
+// Sous-thème QCM -> compétences validées quand au moins 80 % de ses questions sont réussies.
+const BANK_MASTERY_RATIO = 0.8;
+const BANK_COMPETENCES = {
+  comm: {
+    reseaux: ['NUM-1.D1', 'NUM-1.D2'],
+    messagerie: ['NUM-1.D5', 'NUM-1.P1'],
+    ethique: ['NUM-1.D6', 'NUM-1.D7', 'NUM-1.D8', 'NUM-1.P5', 'NUM-1.P7'],
+    collaboration: ['NUM-1.D3', 'NUM-1.D4', 'NUM-1.P9']
+  },
+  secu: {
+    profil: ['NUM-2.D1', 'NUM-2.P4'],
+    signaletique: ['NUM-2.D2', 'NUM-2.D3'],
+    cyber: ['NUM-2.D6', 'NUM-2.D7', 'NUM-2.D9', 'NUM-2.P2'],
+    confidentialite: ['NUM-2.D5', 'NUM-2.P1', 'NUM-2.P3', 'NUM-2.P5'],
+    identite: ['NUM-2.D4', 'NUM-2.D8', 'NUM-2.M2']
+  }
+};
+// Part de bonnes réponses exigée pour valider un quizz du Tome 1b (4 sur 6).
+const TOME1B_QUIZ_PASS_RATIO = 0.66;
+
 /**
  * Convertit le texte brut `lecon` de altxBank en cartes HTML visuelles et aérées pour des élèves de 11-12 ans,
  * avec mise en évidence des encadrés officiels @lt_X : 🧠 Cerveau, 💡 Le savais-tu ?, 💼 Métier, 🤖 IA.
@@ -146,14 +174,15 @@ export function createFmttnStore() {
     escapeGame: escapeGameData,
 
     tome1bQuiz: {
-      ch3: { idx: 0, selected: null, submitted: false, isCorrect: false, score: 0, completed: false },
-      ch4: { idx: 0, selected: null, submitted: false, isCorrect: false, score: 0, completed: false },
-      ch5: { idx: 0, selected: null, submitted: false, isCorrect: false, score: 0, completed: false }
+      ch3: { idx: 0, selected: null, submitted: false, isCorrect: false, score: 0, completed: false, finished: false },
+      ch4: { idx: 0, selected: null, submitted: false, isCorrect: false, score: 0, completed: false, finished: false },
+      ch5: { idx: 0, selected: null, submitted: false, isCorrect: false, score: 0, completed: false, finished: false }
     },
+    // Les ateliers démarrent vides : c'est l'élève qui produit la réponse.
     tome1bAtelier: {
-      ch3: { role: 'Tu es un professeur de sciences bienveillant', tache: 'Explique la photosynthèse', contexte: 'Pour un élève de 1re secondaire', format: 'En 4 points à puces simples', ajustement: 'Ajoute une analogie du quotidien', feedback: '', validated: false },
-      ch4: { order: 'o < Ko < Mo < Go < To', exportFormat: '.pdf', folderName: '04_documents_scolaires', feedback: '', validated: false },
-      ch5: { logigrammeCondition: 'Losange', fakeNewsType: 'mesinformation', scratchAngle: '120', feedback: '', validated: false }
+      ch3: { role: '', tache: '', contexte: '', format: '', ajustement: '', feedback: '', validated: false },
+      ch4: { order: '', exportFormat: '', folderName: '', feedback: '', validated: false },
+      ch5: { logigrammeCondition: '', fakeNewsType: '', scratchAngle: '', feedback: '', validated: false }
     },
 
     activeSlideIndex: 0,
@@ -168,8 +197,8 @@ export function createFmttnStore() {
 
     // Mission 2 du Module 0 : Déconnexion 1-3-4-2 & Mot de passe blindé
     m0DecoState: {
-      selectedOrder: '1-3-4-2',
-      selectedPassword: 'PommeVelo!27',
+      selectedOrder: '',
+      selectedPassword: '',
       validated: false,
       completed: false,
       feedback: ''
@@ -1169,6 +1198,12 @@ export function createFmttnStore() {
     },
 
     validerM0Deco() {
+      if (!this.m0DecoState.selectedOrder || !this.m0DecoState.selectedPassword) {
+        this.m0DecoState.validated = true;
+        this.m0DecoState.completed = false;
+        this.m0DecoState.feedback = '👉 Choisis d\'abord un mot de passe ET un ordre de déconnexion.';
+        return;
+      }
       const orderOk = this.m0DecoState.selectedOrder === '1-3-4-2';
       const pwdOk = this.m0DecoState.selectedPassword === 'PommeVelo!27';
       this.m0DecoState.validated = true;
@@ -1180,7 +1215,10 @@ export function createFmttnStore() {
         }
         this.syncCurrentStudentProgress();
       } else {
-        this.m0DecoState.feedback = '❌ Vérifie tes réponses : l\'ordre officiel du manuel (p. 16) est 1-3-4-2 et un mot de passe robuste comporte au moins 12 caractères variés (ex: PommeVelo!27).';
+        const aRevoir = [];
+        if (!pwdOk) aRevoir.push('le mot de passe (longueur, majuscules, minuscules, chiffres, symbole : lequel coche tout ?)');
+        if (!orderOk) aRevoir.push('l\'ordre de déconnexion (que faut-il faire AVANT de fermer ? relis la p. 16 du manuel)');
+        this.m0DecoState.feedback = '❌ Pas encore. À revoir : ' + aRevoir.join(' et ') + '.';
       }
     },
 
@@ -1500,6 +1538,22 @@ export function createFmttnStore() {
       this.bankUserSelection = choice;
     },
 
+    /** Nombre de questions réussies / total pour un sous-thème de la banque de QCM. */
+    getBankSubthemeProgress(domain, subKey) {
+      const total = (this.altxBank?.[domain]?.[subKey]?.questions || []).length;
+      const prefix = `bank:${domain}:${subKey}:q`;
+      const done = new Set((this.rewardedActivities || []).filter(k => String(k).startsWith(prefix))).size;
+      const needed = Math.max(1, Math.ceil(total * BANK_MASTERY_RATIO));
+      return { done: Math.min(done, total), total, needed, mastered: total > 0 && done >= needed };
+    },
+
+    /** Une compétence passe à « acquis » seulement quand 80 % du sous-thème est réussi. */
+    updateBankCompetences(domain, subKey) {
+      const codes = BANK_COMPETENCES[domain]?.[subKey] || [];
+      if (!this.getBankSubthemeProgress(domain, subKey).mastered) return;
+      codes.forEach(code => { this.eleveCompetences[code] = 'acquis'; });
+    },
+
     validerBankReponse() {
       if (!this.bankUserSelection) return;
       const q = this.getCurrentBankQuestion();
@@ -1512,26 +1566,7 @@ export function createFmttnStore() {
         if (granted) this.bankScore += 10;
         this.tutorMood = 'happy';
 
-        if (this.activeSubthemeKey === 'reseaux') {
-          this.eleveCompetences['NUM-1.D1'] = 'acquis';
-          this.eleveCompetences['NUM-1.D2'] = 'acquis';
-        }
-        if (this.activeSubthemeKey === 'messagerie') {
-          this.eleveCompetences['NUM-1.D5'] = 'acquis';
-          this.eleveCompetences['NUM-1.P1'] = 'acquis';
-        }
-        if (this.activeSubthemeKey === 'ethique') {
-          this.eleveCompetences['NUM-1.D6'] = 'acquis';
-          this.eleveCompetences['NUM-1.D7'] = 'acquis';
-          this.eleveCompetences['NUM-1.D8'] = 'acquis';
-          this.eleveCompetences['NUM-1.P5'] = 'acquis';
-          this.eleveCompetences['NUM-1.P7'] = 'acquis';
-        }
-        if (this.activeSubthemeKey === 'collaboration') {
-          this.eleveCompetences['NUM-1.D3'] = 'acquis';
-          this.eleveCompetences['NUM-1.D4'] = 'acquis';
-          this.eleveCompetences['NUM-1.P9'] = 'acquis';
-        }
+        this.updateBankCompetences('comm', this.activeSubthemeKey);
       } else {
         this.tutorMood = 'thinking';
       }
@@ -1634,31 +1669,7 @@ export function createFmttnStore() {
         if (granted) this.bankScoreSecu += 10;
         this.tutorMood = 'happy';
 
-        if (this.activeSubthemeKeySecu === 'profil') {
-          this.eleveCompetences['NUM-2.D1'] = 'acquis';
-          this.eleveCompetences['NUM-2.P4'] = 'acquis';
-        }
-        if (this.activeSubthemeKeySecu === 'signaletique') {
-          this.eleveCompetences['NUM-2.D2'] = 'acquis';
-          this.eleveCompetences['NUM-2.D3'] = 'acquis';
-        }
-        if (this.activeSubthemeKeySecu === 'cyber') {
-          this.eleveCompetences['NUM-2.D6'] = 'acquis';
-          this.eleveCompetences['NUM-2.D7'] = 'acquis';
-          this.eleveCompetences['NUM-2.D9'] = 'acquis';
-          this.eleveCompetences['NUM-2.P2'] = 'acquis';
-        }
-        if (this.activeSubthemeKeySecu === 'confidentialite') {
-          this.eleveCompetences['NUM-2.D5'] = 'acquis';
-          this.eleveCompetences['NUM-2.P1'] = 'acquis';
-          this.eleveCompetences['NUM-2.P3'] = 'acquis';
-          this.eleveCompetences['NUM-2.P5'] = 'acquis';
-        }
-        if (this.activeSubthemeKeySecu === 'identite') {
-          this.eleveCompetences['NUM-2.D4'] = 'acquis';
-          this.eleveCompetences['NUM-2.D8'] = 'acquis';
-          this.eleveCompetences['NUM-2.M2'] = 'acquis';
-        }
+        this.updateBankCompetences('secu', this.activeSubthemeKeySecu);
       } else {
         this.tutorMood = 'thinking';
       }
@@ -1861,6 +1872,35 @@ export function createFmttnStore() {
       return qs[st.idx] || qs[0];
     },
 
+    getTome1bQuizPassMark(chKey) {
+      const n = this.getTome1bQuizQuestions(chKey).length;
+      return Math.max(1, Math.ceil(n * TOME1B_QUIZ_PASS_RATIO));
+    },
+
+    /** Fin de quizz : réussi seulement si le seuil est atteint (sinon l'élève recommence). */
+    finishTome1bQuiz(chKey) {
+      const st = this.tome1bQuiz?.[chKey];
+      if (!st) return;
+      st.finished = true;
+      if (st.score >= this.getTome1bQuizPassMark(chKey)) {
+        st.completed = true;
+        if (typeof this.attribuerXpUnique === 'function') {
+          this.attribuerXpUnique(`quiz:tome1b-${chKey}`, 20, `Quizz réussi Tome 1b (${chKey.toUpperCase()})`);
+        }
+      }
+    },
+
+    getTome1bQuizResultText(chKey) {
+      const st = this.tome1bQuiz?.[chKey];
+      if (!st || !st.finished) return '';
+      const total = this.getTome1bQuizQuestions(chKey).length;
+      const need = this.getTome1bQuizPassMark(chKey);
+      if (st.score >= need) {
+        return `🏆 Quizz réussi : ${st.score} / ${total}. Bravo !`;
+      }
+      return `💪 ${st.score} / ${total} : il faut au moins ${need} bonnes réponses pour valider ce quizz. Relis la théorie puis recommence, tu vas y arriver !`;
+    },
+
     submitTome1bQuizAnswer(chKey) {
       const st = this.tome1bQuiz?.[chKey];
       const q = this.getCurrentTome1bQuestion(chKey);
@@ -1875,10 +1915,7 @@ export function createFmttnStore() {
       }
       const qs = this.getTome1bQuizQuestions(chKey);
       if (st.idx >= qs.length - 1) {
-        st.completed = true;
-        if (typeof this.attribuerXpUnique === 'function') {
-          this.attribuerXpUnique(`quiz:tome1b-${chKey}`, 20, `Quizz complet Tome 1b (${chKey.toUpperCase()})`);
-        }
+        this.finishTome1bQuiz(chKey);
       }
       this.syncCurrentStudentProgress();
     },
@@ -1892,12 +1929,6 @@ export function createFmttnStore() {
         st.selected = null;
         st.submitted = false;
         st.isCorrect = false;
-      } else {
-        st.completed = true;
-        if (typeof this.attribuerXpUnique === 'function') {
-          this.attribuerXpUnique(`quiz:tome1b-${chKey}`, 20, `Quizz complet Tome 1b (${chKey.toUpperCase()})`);
-        }
-        this.syncCurrentStudentProgress();
       }
     },
 
@@ -1909,29 +1940,80 @@ export function createFmttnStore() {
       st.submitted = false;
       st.isCorrect = false;
       st.score = 0;
+      st.finished = false;
+    },
+
+    /** État Tome 1b enregistré dans la progression (quizz réussis + réponses des ateliers). */
+    getTome1bStateForSave() {
+      const quiz = {};
+      const atelier = {};
+      ['ch3', 'ch4', 'ch5'].forEach(k => {
+        quiz[k] = { completed: Boolean(this.tome1bQuiz?.[k]?.completed) };
+        const { feedback, ...answers } = this.tome1bAtelier?.[k] || {};
+        atelier[k] = answers;
+      });
+      return { quiz, atelier };
+    },
+
+    applyTome1bSavedState(saved) {
+      if (!saved || typeof saved !== 'object') return;
+      ['ch3', 'ch4', 'ch5'].forEach(k => {
+        if (saved.quiz?.[k]?.completed && this.tome1bQuiz?.[k]) this.tome1bQuiz[k].completed = true;
+        const at = saved.atelier?.[k];
+        if (at && this.tome1bAtelier?.[k]) {
+          Object.keys(this.tome1bAtelier[k]).forEach(field => {
+            if (field === 'feedback' || at[field] === undefined || at[field] === null) return;
+            // Ne pas écraser une saisie en cours par une valeur vide venue du serveur.
+            if (field !== 'validated' && String(at[field]) === '' && String(this.tome1bAtelier[k][field]) !== '') return;
+            this.tome1bAtelier[k][field] = field === 'validated'
+              ? Boolean(at[field]) || Boolean(this.tome1bAtelier[k].validated)
+              : String(at[field]).slice(0, 300);
+          });
+        }
+      });
     },
 
     validerTome1bAtelier(chKey) {
       const at = this.tome1bAtelier?.[chKey];
       if (!at) return;
+      const fail = (msg) => {
+        at.feedback = msg;
+        this.syncCurrentStudentProgress();
+      };
       if (chKey === 'ch3') {
-        const ok = [at.role, at.tache, at.contexte, at.format, at.ajustement].every(v => String(v || '').trim().length >= 4);
-        if (!ok) {
-          at.feedback = '❌ Complète bien les 5 étapes (Rôle, Tâche, Contexte, Format, Ajustement) avec au moins quelques mots chacune.';
-          return;
+        const steps = [
+          ['Rôle', at.role], ['Tâche', at.tache], ['Contexte', at.contexte],
+          ['Format', at.format], ['Ajustement', at.ajustement]
+        ].map(([label, v]) => [label, String(v || '').trim()]);
+        const wordCount = (v) => v.split(/\s+/).filter(w => w.length > 1).length;
+        const tooShort = steps.filter(([, v]) => wordCount(v) < 3).map(([l]) => l);
+        if (tooShort.length) {
+          return fail(`❌ Étape(s) à développer : ${tooShort.join(', ')}. Écris une vraie consigne d'au moins 3 mots pour chacune.`);
+        }
+        const normalized = steps.map(([, v]) => v.toLowerCase());
+        if (new Set(normalized).size < normalized.length) {
+          return fail('❌ Deux étapes contiennent le même texte. Chaque étape a un rôle différent : relis la méthode en 5 étapes.');
+        }
+        const all = normalized.join(' ');
+        if (/[\w.+-]+@[\w-]+\.[a-z]{2,}/i.test(all) || /(\+?\d[\s./-]?){9,}/.test(all)) {
+          return fail('❌ Attention : ton prompt contient une adresse e-mail ou un numéro. On ne donne jamais de données personnelles à une IA. Retire-les.');
         }
         at.validated = true;
-        at.feedback = '✅ Bravo ! Ton prompt en 5 étapes est clair, structuré et respecte la méthode @lt_X (+20 XP) !';
+        at.feedback = '✅ Bravo ! Ton prompt comporte bien les 5 étapes de la méthode @lt_X (+20 XP). Compare-le avec celui de ton voisin : lequel est le plus précis ?';
         if (typeof this.attribuerXpUnique === 'function') {
           this.attribuerXpUnique('atelier:tome1b-ch3', 20, 'Atelier Prompt 5 étapes (Ch. 3)');
         }
       } else if (chKey === 'ch4') {
-        const orderOk = at.order === 'o < Ko < Mo < Go < To';
-        const fmtOk = at.exportFormat === '.pdf';
-        const folderOk = String(at.folderName || '').trim().length > 0 && !String(at.folderName).includes(' ');
-        if (!orderOk || !fmtOk || !folderOk) {
-          at.feedback = '❌ Vérifie tes choix : ordre croissant des unités (o < Ko < Mo < Go < To), format figé d\'envoi (.pdf) et nom de dossier sans espace (_).';
-          return;
+        const folder = String(at.folderName || '').trim();
+        if (!at.order || !at.exportFormat || !folder) {
+          return fail('👉 Réponds aux 3 étapes avant de valider.');
+        }
+        const wrong = [];
+        if (at.order !== 'o < Ko < Mo < Go < To') wrong.push('étape 1 (du plus petit au plus grand : relis le tableau des unités)');
+        if (at.exportFormat !== '.pdf') wrong.push('étape 2 (quel format garde la mise en page partout ?)');
+        if (folder.length < 3 || !/^[A-Za-z0-9_-]+$/.test(folder)) wrong.push('étape 3 (ni espace, ni accent, ni caractère spécial ; au moins 3 caractères)');
+        if (wrong.length) {
+          return fail('❌ Pas encore. À revoir : ' + wrong.join(' ; ') + '.');
         }
         at.validated = true;
         at.feedback = '✅ Parfait ! Tu maîtrises les ordres de grandeur numériques, le nommage propre et l\'export PDF (+20 XP) !';
@@ -1939,10 +2021,17 @@ export function createFmttnStore() {
           this.attribuerXpUnique('atelier:tome1b-ch4', 20, 'Atelier Fichiers & Export PDF (Ch. 4)');
         }
       } else if (chKey === 'ch5') {
-        const ok = at.logigrammeCondition === 'Losange' && at.fakeNewsType === 'mesinformation' && String(at.scratchAngle) === '120';
-        if (!ok) {
-          at.feedback = '❌ Indice : dans un logigramme la condition est un Losange, partager de bonne foi est de la mésinformation, et pour un triangle équilatéral 360° ÷ 3 = 120° !';
-          return;
+        const angleRaw = String(at.scratchAngle || '').trim();
+        if (!at.logigrammeCondition || !at.fakeNewsType || !angleRaw) {
+          return fail('👉 Réponds aux 3 défis avant de valider.');
+        }
+        const angle = Number(angleRaw.replace(/[°\s]/g, '').replace(',', '.'));
+        const wrong = [];
+        if (at.logigrammeCondition !== 'Losange') wrong.push('défi 1 (revois le schéma du logigramme : quelle forme pose une question Oui/Non ?)');
+        if (at.fakeNewsType !== 'mesinformation') wrong.push('défi 2 (la personne voulait-elle tromper ?)');
+        if (angle !== 120) wrong.push('défi 3 (un tour complet fait 360° : combien de virages pour un triangle ?)');
+        if (wrong.length) {
+          return fail('❌ Pas encore. À revoir : ' + wrong.join(' ; ') + '.');
         }
         at.validated = true;
         at.feedback = '✅ Excellent ! Logigramme, Culture numérique et programmation Scratch validés (+20 XP) !';
