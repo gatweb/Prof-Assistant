@@ -1,4 +1,4 @@
-# 🚀 ROADMAP & CAHIER DES CHARGES : Plateforme EdTech (Informatique 4e)
+# 🚀 ROADMAP & CAHIER DES CHARGES : ProfAssistant V2 (Numérique FMTTN 1re • Dactylographie & Bureautique 3e)
 
 ## 🎯 1. Philosophie Pédagogique (RÈGLES D'OR POUR L'AGENT IA)
 1. **L'IA est un Tuteur Socratique :** Elle ne doit **JAMAIS** donner la ligne de code corrigée ni la solution finale. Elle pointe l'erreur et pose une question pour faire réfléchir l'élève.
@@ -6,22 +6,22 @@
 3. **Le Professeur reste maître :** Sauf indication contraire, l'IA suggère une note et un feedback, mais c'est le professeur qui valide et publie (Flux en deux étapes).
 
 ## 🛠️ 2. Stack Technique
-* **Frontend :** HTML/CSS/JS (Vanilla). Design épuré, Glassmorphism, Typographie moderne (Inter/Roboto).
-* **Éditeur de code :** Monaco Editor (ou CodeMirror).
-* **Backend :** Firebase Cloud Functions (Node.js).
-* **Base de données :** Cloud Firestore.
-* **Authentification :** Firebase Auth (Google Workspace).
-* **Moteur IA :** API Gemini 3 (via SDK officiel `@google/genai`).
+* **Frontend (`v2/` → compilé dans `public/`) :** Vite, Alpine.js (stores modulaires dans `v2/src/stores/`), Tailwind CSS, Marked + KaTeX.
+* **Backend :** Firebase Cloud Functions v2 (Node.js, `europe-west1`).
+* **Base de données :** Cloud Firestore (règles testées dans `tests/firestore/rules.test.mjs`).
+* **Authentification :** Firebase Auth (Google Workspace ; mode invité 100 % local).
+* **Moteur IA :** Gemini via le SDK officiel `@google/genai` (`gemini-2.5-flash` / `gemini-2.5-flash-lite`).
+* **La V1 (`public/v1/`) n'est plus utilisée.**
 
 ## 🗄️ 3. Architecture de la Base de Données (Firestore)
-* **Collection `exercices` :** Contient les énoncés et les codes de départ.
-* **Collection `soumissions` :** Cycle de vie strict :
-  1. `brouillon` : L'élève code.
-  2. `a_valider` : Soumis à la Cloud Function, IA a généré un feedback, en attente du prof.
-  3. `publie` : Professeur a validé, visible par l'élève en temps réel.
-* **Collection `cours` :** Documents de référence pour le RAG (Chatbot).
+* **`users/st_<email>` :** classe officielle de l'élève (source de vérité).
+* **`progressions_v2/<classe>_<email>` :** XP (incrémentés en transaction), activités récompensées, compétences, état des ateliers.
+* **`submissions` :** cycle `brouillon` → `a_valider` → `valide` / `publie`. Seule la note validée par le professeur compte au bulletin.
+* **`cours`, `cours/{id}/modules`, `exercices` :** contenu des cours (lecture publique).
+* **`exercices_corriges` :** corrigés et barèmes, réservés aux professeurs et aux Cloud Functions.
+* **`classes`, `enseignants`, `usage/{uid}` :** liaisons Classroom, équipe enseignante, quotas IA.
 
-## 📍 4. Phase Actuelle : Plan d'Amélioration V3 — Toutes les Phases (0 à 13) Terminées & Validées 🚀
+## 📍 4. Phase Actuelle : Audit de novembre 2026 — P0 et P1 validés, P2 implémenté (à valider)
 * **Fusion V1/V2 (Phases 0 à 6) :** [TERMINÉ & DÉPLOYÉ ✅] Règles Firestore, Multi-Enseignants & Custom Claims, Moteur Multi-Cours V2, Espace Professeur Unifié (`submissions` + matrice), Google Classroom, Google Forms IA, et bascule racine `/` vers la V2.
 * **Phase 7 (Fiabilité du Tuteur IA & Sécurité — Plan V3) :** [TERMINÉ & VALIDÉ ✅]
   - **Serveur (`functions/index.js`)** : Connexion obligatoire, quota horaire de 40 appels/élève/h (`usage/{uid}`), résolution stricte du prompt système côté serveur par `course_id`, cascade réduite à 2 modèles vérifiés (`gemini-2.5-flash`, `gemini-2.5-flash-lite`) avec timeout de 12 s par appel, budget total de 25 s, 1 retry avec backoff sur 429/503, `responseSchema` JSON strict, cache mémoire 10 min, gestion des réponses vides et logs JSON structurés.
@@ -56,6 +56,16 @@
   - **Espace Professeur simplifié & Bulletin** : Refonte en 4 onglets, vue **Bulletin par élève**, filtres **Année en cours / Comptes inactifs / Archives / Classe `0`**, fusion des doublons, et correction manuelle XP / cours validés.
   - **Fiabilisation XP & Cloisonnement par année** : Suppression du reset XP sur « Quitter », statut vert exact des cours, blocage d'accès inter-années et classe `0` (`getYearLevelFromClass`), alignement complet des 4 classes 2026 (`RAPPORT_ALIGNEMENT_ELEVES_2026.md`).
 
+* **Phase 15 (Novembre 2026 — Audit sécurité / pédagogie / UX, correctifs P0 et P1) :** [TERMINÉ & VALIDÉ ✅]
+  - **P0 sécurité (`8f91d66`)** : règles Firestore (propriété par e-mail vérifié, champs professeur intouchables, XP non décroissants), iframes en bac à sable, classe officielle verrouillée, fonctions IA réservées aux comptes identifiés avec quotas, suppression du code maître.
+  - **P1 fiabilité** : XP envoyés comme gains en transaction (plus d'écrasement entre appareils), remise à zéro complète à la déconnexion, bulletin calculé sur les seules notes validées, Tome 1b (options mélangées, seuil 4/6, ateliers vierges, feedback sans réponse, persistance), compétence « acquise » après 80 % d'un sous-thème, classes 2026, cache et images allégées.
+* **Phase 16 (Novembre 2026 — Confort P2) :** [IMPLÉMENTÉ — À VALIDER PAR LE PROFESSEUR ⏳]
+  - **Boîtes de dialogue accessibles** (`v2/src/stores/ui.js`) à la place de `alert` / `confirm`.
+  - **Accessibilité** : focus clavier visible, lien d'évitement, cibles tactiles de 44 px, zones de feedback annoncées, respect de « réduire les animations », lecture vocale avec voix française et découpage en phrases.
+  - **Moteur de frappe intégré** (`v2/src/stores/typing.js`) : vitesse et précision mesurées pour la dactylographie, résultat transmis au professeur.
+  - **Arbre de compétences par année** (1re : FMTTN Tomes 1a/1b ; 3e : clavier et bureautique).
+  - **Corrigés des exercices protégés** : collection privée `exercices_corriges` + bouton de migration dans le Course Studio.
+
 ## 🔮 5. Prochaines Étapes (Feuille de Route V3 — voir `plan_ameliorations_v3.md`)
 - [x] **Phases 0 à 6 (Fusion V1 → V2) :** [OK] Déployées en production.
 - [x] **Phase 7 : Fiabilité du Tuteur IA & Sécurité :** [OK] Commit `d69b1ff` (26/26 tests Firestore).
@@ -66,6 +76,10 @@
 - [x] **Phase 12 : Expérience élève (Mascotte évolutive 5 stades, Arbre de compétences, score d'autonomie, vérification permissions Drive, mode dyslexie & synthèse vocale) :** [OK] Commit `cea70b7` (29/29 tests Firestore).
 - [x] **Phase 13 : Multi-matières (pilote : Rédaction, Langues CECRL, Sciences/Maths KaTeX) :** [OK] Implémentée, buildée et validée (29/29 tests Firestore).
 - [x] **Phase 14 : Tome 1b @lt_X, Illustrations jeunesse, Ergonomie Tablette/Chromebook, Espace Professeur 4 onglets & Alignement 2026 :** [OK] Déployée (`8da4562`).
+- [x] **Phase 15 : Audit — correctifs P0 (sécurité) et P1 (fiabilité XP, bulletin, Tome 1b) :** [OK] Validés par le professeur.
+- [ ] **Phase 16 : Confort P2 (modales, accessibilité, moteur de frappe, arbre par année, corrigés privés) :** implémentée, à valider. Après déploiement : cliquer une fois sur « 🔐 Protéger les corrigés des exercices » dans le Course Studio.
+- [ ] **Reste à faire (hors code)** : contenu pédagogique dépendant du manuel @lt_X (chapitre 4 partie 3, compétences NUM-3/4/5, 15 QCM par chapitre du Tome 1b, rééquilibrage des distracteurs du Tome 1a).
+- [ ] **Reste à faire (technique)** : chargement différé de l'Espace Professeur, de KaTeX et des données (`import()` dynamique), `x-if` par module, en-tête CSP.
 
 ---
 ### ⚠️ INSTRUCTION POUR L'AGENT DE DÉVELOPPEMENT :

@@ -174,6 +174,20 @@ test('P0 progression : ni baisse d\'XP ni retrait d\'activité récompensée (an
   await assertSucceeds(setDoc(ref, aliceProg({ xp: 505, rewarded_activities: ['a', 'b', 'c', 'd'] }), { merge: true }));
 });
 
+test('P2 corrigés : la collection privée exercices_corriges est réservée aux enseignants', async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), 'exercices_corriges/bur-ex1'), { corrige_enseignant: 'Réponse attendue' });
+    await setDoc(doc(ctx.firestore(), 'exercices/bur-ex1'), { titre: 'Mise en page' });
+  });
+  await assertSucceeds(getDoc(doc(alice(), 'exercices/bur-ex1')));
+  await assertFails(getDoc(doc(alice(), 'exercices_corriges/bur-ex1')));
+  await assertFails(getDocs(collection(alice(), 'exercices_corriges')));
+  await assertFails(setDoc(doc(alice(), 'exercices_corriges/bur-ex1'), { corrige_enseignant: 'x' }));
+  await assertFails(getDoc(doc(anon('invite-uid'), 'exercices_corriges/bur-ex1')));
+  await assertSucceeds(getDoc(doc(prof(), 'exercices_corriges/bur-ex1')));
+  await assertSucceeds(setDoc(doc(prof(), 'exercices_corriges/bur-ex1'), { rubric: 'Barème' }, { merge: true }));
+});
+
 test('P1 progression : incrément d\'XP en transaction (lecture puis écriture) avec l\'état Tome 1b', async () => {
   await env.withSecurityRulesDisabled(async (ctx) => {
     await setDoc(doc(ctx.firestore(), `progressions_v2/3GB_${ALICE_KEY}`), aliceProg({ xp: 200, rewarded_activities: ['a'] }));

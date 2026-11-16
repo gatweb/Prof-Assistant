@@ -13,6 +13,8 @@
 </head>
 <body class="h-full flex flex-col bg-slate-50 text-slate-800" x-data="profAssistantApp()">
 
+  <a href="#contenu-principal" class="skip-link">Aller directement au contenu</a>
+
   <!-- 🧭 Barre de Navigation Supérieure -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -22,6 +24,8 @@
         <div 
           @click="ouvrirHubCours()"
           class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-black text-xl shadow-sm cursor-pointer hover:opacity-90 transition shrink-0" 
+          role="button" tabindex="0" aria-label="Retour au hub « Mes cours »"
+          @keydown.enter="ouvrirHubCours()" @keydown.space.prevent="ouvrirHubCours()"
           title="Hub Mes Cours — ProfAssistant">
           @
         </div>
@@ -180,7 +184,7 @@
   <div
     x-show="activeTab !== 'prof' && studentSpamWarning && studentSpamWarning.active"
     class="fixed inset-0 z-50 bg-rose-950/85 backdrop-blur-md flex items-center justify-center p-4"
-    x-cloak>
+    x-cloak role="dialog" aria-modal="true">
     <div class="w-full max-w-lg bg-white rounded-3xl border-4 border-rose-600 shadow-2xl overflow-hidden animate-fade-in">
       <div class="bg-gradient-to-r from-rose-600 to-red-700 px-6 py-5 text-white flex items-center gap-4">
         <div class="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-3xl shrink-0">
@@ -515,7 +519,7 @@
   </div>
 
   <!-- 🌟 Contenu Principal -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <main id="contenu-principal" tabindex="-1" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     <!-- ======================================================= -->
     <!-- ÉTAPE 1 DE L'ENTONNOIR : HUB « MES COURS » (PHASE 8)    -->
@@ -1238,7 +1242,7 @@
 
         <div x-show="m0DecoState.validated" class="p-4 rounded-2xl border text-xs font-bold leading-relaxed"
              :class="m0DecoState.completed ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'"
-             x-text="m0DecoState.feedback"></div>
+             x-text="m0DecoState.feedback" role="status" aria-live="polite"></div>
 
         <div class="flex justify-end">
           <button type="button" @click="validerM0Deco()"
@@ -1519,7 +1523,7 @@
         <!-- Feedback Escape Game -->
         <div x-show="egState.feedback" class="mt-4 p-3 rounded-xl text-xs font-bold"
              :class="egState.isSuccess ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'"
-             x-text="egState.feedback">
+             x-text="egState.feedback" role="status" aria-live="polite">
         </div>
 
         <!-- Victoire Escape Game -->
@@ -1634,7 +1638,7 @@
                 @click="lireTexteVocal(getActiveSubtheme().label + '. ' + getActiveSubtheme().lecon)"
                 class="px-2.5 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-[11px] font-extrabold transition cursor-pointer shrink-0"
                 title="Écouter la fiche de cours">
-                <span x-text="ttsPlaying ? '⏹️' : '🔊 Écouter'"></span>
+                <span x-text="ttsPlaying ? '⏹️ Arrêter' : '🔊 Écouter'"></span>
               </button>
             </div>
             <div class="space-y-3 max-h-[460px] overflow-y-auto pr-1"
@@ -2258,7 +2262,7 @@
                 @click="lireTexteVocal(getActiveSubthemeSecu().label + '. ' + getActiveSubthemeSecu().lecon)"
                 class="px-2.5 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold transition cursor-pointer shrink-0"
                 title="Écouter la fiche de cours">
-                <span x-text="ttsPlaying ? '⏹️' : '🔊 Écouter'"></span>
+                <span x-text="ttsPlaying ? '⏹️ Arrêter' : '🔊 Écouter'"></span>
               </button>
             </div>
             
@@ -2756,7 +2760,7 @@
               <div x-show="defisLudiques.linaPermissions.feedback"
                    :class="defisLudiques.linaPermissions.completed ? 'bg-emerald-500/20 border-emerald-400 text-emerald-200' : 'bg-amber-500/20 border-amber-400 text-amber-200'"
                    class="p-3 rounded-xl border text-[11px] font-bold"
-                   x-text="defisLudiques.linaPermissions.feedback"></div>
+                   x-text="defisLudiques.linaPermissions.feedback" role="status" aria-live="polite"></div>
               <button
                 type="button"
                 @click="validerPermissionsLina()"
@@ -3124,7 +3128,7 @@
             <strong>💡 Aperçu de ton prompt complet :</strong>
             <p class="mt-1 italic" x-text="[tome1bAtelier.ch3.role, tome1bAtelier.ch3.tache, tome1bAtelier.ch3.contexte, tome1bAtelier.ch3.format, tome1bAtelier.ch3.ajustement].map(v => String(v || '').trim()).filter(Boolean).join('. ') || 'Ton prompt apparaîtra ici au fur et à mesure.'"></p>
           </div>
-          <div x-show="tome1bAtelier.ch3.feedback" class="p-3.5 rounded-xl text-xs font-bold" :class="tome1bAtelier.ch3.validated ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'" x-text="tome1bAtelier.ch3.feedback"></div>
+          <div x-show="tome1bAtelier.ch3.feedback" class="p-3.5 rounded-xl text-xs font-bold" :class="tome1bAtelier.ch3.validated ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'" x-text="tome1bAtelier.ch3.feedback" role="status" aria-live="polite"></div>
           <button type="button" @click="validerTome1bAtelier('ch3')" class="min-h-[46px] px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm cursor-pointer touch-manipulation shadow-xs">✓ Valider mon Prompt (+20 XP)</button>
         </div>
       </div>
@@ -3303,7 +3307,7 @@
               <input type="text" x-model="tome1bAtelier.ch4.folderName" maxlength="60" placeholder="Ton nom de dossier" autocapitalize="off" autocomplete="off" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" />
             </div>
           </div>
-          <div x-show="tome1bAtelier.ch4.feedback" class="p-3.5 rounded-xl text-xs font-bold" :class="tome1bAtelier.ch4.validated ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'" x-text="tome1bAtelier.ch4.feedback"></div>
+          <div x-show="tome1bAtelier.ch4.feedback" class="p-3.5 rounded-xl text-xs font-bold" :class="tome1bAtelier.ch4.validated ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'" x-text="tome1bAtelier.ch4.feedback" role="status" aria-live="polite"></div>
           <button type="button" @click="validerTome1bAtelier('ch4')" class="min-h-[46px] px-6 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-black text-xs sm:text-sm cursor-pointer touch-manipulation shadow-xs">✓ Valider l'atelier (+20 XP)</button>
         </div>
       </div>
@@ -3495,7 +3499,7 @@
               <input type="text" inputmode="numeric" x-model="tome1bAtelier.ch5.scratchAngle" maxlength="6" placeholder="Nombre de degrés" class="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm" />
             </div>
           </div>
-          <div x-show="tome1bAtelier.ch5.feedback" class="p-3.5 rounded-xl text-xs font-bold" :class="tome1bAtelier.ch5.validated ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'" x-text="tome1bAtelier.ch5.feedback"></div>
+          <div x-show="tome1bAtelier.ch5.feedback" class="p-3.5 rounded-xl text-xs font-bold" :class="tome1bAtelier.ch5.validated ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'" x-text="tome1bAtelier.ch5.feedback" role="status" aria-live="polite"></div>
           <button type="button" @click="validerTome1bAtelier('ch5')" class="min-h-[46px] px-6 py-3 rounded-xl bg-lime-600 hover:bg-lime-700 text-white font-black text-xs sm:text-sm cursor-pointer touch-manipulation shadow-xs">✓ Valider l'atelier (+20 XP)</button>
         </div>
       </div>
@@ -3711,7 +3715,7 @@
               <div x-show="exerciseQuizzState.hasAnswered"
                    :class="exerciseQuizzState.isCorrect ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'"
                    class="p-4 rounded-2xl border text-xs font-bold leading-relaxed"
-                   x-text="exerciseQuizzState.feedbackMsg">
+                   x-text="exerciseQuizzState.feedbackMsg" role="status" aria-live="polite">
               </div>
 
               <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
@@ -3772,7 +3776,92 @@
       <!-- 1. WORKSPACE BUREAUTIQUE & DACTYLO (OFFICE) -->
       <!-- ========================================== -->
       <div x-show="!isCurrentExerciseQuizz() && currentCourse?.workspaceType === 'office'" class="space-y-8">
-        
+
+        <!-- ⌨️ Moteur de frappe intégré (dactylographie) : vitesse et précision mesurées -->
+        <section
+          x-show="hasTypingDrill()"
+          x-effect="currentExercise?.id; prepareTypingDrill()"
+          aria-labelledby="typing-title"
+          class="bg-white rounded-3xl p-5 sm:p-8 border-2 border-indigo-200 shadow-xs space-y-5">
+          <div class="flex items-start justify-between gap-3 flex-wrap">
+            <div>
+              <h3 id="typing-title" class="text-lg sm:text-xl font-black text-slate-900">⌨️ Entraînement de frappe chronométré</h3>
+              <p class="text-xs sm:text-sm text-slate-600 mt-1">
+                <span x-text="typing.label"></span> •
+                Objectif : <strong x-text="typing.goalWpm + ' mots/min'"></strong> et <strong x-text="typing.goalAccuracy + ' % de précision'"></strong>
+              </p>
+            </div>
+            <div x-show="typing.best" class="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-xs font-extrabold text-amber-900"
+                 x-text="typing.best ? ('⭐ Ton record : ' + typing.best.wpm + ' mots/min • ' + typing.best.accuracy + ' %') : ''"></div>
+          </div>
+
+          <!-- Compteurs en direct -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" aria-hidden="true">
+            <div class="p-3 rounded-2xl bg-indigo-50 border border-indigo-100 text-center">
+              <div class="text-2xl font-black text-indigo-800" x-text="typing.started ? typing.wpm : '—'"></div>
+              <div class="text-[11px] font-bold text-indigo-900">mots / minute</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-emerald-50 border border-emerald-100 text-center">
+              <div class="text-2xl font-black text-emerald-800" x-text="typing.started ? (typing.accuracy + ' %') : '—'"></div>
+              <div class="text-[11px] font-bold text-emerald-900">précision</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-rose-50 border border-rose-100 text-center">
+              <div class="text-2xl font-black text-rose-800" x-text="typing.errors"></div>
+              <div class="text-[11px] font-bold text-rose-900">fautes de frappe</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+              <div class="text-2xl font-black text-slate-800" x-text="getTypingSeconds() + ' s'"></div>
+              <div class="text-[11px] font-bold text-slate-700">temps écoulé</div>
+            </div>
+          </div>
+
+          <!-- Texte modèle -->
+          <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200">
+            <div class="text-[11px] font-black uppercase tracking-wide text-slate-600 mb-2">Texte à recopier</div>
+            <div class="typing-target" aria-hidden="true" x-html="getTypingTargetHtml()"></div>
+            <p class="sr-only" x-text="'Texte à recopier : ' + typing.text"></p>
+          </div>
+
+          <div class="h-2.5 rounded-full bg-slate-100 overflow-hidden" role="progressbar" aria-label="Avancement de la frappe"
+               aria-valuemin="0" aria-valuemax="100" :aria-valuenow="getTypingProgressPct()">
+            <div class="h-full bg-indigo-600 transition-all" :style="'width:' + getTypingProgressPct() + '%'"></div>
+          </div>
+
+          <!-- Zone de saisie -->
+          <div class="space-y-1.5">
+            <label for="typing-input" class="block text-xs font-extrabold text-slate-800">
+              👉 Tape ici, sans regarder tes mains. Le chronomètre démarre à la première touche.
+            </label>
+            <textarea
+              id="typing-input"
+              rows="3"
+              :disabled="typing.finished"
+              @input="onTypingInput($event)"
+              @paste.prevent="typing.notice = '✋ Le copier-coller est désactivé : seule la frappe compte.'"
+              @drop.prevent
+              autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+              placeholder="Commence à taper…"
+              class="w-full px-4 py-3 rounded-2xl border-2 border-slate-300 focus:border-indigo-600 bg-white font-mono text-base sm:text-lg disabled:bg-slate-100 disabled:text-slate-600 resize-none"></textarea>
+            <p x-show="typing.notice" class="text-xs font-bold text-rose-700" role="status" aria-live="polite" x-text="typing.notice"></p>
+          </div>
+
+          <!-- Résultat -->
+          <div x-show="typing.finished" role="status" aria-live="polite"
+               class="p-4 rounded-2xl border text-sm font-bold"
+               :class="typing.reached ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'"
+               x-text="getTypingResultText()"></div>
+
+          <div class="flex flex-wrap gap-3">
+            <button type="button" @click="recommencerFrappe(); $nextTick(() => { const f = document.getElementById('typing-input'); if (f) f.value = ''; })"
+                    class="min-h-[46px] px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm cursor-pointer touch-manipulation">↺ Recommencer</button>
+            <button type="button" x-show="hasSeveralTypingTexts()"
+                    @click="prepareTypingDrill(true); $nextTick(() => { const f = document.getElementById('typing-input'); if (f) { f.value = ''; f.focus(); } })"
+                    class="min-h-[46px] px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm cursor-pointer touch-manipulation">🔀 Autre texte</button>
+            <button type="button" x-show="typing.finished && !typing.implausible" @click="utiliserResultatFrappe()"
+                    class="min-h-[46px] px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm cursor-pointer touch-manipulation">📤 Envoyer ce résultat à mon professeur</button>
+          </div>
+        </section>
+
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           <!-- Colonne Gauche : Consigne, Aide-Mémoire & Outils (7 cols) -->
@@ -3933,7 +4022,7 @@
                   type="text" 
                   x-model="officeDocUrl"
                   @blur="if (currentExercise?.submission_type !== 'text' && officeDocUrl.trim()) verifierPartageLienDrive(officeDocUrl)"
-                  :placeholder="currentExercise?.submission_type === 'text' ? 'Ex: 24 mots/min, 96% de précision' : 'https://docs.google.com/document/d/...'"
+                  :placeholder="currentExercise?.submission_type === 'text' ? (hasTypingDrill() ? 'Rempli automatiquement après ton entraînement ci-dessus' : 'Ex: 24 mots/min, 96% de précision') : 'https://docs.google.com/document/d/...'"
                   class="w-full text-xs font-medium px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition" />
 
                 <!-- Résultat de la vérification du partage Drive -->
@@ -3956,10 +4045,11 @@
               </div>
 
               <!-- Feedback / Statut -->
-              <div x-show="officeFeedback" class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold" x-text="officeFeedback"></div>
+              <div x-show="officeFeedback" class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold" x-text="officeFeedback" role="status" aria-live="polite"></div>
 
               <!-- Bouton de soumission -->
               <button 
+                id="office-submit-btn"
                 @click="soumettreOfficeDevoir()"
                 :disabled="officeSubmitting"
                 class="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50">
@@ -4140,7 +4230,7 @@
                 <span x-show="codingScore" class="text-xs font-black px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800" x-text="codingScore + ' / 100'"></span>
               </div>
 
-              <div x-show="codingFeedback" class="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-medium" x-text="codingFeedback"></div>
+              <div x-show="codingFeedback" class="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-medium" x-text="codingFeedback" role="status" aria-live="polite"></div>
 
               <button 
                 @click="soumettreCodeExercice()"
@@ -4247,7 +4337,7 @@
                   class="w-full text-xs font-medium px-3.5 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-slate-50 focus:bg-white transition resize-none"></textarea>
               </div>
 
-              <div x-show="creativeFeedback" class="p-3.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-900 text-xs font-bold" x-text="creativeFeedback"></div>
+              <div x-show="creativeFeedback" class="p-3.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-900 text-xs font-bold" x-text="creativeFeedback" role="status" aria-live="polite"></div>
 
               <button 
                 @click="soumettreCreativeDevoir()"
@@ -4364,7 +4454,7 @@
                 placeholder="Rédigez votre texte argumenté ici..."
                 class="w-full p-4 rounded-2xl border border-slate-200 text-xs sm:text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-rose-500"></textarea>
 
-              <div x-show="redactionState.feedback" class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold" x-text="redactionState.feedback"></div>
+              <div x-show="redactionState.feedback" class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold" x-text="redactionState.feedback" role="status" aria-live="polite"></div>
 
               <button
                 @click="soumettreDevoirRedaction()"
@@ -4467,7 +4557,7 @@
                 </button>
               </div>
 
-              <div x-show="languesState.feedback" class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold" x-text="languesState.feedback"></div>
+              <div x-show="languesState.feedback" class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold" x-text="languesState.feedback" role="status" aria-live="polite"></div>
 
               <button
                 @click="soumettreDevoirLangues()"
@@ -4559,7 +4649,7 @@
               <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 prose-custom text-xs sm:text-sm min-h-[220px]"
                    x-html="getRenderedSciencesPreview()"></div>
 
-              <div x-show="sciencesState.feedback" class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold" x-text="sciencesState.feedback"></div>
+              <div x-show="sciencesState.feedback" class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold" x-text="sciencesState.feedback" role="status" aria-live="polite"></div>
 
               <button
                 @click="soumettreDevoirSciences()"
@@ -4647,7 +4737,7 @@
         <!-- Notification retour Synchronisation Classroom ou Nouveaux élèves détectés -->
         <div x-show="classroomAutoSyncSummary" class="mt-4 p-3 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-100 text-xs font-extrabold flex items-center justify-between">
           <span x-text="classroomAutoSyncSummary"></span>
-          <button @click="classroomAutoSyncSummary = ''" class="text-emerald-200 hover:text-white font-black text-sm cursor-pointer">&times;</button>
+          <button @click="classroomAutoSyncSummary = ''" class="text-emerald-200 hover:text-white font-black text-sm cursor-pointer" aria-label="Fermer">&times;</button>
         </div>
 
         <div x-show="classroomNewStudentsDetected.length > 0" class="mt-4 p-3 rounded-2xl bg-amber-500/20 border border-amber-400/40 text-amber-100 text-xs font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -4785,7 +4875,7 @@
           </div>
         </div>
 
-        <div x-show="batchFeedbackMsg" class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black text-center" x-text="batchFeedbackMsg"></div>
+        <div x-show="batchFeedbackMsg" class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black text-center" x-text="batchFeedbackMsg" role="status" aria-live="polite"></div>
 
         <!-- Barre de Filtres + Protection Anti-Doublons Discrète & Rassurante -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
@@ -4890,7 +4980,7 @@
 
           <div x-show="antiSpamFeedbackMsg" class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between">
             <span x-text="antiSpamFeedbackMsg"></span>
-            <button @click="antiSpamFeedbackMsg = ''" class="text-emerald-700 font-black cursor-pointer">&times;</button>
+            <button @click="antiSpamFeedbackMsg = ''" class="text-emerald-700 font-black cursor-pointer" aria-label="Fermer">&times;</button>
           </div>
 
           <!-- Tiroir Pliable : Régulation XP & Avertissements (Ouvert uniquement à la demande du professeur) -->
@@ -5202,7 +5292,7 @@
 
           <div x-show="cleaningStudentsFeedback" class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold flex items-center justify-between">
             <span x-text="cleaningStudentsFeedback"></span>
-            <button type="button" @click="cleaningStudentsFeedback = ''" class="text-emerald-700 font-black cursor-pointer">&times;</button>
+            <button type="button" @click="cleaningStudentsFeedback = ''" class="text-emerald-700 font-black cursor-pointer" aria-label="Fermer">&times;</button>
           </div>
 
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
@@ -5727,7 +5817,7 @@
             <div x-show="classroomSelectedCourse" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
               <div x-show="classroomImportSuccessMsg" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-black flex items-center justify-between">
                 <span x-text="classroomImportSuccessMsg"></span>
-                <button @click="classroomImportSuccessMsg = ''" class="text-emerald-700 font-bold cursor-pointer">&times;</button>
+                <button @click="classroomImportSuccessMsg = ''" class="text-emerald-700 font-bold cursor-pointer" aria-label="Fermer">&times;</button>
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
@@ -5795,7 +5885,7 @@
 
             <div x-show="classroomPublishSuccess" class="p-3 bg-emerald-100 border border-emerald-300 rounded-xl text-emerald-900 text-xs font-black flex items-center justify-between">
               <span x-text="classroomPublishSuccess"></span>
-              <button @click="classroomPublishSuccess = ''" class="text-emerald-800 font-bold cursor-pointer">&times;</button>
+              <button @click="classroomPublishSuccess = ''" class="text-emerald-800 font-bold cursor-pointer" aria-label="Fermer">&times;</button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -6609,17 +6699,24 @@
                 title="Copier les 6 cours de public/cours/ vers Firestore pour les rendre éditables sans code">
                 <span x-text="studioMigrating ? '⏳ Migration...' : '🔄 Migrer les 6 cours statiques vers Firestore'"></span>
               </button>
+              <button
+                @click="protegerCorrigesExercices()"
+                :disabled="studioMigrating"
+                class="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-bold text-xs transition cursor-pointer disabled:opacity-50"
+                title="Déplacer les corrigés et barèmes hors de la collection publique des exercices">
+                🔐 Protéger les corrigés des exercices
+              </button>
             </div>
           </div>
 
           <!-- Messages retour -->
           <div x-show="studioSuccessMsg" class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black flex items-center justify-between">
             <span x-text="studioSuccessMsg"></span>
-            <button @click="studioSuccessMsg = ''" class="text-emerald-700 font-bold cursor-pointer">&times;</button>
+            <button @click="studioSuccessMsg = ''" class="text-emerald-700 font-bold cursor-pointer" aria-label="Fermer">&times;</button>
           </div>
           <div x-show="studioErrorMsg" class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center justify-between">
             <span x-text="studioErrorMsg"></span>
-            <button @click="studioErrorMsg = ''" class="text-rose-700 font-bold cursor-pointer">&times;</button>
+            <button @click="studioErrorMsg = ''" class="text-rose-700 font-bold cursor-pointer" aria-label="Fermer">&times;</button>
           </div>
 
           <!-- LES 5 SOURCES D'IMPORT FACILE -->
@@ -6952,7 +7049,7 @@
           x-show="studioReviewModalOpen"
           x-transition.opacity
           class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
-          style="display: none;">
+          style="display: none;" role="dialog" aria-modal="true">
           <div class="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 max-h-[85vh] flex flex-col justify-between">
             <div class="pb-4 border-b border-slate-100 flex items-center justify-between">
               <div>
@@ -6960,7 +7057,7 @@
                 <h3 class="text-lg font-black text-slate-900 mt-1" x-text="studioReviewProposal?.title || 'Proposition de cours'"></h3>
                 <p class="text-xs text-slate-500" x-text="studioReviewProposal?.pitch"></p>
               </div>
-              <button @click="studioReviewModalOpen = false" class="text-slate-400 hover:text-slate-700 text-xl font-bold cursor-pointer">&times;</button>
+              <button @click="studioReviewModalOpen = false" class="text-slate-400 hover:text-slate-700 text-xl font-bold cursor-pointer" aria-label="Fermer">&times;</button>
             </div>
 
             <div class="py-4 overflow-y-auto space-y-4 text-xs">
@@ -6997,7 +7094,7 @@
       x-show="modalAddTeacherOpen" 
       x-transition.opacity 
       class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
-      style="display: none;">
+      style="display: none;" role="dialog" aria-modal="true">
       <div 
         @click.away="fermerModalEnseignant()"
         class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative animate-scaleUp">
@@ -7075,14 +7172,14 @@
       x-show="modalAddStudentOpen" 
       x-transition.opacity 
       class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
-      style="display: none;">
+      style="display: none;" role="dialog" aria-modal="true">
       <div 
         @click.away="modalAddStudentOpen = false"
         class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative animate-scaleUp">
         
         <button 
           @click="modalAddStudentOpen = false" 
-          class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold p-1 cursor-pointer">
+          class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold p-1 cursor-pointer" aria-label="Fermer">
           &times;
         </button>
 
@@ -7180,7 +7277,7 @@
           <p class="text-xs text-blue-100 font-medium">Assistant socratique @lt_X</p>
         </div>
       </div>
-      <button @click="tutorOpen = false" class="text-white/80 hover:text-white text-lg font-bold">✕</button>
+      <button @click="tutorOpen = false" class="text-white/80 hover:text-white text-lg font-bold" aria-label="Fermer">✕</button>
     </div>
 
     <div class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 text-xs">
@@ -7241,7 +7338,7 @@
     x-show="modalLoginProfOpen" 
     x-transition.opacity 
     class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
-    style="display: none;">
+    style="display: none;" role="dialog" aria-modal="true">
     <div 
       @click.away="modalLoginProfOpen = false"
       class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 text-center relative animate-scaleUp">
@@ -7249,7 +7346,7 @@
       <!-- Bouton fermer -->
       <button 
         @click="modalLoginProfOpen = false" 
-        class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold p-1">
+        class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold p-1" aria-label="Fermer">
         &times;
       </button>
 
@@ -7296,7 +7393,7 @@
     @keydown.window="handleSpeedGraderKeydown($event)"
     x-transition.opacity 
     class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-3 sm:p-5 overflow-y-auto"
-    style="display: none;">
+    style="display: none;" role="dialog" aria-modal="true">
     <div 
       @click.away="modalCorrectionOpen = false"
       class="bg-white rounded-3xl max-w-6xl w-full p-5 sm:p-7 shadow-2xl border border-slate-100 relative my-4 max-h-[94vh] flex flex-col animate-scaleUp">
@@ -7346,7 +7443,7 @@
 
           <button 
             @click="modalCorrectionOpen = false" 
-            class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl text-base font-bold transition cursor-pointer">
+            class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl text-base font-bold transition cursor-pointer" aria-label="Fermer">
             ✕
           </button>
         </div>
@@ -7513,7 +7610,7 @@
                 class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600 leading-relaxed"></textarea>
             </div>
 
-            <div x-show="gradingFeedbackSuccess" x-text="gradingFeedbackSuccess" class="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-black text-center"></div>
+            <div x-show="gradingFeedbackSuccess" x-text="gradingFeedbackSuccess" class="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-black text-center" role="status" aria-live="polite"></div>
 
             <!-- Synchronisation Google Classroom -->
             <div x-show="classroomConnected" class="p-3 bg-emerald-50/60 rounded-xl border border-emerald-100 flex items-center justify-between gap-2">
@@ -7535,7 +7632,7 @@
                 </button>
               </div>
             </div>
-            <div x-show="classroomSyncGradeFeedback" x-text="classroomSyncGradeFeedback" class="p-2 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-[11px] font-black text-center"></div>
+            <div x-show="classroomSyncGradeFeedback" x-text="classroomSyncGradeFeedback" class="p-2 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-[11px] font-black text-center" role="status" aria-live="polite"></div>
           </div>
         </div>
 
@@ -7612,7 +7709,7 @@
     x-transition:enter="transition ease-out duration-200"
     x-transition:enter-start="opacity-0 scale-95"
     x-transition:enter-end="opacity-100 scale-100"
-    x-cloak>
+    x-cloak role="dialog" aria-modal="true">
     
     <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-100 text-center relative">
       <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-3xl font-black shadow-xs">
@@ -7649,16 +7746,18 @@
   <!-- 🌳 MODALE ARBRE DE COMPÉTENCES, MASCOTTE ÉVOLUTIVE @lt_X & SCORE D'AUTONOMIE (PHASE 12) -->
   <div
     x-show="skillTreeModalOpen"
+    @keydown.escape.window="skillTreeModalOpen = false"
+    aria-label="Mon arbre de compétences"
     x-transition.opacity
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto"
-    style="display: none;">
+    style="display: none;" role="dialog" aria-modal="true">
     <div
       @click.away="skillTreeModalOpen = false"
       class="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative my-6 max-h-[90vh] overflow-y-auto space-y-6">
 
       <button
         @click="skillTreeModalOpen = false"
-        class="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl text-lg font-bold cursor-pointer">
+        class="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl text-lg font-bold cursor-pointer" aria-label="Fermer">
         ✕
       </button>
 
@@ -7739,8 +7838,8 @@
       <!-- Arbre de Compétences Visuel (3 branches) -->
       <div class="space-y-4">
         <div class="flex items-center justify-between">
-          <h4 class="font-black text-base text-slate-900">🌳 Mon Arbre de Compétences Numériques</h4>
-          <span class="text-xs font-bold text-slate-400">Référentiel SeGEC & Parcours Multi-Cours</span>
+          <h4 class="font-black text-base text-slate-900" x-text="'🌳 ' + getSkillTreeTitle()"></h4>
+          <span class="text-xs font-bold text-slate-600" x-text="getSkillTreeSummary().done + ' / ' + getSkillTreeSummary().total + ' validées'"></span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -7754,16 +7853,16 @@
               <div class="space-y-2">
                 <template x-for="node in branch.nodes" :key="node.code">
                   <div
-                    :class="node.status === 'acquis' ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-white border-slate-200 text-slate-700'"
+                    :class="node.status === 'acquis' ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : (node.status === 'en_cours' ? 'bg-amber-50 border-amber-300 text-amber-950' : 'bg-white border-slate-200 text-slate-700')"
                     class="p-2.5 rounded-xl border text-xs flex items-center justify-between gap-2">
                     <div>
                       <div class="text-[10px] font-black opacity-60" x-text="node.code"></div>
                       <div class="font-bold leading-snug" x-text="node.label"></div>
                     </div>
                     <span
-                      :class="node.status === 'acquis' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500'"
-                      class="w-6 h-6 rounded-full text-xs font-black flex items-center justify-center shrink-0"
-                      x-text="node.status === 'acquis' ? '✓' : '•'"></span>
+                      :class="node.status === 'acquis' ? 'bg-emerald-600 text-white' : (node.status === 'en_cours' ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-600')"
+                      class="px-2 h-6 rounded-full text-[11px] font-black flex items-center justify-center shrink-0 whitespace-nowrap"
+                      x-text="node.status === 'acquis' ? '✓ Validé' : (node.status === 'en_cours' ? 'En cours' : 'À faire')"></span>
                   </div>
                 </template>
               </div>
@@ -7782,7 +7881,7 @@
     x-show="modalBulletinEleveOpen"
     x-cloak
     class="fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
-    @keydown.escape.window="fermerBulletinEleve()">
+    @keydown.escape.window="fermerBulletinEleve()" role="dialog" aria-modal="true">
 
     <template x-if="selectedBulletinStudent && getBulletinDataForStudent(selectedBulletinStudent)">
       <div
@@ -7834,7 +7933,7 @@
             <button
               type="button"
               @click="fermerBulletinEleve()"
-              class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold cursor-pointer">
+              class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold cursor-pointer" aria-label="Fermer">
               ✕
             </button>
           </div>
@@ -8121,7 +8220,7 @@
     x-show="modalCourseAccessCodeOpen"
     x-cloak
     class="fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-4"
-    @keydown.escape.window="fermerModalCodeAccesCours()">
+    @keydown.escape.window="fermerModalCodeAccesCours()" role="dialog" aria-modal="true">
 
     <div
       @click.outside="fermerModalCodeAccesCours()"
@@ -8143,7 +8242,7 @@
         <button
           type="button"
           @click="fermerModalCodeAccesCours()"
-          class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold cursor-pointer">
+          class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold cursor-pointer" aria-label="Fermer">
           ✕
         </button>
       </div>
@@ -8200,5 +8299,60 @@
   </div>
 
   <script type="module" src="/src/main.js"></script>
+  <!-- ==================================================================== -->
+  <!-- BOÎTE DE DIALOGUE ACCESSIBLE (remplace alert / confirm du navigateur)   -->
+  <!-- ==================================================================== -->
+  <div
+    x-show="uiDialog.open"
+    x-cloak
+    x-transition.opacity
+    class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/70"
+    style="display: none;"
+    @keydown.escape.window="if (uiDialog.open) closeUiDialog(false)"
+    @keydown.tab="trapUiDialogFocus($event)"
+    @click.self="closeUiDialog(false)">
+    <div
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="ui-dialog-title"
+      aria-describedby="ui-dialog-message"
+      class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 space-y-4"
+      :class="{
+        'border-rose-300': uiDialog.tone === 'error' || uiDialog.tone === 'danger',
+        'border-emerald-300': uiDialog.tone === 'success',
+        'border-indigo-200': uiDialog.tone === 'info' || uiDialog.tone === 'question'
+      }">
+      <div class="flex items-center gap-3">
+        <span
+          aria-hidden="true"
+          class="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0"
+          :class="{
+            'bg-rose-100': uiDialog.tone === 'error' || uiDialog.tone === 'danger',
+            'bg-emerald-100': uiDialog.tone === 'success',
+            'bg-indigo-100': uiDialog.tone === 'info' || uiDialog.tone === 'question'
+          }"
+          x-text="({ error: '⚠️', danger: '🗑️', success: '✅', info: '💡', question: '❓' })[uiDialog.tone] || '💡'"></span>
+        <h2 id="ui-dialog-title" class="font-black text-lg text-slate-900 leading-tight" x-text="uiDialog.title"></h2>
+      </div>
+      <p id="ui-dialog-message" class="text-sm text-slate-700 leading-relaxed whitespace-pre-line break-words" x-text="uiDialog.message"></p>
+      <div class="flex flex-wrap justify-end gap-3 pt-1">
+        <button
+          id="ui-dialog-cancel"
+          type="button"
+          x-show="uiDialog.mode === 'confirm'"
+          @click="closeUiDialog(false)"
+          class="min-h-[44px] px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm cursor-pointer touch-manipulation"
+          x-text="uiDialog.cancelLabel"></button>
+        <button
+          id="ui-dialog-confirm"
+          type="button"
+          @click="closeUiDialog(true)"
+          class="min-h-[44px] px-6 py-2.5 rounded-xl text-white font-black text-sm cursor-pointer touch-manipulation"
+          :class="uiDialog.tone === 'danger' ? 'bg-rose-600 hover:bg-rose-700' : 'bg-indigo-600 hover:bg-indigo-700'"
+          x-text="uiDialog.confirmLabel"></button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

@@ -29,7 +29,7 @@ export function createFormsStore() {
 
     async genererQuizForms() {
       if (!this.formsTopicInput.trim()) {
-        alert("Veuillez renseigner un sujet ou thème pour le quiz.");
+        this.notify("Veuillez renseigner un sujet ou thème pour le quiz.");
         return;
       }
 
@@ -54,10 +54,10 @@ export function createFormsStore() {
         this.formsResponderUrl = res.responderUri || '';
 
         if (res.mode === 'preview_only') {
-          alert("✨ Questions générées avec succès par l'IA Gemini ! Prévisualisation disponible ci-dessous.");
+          this.notify("✨ Questions générées avec succès par l'IA Gemini ! Prévisualisation disponible ci-dessous.");
         }
       } catch (err) {
-        alert("Erreur lors de la génération du quiz : " + err.message);
+        this.notify("Erreur lors de la génération du quiz : " + err.message);
       } finally {
         this.formsGenerating = false;
       }
@@ -65,7 +65,7 @@ export function createFormsStore() {
 
     async synchroniserReponsesForms() {
       if (!this.formsFormId) {
-        alert("Veuillez d'abord générer un Google Form ou saisir son ID.");
+        this.notify("Veuillez d'abord générer un Google Form ou saisir son ID.");
         return;
       }
 
@@ -87,7 +87,7 @@ export function createFormsStore() {
         await this.chargerElevesReels();
         this.activerEcouteClasse(this.selectedTeacherClass);
       } catch (err) {
-        alert("Erreur synchronisation des réponses Google Forms : " + err.message);
+        this.notify("Erreur synchronisation des réponses Google Forms : " + err.message);
       } finally {
         this.formsSyncLoading = false;
       }
@@ -95,11 +95,11 @@ export function createFormsStore() {
 
     async publierQuizFormsDansClassroom() {
       if (!this.formsResponderUrl) {
-        alert("Aucun formulaire Google Forms actif n'a de lien de réponse.");
+        this.notify("Aucun formulaire Google Forms actif n'a de lien de réponse.");
         return;
       }
       if (!isClassroomConnected() || !this.classroomSelectedCourseId) {
-        alert("Veuillez d'abord connecter et sélectionner un cours Google Classroom depuis l'onglet 'Google Classroom'.");
+        this.notify("Veuillez d'abord connecter et sélectionner un cours Google Classroom depuis l'onglet 'Google Classroom'.");
         return;
       }
 
@@ -117,7 +117,7 @@ export function createFormsStore() {
         this.formsPublishToClassroomSuccessMsg = `✅ Quiz publié avec succès dans Google Classroom (${this.classroomSelectedCourse?.name || 'Classroom'}) !`;
         this.classroomCourseWorkList = await fetchCourseWork(this.classroomSelectedCourseId);
       } catch (err) {
-        alert("Erreur publication dans Classroom : " + err.message);
+        this.notify("Erreur publication dans Classroom : " + err.message);
       } finally {
         this.formsPublishToClassroomLoading = false;
       }

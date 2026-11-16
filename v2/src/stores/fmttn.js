@@ -1582,7 +1582,7 @@ export function createFmttnStore() {
         this.bankSubmitted = false;
         this.bankIsCorrect = false;
       } else {
-        alert(`Entraînement terminé ! Score : ${this.bankScore} points.`);
+        this.notify(`Entraînement terminé ! Score : ${this.bankScore} points.`);
         this.bankQuestionIndex = 0;
         this.bankUserSelection = null;
         this.bankSubmitted = false;
@@ -1685,7 +1685,7 @@ export function createFmttnStore() {
         this.bankSubmittedSecu = false;
         this.bankIsCorrectSecu = false;
       } else {
-        alert(`Entraînement Sécurité terminé ! Score : ${this.bankScoreSecu} points.`);
+        this.notify(`Entraînement Sécurité terminé ! Score : ${this.bankScoreSecu} points.`);
         this.bankQuestionIndexSecu = 0;
         this.bankUserSelectionSecu = null;
         this.bankSubmittedSecu = false;
@@ -1725,7 +1725,7 @@ export function createFmttnStore() {
       });
 
       if (!toutRempli) {
-        alert('Veuillez classer les 6 éléments avant de valider.');
+        this.notify('Veuillez classer les 6 éléments avant de valider.');
         return;
       }
 
@@ -1812,7 +1812,7 @@ export function createFmttnStore() {
         this.chapter.support_cours.notebooklm_url = newUrl;
       }
       await savePresentationConfig(moduleId, { notebooklm_url: newUrl });
-      alert('Lien NotebookLM enregistré avec succès dans Firestore !');
+      this.notify('Lien NotebookLM enregistré avec succès dans Firestore !');
     },
 
     getFmttnModuleLabel(moduleId = this.selectedModuleId) {

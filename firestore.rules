@@ -87,6 +87,12 @@ service cloud.firestore {
       allow write: if isTeacher();
     }
 
+    // Corrigés et barèmes des exercices : JAMAIS lisibles par les élèves.
+    // Lus côté serveur par les Cloud Functions (tuteur IA, correction) via l'Admin SDK.
+    match /exercices_corriges/{exId} {
+      allow read, write: if isTeacher();
+    }
+
     match /config_presentations/{moduleId} {
       allow read: if true;
       allow write: if isTeacher();

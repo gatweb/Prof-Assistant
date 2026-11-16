@@ -1080,7 +1080,7 @@ export function createCourseStore() {
     async soumettreOfficeDevoir() {
       const docUrl = this.officeDocUrl.trim();
       if (!docUrl && this.currentExercise?.submission_type !== 'text') {
-        alert("Veuillez coller le lien de votre Google Doc ou dossier Drive.");
+        this.notify("Veuillez coller le lien de votre Google Doc ou dossier Drive.");
         return;
       }
 
@@ -1093,7 +1093,7 @@ export function createCourseStore() {
       if (this.currentExercise?.submission_type !== 'text' && typeof this.verifierPartageLienDrive === 'function') {
         const check = await this.verifierPartageLienDrive(docUrl);
         if (check && check.status === 'private_file') {
-          alert(check.message);
+          this.notify(check.message);
           return;
         }
       }
@@ -1158,7 +1158,7 @@ export function createCourseStore() {
     async soumettreCreativeDevoir() {
       const projUrl = this.creativeProjectUrl.trim();
       if (!projUrl) {
-        alert("Veuillez coller le lien de votre création (Canva, Drive, Gemini, etc.).");
+        this.notify("Veuillez coller le lien de votre création (Canva, Drive, Gemini, etc.).");
         return;
       }
       const exId = this.currentExercise?.id || 'creative-ex';

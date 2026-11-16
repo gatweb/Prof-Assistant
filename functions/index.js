@@ -45,6 +45,29 @@ async function getCachedDoc(collectionName, docId) {
     return data;
 }
 
+// Champs de corrigé conservés hors de la collection publique `exercices`.
+const CORRIGE_FIELDS = ["corrige_enseignant", "expected_answer", "rubric"];
+
+/**
+ * Corrigé de référence d'un exercice : collection privée `exercices_corriges` d'abord,
+ * puis anciens champs du document public (tant que la migration n'a pas été lancée).
+ */
+async function getCorrigeReference(exId, exData) {
+    let prive = null;
+    try {
+        prive = exId ? await getCachedDoc("exercices_corriges", String(exId).slice(0, 120)) : null;
+    } catch (e) {
+        prive = null;
+    }
+    for (const source of [prive, exData]) {
+        for (const field of CORRIGE_FIELDS) {
+            const value = source && source[field];
+            if (value) return typeof value === "string" ? value : JSON.stringify(value);
+        }
+    }
+    return "";
+}
+
 /**
  * Prompts système officiels résolus côté serveur par `course_id` (Sécurité S1 : aucun prompt arbitraire depuis le client).
  */
@@ -396,7 +419,7 @@ exports.corrigerDevoir = onCall({
             directives = "- Vérifie la rigueur du raisonnement étape par étape : identification des données, formule choisie, application numérique et présence indispensable des unités.\n- Si une étape comporte une erreur de calcul ou de signe, pointe l'étape précise sans livrer la réponse finale.";
         }
 
-        const corrigeReference = exData.corrige_enseignant || exData.expected_answer || exData.rubric || "";
+        const corrigeReference = await getCorrigeReference(safeExId, exData);
         const promptSysteme = `Tu es ${role} rigoureux et bienveillant.
 Contexte théorique de l'exercice/mission : "${exData.theorie_md || ''}"
 Consigne/Objectif : "${exData.enonce_md || exData.consigne || ''}"
@@ -604,7 +627,7 @@ exports.interrogerTuteur = onCall({
         }
     });
 
-    const corrigeTuteur = exData?.corrige_enseignant || exData?.expected_answer || exData?.rubric || "";
+    const corrigeTuteur = await getCorrigeReference(safeExId, exData);
     const systemInstruction = `${baseSystemPrompt}
 ${exData?.theorie_md ? `\nCONTEXTE THÉORIQUE DE L'EXERCICE :\n${exData.theorie_md}` : ""}
 ${exData?.enonce_md || exData?.consigne ? `\nCONSIGNE DE L'EXERCICE :\n${exData.enonce_md || exData.consigne}` : ""}

@@ -14,6 +14,7 @@ import {
   setDoc, 
   updateDoc, 
   deleteDoc,
+  deleteField,
   writeBatch,
   runTransaction,
   collection, 
@@ -1982,3 +1983,36 @@ export async function acquitterAvertissementSpamEleve({ classeId = '1A', eleveId
 
 
 
+
+// ==========================================
+// 🔐 Corrigés des exercices : hors de la collection publique
+// ==========================================
+const CORRIGE_FIELDS = ['corrige_enseignant', 'expected_answer', 'rubric'];
+
+/**
+ * Déplace les corrigés/barèmes de `exercices/{id}` (lisible par tous) vers
+ * `exercices_corriges/{id}` (professeurs et Cloud Functions uniquement).
+ * Sans danger à relancer : ne touche que les documents qui contiennent encore un corrigé.
+ */
+export async function migrerCorrigesExercicesPrives() {
+  const snap = await getDocs(collection(db, 'exercices'));
+  let moved = 0;
+  for (const docSnap of snap.docs) {
+    const data = docSnap.data();
+    const present = CORRIGE_FIELDS.filter(f => data[f] !== undefined && data[f] !== null && data[f] !== '');
+    if (!present.length) continue;
+    const privatePayload = { exercice_id: docSnap.id, course_id: data.course_id || data.id_course || '', migrated_at: serverTimestamp() };
+    const publicPatch = {};
+    present.forEach(f => {
+      privatePayload[f] = data[f];
+      publicPatch[f] = deleteField();
+    });
+    // Le corrigé est d'abord copié en lieu sûr, puis seulement retiré du document public.
+    const batch = writeBatch(db);
+    batch.set(doc(db, 'exercices_corriges', docSnap.id), privatePayload, { merge: true });
+    batch.update(doc(db, 'exercices', docSnap.id), publicPatch);
+    await batch.commit();
+    moved++;
+  }
+  return { scanned: snap.size, moved };
+}

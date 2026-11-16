@@ -372,7 +372,7 @@ export function createTeacherStore() {
         await this.chargerEquipeEnseignants();
       } catch (err) {
         console.error("Erreur enregistrement enseignant :", err);
-        alert("Erreur lors de l'enregistrement : " + err.message);
+        this.notify("Erreur lors de l'enregistrement : " + err.message);
       }
     },
 
@@ -389,19 +389,19 @@ export function createTeacherStore() {
         await this.chargerEquipeEnseignants();
       } catch (err) {
         console.error("Erreur mise à jour statut enseignant :", err);
-        alert("Erreur : " + err.message);
+        this.notify("Erreur : " + err.message);
       }
     },
 
     async supprimerEnseignantModal(email) {
-      if (!confirm(`Retirer définitivement ${email} de l'équipe enseignante ?`)) return;
+      if (!await this.confirmDialog(`Retirer définitivement ${email} de l'équipe enseignante ?`)) return;
 
       try {
         await supprimerEnseignantCloud(email);
         await this.chargerEquipeEnseignants();
       } catch (err) {
         console.error("Erreur suppression enseignant :", err);
-        alert("Erreur : " + err.message);
+        this.notify("Erreur : " + err.message);
       }
     },
 
@@ -426,7 +426,7 @@ export function createTeacherStore() {
         await this.chargerElevesReels();
         this.activerEcouteClasse(this.selectedTeacherClass);
       } else {
-        alert(`Erreur lors de l'enregistrement de l'élève : ${res.error}`);
+        this.notify(`Erreur lors de l'enregistrement de l'élève : ${res.error}`);
       }
     },
 
@@ -441,7 +441,7 @@ export function createTeacherStore() {
 
     async supprimerEleveModal(student) {
       if (!student) return;
-      if (!confirm(`Supprimer définitivement le compte de « ${student.nom} » (${student.classe || '1A'}) ?\nAstuce : vous pouvez aussi cliquer sur 🗄️ Archiver pour simplement le déplacer dans « Années précédentes ».`)) return;
+      if (!await this.confirmDialog(`Supprimer définitivement le compte de « ${student.nom} » (${student.classe || '1A'}) ?\nAstuce : vous pouvez aussi cliquer sur 🗄️ Archiver pour simplement le déplacer dans « Années précédentes ».`)) return;
       const ok = await deleteStudentFromClassInDb(student);
       if (ok) {
         if (this.selectedBulletinStudent?.id === student.id) {
@@ -487,7 +487,7 @@ export function createTeacherStore() {
         this.cleaningStudentsFeedback = doneMsg;
         this.studentCleanStatusMsg = doneMsg;
       } catch (err) {
-        alert("Erreur lors du nettoyage des élèves : " + err.message);
+        this.notify("Erreur lors du nettoyage des élèves : " + err.message);
         this.cleaningStudentsFeedback = '';
         this.studentCleanStatusMsg = '';
       } finally {
@@ -754,7 +754,7 @@ export function createTeacherStore() {
         this.antiSpamFeedbackMsg = `🧹 Nettoyage terminé : ${res.deletedCount} copie(s) en doublon supprimée(s) définitivement de Firestore !`;
       } catch (err) {
         console.error('[AntiSpam] Erreur purge doublons :', err);
-        alert('Erreur lors de la purge des doublons : ' + err.message);
+        this.notify('Erreur lors de la purge des doublons : ' + err.message);
       } finally {
         this.antiSpamCleaning = false;
       }
@@ -777,7 +777,7 @@ export function createTeacherStore() {
         this.antiSpamFeedbackMsg = `⚖️ ${spammer.nom} : XP ajusté à ${newXp} XP ${sendWarning ? '+ Avertissement bloquant envoyé sur son écran' : ''}.`;
       } catch (err) {
         console.error('[AntiSpam] Erreur sanction élève :', err);
-        alert('Erreur lors de la sanction : ' + err.message);
+        this.notify('Erreur lors de la sanction : ' + err.message);
       } finally {
         this.antiSpamCleaning = false;
       }
@@ -809,7 +809,7 @@ export function createTeacherStore() {
         this.antiSpamFeedbackMsg = `✅ Assainissement réussi : ${deleted} doublon(s) supprimé(s), ${warned} élève(s) recalculé(s) et averti(s) !`;
       } catch (err) {
         console.error('[AntiSpam] Erreur assainissement global :', err);
-        alert('Erreur : ' + err.message);
+        this.notify('Erreur : ' + err.message);
       } finally {
         this.antiSpamCleaning = false;
       }
@@ -965,7 +965,7 @@ export function createTeacherStore() {
           }, 900);
         }
       } catch (err) {
-        alert("Erreur lors de la mise à jour : " + err.message);
+        this.notify("Erreur lors de la mise à jour : " + err.message);
       } finally {
         this.gradingLoading = false;
       }
@@ -988,11 +988,11 @@ export function createTeacherStore() {
     async validerLotCopiesEligibles() {
       const eligible = this.getBatchEligibleSubmissions();
       if (!eligible.length) {
-        alert("Aucune copie en attente ne remplit tous les critères automatiques (note IA ≥ 80% et 0 erreur détectée).");
+        this.notify("Aucune copie en attente ne remplit tous les critères automatiques (note IA ≥ 80% et 0 erreur détectée).");
         return;
       }
 
-      if (!confirm(`Valider par lot ${eligible.length} copie(s) ayant rempli tous les critères de réussite (note IA ≥ 80/100 et aucune erreur) ?`)) {
+      if (!await this.confirmDialog(`Valider par lot ${eligible.length} copie(s) ayant rempli tous les critères de réussite (note IA ≥ 80/100 et aucune erreur) ?`)) {
         return;
       }
 
@@ -1020,7 +1020,7 @@ export function createTeacherStore() {
         this.batchFeedbackMsg = `🎉 ${validatedCount} copie(s) validée(s) par lot avec succès !`;
         setTimeout(() => { this.batchFeedbackMsg = ''; }, 5000);
       } catch (err) {
-        alert("Erreur lors de la validation par lot : " + err.message);
+        this.notify("Erreur lors de la validation par lot : " + err.message);
       } finally {
         this.batchValidating = false;
       }
@@ -1293,7 +1293,7 @@ export function createTeacherStore() {
       if (!st) return;
       const targetXp = explicitXp !== null ? Number(explicitXp) : Number(this.bulletinXpInput);
       if (isNaN(targetXp) || targetXp < 0) {
-        alert("Veuillez entrer un nombre de points XP valide (0 ou plus).");
+        this.notify("Veuillez entrer un nombre de points XP valide (0 ou plus).");
         return;
       }
       this.bulletinCorrectionSaving = true;
@@ -1309,7 +1309,7 @@ export function createTeacherStore() {
           await this.chargerElevesReels();
         }
       } catch (err) {
-        alert("Erreur lors de la mise à jour des XP : " + err.message);
+        this.notify("Erreur lors de la mise à jour des XP : " + err.message);
       } finally {
         this.bulletinCorrectionSaving = false;
       }
@@ -1353,7 +1353,7 @@ export function createTeacherStore() {
           await this.chargerElevesReels();
         }
       } catch (err) {
-        alert("Erreur lors de la mise à jour du cours : " + err.message);
+        this.notify("Erreur lors de la mise à jour du cours : " + err.message);
       } finally {
         this.bulletinCorrectionSaving = false;
       }
@@ -1364,7 +1364,7 @@ export function createTeacherStore() {
       const current = Array.isArray(eleve.manual_completed_exos) ? [...eleve.manual_completed_exos] : [];
       const exists = current.includes(exo.id);
       const actionLabel = exists ? `Retirer la validation manuelle de « ${exo.title || exo.titre} » pour ${eleve.nom} ?` : `Marquer l'exercice « ${exo.title || exo.titre} » comme FAIT (Vert) pour ${eleve.nom} ?`;
-      if (!confirm(actionLabel)) return;
+      if (!await this.confirmDialog(actionLabel)) return;
       const updated = exists ? current.filter(id => id !== exo.id) : [...current, exo.id];
       const ok = await saveTeacherStudentCorrectionInDb(eleve, { manualCompletedExos: updated });
       if (ok) {
@@ -1627,7 +1627,7 @@ export function createTeacherStore() {
         this.bulletinSaveMsg = okMsg;
         await this.chargerElevesReels();
       } catch (err) {
-        alert("Erreur lors de la sauvegarde du bulletin : " + err.message);
+        this.notify("Erreur lors de la sauvegarde du bulletin : " + err.message);
       } finally {
         this.bulletinSaving = false;
       }
@@ -1689,7 +1689,7 @@ export function createTeacherStore() {
     exporterBulletinCSV() {
       const liveList = this.getLiveClassStatusList();
       if (!liveList.length) {
-        alert("Aucun élève trouvé dans cette classe pour générer l'export bulletin.");
+        this.notify("Aucun élève trouvé dans cette classe pour générer l'export bulletin.");
         return;
       }
 
@@ -1752,12 +1752,12 @@ export function createTeacherStore() {
         await updateTeacherSubmission(sub.id, { status: 'archive' });
         sub.status = 'archive';
       } catch (err) {
-        alert("Erreur archivage : " + err.message);
+        this.notify("Erreur archivage : " + err.message);
       }
     },
 
     async supprimerCopie(sub) {
-      if (!confirm(`Supprimer définitivement la copie de ${sub.nom_eleve || 'cet élève'} ?`)) return;
+      if (!await this.confirmDialog(`Supprimer définitivement la copie de ${sub.nom_eleve || 'cet élève'} ?`)) return;
       try {
         await deleteTeacherSubmission(sub.id);
         this.teacherSubmissions = this.teacherSubmissions.filter(s => s.id !== sub.id);
@@ -1765,7 +1765,7 @@ export function createTeacherStore() {
           this.modalCorrectionOpen = false;
         }
       } catch (err) {
-        alert("Erreur suppression : " + err.message);
+        this.notify("Erreur suppression : " + err.message);
       }
     },
 
@@ -1787,7 +1787,7 @@ export function createTeacherStore() {
     exporterSubmissionsCSV() {
       const list = this.getFilteredSubmissions();
       if (list.length === 0) {
-        alert("Aucune copie à exporter selon les filtres actuels.");
+        this.notify("Aucune copie à exporter selon les filtres actuels.");
         return;
       }
 

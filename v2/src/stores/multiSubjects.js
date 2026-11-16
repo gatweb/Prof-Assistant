@@ -86,7 +86,7 @@ export function createMultiSubjectsStore() {
 
     async soumettreDevoirRedaction() {
       if (!this.redactionState.texteComplet.trim() && !this.redactionState.these.trim()) {
-        alert("Veuillez rédiger votre argumentation avant de soumettre.");
+        this.notify("Veuillez rédiger votre argumentation avant de soumettre.");
         return;
       }
       if (!this.redactionState.texteComplet.trim()) {
@@ -182,6 +182,12 @@ export function createMultiSubjectsStore() {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(String(text || ''));
       u.lang = this.languesState.targetLang || 'en-GB';
+      // Voix native de la langue cible quand elle est installée (sinon accent du système).
+      const prefix = u.lang.slice(0, 2).toLowerCase();
+      const voices = window.speechSynthesis.getVoices() || [];
+      const native = voices.find(v => (v.lang || '').replace('_', '-').toLowerCase() === u.lang.toLowerCase())
+        || voices.find(v => (v.lang || '').toLowerCase().startsWith(prefix));
+      if (native) u.voice = native;
       u.rate = 0.92;
       window.speechSynthesis.speak(u);
     },
@@ -223,7 +229,7 @@ export function createMultiSubjectsStore() {
     async soumettreDevoirLangues() {
       const studentTurns = this.languesState.messages.filter(m => m.role === 'user');
       if (studentTurns.length === 0) {
-        alert("Écris au moins une réplique dans le dialogue avant de soumettre ta mission.");
+        this.notify("Écris au moins une réplique dans le dialogue avant de soumettre ta mission.");
         return;
       }
 
@@ -301,7 +307,7 @@ export function createMultiSubjectsStore() {
 
     async soumettreDevoirSciences() {
       if (!this.sciencesState.resultatFinal.trim()) {
-        alert("Veuillez indiquer votre résultat final et son unité.");
+        this.notify("Veuillez indiquer votre résultat final et son unité.");
         return;
       }
 

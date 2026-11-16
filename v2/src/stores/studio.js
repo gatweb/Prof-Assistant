@@ -5,7 +5,8 @@ import {
   getFirestoreCoursesList,
   getCourseModulesFromFirestore,
   saveCourseStudioBundle,
-  deleteCourseFromFirestore
+  deleteCourseFromFirestore,
+  migrerCorrigesExercicesPrives
 } from '../services/firebase.js';
 import {
   getClassroomToken,
@@ -223,7 +224,7 @@ export function createStudioStore() {
 
     supprimerModuleStudio(idx) {
       if (this.studioModules.length <= 1) {
-        alert("Un cours doit comporter au moins un module.");
+        this.notify("Un cours doit comporter au moins un module.");
         return;
       }
       this.studioModules.splice(idx, 1);
@@ -261,7 +262,7 @@ export function createStudioStore() {
         this.studioCourseForm.status = targetStatus;
       }
       if (!this.studioCourseForm.id.trim() || !this.studioCourseForm.title.trim()) {
-        alert("L'identifiant et le titre du cours sont obligatoires.");
+        this.notify("L'identifiant et le titre du cours sont obligatoires.");
         return;
       }
 
@@ -283,6 +284,28 @@ export function createStudioStore() {
         this.studioErrorMsg = "Erreur de sauvegarde : " + err.message;
       } finally {
         this.studioSaving = false;
+      }
+    },
+
+    /** Retire les corrigés de la collection publique `exercices` (voir firebase.js). */
+    async protegerCorrigesExercices() {
+      const ok = await this.confirmDialog(
+        "Déplacer les corrigés et barèmes des exercices vers un espace réservé aux professeurs ?\n\nLes élèves ne pourront plus les lire. Le tuteur IA et la correction automatique continuent de les utiliser.",
+        { danger: false, confirmLabel: 'Protéger les corrigés' }
+      );
+      if (!ok) return;
+      this.studioMigrating = true;
+      this.studioSuccessMsg = '';
+      this.studioErrorMsg = '';
+      try {
+        const res = await migrerCorrigesExercicesPrives();
+        this.studioSuccessMsg = res.moved > 0
+          ? `🔐 ${res.moved} corrigé(s) déplacé(s) hors de la collection publique (${res.scanned} exercices vérifiés).`
+          : `🔐 Aucun corrigé public trouvé : tout est déjà protégé (${res.scanned} exercices vérifiés).`;
+      } catch (err) {
+        this.studioErrorMsg = "Erreur lors de la protection des corrigés : " + err.message;
+      } finally {
+        this.studioMigrating = false;
       }
     },
 
@@ -311,7 +334,7 @@ export function createStudioStore() {
     async importerCoursDepuisClassroomIA() {
       const cId = this.studioImportClassroomCourseId || this.classroomSelectedCourseId;
       if (!cId) {
-        alert("Veuillez sélectionner un cours Google Classroom à importer.");
+        this.notify("Veuillez sélectionner un cours Google Classroom à importer.");
         return;
       }
 
@@ -349,7 +372,7 @@ export function createStudioStore() {
 
         this.ouvrirEcranRelectureImport(res.proposal);
       } catch (err) {
-        alert("Erreur lors de l'import Classroom par IA : " + err.message);
+        this.notify("Erreur lors de l'import Classroom par IA : " + err.message);
       } finally {
         this.studioImportLoading = false;
       }
@@ -360,7 +383,7 @@ export function createStudioStore() {
      */
     async importerCoursDepuisGoogleDocIA() {
       if (!this.studioImportGDocUrl.trim() && !this.studioImportRawText.trim()) {
-        alert("Veuillez renseigner l'URL/ID du Google Doc ou coller son contenu.");
+        this.notify("Veuillez renseigner l'URL/ID du Google Doc ou coller son contenu.");
         return;
       }
 
@@ -378,7 +401,7 @@ export function createStudioStore() {
 
         this.ouvrirEcranRelectureImport(res.proposal);
       } catch (err) {
-        alert("Erreur lors de la structuration du Google Doc : " + err.message);
+        this.notify("Erreur lors de la structuration du Google Doc : " + err.message);
       } finally {
         this.studioImportLoading = false;
       }
@@ -389,7 +412,7 @@ export function createStudioStore() {
      */
     async importerCoursDepuisSyllabusIA() {
       if (!this.studioImportRawText.trim() || this.studioImportRawText.trim().length < 15) {
-        alert("Veuillez coller le texte de votre syllabus, cours ou PDF (au moins quelques lignes).");
+        this.notify("Veuillez coller le texte de votre syllabus, cours ou PDF (au moins quelques lignes).");
         return;
       }
 
@@ -405,7 +428,7 @@ export function createStudioStore() {
 
         this.ouvrirEcranRelectureImport(res.proposal);
       } catch (err) {
-        alert("Erreur lors de l'analyse IA du syllabus : " + err.message);
+        this.notify("Erreur lors de l'analyse IA du syllabus : " + err.message);
       } finally {
         this.studioImportLoading = false;
       }
@@ -477,7 +500,7 @@ export function createStudioStore() {
           };
           this.ouvrirEcranRelectureImport(proposal);
         } catch (err) {
-          alert("Erreur lecture du Pack JSON : " + err.message);
+          this.notify("Erreur lecture du Pack JSON : " + err.message);
         }
       };
       reader.readAsText(file);
@@ -495,7 +518,7 @@ export function createStudioStore() {
       const newTitle = (this.studioDuplicateNewTitle || 'Copie du cours').trim();
 
       if (!srcId || !newId) {
-        alert("Veuillez choisir un cours modèle et un nouvel identifiant.");
+        this.notify("Veuillez choisir un cours modèle et un nouvel identifiant.");
         return;
       }
 

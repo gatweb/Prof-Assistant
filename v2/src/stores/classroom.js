@@ -288,7 +288,7 @@ export function createClassroomStore() {
      */
     async enregistrerLiaisonClassroom() {
       if (!this.classroomSelectedCourseId || !this.classroomSelectedCourse) {
-        alert("Veuillez d'abord sélectionner un cours Google Classroom.");
+        this.notify("Veuillez d'abord sélectionner un cours Google Classroom.");
         return;
       }
       const targetClass = (this.classroomMappingForm.newClasseId.trim() || this.classroomMappingForm.classeId || '1A').toUpperCase();
@@ -315,7 +315,7 @@ export function createClassroomStore() {
 
         await this.detecterNouveauxElevesPourCoursSelectionne();
       } catch (err) {
-        alert("Erreur lors de l'enregistrement de la liaison : " + err.message);
+        this.notify("Erreur lors de l'enregistrement de la liaison : " + err.message);
       } finally {
         this.classroomMappingSaving = false;
       }
@@ -398,7 +398,7 @@ export function createClassroomStore() {
         await this.chargerElevesReels();
         this.activerEcouteClasse(this.selectedTeacherClass);
       } catch (err) {
-        alert("Erreur synchronisation nouveaux élèves : " + err.message);
+        this.notify("Erreur synchronisation nouveaux élèves : " + err.message);
       } finally {
         this.classroomImportLoading = false;
       }
@@ -407,7 +407,7 @@ export function createClassroomStore() {
     async importerElevesClassroom(targetClass) {
       const finalClass = (this.classroomNewClassName.trim() || this.classroomMappingForm.newClasseId.trim() || targetClass || this.classroomMappingForm.classeId || '1A').toUpperCase();
       if (!this.classroomSelectedCourseStudents.length) {
-        alert("Aucun élève trouvé dans ce cours Classroom.");
+        this.notify("Aucun élève trouvé dans ce cours Classroom.");
         return;
       }
 
@@ -451,7 +451,7 @@ export function createClassroomStore() {
         await this.chargerElevesReels();
         this.activerEcouteClasse(finalClass);
       } catch (err) {
-        alert("Erreur lors de l'import : " + err.message);
+        this.notify("Erreur lors de l'import : " + err.message);
       } finally {
         this.classroomImportLoading = false;
       }
@@ -497,11 +497,11 @@ export function createClassroomStore() {
      */
     async publierActiviteClassroom() {
       if (!this.classroomSelectedCourseId) {
-        alert("Veuillez sélectionner un cours Google Classroom.");
+        this.notify("Veuillez sélectionner un cours Google Classroom.");
         return;
       }
       if (!this.classroomNewAssignment.title.trim() && this.classroomNewAssignment.publishMode === 'single') {
-        alert("Veuillez renseigner le titre du devoir.");
+        this.notify("Veuillez renseigner le titre du devoir.");
         return;
       }
 
@@ -588,7 +588,7 @@ export function createClassroomStore() {
 
         this.classroomCourseWorkList = await fetchCourseWork(this.classroomSelectedCourseId);
       } catch (err) {
-        alert("Erreur publication devoir Classroom : " + err.message);
+        this.notify("Erreur publication devoir Classroom : " + err.message);
       } finally {
         this.classroomPublishLoading = false;
       }
@@ -631,11 +631,11 @@ export function createClassroomStore() {
 
     async synchroniserNoteVersClassroom(submission, note) {
       if (!isClassroomConnected()) {
-        alert("Veuillez d'abord connecter votre compte Google Classroom depuis l'onglet dédié.");
+        this.notify("Veuillez d'abord connecter votre compte Google Classroom depuis l'onglet dédié.");
         return;
       }
       if (!this.classroomSelectedCourseId) {
-        alert("Veuillez sélectionner un cours Google Classroom actif.");
+        this.notify("Veuillez sélectionner un cours Google Classroom actif.");
         return;
       }
 
@@ -645,7 +645,7 @@ export function createClassroomStore() {
 
       const courseWorkId = this.classroomSelectedAssignmentForSync;
       if (!courseWorkId) {
-        alert("Aucun devoir Classroom n'est sélectionné pour synchroniser la note.");
+        this.notify("Aucun devoir Classroom n'est sélectionné pour synchroniser la note.");
         return;
       }
 
@@ -668,7 +668,7 @@ export function createClassroomStore() {
           this.classroomSyncGradeFeedback = '';
         }, 5000);
       } catch (err) {
-        alert("Erreur synchronisation note Classroom : " + err.message);
+        this.notify("Erreur synchronisation note Classroom : " + err.message);
       } finally {
         this.classroomSyncGradeLoading = false;
       }

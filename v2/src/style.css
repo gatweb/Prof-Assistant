@@ -160,3 +160,70 @@ body.dyslexia-mode .prose-custom {
   word-spacing: 0.16em;
 }
 
+
+/* ♿ Accessibilité (P2) */
+[x-cloak] { display: none !important; }
+
+/* Focus clavier toujours visible, y compris sur les éléments stylés `focus:outline-none`. */
+:where(a, button, input, select, textarea, summary, [role="button"], [tabindex]):focus-visible {
+  outline: 3px solid #1d4ed8 !important;
+  outline-offset: 2px !important;
+  border-radius: 0.5rem;
+}
+main:focus { outline: none; }
+
+/* Lien d'évitement : visible seulement au clavier. */
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -4rem;
+  z-index: 200;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: #1e1b4b;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.875rem;
+  transition: top 0.15s ease;
+}
+.skip-link:focus { top: 0.75rem; }
+
+/* Tablettes / Chromebooks tactiles : cibles d'au moins 44 px (WCAG 2.5.5). */
+@media (pointer: coarse) {
+  button, [role="button"], select, summary,
+  input[type="text"], input[type="email"], input[type="number"], input[type="url"], input[type="search"] {
+    min-height: 44px;
+  }
+  button, [role="button"] { min-width: 44px; }
+  input[type="checkbox"], input[type="radio"] { width: 1.5rem; height: 1.5rem; }
+}
+
+/* Contraste : les très petits textes gris clair passent à un gris lisible (≥ 4,5:1 sur blanc).
+   Limité aux zones claires : les panneaux sombres gardent leurs teintes d'origine. */
+:where(.bg-white, .bg-slate-50, .bg-slate-100) :where(.text-slate-400):not(:where([class*="bg-slate-9"], [class*="bg-indigo-9"], [class*="from-indigo-9"], [class*="from-slate-9"]) *) {
+  color: #64748b;
+}
+
+/* Respect du réglage système « réduire les animations ». */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ⌨️ Moteur de frappe (dactylographie) */
+.typing-target {
+  font-family: ui-monospace, "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  font-size: 1.25rem;
+  line-height: 2.1;
+  letter-spacing: 0.04em;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+.typing-target .tc-ok { color: #047857; background: #d1fae5; }
+.typing-target .tc-ko { color: #9f1239; background: #ffe4e6; text-decoration: underline wavy #e11d48; }
+.typing-target .tc-cur { background: #1d4ed8; color: #fff; border-radius: 0.2rem; }
+.typing-target .tc-todo { color: #334155; }
