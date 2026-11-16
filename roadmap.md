@@ -50,6 +50,11 @@
   - **Mode dyslexie & Lecture vocale** : Bouton `👓 Dys` persistant et boutons `🔊 Écouter la consigne` / `🔊 Écouter la leçon` via Web Speech API.
 * **Phase 13 (Pilote Multi-Matières : Rédaction, Langues CECRL, Sciences/Maths KaTeX) :** [TERMINÉ & VALIDÉ ✅]
   - **3 Blocs spécialisés (`v2/src/stores/multiSubjects.js`)** : `✍️ Rédaction & Argumentation` (constructeur de plan + connecteurs logiques), `🗣️ Langues Vivantes` (jeu de rôle CECRL A1-B2 en EN/NL/ES avec synthèse vocale native), `🔬 Sciences & Maths` (rendu KaTeX en direct, saisie par étapes et vérification des unités SI).
+* **Phase 14 (Novembre 2026 — Tome 1b @lt_X, Espace Professeur Simplifié, Fiabilité XP & Ergonomie Tablette) :** [TERMINÉ & VALIDÉ ✅]
+  - **Tome 1b intégral (`@lt_X` — Chapitres 3, 4 et 5)** : Ajout de `chapitre-3-ia.json`, `chapitre-4-donnees.json`, `chapitre-5-creation.json` et `altx-tome1b-bank.json` (18 QCM corrigés + ateliers Prompt 5 étapes, Unités/Export PDF, Logigramme/Scratch).
+  - **Illustrations & Ergonomie Tablette/Chromebook** : 8 illustrations jeunesse (`public/img/tome1b/`), schémas visuels (arborescence, logigramme, blocs Scratch), navigation tactile (`min-h-[42px..48px]`, `touch-manipulation`) et « Atelier & Pratique » guidé (`👉 À toi de jouer`).
+  - **Espace Professeur simplifié & Bulletin** : Refonte en 4 onglets, vue **Bulletin par élève**, filtres **Année en cours / Comptes inactifs / Archives / Classe `0`**, fusion des doublons, et correction manuelle XP / cours validés.
+  - **Fiabilisation XP & Cloisonnement par année** : Suppression du reset XP sur « Quitter », statut vert exact des cours, blocage d'accès inter-années et classe `0` (`getYearLevelFromClass`), alignement complet des 4 classes 2026 (`RAPPORT_ALIGNEMENT_ELEVES_2026.md`).
 
 ## 🔮 5. Prochaines Étapes (Feuille de Route V3 — voir `plan_ameliorations_v3.md`)
 - [x] **Phases 0 à 6 (Fusion V1 → V2) :** [OK] Déployées en production.
@@ -60,6 +65,7 @@
 - [x] **Phase 11 : Outils du professeur (SpeedGrader, validation par lot, vue classe en direct avec signal « bloqué », export bulletin) :** [OK] Commit `b1f2f87` (29/29 tests Firestore).
 - [x] **Phase 12 : Expérience élève (Mascotte évolutive 5 stades, Arbre de compétences, score d'autonomie, vérification permissions Drive, mode dyslexie & synthèse vocale) :** [OK] Commit `cea70b7` (29/29 tests Firestore).
 - [x] **Phase 13 : Multi-matières (pilote : Rédaction, Langues CECRL, Sciences/Maths KaTeX) :** [OK] Implémentée, buildée et validée (29/29 tests Firestore).
+- [x] **Phase 14 : Tome 1b @lt_X, Illustrations jeunesse, Ergonomie Tablette/Chromebook, Espace Professeur 4 onglets & Alignement 2026 :** [OK] Déployée (`8da4562`).
 
 ---
 ### ⚠️ INSTRUCTION POUR L'AGENT DE DÉVELOPPEMENT :
