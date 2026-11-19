@@ -137,6 +137,18 @@
   font-weight: 600;
 }
 
+.prose-custom img {
+  display: block;
+  width: 100%;
+  max-width: 680px;
+  max-height: 360px;
+  object-fit: cover;
+  margin: 1.25rem auto;
+  border-radius: 1rem;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
 /* 👓 Mode Dyslexie & Confort de Lecture (Phase 12) */
 body.dyslexia-mode {
   font-family: "Atkinson Hyperlegible", "Comic Sans MS", "Verdana", "Trebuchet MS", sans-serif !important;

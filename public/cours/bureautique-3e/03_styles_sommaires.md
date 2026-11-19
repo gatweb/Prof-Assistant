@@ -4,6 +4,8 @@ Lorsque tu rédiges un dossier de 5, 10 ou 20 pages (rapport de stage, travail d
 
 Dans ce module, tu découvres les **3 super-pouvoirs** du traitement de texte professionnel : les **Styles de paragraphe**, la **Table des matières automatique** et les **Sauts de page / section**.
 
+![Structure d'un dossier : page de garde, sommaire automatique et chapitres](/img/bureautique-3e/bur-m3-styles.jpg)
+
 ---
 
 ## 🎨 1. Les Styles de Paragraphe : La Colonne Vertébrale du Document

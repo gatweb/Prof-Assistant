@@ -2,6 +2,8 @@
 
 Bienvenue dans le cours **Bureautique & Google Workspace (3e)** ! Avant de rédiger des rapports professionnels, tout informaticien ou employé organisé commence par structurer son **espace de travail dans le Cloud**. Une arborescence propre te fera gagner des heures de recherche toute l'année.
 
+![Arborescence Google Drive et partage sécurisé](/img/bureautique-3e/bur-m1-drive.jpg)
+
 ---
 
 ## ☁️ 1. Comprendre Google Drive : Disque local vs Cloud

@@ -2,6 +2,8 @@
 
 Un texte bien rédigé mais mal présenté perd immédiatement sa crédibilité. Dans ce module, tu vas apprendre à utiliser **Google Docs** comme un professionnel : configurer ta page, aligner proprement tes paragraphes, maîtriser les raccourcis clavier essentiels et intégrer des images ou tableaux sans tout décaler.
 
+![Mise en page Google Docs : marges, image et tableau](/img/bureautique-3e/bur-m2-mep.jpg)
+
 ---
 
 ## 🧭 1. Anatomie de Google Docs & Configuration de la Page

@@ -2,6 +2,8 @@
 
 Tu sais maintenant organiser ton Drive et structurer un document Google Docs. Il te reste à maîtriser le détail qui distingue immédiatement un amateur d'un professionnel : **le respect des règles de typographie française (et norme belge NBN)** ainsi qu'une frappe fluide au clavier.
 
+![Typographie française et positionnement des mains sur le clavier](/img/bureautique-3e/bur-m4-typo.jpg)
+
 ---
 
 ## 🔍 1. La Règle d'Or des Espaces autour de la Ponctuation
